@@ -1,34 +1,51 @@
 package com.iti.careerpilot.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import com.iti.careerpilot.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+private val InterFontFamily = FontFamily(
+    Font(
+        resId = R.font.inter_light,
+        weight = FontWeight.Light,
     ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-    */
+    Font(
+        resId = R.font.inter,
+        weight = FontWeight.Normal,
+    ),
+    Font(
+        resId = R.font.inter_medium,
+        weight = FontWeight.Medium,
+    ),
+    Font(
+        resId = R.font.inter_semibold,
+        weight = FontWeight.SemiBold,
+    ),
+    Font(
+        resId = R.font.inter_bold,
+        weight = FontWeight.Bold,
+    ),
+)
+
+private val baseline = Typography()
+
+
+val Typography = Typography(
+    displayLarge = baseline.displayLarge.copy(fontFamily = InterFontFamily),
+    displayMedium = baseline.displayMedium.copy(fontFamily = InterFontFamily),
+    displaySmall = baseline.displaySmall.copy(fontFamily = InterFontFamily),
+    headlineLarge = baseline.headlineLarge.copy(fontFamily = InterFontFamily),
+    headlineMedium = baseline.headlineMedium.copy(fontFamily = InterFontFamily),
+    headlineSmall = baseline.headlineSmall.copy(fontFamily = InterFontFamily),
+    titleLarge = baseline.titleLarge.copy(fontFamily = InterFontFamily),
+    titleMedium = baseline.titleMedium.copy(fontFamily = InterFontFamily),
+    titleSmall = baseline.titleSmall.copy(fontFamily = InterFontFamily),
+    bodyLarge = baseline.bodyLarge.copy(fontFamily = InterFontFamily),
+    bodyMedium = baseline.bodyMedium.copy(fontFamily = InterFontFamily),
+    bodySmall = baseline.bodySmall.copy(fontFamily = InterFontFamily),
+    labelLarge = baseline.labelLarge.copy(fontFamily = InterFontFamily),
+    labelMedium = baseline.labelMedium.copy(fontFamily = InterFontFamily),
+    labelSmall = baseline.labelSmall.copy(fontFamily = InterFontFamily),
 )

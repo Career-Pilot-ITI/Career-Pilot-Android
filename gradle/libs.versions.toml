@@ -6,8 +6,23 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-kotlin = "2.2.10"
-composeBom = "2026.02.01"
+kotlin = "2.4.0"
+composeBom = "2026.06.01"
+#
+lottieCompose = "6.7.1"
+kotlinxDatetime = "0.8.0"
+hilt = "2.60.1"
+hiltAndroidx = "1.4.0"
+room = "2.8.4"
+workManager = "2.11.2"
+datastore = "1.2.1"
+coil = "3.5.0"
+material3Android = "1.5.0-alpha23"
+coreSplashscreen = "1.2.0"
+kotlinxSerializationJson = "1.11.0"
+ksp = "2.3.9"
+ktor = "3.5.1"
+nav3 = "1.1.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,8 +39,56 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+#lottie
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
+#kotlinx datetime
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+#work manager
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
+# hilt
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+#hilt view model
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltAndroidx" }
+#hilt work
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltAndroidx" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltAndroidx" }
+#coil
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+#material3 expressive
+androidx-material3-android = { module = "androidx.compose.material3:material3-android", version.ref = "material3Android" }
+#core-splashscreen
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+#room database
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+#collect as state with lifecycle
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
+#viewmodel scoping per NavEntry (Navigation 3)
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+#json
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+#datastore
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+#ktor
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+#nav3
+androidx-navigation3 = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+#added plugins
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
+[bundles]
+ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

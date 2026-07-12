@@ -1,20 +1,21 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dagger.hilt.android)
 }
 
 android {
     namespace = "com.iti.careerpilot"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+        version = release(37)
     }
 
     defaultConfig {
         applicationId = "com.iti.careerpilot"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -34,6 +35,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -53,4 +55,55 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // collect as state with lifecycle
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // datastore proto
+    implementation(libs.androidx.datastore)
+
+    // room database
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // Kotlin json
+    implementation(libs.kotlinx.serialization.json)
+
+    // splash screen
+    implementation(libs.androidx.core.splashscreen)
+
+    // material3 expressive
+    implementation(libs.androidx.material3.android)
+
+    // coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
+
+    //work manager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    // hilt view model
+    implementation(libs.androidx.hilt.navigation.compose)
+    //hilt work
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+
+    //lottie
+    implementation(libs.lottie.compose)
+
+    //kotlinx-datetime
+    implementation(libs.kotlinx.datetime)
+
+    // ktor
+    implementation(libs.bundles.ktor)
+
+    // nav3
+    implementation(libs.androidx.navigation3)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
 }
