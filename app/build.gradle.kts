@@ -107,3 +107,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
 
 }
+
+dependencies{
+    implementation(project(":core:designsystem"))
+
+}
