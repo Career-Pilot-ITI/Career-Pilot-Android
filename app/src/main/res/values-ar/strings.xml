@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Career Pilot</string>
+    <string name="home">الرئيسية</string>
+    <string name="reports">التقارير</string>
+    <string name="profile">الملف الشخصي</string>
 </resources>
