@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Career Pilot</string>
+
+    <string name="home">Home</string>
+    <string name="reports">Reports</string>
+    <string name="profile">Profile</string>
 </resources>
