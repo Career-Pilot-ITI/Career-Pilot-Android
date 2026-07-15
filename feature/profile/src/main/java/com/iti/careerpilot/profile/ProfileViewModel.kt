@@ -1,4 +1,4 @@
-package com.iti.careerpilot.features.profile
+package com.iti.careerpilot.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

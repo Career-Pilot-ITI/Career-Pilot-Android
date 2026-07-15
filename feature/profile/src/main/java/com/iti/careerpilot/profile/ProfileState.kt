@@ -1,4 +1,4 @@
-package com.iti.careerpilot.features.profile
+package com.iti.careerpilot.profile
 
 data class ProfileState(
     val paramOne: String = "default",
