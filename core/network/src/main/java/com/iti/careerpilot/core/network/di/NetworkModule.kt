@@ -63,7 +63,7 @@ object NetworkModule {
 
         defaultRequest {
             contentType(ContentType.Application.Json)
-            url("")
+            url(BuildConfig.BASE_URL)
         }
     }
 }
