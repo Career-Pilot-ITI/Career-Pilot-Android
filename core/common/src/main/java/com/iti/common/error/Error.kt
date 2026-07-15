@@ -1,4 +1,4 @@
-package com.iti.careerpilot.core.error
+package com.iti.common.error
 
 enum class NetworkError : IError {
     TIME_OUT,

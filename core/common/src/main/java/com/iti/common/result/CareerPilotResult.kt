@@ -1,6 +1,6 @@
-package com.iti.careerpilot.core.result
+package com.iti.common.result
 
-import com.iti.careerpilot.core.error.IError
+import com.iti.common.error.IError
 
 
 sealed interface CareerPilotResult<out D, out E : IError> {

@@ -1,8 +1,8 @@
-package com.iti.careerpilot.core.util
+package com.iti.common.util
 
-import com.iti.careerpilot.R
-import com.iti.careerpilot.core.error.NetworkError
-import com.iti.careerpilot.core.error.StorageError
+import com.iti.common.R
+import com.iti.common.error.NetworkError
+import com.iti.common.error.StorageError
 
 fun NetworkError.toUIText(): UIText {
     return UIText.StringResource(

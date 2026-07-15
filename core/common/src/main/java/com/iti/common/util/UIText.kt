@@ -1,5 +1,4 @@
-package com.iti.careerpilot.core.util
-
+package com.iti.common.util
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 
