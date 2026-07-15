@@ -1,6 +1,7 @@
 package com.iti.careerpilot.core.network.di
 
 import android.util.Log
+import com.iti.careerpilot.core.network.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,6 +15,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -47,12 +49,15 @@ object NetworkModule {
             socketTimeoutMillis = 30_000
         }
 
-        install(Logging) {
-            level = LogLevel.BODY
-            logger = object : Logger {
-                override fun log(message: String) {
-                    Log.d("KtorClient", message)
+        if (BuildConfig.DEBUG) {
+            install(Logging) {
+                level = LogLevel.BODY
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Log.d("KtorClient", message)
+                    }
                 }
+                sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
             }
         }
 
