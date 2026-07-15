@@ -7,15 +7,29 @@ plugins {
     alias(libs.plugins.dagger.hilt.android)
 }
 
-val baseUrl: String = Properties().run {
-    val file = rootProject.file("local.properties")
-    if (file.exists()) file.inputStream().use { load(it) }
-    getProperty("careerpilot.baseUrl") ?: throw GradleException(
-        """
-        Missing 'careerpilot.baseUrl' in local.properties.
-        The URL must end with '/'.
-        """.trimIndent()
-    )
+val baseUrl: String = run {
+    val fromLocalProperties = Properties().run {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+        getProperty("careerpilot.baseUrl")
+    }
+
+    listOf(
+        fromLocalProperties,
+        providers.gradleProperty("careerpilot.baseUrl").orNull,
+        providers.environmentVariable("CAREERPILOT_BASE_URL").orNull,
+    ).firstOrNull { !it.isNullOrBlank() }
+        ?: throw GradleException(
+            """
+            Missing backend base URL for :core:network.
+
+            Local development - add this line to local.properties in the project root:
+
+                careerpilot.baseUrl=http://10.0.2.2:8080/
+                
+            The URL must end with '/'.
+            """.trimIndent()
+        )
 }
 
 android {
