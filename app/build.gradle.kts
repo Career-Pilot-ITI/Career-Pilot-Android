@@ -98,9 +98,6 @@ dependencies {
     //kotlinx-datetime
     implementation(libs.kotlinx.datetime)
 
-    // ktor
-    implementation(libs.bundles.ktor)
-
     // nav3
     implementation(libs.androidx.navigation3)
     implementation(libs.androidx.navigation3.ui)
@@ -111,4 +108,5 @@ dependencies {
 dependencies{
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))
+    implementation(project(":core:network"))
 }
