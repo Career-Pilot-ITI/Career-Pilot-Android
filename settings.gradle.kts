@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Career Pilot"
 include(":app")
+include(":core:designsystem")
