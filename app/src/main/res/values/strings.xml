@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">Career Pilot</string>
+
+    <!-- Common errors -->
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="error_no_internet">No internet connection. Check your connection and try again.</string>
+    <string name="error_network">A network error occurred. Please try again.</string>
+
+    <!-- Network errors -->
+    <string name="error_network_timeout">The request timed out. Please try again.</string>
+    <string name="error_too_many_requests">Too many requests. Please wait a moment and try again.</string>
+    <string name="error_server">The server is currently unavailable. Please try again later.</string>
+    <string name="error_serialization">The server returned an invalid response.</string>
+    <string name="error_empty_result">No results were found.</string>
+    <string name="error_bad_request">The request is invalid. Please check your information and try again.</string>
+    <string name="error_invalid_coupon">This coupon code is invalid or has expired.</string>
+    <string name="error_address">The address information is invalid or incomplete.</string>
+
+    <!-- Registration errors -->
+    <string name="error_email_already_in_use">An account with this email address already exists.</string>
+    <string name="error_weak_password">The password is too weak. Use a stronger password.</string>
+    <string name="error_registration_unknown">Unable to create your account. Please try again.</string>
+
+    <!-- Sign-in errors -->
+    <string name="error_invalid_credentials">The email address or password is incorrect.</string>
+    <string name="error_user_not_found">No account was found with this email address.</string>
+    <string name="error_account_disabled">This account has been disabled. Contact support for assistance.</string>
+    <string name="error_email_not_verified">Your email address has not been verified. Check your inbox and verify it first.</string>
+    <string name="error_invalid_email">Enter a valid email address.</string>
+    <string name="error_sign_in_unknown">Unable to sign in. Please try again.</string>
+
+    <!-- Storage errors -->
+    <string name="error_file_too_large">The selected file is too large.</string>
+    <string name="error_incompatible_file">This file type is not supported.</string>
+    <string name="error_storage_unknown">Unable to process the selected file. Please try another file.</string>
+
 </resources>
