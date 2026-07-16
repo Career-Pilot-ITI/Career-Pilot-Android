@@ -1,4 +1,4 @@
-package com.iti.careerpilot.profile
+package com.iti.careerpilot.profile.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +11,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.profile.presentation.state.ProfileState
+import com.iti.careerpilot.profile.presentation.viewmodel.ProfileViewModel
+import com.iti.careerpilot.profile.presentation.action.ProfileAction
 
 @Composable
 fun ProfileRoot(
@@ -37,7 +40,7 @@ fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = Modifier
             .background(Color.Magenta)
             .fillMaxSize(),

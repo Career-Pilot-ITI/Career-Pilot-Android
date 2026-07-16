@@ -18,7 +18,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.features.reports.ReportsRoot
 import com.iti.careerpilot.features.home.HomeRoot
-import com.iti.careerpilot.profile.ProfileRoot
+import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 

@@ -1,7 +1,10 @@
-package com.iti.careerpilot.profile
+package com.iti.careerpilot.profile.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.profile.domain.repo.ProfileRepo
+import com.iti.careerpilot.profile.presentation.action.ProfileAction
+import com.iti.careerpilot.profile.presentation.state.ProfileState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,7 +13,9 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileViewModel @Inject constructor() : ViewModel() {
+class ProfileViewModel @Inject constructor(
+    private val profileRepo: ProfileRepo
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 

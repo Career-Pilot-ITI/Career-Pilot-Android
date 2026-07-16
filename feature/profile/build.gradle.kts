@@ -72,4 +72,8 @@ dependencies {
     //kotlinx-datetime
     implementation(libs.kotlinx.datetime)
 
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:common"))
+    implementation(project(":core:network"))
+
 }
