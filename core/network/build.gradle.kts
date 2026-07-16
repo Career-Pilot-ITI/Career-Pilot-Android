@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.careerpilot.module.network)
+    alias(libs.plugins.careerpilot.testing)
 }
 
 val baseUrl: String = run {
