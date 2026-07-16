@@ -1,9 +1,9 @@
 package com.iti.careerpilot.profile.presentation.state
 
 import androidx.compose.runtime.Immutable
+import com.iti.core.datastore.models.UserProfile
 
 @Immutable
 data class ProfileState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
+    val profile: UserProfile = UserProfile()
 )
