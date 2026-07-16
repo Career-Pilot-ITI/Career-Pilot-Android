@@ -10,6 +10,5 @@ class FeatureDataConventionPlugin : Plugin<Project> {
         pluginManager.apply("careerpilot.kotlin.serialization")
 
         addLibrary("implementation", "kotlinx-coroutines-core")
-        addLibrary("implementation", "kotlinx-coroutines-android")
     }
 }
