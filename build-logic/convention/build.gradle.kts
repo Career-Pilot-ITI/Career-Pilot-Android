@@ -109,6 +109,12 @@ gradlePlugin {
             id = "careerpilot.testing"
             implementationClass = "com.iti.careerpilot.buildlogic.TestingConventionPlugin"
         }
+
+        // Features
+        register("onboardingFeature") {
+            id = "feature.onboarding"
+            implementationClass = "com.iti.careerpilot.buildlogic.OnboardingConventionPlugin"
+        }
     }
 }
 

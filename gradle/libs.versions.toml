@@ -135,6 +135,7 @@ careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
 careerpilot-feature-data = { id = "careerpilot.feature.data" }
 careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
 careerpilot-testing = { id = "careerpilot.testing" }
+feature-onboarding = { id = "feature.onboarding" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]
