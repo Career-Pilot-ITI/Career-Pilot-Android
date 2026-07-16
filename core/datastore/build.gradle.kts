@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.careerpilot.module.datastore)
-    alias(libs.plugins.careerpilot.testing)
 }
 
 android {
