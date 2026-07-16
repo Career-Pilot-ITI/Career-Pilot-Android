@@ -20,11 +20,12 @@ coil = "3.5.0"
 material3Android = "1.5.0-alpha23"
 coreSplashscreen = "1.2.0"
 kotlinxSerializationJson = "1.11.0"
-ksp = "2.3.9"
+ksp = "2.3.10"
 ktor = "3.5.1"
 nav3 = "1.1.4"
 appcompat = "1.7.1"
 material = "1.14.0"
+coroutines = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -87,15 +88,53 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+# Kotlin coroutines
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Additional lifecycle and testing dependencies
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+
+# Gradle plugins used by the included build-logic build
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-compose-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 #added plugins
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+# CareerPilot convention plugins supplied by the included build-logic build
+careerpilot-android-application = { id = "careerpilot.android.application" }
+careerpilot-android-library = { id = "careerpilot.android.library" }
+careerpilot-android-compose = { id = "careerpilot.android.compose" }
+careerpilot-android-hilt = { id = "careerpilot.android.hilt" }
+careerpilot-kotlin-jvm = { id = "careerpilot.kotlin.jvm" }
+careerpilot-kotlin-serialization = { id = "careerpilot.kotlin.serialization" }
+careerpilot-android-room = { id = "careerpilot.android.room" }
+careerpilot-android-datastore = { id = "careerpilot.android.datastore" }
+careerpilot-android-ktor = { id = "careerpilot.android.ktor" }
+careerpilot-android-workmanager = { id = "careerpilot.android.workmanager" }
+careerpilot-module-network = { id = "careerpilot.module.network" }
+careerpilot-module-database = { id = "careerpilot.module.database" }
+careerpilot-module-datastore = { id = "careerpilot.module.datastore" }
+careerpilot-module-models = { id = "careerpilot.module.models" }
+careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
+careerpilot-feature-data = { id = "careerpilot.feature.data" }
+careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
+careerpilot-testing = { id = "careerpilot.testing" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]
