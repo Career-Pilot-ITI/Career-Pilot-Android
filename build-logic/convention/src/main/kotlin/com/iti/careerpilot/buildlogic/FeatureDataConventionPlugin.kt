@@ -11,6 +11,5 @@ class FeatureDataConventionPlugin : Plugin<Project> {
 
         addLibrary("implementation", "kotlinx-coroutines-core")
         addLibrary("implementation", "kotlinx-coroutines-android")
-        addLibrary("testImplementation", "kotlinx-coroutines-test")
     }
 }

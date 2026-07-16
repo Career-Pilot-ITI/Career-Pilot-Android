@@ -12,7 +12,6 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
         addLibrary("implementation", "androidx-room-runtime")
         addLibrary("implementation", "androidx-room-ktx")
         addLibrary("ksp", "androidx-room-compiler")
-        addLibrary("testImplementation", "androidx-room-testing")
 
         extensions.configure<KspExtension> {
             arg(

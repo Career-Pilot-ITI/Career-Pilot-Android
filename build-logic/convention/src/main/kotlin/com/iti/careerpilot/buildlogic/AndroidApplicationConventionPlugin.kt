@@ -16,9 +16,5 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
         addLibrary("implementation", "androidx-core-ktx")
         addLibrary("implementation", "androidx-lifecycle-runtime-ktx")
-
-        addLibrary("testImplementation", "junit")
-        addLibrary("androidTestImplementation", "androidx-junit")
-        addLibrary("androidTestImplementation", "androidx-espresso-core")
     }
 }

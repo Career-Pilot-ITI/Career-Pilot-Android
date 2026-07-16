@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.careerpilot.module.database)
+    alias(libs.plugins.careerpilot.testing)
 }
 
 android {

@@ -6,6 +6,15 @@ plugins {
 }
 
 group = "com.iti.careerpilot.buildlogic"
+
+/*
+ * Do not request an exact Java toolchain here.
+ *
+ * AGP 9.2.1 already requires Gradle to run on JDK 17 or newer. Compiling the
+ * convention plugins with the current Gradle JVM avoids forcing developers to
+ * install a separate JDK 17 when Android Studio is already running Gradle with
+ * its embedded JDK 21.
+ */
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -95,6 +104,10 @@ gradlePlugin {
         register("careerPilotFeaturePresentation") {
             id = "careerpilot.feature.presentation"
             implementationClass = "com.iti.careerpilot.buildlogic.FeaturePresentationConventionPlugin"
+        }
+        register("careerPilotTesting") {
+            id = "careerpilot.testing"
+            implementationClass = "com.iti.careerpilot.buildlogic.TestingConventionPlugin"
         }
     }
 }

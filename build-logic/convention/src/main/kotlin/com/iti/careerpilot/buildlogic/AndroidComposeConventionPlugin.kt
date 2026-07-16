@@ -23,7 +23,6 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         }
 
         addPlatform("implementation", "androidx-compose-bom")
-        addPlatform("androidTestImplementation", "androidx-compose-bom")
 
         addLibrary("implementation", "androidx-compose-ui")
         addLibrary("implementation", "androidx-compose-ui-graphics")
@@ -31,7 +30,5 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         addLibrary("implementation", "androidx-compose-material3")
 
         addLibrary("debugImplementation", "androidx-compose-ui-tooling")
-        addLibrary("debugImplementation", "androidx-compose-ui-test-manifest")
-        addLibrary("androidTestImplementation", "androidx-compose-ui-test-junit4")
     }
 }

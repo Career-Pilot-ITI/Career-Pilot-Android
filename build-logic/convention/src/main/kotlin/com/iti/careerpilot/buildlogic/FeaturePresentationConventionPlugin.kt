@@ -16,6 +16,5 @@ class FeaturePresentationConventionPlugin : Plugin<Project> {
         addLibrary("implementation", "androidx-navigation3-ui")
         addLibrary("implementation", "androidx-lifecycle-viewmodel-navigation3")
         addLibrary("implementation", "kotlinx-coroutines-android")
-        addLibrary("testImplementation", "kotlinx-coroutines-test")
     }
 }

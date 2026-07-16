@@ -25,7 +25,5 @@ class KotlinJvmConventionPlugin : Plugin<Project> {
             sourceCompatibility = CareerPilotBuildConfig.ANDROID_JAVA_VERSION
             targetCompatibility = CareerPilotBuildConfig.ANDROID_JAVA_VERSION
         }
-
-        addLibrary("testImplementation", "junit")
     }
 }

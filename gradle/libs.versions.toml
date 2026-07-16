@@ -6,7 +6,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-kotlin = "2.4.10"
+kotlin = "2.4.0"
 composeBom = "2026.06.01"
 #
 lottieCompose = "6.7.1"
@@ -17,7 +17,7 @@ room = "2.8.4"
 workManager = "2.11.2"
 datastore = "1.2.1"
 coil = "3.5.0"
-material3Android = "1.5.0-alpha24"
+material3Android = "1.5.0-alpha23"
 coreSplashscreen = "1.2.0"
 kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.10"
@@ -26,7 +26,6 @@ nav3 = "1.1.4"
 appcompat = "1.7.1"
 material = "1.14.0"
 coroutines = "1.11.0"
-googlefonts = "1.11.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,7 +42,7 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googlefonts" }
+androidx-compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version = "1.6.0" }
 #lottie
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 #kotlinx datetime
@@ -135,6 +134,7 @@ careerpilot-module-models = { id = "careerpilot.module.models" }
 careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
 careerpilot-feature-data = { id = "careerpilot.feature.data" }
 careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
+careerpilot-testing = { id = "careerpilot.testing" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

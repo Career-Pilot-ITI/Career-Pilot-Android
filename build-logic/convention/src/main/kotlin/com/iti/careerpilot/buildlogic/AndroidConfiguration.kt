@@ -11,7 +11,6 @@ internal fun ApplicationExtension.configureCareerPilotApplication() {
     defaultConfig {
         minSdk = CareerPilotBuildConfig.DEFAULT_MIN_SDK
         targetSdk = CareerPilotBuildConfig.TARGET_SDK
-        testInstrumentationRunner = CareerPilotBuildConfig.TEST_RUNNER
     }
 
     compileOptions {
@@ -30,10 +29,6 @@ internal fun ApplicationExtension.configureCareerPilotApplication() {
             "META-INF/NOTICE*",
         )
     }
-
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
-    }
 }
 
 internal fun LibraryExtension.configureCareerPilotLibrary() {
@@ -43,7 +38,6 @@ internal fun LibraryExtension.configureCareerPilotLibrary() {
 
     defaultConfig {
         minSdk = CareerPilotBuildConfig.DEFAULT_MIN_SDK
-        testInstrumentationRunner = CareerPilotBuildConfig.TEST_RUNNER
     }
 
     compileOptions {
@@ -61,9 +55,5 @@ internal fun LibraryExtension.configureCareerPilotLibrary() {
             "META-INF/LICENSE*",
             "META-INF/NOTICE*",
         )
-    }
-
-    testOptions {
-        unitTests.isIncludeAndroidResources = true
     }
 }

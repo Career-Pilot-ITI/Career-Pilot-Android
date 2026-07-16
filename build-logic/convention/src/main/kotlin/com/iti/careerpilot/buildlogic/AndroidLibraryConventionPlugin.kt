@@ -15,9 +15,5 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         configureCareerPilotKotlinAndroid()
 
         addLibrary("implementation", "androidx-core-ktx")
-
-        addLibrary("testImplementation", "junit")
-        addLibrary("androidTestImplementation", "androidx-junit")
-        addLibrary("androidTestImplementation", "androidx-espresso-core")
     }
 }
