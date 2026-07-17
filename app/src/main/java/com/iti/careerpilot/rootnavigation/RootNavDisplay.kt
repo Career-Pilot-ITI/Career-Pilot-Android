@@ -3,128 +3,188 @@ package com.iti.careerpilot.rootnavigation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.components.CareerPilotSnackbarHost
 import com.iti.careerpilot.features.login.LoginRoot
 import com.iti.careerpilot.features.otp.OTPRoot
-import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
-import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
+import com.iti.careerpilot.features.register.RegisterRoot
+import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.common.snackbar.SnackbarController
+import com.iti.common.snackbar.model.CareerPilotSnackbarResult
+import com.iti.common.util.isDismissible
+import com.iti.common.util.toCareerPilotResult
+import com.iti.common.util.toMaterialDuration
+import kotlinx.coroutines.CancellationException
 
 @Composable
-fun RootNavDisplay() {
-
+fun RootNavDisplay(
+    snackbarController: SnackbarController,
+) {
     val rootBackStack = rememberNavBackStack(Route.Login)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val currentRootRoute = rootBackStack.lastOrNull()
 
-    NavDisplay(
-        modifier = Modifier.fillMaxSize(),
-        backStack = rootBackStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        transitionSpec = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(350)
-            ) togetherWith slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                animationSpec = tween(350)
-            )
-        },
-        popTransitionSpec = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(350)
-            ) togetherWith slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(350)
-            )
-        },
-        entryProvider = entryProvider {
-            entry<Route.Login> {
-                LoginRoot(
-                    openOTP = {
-                        rootBackStack.apply {
-                            navigateSingleTop(Route.OTP)
-                        }
-                    },
+    LaunchedEffect(snackbarController, snackbarHostState) {
+        snackbarController.requests.collect { request ->
+            try {
+                val event = request.event
+                val materialResult = snackbarHostState.showSnackbar(
+                    message = event.message.asString(context),
+                    actionLabel = event.actionLabel?.asString(context),
+                    withDismissAction = event.type.isDismissible,
+                    duration = event.duration.toMaterialDuration(),
                 )
-            }
-            entry<Route.OTP> {
-                OTPRoot(
-                    openHome = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.NestedNav)
-                        }
-                    },
-                    openRegister = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.Register)
-                        }
-                    }
-                )
-            }
-            entry<Route.Register> {
-                RegisterRoot(
-                    openHome = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.NestedNav)
-                        }
-                    },
-                    openLogin = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.Login)
-                        }
-                    }
-                )
-            }
-            entry<Route.NestedNav> {
-                NestedNavDisplay(
-                    currentRootRoute = rootBackStack.lastOrNull(),
-                    navigateBack = {
-                        rootBackStack.removeLastOrNull()
-                    },
-                    logout = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.Login)
-                        }
-                    },
-                    openSessionDetails = { id ->
-                        rootBackStack.navigateSingleTop(Route.SessionDetails(id = id))
-                    },
-                    openSettings = {
-                        rootBackStack.navigateSingleTop(Route.Settings)
-                    },
-                    openPaywall = {
-                        rootBackStack.navigateSingleTop(Route.Paywall)
-                    },
-                )
-            }
-            entry<Route.SessionDetails> {
-                SessionDetailsRoot(
-                    sessionId = it.id
-                )
-            }
-            entry<Route.Settings> {
-                SettingsRoot()
-            }
-            entry<Route.Paywall> {
-                PaywallRoot()
+
+                request.complete(materialResult.toCareerPilotResult())
+            } catch (cancellation: CancellationException) {
+                request.complete(CareerPilotSnackbarResult.DISMISSED)
+                throw cancellation
             }
         }
-    )
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        NavDisplay(
+            modifier = Modifier.fillMaxSize(),
+            backStack = rootBackStack,
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+            transitionSpec = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(350),
+                ) togetherWith slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(350),
+                )
+            },
+            popTransitionSpec = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(350),
+                ) togetherWith slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(350),
+                )
+            },
+            entryProvider = entryProvider {
+                entry<Route.Login> {
+                    LoginRoot(
+                        openOTP = {
+                            rootBackStack.navigateSingleTop(Route.OTP)
+                        },
+                    )
+                }
+                entry<Route.OTP> {
+                    OTPRoot(
+                        openHome = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav)
+                            }
+                        },
+                        openRegister = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.Register)
+                            }
+                        },
+                    )
+                }
+                entry<Route.Register> {
+                    RegisterRoot(
+                        openHome = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav)
+                            }
+                        },
+                        openLogin = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.Login)
+                            }
+                        },
+                    )
+                }
+                entry<Route.NestedNav> {
+                    NestedNavDisplay(
+                        currentRootRoute = currentRootRoute,
+                        navigateBack = {
+                            rootBackStack.removeLastOrNull()
+                        },
+                        logout = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.Login)
+                            }
+                        },
+                        openSessionDetails = { id ->
+                            rootBackStack.navigateSingleTop(
+                                Route.SessionDetails(id = id),
+                            )
+                        },
+                        openSettings = {
+                            rootBackStack.navigateSingleTop(Route.Settings)
+                        },
+                        openPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall)
+                        },
+                    )
+                }
+                entry<Route.SessionDetails> {
+                    SessionDetailsRoot(
+                        sessionId = it.id,
+                    )
+                }
+                entry<Route.Settings> {
+                    SettingsRoot()
+                }
+                entry<Route.Paywall> {
+                    PaywallRoot()
+                }
+            },
+        )
+
+        CareerPilotSnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(
+                    horizontal = Dimens.SpaceL
+                )
+                .padding(
+                    bottom = if (currentRootRoute == Route.NestedNav) {
+                        Dimens.BottomNavHeight + Dimens.SpaceM
+                    } else {
+                        Dimens.SpaceM
+                    },
+                )
+                .navigationBarsPadding(),
+        )
+    }
 }
