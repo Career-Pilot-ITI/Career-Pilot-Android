@@ -9,6 +9,7 @@ import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,7 +92,7 @@ class ChoosingTracksViewModel @Inject constructor(
                 is CareerPilotResult.Success -> {
                     _state.update { state ->
                         state.copy(
-                            tracks = result.data,
+                            tracks = result.data.toImmutableList(),
                             selectedTrack = state.selectedTrack?.let { selected ->
                                 result.data.firstOrNull { it.id == selected.id }
                             },

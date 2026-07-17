@@ -7,10 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.iti.onboarding.domain.model.Track
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun TracksFlow(
-    tracks: List<Track>,
+    tracks: ImmutableList<Track>,
     onTrackClick: (track: Track) -> Unit,
     modifier: Modifier = Modifier,
     selectedTrack: Track?= null,
