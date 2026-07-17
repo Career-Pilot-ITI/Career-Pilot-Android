@@ -9,4 +9,8 @@ class OnboardingLocalDataSourceImpl @Inject constructor(
     override suspend fun saveAvatarUrl(url: String) {
         preferencesDataSource.setAvatarUrl(url)
     }
+
+    override suspend fun savePdfUrl(url: String) {
+        preferencesDataSource.savePdfUrl(url)
+    }
 }
