@@ -91,6 +91,7 @@ fun NestedNavDisplay(
                     ProfileRoot(
                         openSettings = openSettings,
                         logout = logout,
+                        openEditProfile = {}
                     )
                 }
             }

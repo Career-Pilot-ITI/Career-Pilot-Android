@@ -5,5 +5,6 @@ import com.iti.core.datastore.models.UserProfile
 
 @Immutable
 data class ProfileState(
-    val profile: UserProfile = UserProfile()
+    val showLogoutDialog: Boolean = false,
+    val profile: UserProfile = UserProfile(),
 )

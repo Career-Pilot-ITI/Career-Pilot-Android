@@ -1,33 +1,59 @@
 package com.iti.careerpilot.profile.presentation.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.core.designsystem.CareerPilotTheme
+import com.iti.careerpilot.profile.R
+import com.iti.careerpilot.profile.presentation.action.ProfileAction
+import com.iti.careerpilot.profile.presentation.event.ProfileEvent
+import com.iti.careerpilot.profile.presentation.screen.components.InfoCard
+import com.iti.careerpilot.profile.presentation.screen.components.LogoutDialog
+import com.iti.careerpilot.profile.presentation.screen.components.MenuSection
+import com.iti.careerpilot.profile.presentation.screen.components.ProfileHeader
+import com.iti.careerpilot.profile.presentation.screen.components.StatsRow
 import com.iti.careerpilot.profile.presentation.state.ProfileState
 import com.iti.careerpilot.profile.presentation.viewmodel.ProfileViewModel
-import com.iti.careerpilot.profile.presentation.action.ProfileAction
+import com.iti.core.datastore.models.UserProfile
 
 @Composable
 fun ProfileRoot(
     openSettings: () -> Unit,
+    openEditProfile: () -> Unit,
     logout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                ProfileEvent.NavigateToEditProfile -> openEditProfile()
+                ProfileEvent.NavigateToSettings -> openSettings()
+                ProfileEvent.NavigateToLogout -> logout()
+            }
+        }
+    }
+
     ProfileScreen(
-        openSettings = openSettings,
-        logout = logout,
         state = state,
         onAction = viewModel::onAction
     )
@@ -35,28 +61,87 @@ fun ProfileRoot(
 
 @Composable
 fun ProfileScreen(
-    openSettings: () -> Unit,
-    logout: () -> Unit,
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
 ) {
     Column(
         modifier = Modifier
-            .background(Color.Magenta)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
     ) {
-        Text(text = "profile Screen")
-        Button(
-            onClick = openSettings
+        TopAppBar(
+            title = {
+                Text(
+                    text = stringResource(R.string.profile),
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent
+            ),
+            windowInsets =  TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(20.dp)
         ) {
-            Text(text = "open Settings")
+
+            item {
+                ProfileHeader(
+                    profile = state.profile,
+                    onEditClick = { onAction(ProfileAction.OnEditProfileClick) }
+                )
+            }
+
+            item {
+                StatsRow(profile = state.profile)
+            }
+
+            item {
+                InfoCard(profile = state.profile)
+            }
+
+            item {
+                MenuSection(
+                    onOpenSettings = {
+                        onAction(ProfileAction.OnSettingsClick)
+                    },
+                    onLogOut = {
+                        onAction(ProfileAction.OnLogoutClick)
+                    }
+                )
+            }
         }
-        Button(
-            onClick = logout
-        ) {
-            Text(text = "Logout")
-        }
+    }
+
+    if (state.showLogoutDialog) {
+        LogoutDialog(
+            onConfirm = { onAction(ProfileAction.OnLogoutConfirm) },
+            onDismiss = { onAction(ProfileAction.OnLogoutDismiss) }
+        )
+    }
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+private fun ProfileScreenPreview() {
+    CareerPilotTheme {
+        ProfileScreen(
+            state = ProfileState(
+                profile = UserProfile(
+                    displayName = "Amina Hassan",
+                    username = "amina.h",
+                    email = "amina@example.com",
+                    currentJobTitle = "Product Designer",
+                    targetRole = "Senior Product Designer",
+                    industry = "Technology",
+                    experienceLevel = "Mid-level",
+                    subscriptionTier = "Pro",
+                    coinBalance = 240
+                )
+            ),
+            onAction = {}
+        )
     }
 }
