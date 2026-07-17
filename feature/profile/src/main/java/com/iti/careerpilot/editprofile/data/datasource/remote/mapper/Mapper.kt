@@ -1,8 +1,9 @@
-package com.iti.careerpilot.profile.data.datasource.remote.mapper
+package com.iti.careerpilot.editprofile.data.datasource.remote.mapper
 
-import com.iti.careerpilot.profile.data.datasource.remote.models.RequestProfileUpdateDto
-import com.iti.careerpilot.profile.data.datasource.remote.models.UserProfileDto
-import com.iti.careerpilot.profile.domain.models.RequestProfileUpdate
+
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
+import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.core.datastore.models.UserProfile
 
 fun UserProfileDto.toDomain(
@@ -36,8 +37,8 @@ fun UserProfileDto.toDomain(
     )
 }
 
-fun RequestProfileUpdate.toDto(): RequestProfileUpdateDto {
-    return RequestProfileUpdateDto(
+fun RequestProfileUpdate.toDto(): UpdateProfileRequestDto {
+    return UpdateProfileRequestDto(
         username = username,
         email = email,
         displayName = displayName,

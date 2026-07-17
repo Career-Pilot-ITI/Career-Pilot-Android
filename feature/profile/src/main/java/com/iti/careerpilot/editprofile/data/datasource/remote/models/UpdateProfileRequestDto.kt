@@ -1,9 +1,9 @@
-package com.iti.careerpilot.profile.data.datasource.remote.models
+package com.iti.careerpilot.editprofile.data.datasource.remote.models
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RequestProfileUpdateDto(
+data class UpdateProfileRequestDto(
     val username: String? = null,
     val email: String? = null,
     val displayName: String? = null,

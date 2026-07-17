@@ -30,6 +30,7 @@ fun NestedNavDisplay(
     logout: () -> Unit,
     openSessionDetails: (String) -> Unit,
     openSettings: () -> Unit,
+    openEditProfile: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -91,7 +92,7 @@ fun NestedNavDisplay(
                     ProfileRoot(
                         openSettings = openSettings,
                         logout = logout,
-                        openEditProfile = {}
+                        openEditProfile = openEditProfile
                     )
                 }
             }

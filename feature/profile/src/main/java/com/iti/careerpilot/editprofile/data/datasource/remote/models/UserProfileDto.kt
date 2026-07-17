@@ -1,9 +1,13 @@
-package com.iti.careerpilot.profile.domain.models
+package com.iti.careerpilot.editprofile.data.datasource.remote.models
 
-data class RequestProfileUpdate(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class UserProfileDto(
+    val displayName: String? = null,
     val username: String? = null,
     val email: String? = null,
-    val displayName: String? = null,
+    val avatarUrl: String? = null,
     val gender: String? = null,
     val dateOfBirth: String? = null,
     val targetRole: String? = null,
@@ -11,11 +15,14 @@ data class RequestProfileUpdate(
     val experienceLevel: String? = null,
     val currentJobTitle: String? = null,
     val yearsOfExperience: Int? = null,
+    val cvUrl: String? = null,
     val skills: List<String>? = null,
     val targetCompanies: List<String>? = null,
     val educationLevel: String? = null,
     val timezone: String? = null,
     val termsAccepted: Boolean? = null,
     val subscriptionTier: String? = null,
-    val trackId: Int? = null
+    val coinBalance: Int? = null,
+    val onboardingCompleted: Boolean? = null,
+    val trackName: String? = null
 )

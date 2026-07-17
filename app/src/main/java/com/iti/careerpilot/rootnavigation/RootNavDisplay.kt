@@ -11,11 +11,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.login.LoginRoot
 import com.iti.careerpilot.features.otp.OTPRoot
-import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
-import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
+import com.iti.careerpilot.features.register.RegisterRoot
+import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 
@@ -109,6 +110,9 @@ fun RootNavDisplay() {
                     openSettings = {
                         rootBackStack.navigateSingleTop(Route.Settings)
                     },
+                    openEditProfile = {
+                        rootBackStack.navigateSingleTop(Route.EditProfile)
+                    },
                     openPaywall = {
                         rootBackStack.navigateSingleTop(Route.Paywall)
                     },
@@ -121,6 +125,13 @@ fun RootNavDisplay() {
             }
             entry<Route.Settings> {
                 SettingsRoot()
+            }
+            entry<Route.EditProfile> {
+                EditProfileRoot(
+                    navigateBack = {
+                        rootBackStack.popIfCurrentIs<Route.EditProfile>()
+                    }
+                )
             }
             entry<Route.Paywall> {
                 PaywallRoot()

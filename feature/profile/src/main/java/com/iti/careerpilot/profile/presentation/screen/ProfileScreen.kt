@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.profile.R
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
@@ -43,13 +43,11 @@ fun ProfileRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                ProfileEvent.NavigateToEditProfile -> openEditProfile()
-                ProfileEvent.NavigateToSettings -> openSettings()
-                ProfileEvent.NavigateToLogout -> logout()
-            }
+    ObserveEvent(viewModel.events) { event ->
+        when (event) {
+            ProfileEvent.NavigateToEditProfile -> openEditProfile()
+            ProfileEvent.NavigateToSettings -> openSettings()
+            ProfileEvent.NavigateToLogout -> logout()
         }
     }
 
@@ -77,7 +75,7 @@ fun ProfileScreen(
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
             ),
-            windowInsets =  TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
+            windowInsets = TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
         )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -120,7 +118,6 @@ fun ProfileScreen(
         )
     }
 }
-
 
 
 @Preview(showBackground = true)

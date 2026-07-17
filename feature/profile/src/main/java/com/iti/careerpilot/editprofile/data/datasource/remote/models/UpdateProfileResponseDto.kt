@@ -1,4 +1,4 @@
-package com.iti.careerpilot.profile.data.datasource.remote.models
+package com.iti.careerpilot.editprofile.data.datasource.remote.models
 
 import kotlinx.serialization.Serializable
 

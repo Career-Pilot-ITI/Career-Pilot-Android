@@ -7,6 +7,4 @@ interface ProfileLocalDataSource {
 
     val userProfile: Flow<UserProfile>
 
-    suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile)
-
 }
