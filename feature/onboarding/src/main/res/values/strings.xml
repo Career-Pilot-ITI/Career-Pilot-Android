@@ -5,4 +5,16 @@
     <string name="choose_your_track_subtitle">We’ll tailor questions and feedback for your role.</string>
     <string name="next_btn_content_description">Next Button</string>
     <string name="next_button_label">Next</string>
+    <string name="upload_cv_title">Upload your CV</string>
+    <string name="upload_cv_subtitle">We’ll extract your experience so questions feel personal.</string>
+    <string name="tap_to_upload_cv">Tap to upload your CV</string>
+    <string name="cv_upload_requirements">PDF · Max 10 MB</string>
+    <string name="preparing_cv">Preparing your CV…</string>
+    <string name="cv_ready_to_upload">Ready</string>
+    <string name="cv_uploaded_label">Uploaded</string>
+    <string name="cv_upload_progress">%1$d%% uploaded</string>
+    <string name="cv_file_details">%1$.1f MB · %2$s</string>
+    <string name="cv_uploaded_successfully">CV uploaded successfully</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="analyze_my_cv">Analyse My CV</string>
 </resources>
