@@ -18,11 +18,12 @@ import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.onboarding.presentation.screen.track.view.ChoosingTracksScreen
 
 @Composable
 fun RootNavDisplay() {
 
-    val rootBackStack = rememberNavBackStack(Route.Login)
+    val rootBackStack = rememberNavBackStack(Route.Onboarding)
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -124,6 +125,9 @@ fun RootNavDisplay() {
             }
             entry<Route.Paywall> {
                 PaywallRoot()
+            }
+            entry<Route.Onboarding> {
+                ChoosingTracksScreen()
             }
         }
     )

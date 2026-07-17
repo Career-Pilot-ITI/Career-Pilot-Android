@@ -1,0 +1,8 @@
+<resources>
+    <string name="write_track">اكتب مسارك…</string>
+    <string name="track_name_label">اسم المسار</string>
+    <string name="choose_your_track_title">اختر مسارك المهني</string>
+    <string name="choose_your_track_subtitle">سنخصص الأسئلة والملاحظات بما يتناسب مع دورك المهني.</string>
+    <string name="next_btn_content_description">زر المتابعة</string>
+    <string name="next_button_label">التالي</string>
+</resources>

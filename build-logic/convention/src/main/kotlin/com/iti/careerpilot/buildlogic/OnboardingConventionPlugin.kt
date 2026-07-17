@@ -46,5 +46,10 @@ class OnboardingConventionPlugin : Plugin<Project> {
             configuration = "implementation",
             alias = "kotlinx-coroutines-android",
         )
+
+        addLibrary(
+            configuration = "implementation",
+            alias = "extended-icons",
+        )
     }
 }

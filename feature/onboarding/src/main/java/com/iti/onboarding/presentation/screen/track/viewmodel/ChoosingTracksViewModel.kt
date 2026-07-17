@@ -25,8 +25,7 @@ class ChoosingTracksViewModel : ViewModel() {
             is ChoosingTracksIntent.ToggleTrackSelection -> {
                 _state.update {
                     it.copy(
-                        tracks = it.tracks.filter { track -> track == intent.track }
-                            .map { track -> track.copy(selected = !intent.track.selected) },
+                        selectedTrack = intent.track
                     )
                 }
             }
@@ -37,10 +36,10 @@ class ChoosingTracksViewModel : ViewModel() {
                 }
             }
 
-            is ChoosingTracksIntent.OnChangeSearchQuery -> {
+            is ChoosingTracksIntent.OnChangeCustomTrackValue -> {
                 _state.update {
                     it.copy(
-                        filteredTracks = it.tracks.filter { track -> track.name == intent.searchQuery }
+                        customTrack = intent.customTrackValue
                     )
                 }
             }
