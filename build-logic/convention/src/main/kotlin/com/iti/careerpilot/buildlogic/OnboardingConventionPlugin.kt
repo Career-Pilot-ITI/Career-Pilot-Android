@@ -24,6 +24,11 @@ class OnboardingConventionPlugin : Plugin<Project> {
 
         addLibrary(
             configuration = "implementation",
+            alias = "androidx-material3-android",
+        )
+
+        addLibrary(
+            configuration = "implementation",
             alias = "androidx-hilt-navigation-compose",
         )
 
