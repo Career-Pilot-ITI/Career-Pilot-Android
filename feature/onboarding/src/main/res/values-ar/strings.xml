@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_info_photo_upload_error">تعذر رفع صورتك. حاول مرة أخرى.</string>
+    <string name="profile_info_photo_retry">إعادة المحاولة</string>
+    <string name="profile_info_camera_permission_message">يلزم الوصول إلى الكاميرا لالتقاط صورة.</string>
+    <string name="profile_info_open_settings">فتح الإعدادات</string>
+
+    <string name="profile_info_ready_to_go">جاهز للبدء!</string>
+    <string name="profile_info_title">تم إعداد ملفك الشخصي</string>
+    <string name="profile_info_subtitle">إليك ما وجدناه. يمكنك دائماً تحديث ذلك لاحقاً.</string>
+    <string name="profile_info_full_name_label">الاسم الكامل</string>
+    <string name="profile_info_full_name_placeholder">سارة تشين</string>
+    <string name="profile_info_email_label">البريد الإلكتروني</string>
+    <string name="profile_info_email_placeholder">sarah.chen@gmail.com</string>
+    <string name="profile_info_title_role_label">المسمى الوظيفي / الدور الحالي</string>
+    <string name="profile_info_title_role_placeholder">مهندس برمجيات أول</string>
+    <string name="profile_info_experience_level_label">مستوى الخبرة</string>
+    <string name="profile_info_experience_level_placeholder">متقدم (سينيور)</string>
+    <string name="profile_info_skills_detected_label">المهارات المكتشفة</string>
+    <string name="profile_info_banner_text">جلستك الأولى على حسابنا — لا حاجة لبطاقة ائتمان!</string>
+    <string name="profile_info_start_practising_button">ابدأ التدريب</string>
+
+    <!-- Add Skill Dialog -->
+    <string name="profile_info_other_skill">أخرى</string>
+    <string name="profile_info_add_skill_title">إضافة مهارة</string>
+    <string name="profile_info_add_skill_label">اسم المهارة</string>
+    <string name="profile_info_add_skill_confirm">إضافة</string>
+    <string name="profile_info_add_skill_cancel">إلغاء</string>
+    <string name="profile_info_email_invalid">يرجى إدخال عنوان بريد إلكتروني صحيح</string>
+</resources>
