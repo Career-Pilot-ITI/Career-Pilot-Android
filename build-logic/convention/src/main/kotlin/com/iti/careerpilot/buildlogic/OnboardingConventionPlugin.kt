@@ -39,6 +39,11 @@ class OnboardingConventionPlugin : Plugin<Project> {
 
         addLibrary(
             configuration = "implementation",
+            alias = "immutable-collections"
+        )
+
+        addLibrary(
+            configuration = "implementation",
             alias = "androidx-navigation3",
         )
 
