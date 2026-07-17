@@ -24,7 +24,7 @@ import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 @Composable
 fun RootNavDisplay() {
 
-    val rootBackStack = rememberNavBackStack(Route.Login)
+    val rootBackStack = rememberNavBackStack(Route.ProfileInfo)
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
