@@ -37,4 +37,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Paywall : Route
+
+    @Serializable
+    data object ProfileInfo : Route
 }

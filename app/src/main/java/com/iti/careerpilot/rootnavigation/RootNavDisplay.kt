@@ -12,6 +12,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.features.login.LoginRoot
+import com.iti.onboarding.presentation.screen.profileinfo.view.ProfileInfoScreen
 import com.iti.careerpilot.features.otp.OTPRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.register.RegisterRoot
@@ -19,10 +20,11 @@ import com.iti.careerpilot.features.paywall.PaywallRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RootNavDisplay() {
 
-    val rootBackStack = rememberNavBackStack(Route.Login)
+    val rootBackStack = rememberNavBackStack(Route.ProfileInfo)
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -50,6 +52,9 @@ fun RootNavDisplay() {
             )
         },
         entryProvider = entryProvider {
+            entry<Route.ProfileInfo> {
+                ProfileInfoScreen()
+            }
             entry<Route.Login> {
                 LoginRoot(
                     openOTP = {
