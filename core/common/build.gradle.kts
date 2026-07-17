@@ -8,3 +8,7 @@ plugins {
 android {
     namespace = "com.iti.common"
 }
+
+dependencies {
+    implementation(libs.androidx.activity.compose)
+}

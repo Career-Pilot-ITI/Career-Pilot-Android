@@ -16,5 +16,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
         addLibrary("implementation", "androidx-core-ktx")
         addLibrary("implementation", "androidx-lifecycle-runtime-ktx")
+        addLibrary("implementation", "kotlinx-collections-immutable")
     }
 }

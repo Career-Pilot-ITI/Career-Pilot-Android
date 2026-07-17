@@ -15,5 +15,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         configureCareerPilotKotlinAndroid()
 
         addLibrary("implementation", "androidx-core-ktx")
+        addLibrary("implementation", "kotlinx-collections-immutable")
     }
 }

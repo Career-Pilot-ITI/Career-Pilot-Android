@@ -11,6 +11,7 @@ class OnboardingConventionPlugin : Plugin<Project> {
         pluginManager.apply("careerpilot.android.compose")
         pluginManager.apply("careerpilot.android.hilt")
         pluginManager.apply("careerpilot.kotlin.serialization")
+        pluginManager.apply("careerpilot.android.ktor")
 
         addLibrary(
             configuration = "implementation",
