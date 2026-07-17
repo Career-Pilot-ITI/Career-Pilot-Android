@@ -10,16 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,14 +45,17 @@ fun ChoosingTracksScreen(
     modifier: Modifier = Modifier,
     viewModel: ChoosingTracksViewModel = hiltViewModel(),
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.effects.collect { effects ->
-                when (effects) {
-                    is ChoosingTracksEffects.ShowError -> TODO("Show error using snackbar")
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is ChoosingTracksEffects.ShowError -> {
+                        // TODO: Show the localized message with the base snackbar.
+                    }
+
                     ChoosingTracksEffects.NavigateNext -> onNavigateToNext()
                 }
             }
@@ -60,98 +63,109 @@ fun ChoosingTracksScreen(
     }
 
     ChoosingTracksScreenContent(
-        state,
-        viewModel::onIntent,
-        modifier = modifier.safeContentPadding()
+        state = state,
+        onIntent = viewModel::onIntent,
+        modifier = modifier.safeContentPadding(),
     )
 }
 
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 fun ChoosingTracksScreenContent(
-    state: State<ChoosingTracksUiState>,
+    state: ChoosingTracksUiState,
     onIntent: (ChoosingTracksIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    val enabledActionButton by remember {
-        derivedStateOf {
-            state.value.selectedTrack?.let { track ->
-                track.name != "Other" || state.value.customTrack.isNotBlank()
-            } ?: false
-        }
-    }
-    val showCustomTrackTextField by remember {
-        derivedStateOf {
-            state.value.selectedTrack?.name == "Other"
-        }
-    }
+    val pullToRefreshState = rememberPullToRefreshState()
+    val enabledActionButton = state.selectedTrack?.let { track ->
+        track.name != "Other" || state.customTrack.isNotBlank()
+    } ?: false
+    val showCustomTrackTextField = state.selectedTrack?.name == "Other"
 
-    LazyColumn(
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = {
+            onIntent(ChoosingTracksIntent.OnRefresh)
+        },
+        state = pullToRefreshState,
         modifier = modifier
             .fillMaxSize()
-            .background(colors.background)
-            .padding(bottom = 20.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
+            .background(colors.background),
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = colors.primary,
+                containerColor = colors.surface,
+            )
+        },
     ) {
-        item(key = 1) {
-            Column(
-                modifier = modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ChoosingTracksScreenHeader()
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            item(key = "tracks_content") {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    ChoosingTracksScreenHeader()
 
-                AnimatedVisibility(state.value.tracks.isNotEmpty()) {
-                    TracksFlow(
-                        tracks = state.value.tracks,
-                        selectedTrack = state.value.selectedTrack,
-                        onTrackClick = { track ->
-                            onIntent(ChoosingTracksIntent.ToggleTrackSelection(track))
-                        },
-                        modifier = Modifier.padding(vertical = 24.dp),
-                    )
-                }
-
-                AnimatedVisibility(visible = showCustomTrackTextField) {
-                    Column {
-                        CustomTrackTextField(
-                            value = state.value.customTrack,
-                            label = stringResource(R.string.track_name_label),
-                            onValueChange = {
-                                onIntent(ChoosingTracksIntent.OnChangeCustomTrackValue(it))
-                            }
+                    AnimatedVisibility(state.tracks.isNotEmpty()) {
+                        TracksFlow(
+                            tracks = state.tracks,
+                            selectedTrack = state.selectedTrack,
+                            onTrackClick = { track ->
+                                onIntent(
+                                    ChoosingTracksIntent.ToggleTrackSelection(track)
+                                )
+                            },
+                            modifier = Modifier.padding(vertical = 24.dp),
                         )
-
-                        Spacer(modifier = Modifier.height(40.dp))
                     }
-                }
 
-                if (state.value.isLoading || state.value.error != null) {
-                    Spacer(Modifier.fillParentMaxHeight(0.35f))
+                    AnimatedVisibility(visible = showCustomTrackTextField) {
+                        Column {
+                            CustomTrackTextField(
+                                value = state.customTrack,
+                                label = stringResource(R.string.track_name_label),
+                                onValueChange = {
+                                    onIntent(
+                                        ChoosingTracksIntent.OnChangeCustomTrackValue(it)
+                                    )
+                                },
+                            )
 
-                    AnimatedVisibility(
-                        visible = true
-                    ) {
-                        if (state.value.isLoading) {
-                            LoadingIndicator()
-                        } else if (state.value.error != null) {
-                            Text(state.value.error ?: "")
+                            Spacer(modifier = Modifier.height(40.dp))
                         }
+                    }
+
+                    if (state.isLoading) {
+                        Spacer(Modifier.fillParentMaxHeight(0.35f))
+                        LoadingIndicator(
+                            color = colors.primary,
+                        )
                     }
                 }
             }
-        }
 
-        item(key = 2) {
-            ActionButton(
-                label = stringResource(R.string.next_button_label),
-                onClick = {
-                    onIntent(ChoosingTracksIntent.OnNavigateNext)
-                },
-                enabled = enabledActionButton
-            )
+            item(key = "tracks_action") {
+                ActionButton(
+                    label = stringResource(R.string.next_button_label),
+                    onClick = {
+                        onIntent(ChoosingTracksIntent.OnNavigateNext)
+                    },
+                    enabled = enabledActionButton,
+                )
+            }
         }
     }
 }
