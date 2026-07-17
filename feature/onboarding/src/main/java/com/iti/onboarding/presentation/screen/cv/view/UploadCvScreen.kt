@@ -7,10 +7,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.rememberScrollState
@@ -24,7 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -54,7 +52,7 @@ fun UploadCvScreen(
     modifier: Modifier = Modifier,
     viewModel: UploadCvViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
 
@@ -102,7 +100,7 @@ fun UploadCvScreen(
 
 @Composable
 fun UploadCvScreenContent(
-    state: UploadCvUiState,
+    state: State<UploadCvUiState>,
     onIntent: (UploadCvIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -118,16 +116,16 @@ fun UploadCvScreenContent(
 
         Column {
             UploadCvCard(
-                selectedFile = state.selectedFile,
-                stage = state.stage,
-                uploadProgress = state.uploadProgress,
+                selectedFile = state.value.selectedFile,
+                stage = state.value.stage,
+                uploadProgress = state.value.uploadProgress,
                 onClick = {
                     onIntent(UploadCvIntent.OnUploadAreaClick)
                 },
             )
 
             AnimatedVisibility(
-                visible = state.stage == CvUploadStage.UPLOADED,
+                visible = state.value.stage == CvUploadStage.UPLOADED,
             ) {
                 Row(
                     modifier = Modifier
@@ -155,7 +153,7 @@ fun UploadCvScreenContent(
                 onClick = {
                     onIntent(UploadCvIntent.OnSkipClick)
                 },
-                enabled = !state.isBusy,
+                enabled = !state.value.isBusy,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 12.dp),
@@ -177,7 +175,7 @@ fun UploadCvScreenContent(
 
         ActionButton(
             label = stringResource(R.string.analyze_my_cv),
-            enabled = state.canAnalyze,
+            enabled = state.value.canAnalyze,
             onClick = {
                 onIntent(UploadCvIntent.OnAnalyzeClick)
             },
