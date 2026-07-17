@@ -14,6 +14,11 @@ class OnboardingConventionPlugin : Plugin<Project> {
 
         addLibrary(
             configuration = "implementation",
+            alias = "androidx-activity-compose",
+        )
+
+        addLibrary(
+            configuration = "implementation",
             alias = "androidx-lifecycle-runtime-compose",
         )
 
