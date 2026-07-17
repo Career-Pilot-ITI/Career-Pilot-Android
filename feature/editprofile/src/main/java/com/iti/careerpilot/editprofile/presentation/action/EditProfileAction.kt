@@ -1,6 +1,7 @@
 package com.iti.careerpilot.editprofile.presentation.action
 
 import android.net.Uri
+import com.iti.common.model.ProfileEditSection
 
 
 sealed interface EditProfileAction {
@@ -25,6 +26,6 @@ sealed interface EditProfileAction {
     data class OnTargetCompanyAdd(val company: String) : EditProfileAction
     data class OnTargetCompanyRemove(val company: String) : EditProfileAction
 
-    data object OnSaveClick : EditProfileAction
+    data class OnSaveClick(val section: ProfileEditSection = ProfileEditSection.ALL) : EditProfileAction
     data object OnBackClick : EditProfileAction
 }

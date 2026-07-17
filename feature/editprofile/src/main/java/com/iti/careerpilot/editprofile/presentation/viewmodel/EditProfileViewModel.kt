@@ -2,6 +2,7 @@ package com.iti.careerpilot.editprofile.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import com.iti.careerpilot.editprofile.presentation.action.EditProfileAction
@@ -209,17 +210,19 @@ class EditProfileViewModel @Inject constructor(
             EditProfileAction.OnBackClick ->
                 sendEvent(EditProfileEvent.NavigateBack)
 
-            EditProfileAction.OnSaveClick -> save()
+            is EditProfileAction.OnSaveClick -> save(action.section)
         }
     }
 
-    private fun save() {
+    private fun save(section: ProfileEditSection) {
         val current = _state.value
 
         val errors = mutableMapOf<String, String>()
-        if (current.username.isBlank()) errors["username"] = "Username can't be empty"
-        if (current.email.isNotBlank() && !current.email.contains("@")) errors["email"] =
-            "Enter a valid email"
+        if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
+            if (current.username.isBlank()) errors["username"] = "Username can't be empty"
+            if (current.email.isNotBlank() && !current.email.contains("@")) errors["email"] =
+                "Enter a valid email"
+        }
 
         if (errors.isNotEmpty()) {
             _state.update { it.copy(fieldErrors = errors) }
@@ -228,23 +231,50 @@ class EditProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, fieldErrors = emptyMap()) }
-            val request = RequestProfileUpdate(
-                username = current.username.takeIf { it != original.username },
-                email = current.email.takeIf { it != original.email },
-                displayName = current.displayName.takeIf { it != original.displayName },
-                gender = current.gender.takeIf { it != original.gender },
-                dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
-                targetRole = current.targetRole.takeIf { it != original.targetRole },
-                industry = current.industry.takeIf { it != original.industry },
-                experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
-                currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
-                yearsOfExperience = current.yearsOfExperience.toIntOrNull()
-                    ?.takeIf { it != original.yearsOfExperience },
-                skills = current.skills.takeIf { it != original.skills },
-                targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
-                educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
-                timezone = current.timezone.takeIf { it != original.timezone },
-            )
+            val request = when (section) {
+                ProfileEditSection.PERSONAL -> {
+                    RequestProfileUpdate(
+                        username = current.username.takeIf { it != original.username },
+                        email = current.email.takeIf { it != original.email },
+                        displayName = current.displayName.takeIf { it != original.displayName },
+                        gender = current.gender.takeIf { it != original.gender },
+                        dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
+                    )
+                }
+                ProfileEditSection.CAREER -> {
+                    RequestProfileUpdate(
+                        targetRole = current.targetRole.takeIf { it != original.targetRole },
+                        industry = current.industry.takeIf { it != original.industry },
+                        experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
+                        currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
+                        yearsOfExperience = current.yearsOfExperience.toIntOrNull()
+                            ?.takeIf { it != original.yearsOfExperience },
+                        skills = current.skills.takeIf { it != original.skills },
+                        targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
+                        educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
+                        timezone = current.timezone.takeIf { it != original.timezone },
+                    )
+                }
+                else -> {
+                    RequestProfileUpdate(
+                        username = current.username.takeIf { it != original.username },
+                        email = current.email.takeIf { it != original.email },
+                        displayName = current.displayName.takeIf { it != original.displayName },
+                        gender = current.gender.takeIf { it != original.gender },
+                        dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
+                        targetRole = current.targetRole.takeIf { it != original.targetRole },
+                        industry = current.industry.takeIf { it != original.industry },
+                        experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
+                        currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
+                        yearsOfExperience = current.yearsOfExperience.toIntOrNull()
+                            ?.takeIf { it != original.yearsOfExperience },
+                        skills = current.skills.takeIf { it != original.skills },
+                        targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
+                        educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
+                        timezone = current.timezone.takeIf { it != original.timezone },
+                    )
+                }
+            }
 
             editProfileRepo.updateProfile(request)
                 .onSuccess {

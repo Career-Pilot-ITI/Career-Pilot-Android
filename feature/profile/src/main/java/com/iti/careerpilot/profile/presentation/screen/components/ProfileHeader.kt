@@ -36,7 +36,7 @@ import com.iti.core.datastore.models.UserProfile
 @Composable
 fun ProfileHeader(
     profile: UserProfile,
-    onEditClick: () -> Unit
+    onEditPersonalInfoClick: () -> Unit
 ) {
     CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -104,7 +104,7 @@ fun ProfileHeader(
 
             CareerPilotButton(
                 text = stringResource(R.string.edit_profile),
-                onClick = onEditClick,
+                onClick = onEditPersonalInfoClick,
                 variant = ButtonVariant.OUTLINE,
                 modifier = Modifier.fillMaxWidth()
             )

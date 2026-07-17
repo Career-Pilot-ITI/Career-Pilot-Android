@@ -110,8 +110,8 @@ fun RootNavDisplay() {
                     openSettings = {
                         rootBackStack.navigateSingleTop(Route.Settings)
                     },
-                    openEditProfile = {
-                        rootBackStack.navigateSingleTop(Route.EditProfile)
+                    openEditProfile = { section ->
+                        rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
                     },
                     openPaywall = {
                         rootBackStack.navigateSingleTop(Route.Paywall)
@@ -128,6 +128,7 @@ fun RootNavDisplay() {
             }
             entry<Route.EditProfile> {
                 EditProfileRoot(
+                    section = it.section,
                     navigateBack = {
                         rootBackStack.popIfCurrentIs<Route.EditProfile>()
                     }

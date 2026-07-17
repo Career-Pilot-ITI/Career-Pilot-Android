@@ -19,5 +19,6 @@
     <string name="back">Back</string>
     <string name="my_cv">My CV</string>
     <string name="no_cv_uploaded">No CV uploaded</string>
+    <string name="career_info">Career Info</string>
 
 </resources>

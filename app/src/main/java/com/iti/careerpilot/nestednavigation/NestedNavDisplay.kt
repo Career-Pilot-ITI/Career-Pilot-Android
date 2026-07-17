@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.features.reports.ReportsRoot
 import com.iti.careerpilot.features.home.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
@@ -30,7 +31,7 @@ fun NestedNavDisplay(
     logout: () -> Unit,
     openSessionDetails: (String) -> Unit,
     openSettings: () -> Unit,
-    openEditProfile: () -> Unit,
+    openEditProfile: (ProfileEditSection) -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)

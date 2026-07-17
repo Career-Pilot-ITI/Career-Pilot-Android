@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.profile.R
@@ -38,7 +39,7 @@ import com.iti.core.datastore.models.UserProfile
 @Composable
 fun ProfileRoot(
     openSettings: () -> Unit,
-    openEditProfile: () -> Unit,
+    openEditProfile: (ProfileEditSection) -> Unit,
     logout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -46,7 +47,7 @@ fun ProfileRoot(
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            ProfileEvent.NavigateToEditProfile -> openEditProfile()
+            is ProfileEvent.NavigateToEditProfile -> openEditProfile(event.section)
             ProfileEvent.NavigateToSettings -> openSettings()
             ProfileEvent.NavigateToLogout -> logout()
         }
@@ -87,7 +88,7 @@ fun ProfileScreen(
             item {
                 ProfileHeader(
                     profile = state.profile,
-                    onEditClick = { onAction(ProfileAction.OnEditProfileClick) }
+                    onEditPersonalInfoClick = { onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.PERSONAL)) }
                 )
             }
 
@@ -96,7 +97,10 @@ fun ProfileScreen(
             }
 
             item {
-                InfoCard(profile = state.profile)
+                InfoCard(
+                    profile = state.profile,
+                    onEditCareerClick = { onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.CAREER)) }
+                )
             }
 
             item {

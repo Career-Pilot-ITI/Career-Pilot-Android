@@ -38,7 +38,7 @@ class ProfileViewModel @Inject constructor(
 
     fun onAction(action: ProfileAction) {
         when (action) {
-            ProfileAction.OnEditProfileClick -> sendEvent(ProfileEvent.NavigateToEditProfile)
+            is ProfileAction.OnEditProfileClick -> sendEvent(ProfileEvent.NavigateToEditProfile(action.section))
             ProfileAction.OnSettingsClick -> sendEvent(ProfileEvent.NavigateToSettings)
 
             ProfileAction.OnLogoutClick -> _state.update { it.copy(showLogoutDialog = true) }

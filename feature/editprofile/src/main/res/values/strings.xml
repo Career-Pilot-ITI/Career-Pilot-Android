@@ -55,5 +55,9 @@
     <string name="saving">Saving...</string>
     <string name="save_changes">Save changes</string>
     <string name="email">Email</string>
+    <string name="upload_cv">Upload CV</string>
+    <string name="cv_uploaded">CV Uploaded</string>
+    <string name="change_cv">Change CV</string>
+    <string name="uploading_cv">Uploading CV... %1$d%%</string>
 
 </resources>
