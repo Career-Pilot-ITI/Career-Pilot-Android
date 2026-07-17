@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -28,36 +29,31 @@ import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
-import com.iti.common.snackbar.SnackbarController
-import com.iti.common.snackbar.model.CareerPilotSnackbarResult
-import com.iti.common.util.isDismissible
-import com.iti.common.util.toCareerPilotResult
-import com.iti.common.util.toMaterialDuration
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.CancellationException
 
 @Composable
-fun RootNavDisplay(
-    snackbarController: SnackbarController,
-) {
+fun RootNavDisplay() {
     val rootBackStack = rememberNavBackStack(Route.Login)
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val currentRootRoute = rootBackStack.lastOrNull()
 
-    LaunchedEffect(snackbarController, snackbarHostState) {
-        snackbarController.requests.collect { request ->
+    LaunchedEffect(snackbarHostState) {
+        CareerPilotSnackbarController.requests.collect { request ->
             try {
                 val event = request.event
                 val materialResult = snackbarHostState.showSnackbar(
                     message = event.message.asString(context),
-                    actionLabel = event.actionLabel?.asString(context),
-                    withDismissAction = event.type.isDismissible,
-                    duration = event.duration.toMaterialDuration(),
+                    withDismissAction = event.type == CareerPilotSnackbarType.DISMISSIBLE,
+                    duration = event.duration,
+                    actionLabel = event.actionLabel?.asString(context)
                 )
 
-                request.complete(materialResult.toCareerPilotResult())
+                request.complete(materialResult)
             } catch (cancellation: CancellationException) {
-                request.complete(CareerPilotSnackbarResult.DISMISSED)
+                request.complete(SnackbarResult.Dismissed)
                 throw cancellation
             }
         }
