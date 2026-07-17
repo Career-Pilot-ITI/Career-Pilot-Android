@@ -1,6 +1,8 @@
 package com.iti.careerpilot.editprofile.data.datasource.local
 
 import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
@@ -23,6 +25,7 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
 
     companion object {
         private const val AVATAR_DIR = "avatars"
+        private const val CV_DIR = "cvs"
     }
 
     override val userProfile: Flow<UserProfile> = dataStore.data
@@ -40,10 +43,14 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
     override suspend fun moveImageToInternalStorage(
         sourceFile: File
     ): String {
-        return moveImageToInternalStorage(sourceFile, AVATAR_DIR)
+        return moveFileToInternalStorage(sourceFile, AVATAR_DIR)
     }
 
-    suspend fun moveImageToInternalStorage(
+    override suspend fun moveCVToInternalStorage(sourceFile: File): String {
+        return moveFileToInternalStorage(sourceFile, CV_DIR)
+    }
+
+    suspend fun moveFileToInternalStorage(
         sourceFile: File,
         targetDir: String
     ): String {
@@ -59,5 +66,36 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
             }
             targetFile.toUri().toString()
         }
+    }
+
+    override suspend fun uriToCacheFile(uri: Uri): File? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+                val fileName = getFileName(uri) ?: "temp_file"
+                val file = File(context.cacheDir, fileName)
+                file.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+                file
+            } catch (e: Exception) {
+                Log.e(ERROR_TAG, "Failed to convert uri to file: ${e.localizedMessage}", e)
+                null
+            }
+        }
+    }
+
+    private fun getFileName(uri: Uri): String? {
+        var name: String? = null
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex != -1) {
+                    name = it.getString(nameIndex)
+                }
+            }
+        }
+        return name
     }
 }

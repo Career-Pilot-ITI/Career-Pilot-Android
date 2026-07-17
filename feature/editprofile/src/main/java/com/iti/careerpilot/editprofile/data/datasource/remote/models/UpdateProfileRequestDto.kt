@@ -18,7 +18,4 @@ data class UpdateProfileRequestDto(
     val targetCompanies: List<String>? = null,
     val educationLevel: String? = null,
     val timezone: String? = null,
-    val termsAccepted: Boolean? = null,
-    val subscriptionTier: String? = null,
-    val trackId: Int? = null
 )

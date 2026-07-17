@@ -51,13 +51,17 @@ class EditProfileViewModel @Inject constructor(
                     targetRole = profile.targetRole,
                     industry = profile.industry,
                     experienceLevel = profile.experienceLevel,
+                    trackName = profile.trackName,
                     currentJobTitle = profile.currentJobTitle,
-                    yearsOfExperience = if (profile.yearsOfExperience > 0) profile.yearsOfExperience.toString() else "",
+                    yearsOfExperience = profile.yearsOfExperience.toString(),
                     skills = profile.skills,
                     targetCompanies = profile.targetCompanies,
                     educationLevel = profile.educationLevel,
                     timezone = profile.timezone,
                     avatarUrl = profile.avatarUrl,
+                    avatarLocalUri = profile.avatarLocalUri,
+                    cvUrl = profile.cvUrl,
+                    cvFileName = profile.cvUrl.substringAfterLast("/"),
                     isLoading = false
                 )
             }
@@ -100,6 +104,9 @@ class EditProfileViewModel @Inject constructor(
             is EditProfileAction.OnExperienceLevelChange ->
                 _state.update { it.copy(experienceLevel = action.value) }
 
+            is EditProfileAction.OnTrackChange ->
+                _state.update { it.copy(trackName = action.value) }
+
             is EditProfileAction.OnCurrentJobTitleChange ->
                 _state.update { it.copy(currentJobTitle = action.value) }
 
@@ -126,10 +133,53 @@ class EditProfileViewModel @Inject constructor(
                             }
                         )
                             .onSuccess {
-                                _state.update { it.copy(isUploadingAvatar = false) }
+                                _state.update {
+                                    it.copy(
+                                        avatarLocalUri = uri.toString(),
+                                        isUploadingAvatar = false,
+                                        avatarUploadProgress = 0
+                                    )
+                                }
                             }
                             .onError {
-                                _state.update { it.copy(isUploadingAvatar = false) }
+                                _state.update {
+                                    it.copy(
+                                        isUploadingAvatar = false,
+                                        avatarUploadProgress = 0
+                                    )
+                                }
+                            }
+                    }
+                }
+            }
+
+            is EditProfileAction.OnCVUpload -> {
+                action.value?.let { uri ->
+                    _state.update { it.copy(isUploadingCV = true) }
+                    viewModelScope.launch {
+                        editProfileRepo.uploadCV(
+                            uri = uri,
+                            onProgress = { percent ->
+                                _state.update { it.copy(cvUploadProgress = percent) }
+                            }
+                        )
+                            .onSuccess { response ->
+                                _state.update {
+                                    it.copy(
+                                        isUploadingCV = false,
+                                        cvUrl = response.url,
+                                        cvFileName = response.originalName,
+                                        cvUploadProgress = 0
+                                    )
+                                }
+                            }
+                            .onError {
+                                _state.update {
+                                    it.copy(
+                                        isUploadingCV = false,
+                                        cvUploadProgress = 0
+                                    )
+                                }
                             }
                     }
                 }
@@ -176,41 +226,35 @@ class EditProfileViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _state.update { it.copy(isSaving = true, fieldErrors = emptyMap()) }
-            try {
-                val request = RequestProfileUpdate(
-                    username = current.username.takeIf { it != original.username },
-                    email = current.email.takeIf { it != original.email },
-                    displayName = current.displayName.takeIf { it != original.displayName },
-                    gender = current.gender.takeIf { it != original.gender },
-                    dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
-                    targetRole = current.targetRole.takeIf { it != original.targetRole },
-                    industry = current.industry.takeIf { it != original.industry },
-                    experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
-                    currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
-                    yearsOfExperience = current.yearsOfExperience.toIntOrNull()
-                        ?.takeIf { it != original.yearsOfExperience },
-                    skills = current.skills.takeIf { it != original.skills },
-                    targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
-                    educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
-                    timezone = current.timezone.takeIf { it != original.timezone }
-                )
+            _state.update { it.copy(isLoading = true, fieldErrors = emptyMap()) }
+            val request = RequestProfileUpdate(
+                username = current.username.takeIf { it != original.username },
+                email = current.email.takeIf { it != original.email },
+                displayName = current.displayName.takeIf { it != original.displayName },
+                gender = current.gender.takeIf { it != original.gender },
+                dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
+                targetRole = current.targetRole.takeIf { it != original.targetRole },
+                industry = current.industry.takeIf { it != original.industry },
+                experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
+                currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
+                yearsOfExperience = current.yearsOfExperience.toIntOrNull()
+                    ?.takeIf { it != original.yearsOfExperience },
+                skills = current.skills.takeIf { it != original.skills },
+                targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
+                educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
+                timezone = current.timezone.takeIf { it != original.timezone },
+            )
 
-                editProfileRepo.updateProfile(request)
-
-                _state.update { it.copy(isSaving = false) }
-                _events.send(EditProfileEvent.ShowSnackbar("Profile updated"))
-                _events.send(EditProfileEvent.NavigateBack)
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isSaving = false)
+            editProfileRepo.updateProfile(request)
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
+                    _events.send(EditProfileEvent.NavigateBack)
                 }
-                _events.send(
-                    EditProfileEvent.ShowSnackbar(
-                        e.message ?: "Couldn't update your profile. Try again."
-                    )
-                )
-            }
+                .onError {
+                    _state.update {
+                        it.copy(isLoading = false)
+                    }
+                }
         }
     }
 

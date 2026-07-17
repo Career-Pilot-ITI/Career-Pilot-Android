@@ -14,9 +14,14 @@ interface EditProfileRepo {
 
     suspend fun updateProfile(
         request: RequestProfileUpdate
-    )
+    ): CareerPilotResult<Unit, NetworkError>
 
     suspend fun uploadImage(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<FileUploadResponse, NetworkError>
+
+    suspend fun uploadCV(
         uri: Uri,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError>

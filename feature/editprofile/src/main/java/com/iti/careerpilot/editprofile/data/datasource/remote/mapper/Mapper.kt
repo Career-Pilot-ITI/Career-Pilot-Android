@@ -53,8 +53,5 @@ fun RequestProfileUpdate.toDto(): UpdateProfileRequestDto {
         targetCompanies = targetCompanies,
         educationLevel = educationLevel,
         timezone = timezone,
-        termsAccepted = termsAccepted,
-        subscriptionTier = subscriptionTier,
-        trackId = trackId
     )
 }

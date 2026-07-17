@@ -12,11 +12,13 @@ sealed interface EditProfileAction {
     data class OnTargetRoleChange(val value: String) : EditProfileAction
     data class OnIndustryChange(val value: String) : EditProfileAction
     data class OnExperienceLevelChange(val value: String) : EditProfileAction
+    data class OnTrackChange(val value: String) : EditProfileAction
     data class OnCurrentJobTitleChange(val value: String) : EditProfileAction
     data class OnYearsOfExperienceChange(val value: String) : EditProfileAction
     data class OnEducationLevelChange(val value: String) : EditProfileAction
     data class OnTimezoneChange(val value: String) : EditProfileAction
     data class OnAvatarChange(val value: Uri?) : EditProfileAction
+    data class OnCVUpload(val value: Uri?) : EditProfileAction
 
     data class OnSkillAdd(val skill: String) : EditProfileAction
     data class OnSkillRemove(val skill: String) : EditProfileAction

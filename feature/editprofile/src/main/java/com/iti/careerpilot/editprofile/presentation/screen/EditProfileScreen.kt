@@ -102,16 +102,14 @@ fun EditProfileScreen(
             SnackbarHost(snackbarHostState) { data -> Snackbar(snackbarData = data) }
         },
         bottomBar = {
-            if (!state.isLoading) {
-                SaveBar(
-                    isSaving = state.isSaving,
-                    onSave = { onAction(EditProfileAction.OnSaveClick) },
-                    onCancel = onBack,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
-                )
-            }
+            SaveBar(
+                isSaving = state.isLoading,
+                onSave = { onAction(EditProfileAction.OnSaveClick) },
+                onCancel = onBack,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            )
         }
     ) { innerPadding ->
         LazyColumn(

@@ -13,4 +13,10 @@ interface EditProfileLocalDataSource {
     suspend fun moveImageToInternalStorage(
         sourceFile: File
     ): String
+
+    suspend fun uriToCacheFile(uri: android.net.Uri): File?
+
+    suspend fun moveCVToInternalStorage(
+        sourceFile: File
+    ): String
 }

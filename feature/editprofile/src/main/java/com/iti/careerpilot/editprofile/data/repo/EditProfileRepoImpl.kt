@@ -12,6 +12,7 @@ import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.mapToEmptyResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
@@ -28,8 +29,8 @@ class EditProfileRepoImpl @Inject constructor(
 
     override suspend fun updateProfile(
         request: RequestProfileUpdate
-    ) {
-        remoteDataSource.updateProfile(request.toDto())
+    ): CareerPilotResult<Unit, NetworkError> {
+        return remoteDataSource.updateProfile(request.toDto())
             .onSuccess { dto ->
                 dto.profile?.toDomain(
                     dto.id,
@@ -40,6 +41,7 @@ class EditProfileRepoImpl @Inject constructor(
                     }
                 }
             }
+            .mapToEmptyResult()
             .onError {
                 Log.e("CareerPilot: updateProfile", "updateProfile: ${it.name}")
             }
@@ -59,6 +61,24 @@ class EditProfileRepoImpl @Inject constructor(
                             avatarUrl = response.url,
                             avatarLocalUri = localImageUri,
                             avatarSizeBytes = response.sizeBytes
+                        )
+                    }
+                }
+        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+
+    override suspend fun uploadCV(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<FileUploadResponse, NetworkError> {
+        val file = localDataSource.uriToCacheFile(uri)
+        return file?.let {
+            remoteDataSource.uploadCV(file, onProgress)
+                .onSuccess { response ->
+                    localDataSource.moveCVToInternalStorage(file)
+                    localDataSource.updateUserProfile {
+                        it.copy(
+                            cvUrl = response.url
                         )
                     }
                 }

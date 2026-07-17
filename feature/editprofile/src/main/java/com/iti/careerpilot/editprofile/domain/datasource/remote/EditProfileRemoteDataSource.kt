@@ -18,4 +18,9 @@ interface EditProfileRemoteDataSource {
         file: File,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError>
+
+    suspend fun uploadCV(
+        file: File,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<FileUploadResponse, NetworkError>
 }

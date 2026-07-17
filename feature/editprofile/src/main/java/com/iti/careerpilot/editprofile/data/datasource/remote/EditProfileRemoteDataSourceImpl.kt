@@ -16,8 +16,11 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.headers
 import java.io.File
 import javax.inject.Inject
+
+private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsInN1YiI6InVzZXJfMTAxMDEwIiwiaWF0IjoxNzg0MzA2MDA5LCJleHAiOjE3ODQzMDk2MDl9.kKeWs2CH8hqPkcseHTKix2Swn23kTPG9k0_RkGzlR30"
 
 class EditProfileRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient
@@ -28,6 +31,12 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<UpdateProfileResponseDto, NetworkError> {
         return safeApiCall<UpdateProfileResponseDto> {
             httpClient.patch("${BuildConfig.BASE_URL}api/v1/auth/profile") {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer $testToken"
+                    )
+                }
                 setBody(request)
             }
         }
@@ -51,6 +60,47 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     append("type", "AVATAR")
                 }
             ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer $testToken"
+                    )
+                }
+                onUpload { bytesSentTotal, contentLength ->
+                    if (contentLength != null && contentLength > 0) {
+                        val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)
+                        onProgress(percent)
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun uploadCV(
+        file: File,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<FileUploadResponse, NetworkError> {
+        return safeApiCall<FileUploadResponse> {
+            httpClient.submitFormWithBinaryData(
+                url = "${BuildConfig.BASE_URL}api/v1/files/upload",
+                formData = formData {
+                    append(
+                        key = "file",
+                        value = file.readBytes(),
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, "application/pdf")
+                            append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+                        }
+                    )
+                    append("type", "RESUME")
+                }
+            ) {
+                headers {
+                    append(
+                        HttpHeaders.Authorization,
+                        "Bearer $testToken"
+                    )
+                }
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)
