@@ -41,6 +41,7 @@ import com.iti.onboarding.presentation.screen.track.viewmodel.ChoosingTracksView
 
 @Composable
 fun ChoosingTracksScreen(
+    onNavigateToNext: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChoosingTracksViewModel = hiltViewModel(),
 ) {
@@ -51,8 +52,8 @@ fun ChoosingTracksScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effects.collect { effects ->
                 when (effects) {
-                    is ChoosingTracksEffects.ShowError -> TODO()
-                    ChoosingTracksEffects.NavigateNext -> TODO()
+                    is ChoosingTracksEffects.ShowError -> TODO("Show error using snackbar")
+                    ChoosingTracksEffects.NavigateNext -> onNavigateToNext()
                 }
             }
         }

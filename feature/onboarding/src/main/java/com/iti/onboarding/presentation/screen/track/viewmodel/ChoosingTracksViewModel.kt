@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
+import com.iti.common.util.UIText
 import com.iti.onboarding.domain.usecase.GetTracksUseCase
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -40,7 +40,14 @@ class ChoosingTracksViewModel @Inject constructor(
             getTracksUseCase().onSuccess { tracks ->
                 _state.update { it.copy(tracks = tracks, isLoading = false) }
             }.onError { error ->
-                _state.update { it.copy(isLoading = false, error = error.toString()) }
+                // TODO: Mapping error to UiText or show error screen
+                _effects.emit(
+                    ChoosingTracksEffects.ShowError(
+                        UIText.StringResource(
+                            com.iti.common.R.string.error_unknown
+                        )
+                    )
+                )
             }
         }
     }
