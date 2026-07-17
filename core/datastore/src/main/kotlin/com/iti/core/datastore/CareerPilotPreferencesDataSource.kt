@@ -11,7 +11,21 @@ class CareerPilotPreferencesDataSource @Inject constructor(
     val hasCompletedOnboarding: Flow<Boolean> =
         userPreferences.data.map { it.hasCompletedOnboarding }
 
+    val token: Flow<String?> = 
+        userPreferences.data.map { it.token }
+
+    val avatarUrl: Flow<String?> =
+        userPreferences.data.map { it.avatarUrl }
+
     suspend fun setHasCompletedOnboarding(completed: Boolean) {
         userPreferences.updateData { it.copy(hasCompletedOnboarding = completed) }
+    }
+
+    suspend fun setToken(token: String?) {
+        userPreferences.updateData { it.copy(token = token) }
+    }
+
+    suspend fun setAvatarUrl(avatarUrl: String?) {
+        userPreferences.updateData { it.copy(avatarUrl = avatarUrl) }
     }
 }
