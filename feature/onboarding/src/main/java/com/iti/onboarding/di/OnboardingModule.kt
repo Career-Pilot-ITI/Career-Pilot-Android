@@ -6,35 +6,31 @@ import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSource
 import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSourceImpl
 import com.iti.onboarding.data.repository.OnboardingRepositoryImpl
 import com.iti.onboarding.domain.repository.OnboardingRepository
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object TracksDataDIModule {
+abstract class OnboardingModule {
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideRemoteDataSource(): OnboardingRemoteDataSource =
-        OnboardingRemoteDataSourceImpl()
+    abstract fun bindOnboardingRemoteDataSource(
+        impl: OnboardingRemoteDataSourceImpl,
+    ): OnboardingRemoteDataSource
 
-    @Provides
+    @Binds
     @Singleton
-    fun provideLocalDataSource(): OnboardingLocalDataSource =
-        OnboardingLocalDataSourceImpl()
+    abstract fun bindOnboardingRepository(
+        impl: OnboardingRepositoryImpl,
+    ): OnboardingRepository
 
-    @Provides
+    @Binds
     @Singleton
-    fun bindsRepository(
-        local: OnboardingLocalDataSource,
-        remote: OnboardingRemoteDataSource,
-    ): OnboardingRepository {
-        return OnboardingRepositoryImpl(
-            remote,
-            local
-        )
-    }
+    abstract fun bindOnboardingLocalDataSource(
+        impl: OnboardingLocalDataSourceImpl,
+    ): OnboardingLocalDataSource
 }

@@ -9,4 +9,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.compose.googlefonts)
+    api(libs.androidx.compose.material3)
+    api(libs.androidx.material3.android)
+    api(libs.coil.compose)
+    api(libs.extended.icons)
 }

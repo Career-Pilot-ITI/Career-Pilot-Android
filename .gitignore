@@ -14,3 +14,10 @@
 .cxx
 local.properties
 .idea
+
+# AI Agent and Scratch files
+/.agents/
+diff.txt
+log.txt
+skills-lock.json
+test_epoch.kts
