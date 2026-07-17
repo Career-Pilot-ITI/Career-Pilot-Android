@@ -1,5 +1,6 @@
 package com.iti.onboarding.data.repository
 
+import android.util.Log
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserResponseDto
 import com.iti.common.dispatcher.CareerPilotDispatchers.IO
@@ -75,9 +76,12 @@ class OnboardingRepositoryImpl @Inject constructor(
         document: PdfFile,
         onProgress: (Float) -> Unit,
     ): CareerPilotResult<Unit, NetworkError> {
-        return remoteDataSource.uploadCv(
+        val response = remoteDataSource.uploadCv(
             document = document,
             onProgress = onProgress,
         )
+
+        Log.d("TAG", response.toString())
+        return CareerPilotResult.Success(Unit)
     }
 }

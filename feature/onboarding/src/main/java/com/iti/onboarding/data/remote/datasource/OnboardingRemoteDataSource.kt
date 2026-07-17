@@ -17,5 +17,5 @@ interface OnboardingRemoteDataSource {
     suspend fun uploadCv(
         document: PdfFile,
         onProgress: (Float) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError>
+    ): UploadFileResponseDto
 }

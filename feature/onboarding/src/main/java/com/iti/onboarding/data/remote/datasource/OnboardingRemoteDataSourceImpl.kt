@@ -1,9 +1,14 @@
 package com.iti.onboarding.data.remote.datasource
 
-import com.iti.onboarding.data.dto.UploadFileResponseDto
+import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserResponseDto
+import com.iti.common.result.CareerPilotResult
+import com.iti.core.model.PdfFile
+import com.iti.onboarding.data.dto.UploadFileResponseDto
+import com.iti.onboarding.domain.error.TracksScreenError
 import com.iti.onboarding.domain.model.FileUploadData
+import com.iti.onboarding.domain.model.Track
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
@@ -14,14 +19,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import javax.inject.Inject
-import com.iti.careerpilot.core.network.Endpoints
-import com.iti.common.error.NetworkError
-import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.PdfFile
-import com.iti.onboarding.domain.error.TracksScreenError
-import com.iti.onboarding.domain.model.Track
+import io.ktor.http.headers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class OnboardingRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient,
@@ -59,26 +62,39 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
     override suspend fun uploadCv(
         document: PdfFile,
         onProgress: (Float) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError> {
-        /*
-         * TODO: Inject the onboarding API service and replace this placeholder.
-         *
-         * The contract is already ready for a binary/multipart request. With
-         * Ktor, forward HttpRequestBuilder.onUpload progress to onProgress.
-         */
-        val totalBytes = document.bytes.size.coerceAtLeast(1)
-        var uploadedBytes = 0
+    ): UploadFileResponseDto {
+        return coroutineScope {
+            launch {
+                val totalBytes = document.bytes.size.coerceAtLeast(1)
+                var uploadedBytes = 0
 
-        while (uploadedBytes < totalBytes) {
-            delay(UPLOAD_PROGRESS_DELAY_MS)
-            uploadedBytes = minOf(
-                uploadedBytes + UPLOAD_CHUNK_SIZE_BYTES,
-                totalBytes,
-            )
-            onProgress(uploadedBytes.toFloat() / totalBytes.toFloat())
+                while (uploadedBytes < totalBytes) {
+                    delay(UPLOAD_PROGRESS_DELAY_MS)
+                    uploadedBytes = minOf(
+                        uploadedBytes + UPLOAD_CHUNK_SIZE_BYTES,
+                        totalBytes,
+                    )
+                    onProgress(uploadedBytes.toFloat() / totalBytes.toFloat())
+                }
+            }
+
+            async<UploadFileResponseDto> {
+                return@async httpClient.submitFormWithBinaryData(
+                    url = Endpoints.UPLOAD_FILE,
+                    formData = formData {
+                        append("type", "cvs")
+                        append(
+                            "file",
+                            document.bytes,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, document.mimeType)
+                                append(HttpHeaders.ContentDisposition, "filename=\"${document.name}\"")
+                            }
+                        )
+                    }
+                ).body()
+            }.await()
         }
-
-        return CareerPilotResult.Success(Unit)
     }
 
     private companion object {
