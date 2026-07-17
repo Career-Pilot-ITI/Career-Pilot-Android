@@ -20,8 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.iti.careerpilot.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
+import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.profile.R
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent

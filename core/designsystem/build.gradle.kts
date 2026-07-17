@@ -25,4 +25,5 @@ dependencies {
     implementation(libs.androidx.compose.googlefonts)
     implementation(libs.androidx.core.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
 }
