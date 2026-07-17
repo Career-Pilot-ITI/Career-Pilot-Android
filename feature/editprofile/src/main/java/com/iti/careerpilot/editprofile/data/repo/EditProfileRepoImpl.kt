@@ -36,8 +36,13 @@ class EditProfileRepoImpl @Inject constructor(
                     dto.id,
                     dto.phoneNumber
                 )?.let { newProfile ->
-                    localDataSource.updateUserProfile {
-                        newProfile
+                    localDataSource.updateUserProfile { current ->
+                        newProfile.copy(
+                            avatarLocalUri = current.avatarLocalUri,
+                            avatarSizeBytes = current.avatarSizeBytes,
+                            cvFileName = current.cvFileName,
+                            cvSizeBytes = current.cvSizeBytes
+                        )
                     }
                 }
             }
@@ -78,7 +83,9 @@ class EditProfileRepoImpl @Inject constructor(
                     localDataSource.moveCVToInternalStorage(file)
                     localDataSource.updateUserProfile {
                         it.copy(
-                            cvUrl = response.url
+                            cvUrl = response.url,
+                            cvFileName = response.originalName,
+                            cvSizeBytes = response.sizeBytes
                         )
                     }
                 }

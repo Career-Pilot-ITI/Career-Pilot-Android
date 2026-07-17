@@ -61,7 +61,8 @@ class EditProfileViewModel @Inject constructor(
                     avatarUrl = profile.avatarUrl,
                     avatarLocalUri = profile.avatarLocalUri,
                     cvUrl = profile.cvUrl,
-                    cvFileName = profile.cvUrl.substringAfterLast("/"),
+                    cvFileName = profile.cvFileName,
+                    cvFileSize = if (profile.cvSizeBytes > 0) "${profile.cvSizeBytes / 1024} KB" else "",
                     isLoading = false
                 )
             }

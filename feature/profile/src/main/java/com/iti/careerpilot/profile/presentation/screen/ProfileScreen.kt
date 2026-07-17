@@ -25,6 +25,7 @@ import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.profile.R
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent
+import com.iti.careerpilot.profile.presentation.screen.components.CVCard
 import com.iti.careerpilot.profile.presentation.screen.components.InfoCard
 import com.iti.careerpilot.profile.presentation.screen.components.LogoutDialog
 import com.iti.careerpilot.profile.presentation.screen.components.MenuSection
@@ -96,6 +97,13 @@ fun ProfileScreen(
 
             item {
                 InfoCard(profile = state.profile)
+            }
+
+            item {
+                CVCard(
+                    fileName = state.profile.cvFileName,
+                    fileSize = if (state.profile.cvSizeBytes > 0) "${state.profile.cvSizeBytes / 1024} KB" else ""
+                )
             }
 
             item {

@@ -20,6 +20,8 @@ data class UserProfile(
     val currentJobTitle: String = "",
     val yearsOfExperience: Int = 0,
     val cvUrl: String = "",
+    val cvFileName: String = "",
+    val cvSizeBytes: Long = 0,
     val skills: List<String> = emptyList(),
     val targetCompanies: List<String> = emptyList(),
     val educationLevel: String = "",
