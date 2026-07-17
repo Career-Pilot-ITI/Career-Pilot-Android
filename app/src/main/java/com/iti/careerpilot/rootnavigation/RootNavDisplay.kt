@@ -126,9 +126,6 @@ fun RootNavDisplay() {
             entry<Route.Paywall> {
                 PaywallRoot()
             }
-            entry<Route.Onboarding> {
-                ChoosingTracksScreen()
-            }
         }
     )
 }
