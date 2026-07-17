@@ -2,10 +2,10 @@ package com.iti.onboarding.presentation.screen.cv.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.common.media.pdfpicker.PdfReader
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
-import com.iti.onboarding.domain.model.CvDocument
-import com.iti.onboarding.domain.usecase.PrepareCvUseCase
+import com.iti.core.model.PdfFile
 import com.iti.onboarding.domain.usecase.UploadCvUseCase
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
-    private val prepareCv: PrepareCvUseCase,
     private val uploadCv: UploadCvUseCase,
+    private val pdfReader: PdfReader
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UploadCvUiState())
@@ -60,7 +60,7 @@ class UploadCvViewModel @Inject constructor(
                 stage = CvUploadStage.PREPARING,
             )
 
-            when (val result = prepareCv(uri)) {
+            when (val result = pdfReader.readPdf(uri)) {
                 is CareerPilotResult.Error -> {
                     _state.value = UploadCvUiState()
 
@@ -89,7 +89,7 @@ class UploadCvViewModel @Inject constructor(
         }
     }
 
-    private suspend fun uploadSelectedDocument(document: CvDocument) {
+    private suspend fun uploadSelectedDocument(document: PdfFile) {
         _state.update {
             it.copy(
                 stage = CvUploadStage.UPLOADING,

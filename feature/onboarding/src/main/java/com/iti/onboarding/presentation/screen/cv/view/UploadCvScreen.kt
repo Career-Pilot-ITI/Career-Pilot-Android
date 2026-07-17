@@ -1,8 +1,5 @@
 package com.iti.onboarding.presentation.screen.cv.view
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -33,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.iti.common.media.pdfpicker.rememberPdfPickerLauncher
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
@@ -43,7 +40,6 @@ import com.iti.onboarding.presentation.screen.cv.view.components.UploadCvHeader
 import com.iti.onboarding.presentation.screen.cv.viewmodel.UploadCvViewModel
 import com.iti.onboarding.presentation.screen.track.view.components.ActionButton
 
-private const val PDF_MIME_TYPE = "application/pdf"
 
 @Composable
 fun UploadCvScreen(
@@ -54,31 +50,19 @@ fun UploadCvScreen(
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalContext.current
 
-    val pdfPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-
-        runCatching {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            )
+    val pdfPicker = rememberPdfPickerLauncher(
+        onPdfSelected = { uri ->
+            viewModel.onIntent(UploadCvIntent.OnPdfSelected(uri.toString()))
         }
-
-        viewModel.onIntent(
-            UploadCvIntent.OnPdfSelected(uri.toString())
-        )
-    }
+    )
 
     LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effects.collect { effect ->
                 when (effect) {
                     UploadCvEffect.OpenPdfPicker -> {
-                        pdfPicker.launch(arrayOf(PDF_MIME_TYPE))
+                        pdfPicker.launchPdfPicker()
                     }
 
                     UploadCvEffect.NavigateNext -> onNavigateToNext()
