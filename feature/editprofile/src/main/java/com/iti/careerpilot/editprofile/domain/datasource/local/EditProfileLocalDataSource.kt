@@ -2,6 +2,7 @@ package com.iti.careerpilot.editprofile.domain.datasource.local
 
 import com.iti.core.datastore.models.UserProfile
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 interface EditProfileLocalDataSource {
 
@@ -9,4 +10,7 @@ interface EditProfileLocalDataSource {
 
     suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile)
 
+    suspend fun moveImageToInternalStorage(
+        sourceFile: File
+    ): String
 }

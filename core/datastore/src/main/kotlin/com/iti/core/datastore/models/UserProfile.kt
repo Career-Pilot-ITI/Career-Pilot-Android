@@ -10,6 +10,8 @@ data class UserProfile(
     val username: String = "",
     val email: String = "",
     val avatarUrl: String = "",
+    val avatarLocalUri: String = "",
+    val avatarSizeBytes: Long = 0,
     val gender: String = "",
     val dateOfBirth: String = "",
     val targetRole: String = "",

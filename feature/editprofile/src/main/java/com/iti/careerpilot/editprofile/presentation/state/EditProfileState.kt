@@ -21,6 +21,8 @@ data class EditProfileState(
     val avatarUrl: String = "",
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
+    val isUploadingAvatar: Boolean = false,
+    val avatarUploadProgress: Int = 0,
     val fieldErrors: Map<String, String> = emptyMap()
 )
 

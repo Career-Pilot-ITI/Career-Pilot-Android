@@ -1,12 +1,17 @@
 package com.iti.careerpilot.editprofile.data.repo
 
+import android.net.Uri
 import android.util.Log
 import com.iti.careerpilot.editprofile.data.datasource.remote.mapper.toDomain
 import com.iti.careerpilot.editprofile.data.datasource.remote.mapper.toDto
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
 import com.iti.careerpilot.editprofile.domain.datasource.local.EditProfileLocalDataSource
+import com.iti.careerpilot.editprofile.domain.datasource.local.ImageCompressor
 import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
+import com.iti.common.error.NetworkError
+import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
@@ -16,7 +21,8 @@ import javax.inject.Inject
 class EditProfileRepoImpl @Inject constructor(
     private val localDataSource: EditProfileLocalDataSource,
     private val remoteDataSource: EditProfileRemoteDataSource,
-): EditProfileRepo {
+    private val imageCompressor: ImageCompressor
+) : EditProfileRepo {
 
     override val userProfile: Flow<UserProfile> = localDataSource.userProfile
 
@@ -35,7 +41,28 @@ class EditProfileRepoImpl @Inject constructor(
                 }
             }
             .onError {
-                Log.e("CareerPilot: updateProfile", "updateProfile: ${it.name}", )
+                Log.e("CareerPilot: updateProfile", "updateProfile: ${it.name}")
             }
     }
+
+    override suspend fun uploadImage(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<FileUploadResponse, NetworkError> {
+        val file = imageCompressor.compressToFile(uri)
+        return file?.let {
+            remoteDataSource.uploadImage(file, onProgress)
+                .onSuccess { response ->
+                    val localImageUri = localDataSource.moveImageToInternalStorage(file)
+                    localDataSource.updateUserProfile {
+                        it.copy(
+                            avatarUrl = response.url,
+                            avatarLocalUri = localImageUri,
+                            avatarSizeBytes = response.sizeBytes
+                        )
+                    }
+                }
+        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+
 }

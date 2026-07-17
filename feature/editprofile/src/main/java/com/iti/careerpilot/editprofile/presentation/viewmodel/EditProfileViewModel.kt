@@ -7,6 +7,8 @@ import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import com.iti.careerpilot.editprofile.presentation.action.EditProfileAction
 import com.iti.careerpilot.editprofile.presentation.event.EditProfileEvent
 import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,14 +22,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
-    private val editProfileRepo: EditProfileRepo
+    private val editProfileRepo: EditProfileRepo,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        EditProfileState(
-            isLoading = true
-        )
-    )
+    private val _state = MutableStateFlow(EditProfileState())
     val state = _state.asStateFlow()
 
     private val _events = Channel<EditProfileEvent>(Channel.BUFFERED)
@@ -72,10 +70,20 @@ class EditProfileViewModel @Inject constructor(
                 _state.update { it.copy(displayName = action.value) }
 
             is EditProfileAction.OnUsernameChange ->
-                _state.update { it.copy(username = action.value, fieldErrors = it.fieldErrors - "username") }
+                _state.update {
+                    it.copy(
+                        username = action.value,
+                        fieldErrors = it.fieldErrors - "username"
+                    )
+                }
 
             is EditProfileAction.OnEmailChange ->
-                _state.update { it.copy(email = action.value, fieldErrors = it.fieldErrors - "email") }
+                _state.update {
+                    it.copy(
+                        email = action.value,
+                        fieldErrors = it.fieldErrors - "email"
+                    )
+                }
 
             is EditProfileAction.OnGenderChange ->
                 _state.update { it.copy(gender = action.value) }
@@ -108,7 +116,23 @@ class EditProfileViewModel @Inject constructor(
                 _state.update { it.copy(timezone = action.value) }
 
             is EditProfileAction.OnAvatarChange -> {
-                //todo
+                action.value?.let { uri ->
+                    _state.update { it.copy(isUploadingAvatar = true) }
+                    viewModelScope.launch {
+                        editProfileRepo.uploadImage(
+                            uri = uri,
+                            onProgress = { percent ->
+                                _state.update { it.copy(avatarUploadProgress = percent) }
+                            }
+                        )
+                            .onSuccess {
+                                _state.update { it.copy(isUploadingAvatar = false) }
+                            }
+                            .onError {
+                                _state.update { it.copy(isUploadingAvatar = false) }
+                            }
+                    }
+                }
             }
 
             is EditProfileAction.OnSkillAdd -> {
@@ -143,7 +167,8 @@ class EditProfileViewModel @Inject constructor(
 
         val errors = mutableMapOf<String, String>()
         if (current.username.isBlank()) errors["username"] = "Username can't be empty"
-        if (current.email.isNotBlank() && !current.email.contains("@")) errors["email"] = "Enter a valid email"
+        if (current.email.isNotBlank() && !current.email.contains("@")) errors["email"] =
+            "Enter a valid email"
 
         if (errors.isNotEmpty()) {
             _state.update { it.copy(fieldErrors = errors) }
@@ -180,7 +205,11 @@ class EditProfileViewModel @Inject constructor(
                 _state.update {
                     it.copy(isSaving = false)
                 }
-                _events.send(EditProfileEvent.ShowSnackbar(e.message ?: "Couldn't update your profile. Try again."))
+                _events.send(
+                    EditProfileEvent.ShowSnackbar(
+                        e.message ?: "Couldn't update your profile. Try again."
+                    )
+                )
             }
         }
     }
