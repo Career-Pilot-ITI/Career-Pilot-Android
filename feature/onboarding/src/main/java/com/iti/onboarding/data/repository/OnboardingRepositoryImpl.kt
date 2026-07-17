@@ -6,6 +6,7 @@ import com.iti.common.dispatcher.CareerPilotDispatchers.IO
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.core.model.PdfFile
 import com.iti.onboarding.data.mapper.toDomain
 import com.iti.onboarding.domain.model.UploadedFile
 import com.iti.onboarding.domain.model.FileUploadData
@@ -68,5 +69,15 @@ class OnboardingRepositoryImpl @Inject constructor(
 
     override suspend fun getTracks(): CareerPilotResult<List<Track>, TracksScreenError> {
         return remoteDataSource.getTracks()
+    }
+
+    override suspend fun uploadCv(
+        document: PdfFile,
+        onProgress: (Float) -> Unit,
+    ): CareerPilotResult<Unit, NetworkError> {
+        return remoteDataSource.uploadCv(
+            document = document,
+            onProgress = onProgress,
+        )
     }
 }

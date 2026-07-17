@@ -16,9 +16,12 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import javax.inject.Inject
 import com.iti.careerpilot.core.network.Endpoints
+import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.core.model.PdfFile
 import com.iti.onboarding.domain.error.TracksScreenError
 import com.iti.onboarding.domain.model.Track
+import kotlinx.coroutines.delay
 
 class OnboardingRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient,
@@ -51,5 +54,35 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun getTracks(): CareerPilotResult<List<Track>, TracksScreenError> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun uploadCv(
+        document: PdfFile,
+        onProgress: (Float) -> Unit,
+    ): CareerPilotResult<Unit, NetworkError> {
+        /*
+         * TODO: Inject the onboarding API service and replace this placeholder.
+         *
+         * The contract is already ready for a binary/multipart request. With
+         * Ktor, forward HttpRequestBuilder.onUpload progress to onProgress.
+         */
+        val totalBytes = document.bytes.size.coerceAtLeast(1)
+        var uploadedBytes = 0
+
+        while (uploadedBytes < totalBytes) {
+            delay(UPLOAD_PROGRESS_DELAY_MS)
+            uploadedBytes = minOf(
+                uploadedBytes + UPLOAD_CHUNK_SIZE_BYTES,
+                totalBytes,
+            )
+            onProgress(uploadedBytes.toFloat() / totalBytes.toFloat())
+        }
+
+        return CareerPilotResult.Success(Unit)
+    }
+
+    private companion object {
+        const val UPLOAD_CHUNK_SIZE_BYTES = 256 * 1024
+        const val UPLOAD_PROGRESS_DELAY_MS = 40L
     }
 }
