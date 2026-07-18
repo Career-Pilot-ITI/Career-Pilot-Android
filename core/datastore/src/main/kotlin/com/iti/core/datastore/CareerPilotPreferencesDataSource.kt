@@ -17,6 +17,9 @@ class CareerPilotPreferencesDataSource @Inject constructor(
     val avatarUrl: Flow<String?> =
         userPreferences.data.map { it.avatarUrl }
 
+    val pdfUrl: Flow<String?> =
+        userPreferences.data.map { it.pdfUrl }
+
     suspend fun setHasCompletedOnboarding(completed: Boolean) {
         userPreferences.updateData { it.copy(hasCompletedOnboarding = completed) }
     }
@@ -27,5 +30,9 @@ class CareerPilotPreferencesDataSource @Inject constructor(
 
     suspend fun setAvatarUrl(avatarUrl: String?) {
         userPreferences.updateData { it.copy(avatarUrl = avatarUrl) }
+    }
+
+    suspend fun savePdfUrl(url: String) {
+        userPreferences.updateData { it.copy(pdfUrl = url) }
     }
 }
