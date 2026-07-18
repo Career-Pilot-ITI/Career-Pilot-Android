@@ -52,14 +52,7 @@ fun LabeledDropdownField(
                     contentDescription = null
                 )
             },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedIndicatorColor = CareerPilotPalette.amber,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                cursorColor = CareerPilotPalette.amber,
-                focusedLabelColor = CareerPilotPalette.amber
-            ),
+            colors = fieldColors,
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)

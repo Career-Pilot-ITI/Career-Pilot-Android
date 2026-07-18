@@ -1,13 +1,18 @@
 package com.iti.careerpilot.editprofile.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -110,252 +115,255 @@ fun EditProfileScreen(
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data -> Snackbar(snackbarData = data) }
         },
-        bottomBar = {
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding()
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+
+                if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
+                    item {
+                        EditProfileHeader(
+                            displayName = state.displayName,
+                            username = state.username,
+                            avatarUri = state.avatarUrl,
+                            onAvatarChange = { uri ->
+                                onAction(
+                                    EditProfileAction.OnAvatarChange(
+                                        uri
+                                    )
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        FormSection(
+                            title = stringResource(R.string.basic_info),
+                            icon = ImageVector.vectorResource(R.drawable.ic_account)
+                        ) {
+                            LabeledTextField(
+                                label = stringResource(R.string.display_name),
+                                value = state.displayName,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnDisplayNameChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledTextField(
+                                label = stringResource(R.string.email),
+                                value = state.email,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnEmailChange(
+                                            it
+                                        )
+                                    )
+                                },
+                                keyboardType = KeyboardType.Email,
+                                errorText = state.fieldErrors["email"]
+                            )
+                            LabeledDropdownField(
+                                label = stringResource(R.string.gender),
+                                value = state.gender,
+                                options = Gender.entries.map {
+                                    stringResource(
+                                        it.labelRes
+                                    )
+                                },
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnGenderChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledTextField(
+                                label = stringResource(R.string.date_of_birth),
+                                value = state.dateOfBirth,
+                                placeholder = stringResource(R.string.yyyy_mm_dd),
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnDateOfBirthChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (section == ProfileEditSection.ALL || section == ProfileEditSection.CAREER) {
+                    item {
+                        FormSection(
+                            title = stringResource(R.string.career),
+                            icon = ImageVector.vectorResource(R.drawable.ic_work)
+                        ) {
+                            LabeledTextField(
+                                label = stringResource(R.string.target_role),
+                                value = state.targetRole,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnTargetRoleChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledTextField(
+                                label = stringResource(R.string.industry),
+                                value = state.industry,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnIndustryChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledDropdownField(
+                                label = stringResource(R.string.experience_level),
+                                value = state.experienceLevel,
+                                options = ExperienceLevel.entries.map {
+                                    stringResource(
+                                        it.labelRes
+                                    )
+                                },
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnExperienceLevelChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledTextField(
+                                label = stringResource(R.string.current_job_title),
+                                value = state.currentJobTitle,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnCurrentJobTitleChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                            LabeledTextField(
+                                label = stringResource(R.string.years_of_experience),
+                                value = state.yearsOfExperience,
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnYearsOfExperienceChange(
+                                            it
+                                        )
+                                    )
+                                },
+                                keyboardType = KeyboardType.Number
+                            )
+                            LabeledDropdownField(
+                                label = stringResource(R.string.education_level),
+                                value = state.educationLevel,
+                                options = EducationLevel.entries.map {
+                                    stringResource(
+                                        it.labelRes
+                                    )
+                                },
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnEducationLevelChange(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+
+                            CVUploadField(
+                                fileName = state.cvFileName,
+                                isUploading = state.isUploadingCV,
+                                uploadProgress = state.cvUploadProgress,
+                                onCVSelected = { uri ->
+                                    onAction(EditProfileAction.OnCVUpload(uri))
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        FormSection(
+                            title = stringResource(R.string.skills),
+                            icon = ImageVector.vectorResource(R.drawable.ic_star)
+                        ) {
+                            ChipInputField(
+                                chips = state.skills,
+                                placeholder = stringResource(R.string.add_a_skill_and_press_enter),
+                                onAdd = {
+                                    onAction(
+                                        EditProfileAction.OnSkillAdd(
+                                            it
+                                        )
+                                    )
+                                },
+                                onRemove = {
+                                    onAction(
+                                        EditProfileAction.OnSkillRemove(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        FormSection(
+                            title = stringResource(R.string.target_companies),
+                            icon = ImageVector.vectorResource(R.drawable.ic_business)
+                        ) {
+                            ChipInputField(
+                                chips = state.targetCompanies,
+                                placeholder = stringResource(R.string.add_a_company_and_press_enter),
+                                onAdd = {
+                                    onAction(
+                                        EditProfileAction.OnTargetCompanyAdd(
+                                            it
+                                        )
+                                    )
+                                },
+                                onRemove = {
+                                    onAction(
+                                        EditProfileAction.OnTargetCompanyRemove(
+                                            it
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                item { Spacer(Modifier.height(12.dp)) }
+            }
             SaveBar(
                 isSaving = state.isLoading,
                 onSave = { onAction(EditProfileAction.OnSaveClick(section)) },
-                onCancel = onBack,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 20.dp)
-                .imePadding(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-
-            if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
-                item {
-                    EditProfileHeader(
-                        displayName = state.displayName,
-                        username = state.username,
-                        avatarUri = state.avatarUrl,
-                        onAvatarChange = { uri ->
-                            onAction(
-                                EditProfileAction.OnAvatarChange(
-                                    uri
-                                )
-                            )
-                        }
-                    )
-                }
-
-                item {
-                    FormSection(
-                        title = stringResource(R.string.basic_info),
-                        icon = ImageVector.vectorResource(R.drawable.ic_account)
-                    ) {
-                        LabeledTextField(
-                            label = stringResource(R.string.display_name),
-                            value = state.displayName,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnDisplayNameChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledTextField(
-                            label = stringResource(R.string.email),
-                            value = state.email,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnEmailChange(
-                                        it
-                                    )
-                                )
-                            },
-                            keyboardType = KeyboardType.Email,
-                            errorText = state.fieldErrors["email"]
-                        )
-                        LabeledDropdownField(
-                            label = stringResource(R.string.gender),
-                            value = state.gender,
-                            options = Gender.entries.map {
-                                stringResource(
-                                    it.labelRes
-                                )
-                            },
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnGenderChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledTextField(
-                            label = stringResource(R.string.date_of_birth),
-                            value = state.dateOfBirth,
-                            placeholder = stringResource(R.string.yyyy_mm_dd),
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnDateOfBirthChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-
-            if (section == ProfileEditSection.ALL || section == ProfileEditSection.CAREER) {
-                item {
-                    FormSection(
-                        title = stringResource(R.string.career),
-                        icon = ImageVector.vectorResource(R.drawable.ic_work)
-                    ) {
-                        LabeledTextField(
-                            label = stringResource(R.string.target_role),
-                            value = state.targetRole,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnTargetRoleChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledTextField(
-                            label = stringResource(R.string.industry),
-                            value = state.industry,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnIndustryChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledDropdownField(
-                            label = stringResource(R.string.experience_level),
-                            value = state.experienceLevel,
-                            options = ExperienceLevel.entries.map {
-                                stringResource(
-                                    it.labelRes
-                                )
-                            },
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnExperienceLevelChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledTextField(
-                            label = stringResource(R.string.current_job_title),
-                            value = state.currentJobTitle,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnCurrentJobTitleChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                        LabeledTextField(
-                            label = stringResource(R.string.years_of_experience),
-                            value = state.yearsOfExperience,
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnYearsOfExperienceChange(
-                                        it
-                                    )
-                                )
-                            },
-                            keyboardType = KeyboardType.Number
-                        )
-                        LabeledDropdownField(
-                            label = stringResource(R.string.education_level),
-                            value = state.educationLevel,
-                            options = EducationLevel.entries.map {
-                                stringResource(
-                                    it.labelRes
-                                )
-                            },
-                            onValueChange = {
-                                onAction(
-                                    EditProfileAction.OnEducationLevelChange(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-
-                        CVUploadField(
-                            fileName = state.cvFileName,
-                            isUploading = state.isUploadingCV,
-                            uploadProgress = state.cvUploadProgress,
-                            onCVSelected = { uri ->
-                                onAction(EditProfileAction.OnCVUpload(uri))
-                            }
-                        )
-                    }
-                }
-
-                item {
-                    FormSection(
-                        title = stringResource(R.string.skills),
-                        icon = ImageVector.vectorResource(R.drawable.ic_star)
-                    ) {
-                        ChipInputField(
-                            chips = state.skills,
-                            placeholder = stringResource(R.string.add_a_skill_and_press_enter),
-                            onAdd = {
-                                onAction(
-                                    EditProfileAction.OnSkillAdd(
-                                        it
-                                    )
-                                )
-                            },
-                            onRemove = {
-                                onAction(
-                                    EditProfileAction.OnSkillRemove(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-
-                item {
-                    FormSection(
-                        title = stringResource(R.string.target_companies),
-                        icon = ImageVector.vectorResource(R.drawable.ic_business)
-                    ) {
-                        ChipInputField(
-                            chips = state.targetCompanies,
-                            placeholder = stringResource(R.string.add_a_company_and_press_enter),
-                            onAdd = {
-                                onAction(
-                                    EditProfileAction.OnTargetCompanyAdd(
-                                        it
-                                    )
-                                )
-                            },
-                            onRemove = {
-                                onAction(
-                                    EditProfileAction.OnTargetCompanyRemove(
-                                        it
-                                    )
-                                )
-                            }
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(Modifier.height(12.dp)) }
         }
     }
 }

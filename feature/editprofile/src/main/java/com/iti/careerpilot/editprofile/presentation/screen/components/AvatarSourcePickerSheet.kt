@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette
+import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
 import com.iti.careerpilot.editprofile.R
 import java.io.File
 
@@ -58,6 +59,7 @@ fun AvatarSourcePickerSheet(
     )
 
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+    var showCameraPermissionDialog by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -67,14 +69,10 @@ fun AvatarSourcePickerSheet(
         contract = ActivityResultContracts.TakePicture()
     ) { success -> onImagePicked(if (success) pendingCameraUri else null) }
 
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) {
-            val uri = createCameraOutputUri(context)
-            pendingCameraUri = uri
-            cameraLauncher.launch(uri)
-        }
+    fun launchCamera() {
+        val uri = createCameraOutputUri(context)
+        pendingCameraUri = uri
+        cameraLauncher.launch(uri)
     }
 
     ModalBottomSheet(
@@ -85,7 +83,7 @@ fun AvatarSourcePickerSheet(
             Text(
                 text = stringResource(R.string.update_profile_photo),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
@@ -106,26 +104,33 @@ fun AvatarSourcePickerSheet(
                         context, Manifest.permission.CAMERA
                     ) == PackageManager.PERMISSION_GRANTED
 
-                    if (hasPermission) {
-                        val uri = createCameraOutputUri(context)
-                        pendingCameraUri = uri
-                        cameraLauncher.launch(uri)
-                    } else {
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    if (hasPermission) launchCamera() else showCameraPermissionDialog = true
                 }
             )
 
             Spacer(Modifier.height(12.dp))
         }
     }
-}
 
+    if (showCameraPermissionDialog) {
+        PermissionsDialog(
+            title = stringResource(R.string.camera_permission_title),
+            text = stringResource(R.string.camera_permission_text),
+            icon = ImageVector.vectorResource(R.drawable.ic_camera),
+            cancel = stringResource(R.string.cancel),
+            allow = stringResource(R.string.allow),
+            neededPermissions = arrayOf(Manifest.permission.CAMERA),
+            onDismiss = { showCameraPermissionDialog = false },
+            onGranted = { launchCamera() }
+        )
+    }
+}
 
 @Composable
 fun AvatarSourceOption(
     icon: ImageVector,
-    label: String, onClick: () -> Unit
+    label: String,
+    onClick: () -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -135,9 +140,13 @@ fun AvatarSourceOption(
             .clickable(onClick = onClick)
             .padding(vertical = 14.dp, horizontal = 4.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = CareerPilotPalette.amber)
+        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(16.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 

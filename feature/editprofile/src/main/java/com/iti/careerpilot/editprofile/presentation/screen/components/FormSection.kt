@@ -22,6 +22,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 
+
 @Composable
 fun FormSection(
     title: String,
@@ -36,20 +37,17 @@ fun FormSection(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = CareerPilotPalette.amber,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.width(8.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        CareerPilotCard(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),

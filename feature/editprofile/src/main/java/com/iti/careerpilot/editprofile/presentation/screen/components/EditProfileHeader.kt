@@ -53,7 +53,7 @@ fun EditProfileHeader(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(64.dp)
-                .background(CareerPilotPalette.amber.copy(alpha = 0.15f), CircleShape)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -73,8 +73,7 @@ fun EditProfileHeader(
                 Text(
                     text = displayName.trim().take(1).ifBlank { "?" }.uppercase(),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = CareerPilotPalette.amber
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
             Box(
@@ -83,12 +82,13 @@ fun EditProfileHeader(
                     .align(Alignment.BottomEnd)
                     .size(22.dp)
                     .clip(CircleShape)
-                    .background(CareerPilotPalette.amber)
+                    .background(MaterialTheme.colorScheme.primary)
                     .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_camera),
                     contentDescription = stringResource(R.string.change_photo),
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(12.dp)
                 )
             }
@@ -98,7 +98,6 @@ fun EditProfileHeader(
             Text(
                 text = displayName.ifBlank { stringResource(R.string.your_name) },
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(

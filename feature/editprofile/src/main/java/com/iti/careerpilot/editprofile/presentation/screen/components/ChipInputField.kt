@@ -52,13 +52,16 @@ fun ChipInputField(
         OutlinedTextField(
             value = input,
             onValueChange = { input = it },
-            placeholder = { Text(placeholder, color = CareerPilotPalette.gray400) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant) },
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             trailingIcon = {
                 if (input.isNotBlank()) {
                     IconButton(onClick = { onAdd(input); input = "" }) {
-                        Icon(ImageVector.vectorResource(R.drawable.ic_add), contentDescription = "Add")
+                        Icon(
+                            ImageVector.vectorResource(R.drawable.ic_add),
+                            contentDescription = stringResource(R.string.add)
+                        )
                     }
                 }
             },
@@ -66,19 +69,11 @@ fun ChipInputField(
             keyboardActions = KeyboardActions(
                 onDone = {
                     if (input.isNotBlank()) {
-                        onAdd(input)
-                        input = ""
+                        onAdd(input); input = ""
                     }
                 }
             ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedIndicatorColor = CareerPilotPalette.amber,
-                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-                cursorColor = CareerPilotPalette.amber,
-                focusedLabelColor = CareerPilotPalette.amber
-            ),
+            colors = fieldColors,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -101,29 +96,31 @@ fun ChipInputField(
     }
 }
 
-
 @Composable
 fun Chip(text: String, onRemove: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(CareerPilotPalette.amber.copy(alpha = 0.12f))
-            .border(1.dp, CareerPilotPalette.amber.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                RoundedCornerShape(20.dp)
+            )
             .padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            color = CareerPilotPalette.amber,
-            fontWeight = FontWeight.Medium
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.width(4.dp))
         IconButton(onClick = onRemove, modifier = Modifier.size(18.dp)) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close),
-                contentDescription = "Remove $text",
-                tint = CareerPilotPalette.amber,
+                contentDescription = stringResource(R.string.remove_x, text),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(14.dp)
             )
         }
