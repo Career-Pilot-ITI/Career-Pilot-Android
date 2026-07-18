@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -194,7 +198,8 @@ fun EditProfileScreen(
                             val genderOptions = Gender.entries.map { stringResource(it.labelRes) }
                             LabeledDropdownField(
                                 label = stringResource(R.string.gender),
-                                value = Gender.fromBackendValue(state.gender)?.let { stringResource(it.labelRes) } ?: state.gender,
+                                value = Gender.fromBackendValue(state.gender)
+                                    ?.let { stringResource(it.labelRes) } ?: state.gender,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_person),
                                 options = genderOptions,
                                 onValueChange = { selectedLabel ->
@@ -207,7 +212,7 @@ fun EditProfileScreen(
                             val dateInteractionSource = remember { MutableInteractionSource() }
                             val isPressed by dateInteractionSource.collectIsPressedAsState()
                             var showDatePicker by remember { mutableStateOf(false) }
-                            
+
                             if (isPressed) {
                                 showDatePicker = true
                             }
@@ -225,7 +230,8 @@ fun EditProfileScreen(
                             if (showDatePicker) {
                                 val datePickerState = rememberDatePickerState(
                                     initialSelectedDateMillis = state.dateOfBirthMillis,
-                                    selectableDates = object : androidx.compose.material3.SelectableDates {
+                                    selectableDates = object :
+                                        androidx.compose.material3.SelectableDates {
                                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                                             return utcTimeMillis <= System.currentTimeMillis()
                                         }
@@ -238,17 +244,27 @@ fun EditProfileScreen(
                                 DatePickerDialog(
                                     onDismissRequest = { showDatePicker = false },
                                     confirmButton = {
-                                        TextButton(onClick = {
-                                            datePickerState.selectedDateMillis?.let { millis ->
-                                                onAction(EditProfileAction.OnDateSelected(millis))
-                                            }
-                                            showDatePicker = false
-                                        }) {
-                                            Text(stringResource(R.string.allow))
+                                        Button(
+                                            onClick = {
+                                                datePickerState.selectedDateMillis?.let { millis ->
+                                                    onAction(EditProfileAction.OnDateSelected(millis))
+                                                }
+                                                showDatePicker = false
+                                            },
+                                            modifier = Modifier.width(100.dp)
+                                        ) {
+                                            Text(stringResource(R.string.ok))
                                         }
                                     },
                                     dismissButton = {
-                                        TextButton(onClick = { showDatePicker = false }) {
+                                        TextButton(
+                                            onClick = { showDatePicker = false },
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                                containerColor = Color.Transparent
+                                            ),
+                                            modifier = Modifier.width(100.dp)
+                                        ) {
                                             Text(stringResource(R.string.cancel))
                                         }
                                     }
@@ -283,19 +299,37 @@ fun EditProfileScreen(
                                 value = state.experienceLevel,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_briefcase),
                                 options = ExperienceLevel.entries.map { stringResource(it.labelRes) },
-                                onValueChange = { onAction(EditProfileAction.OnExperienceLevelChange(it)) }
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnExperienceLevelChange(
+                                            it
+                                        )
+                                    )
+                                }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.current_job_title),
                                 value = state.currentJobTitle,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_work),
-                                onValueChange = { onAction(EditProfileAction.OnCurrentJobTitleChange(it)) }
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnCurrentJobTitleChange(
+                                            it
+                                        )
+                                    )
+                                }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.years_of_experience),
                                 value = state.yearsOfExperience,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_calendar),
-                                onValueChange = { onAction(EditProfileAction.OnYearsOfExperienceChange(it)) },
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnYearsOfExperienceChange(
+                                            it
+                                        )
+                                    )
+                                },
                                 keyboardType = KeyboardType.Number
                             )
                             LabeledDropdownField(
@@ -303,7 +337,13 @@ fun EditProfileScreen(
                                 value = state.educationLevel,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_school),
                                 options = EducationLevel.entries.map { stringResource(it.labelRes) },
-                                onValueChange = { onAction(EditProfileAction.OnEducationLevelChange(it)) }
+                                onValueChange = {
+                                    onAction(
+                                        EditProfileAction.OnEducationLevelChange(
+                                            it
+                                        )
+                                    )
+                                }
                             )
                             CVUploadField(
                                 fileName = state.cvFileName,

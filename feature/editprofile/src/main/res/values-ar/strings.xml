@@ -72,4 +72,5 @@
     <string name="upload_failed">فشل التحميل</string>
     <string name="error_empty_display_name">الاسم يجب ان يكون موجود</string>
     <string name="error_invalid_email">الرجاء ادخال عنوان بريد صالح</string>
+    <string name="ok">تم</string>
 </resources>

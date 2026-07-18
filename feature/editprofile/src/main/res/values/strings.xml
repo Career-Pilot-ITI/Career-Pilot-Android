@@ -71,5 +71,6 @@
     <string name="upload_failed">Upload Failed</string>
     <string name="error_empty_display_name">Display name cannot be empty</string>
     <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="ok">OK</string>
 
 </resources>
