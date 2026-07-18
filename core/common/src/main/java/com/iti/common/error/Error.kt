@@ -18,3 +18,10 @@ enum class StorageError : IError {
     INCOMPATIBLE_FILE,
     UNKNOWN
 }
+
+enum class PhoneValidationError : IError {
+    EMPTY,
+    TOO_SHORT,
+    TOO_LONG,
+    INVALID_FORMAT,
+}
