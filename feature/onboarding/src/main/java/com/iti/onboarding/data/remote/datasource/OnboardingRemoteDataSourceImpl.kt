@@ -56,7 +56,18 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getTracks(): CareerPilotResult<List<Track>, TracksScreenError> {
-        TODO("Not yet implemented")
+        delay(1000)
+        return CareerPilotResult.Success(
+            listOf(
+                Track("1", "Android Development"),
+                Track("2", "iOS Development"),
+                Track("3", "Web Development"),
+                Track("4", "Data Science"),
+                Track("5", "Machine Learning"),
+                Track("6", "UI/UX Design"),
+                Track("7", "Other")
+            )
+        )
     }
 
     override suspend fun uploadCv(
