@@ -51,7 +51,6 @@ androidx-compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 # country code picker
 komposecountrycodepicker = { module = "io.github.joelkanyi:komposecountrycodepicker", version.ref = "komposecountrycodepicker" }
-androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 # phone number validation
 libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
 #kotlinx datetime
