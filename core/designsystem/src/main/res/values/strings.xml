@@ -1,3 +1,5 @@
 <resources>
     <string name="snackbar_dismiss_action">Dismiss message</string>
+    <string name="offline_mode_message">You’re offline. Some features may be limited.</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
