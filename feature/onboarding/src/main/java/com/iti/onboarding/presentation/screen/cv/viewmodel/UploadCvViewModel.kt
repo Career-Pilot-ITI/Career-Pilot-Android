@@ -15,6 +15,8 @@ import com.iti.onboarding.presentation.screen.cv.state.UploadCvUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,7 +27,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
     private val uploadCv: UploadCvUseCase,
-    private val pdfReader: PdfReader
+    private val pdfReader: PdfReader,
+    private val datastore: CareerPilotPreferencesDataSource
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UploadCvUiState())
@@ -34,7 +37,7 @@ class UploadCvViewModel @Inject constructor(
     private val _effects = MutableSharedFlow<UploadCvEffect>()
     val effects = _effects.asSharedFlow()
 
-    private var uploadJob: Job? = null
+    private val uploadJob = AtomicReference<Job?>(null)
 
     fun onIntent(intent: UploadCvIntent) {
         when (intent) {
@@ -46,7 +49,7 @@ class UploadCvViewModel @Inject constructor(
     }
 
     private fun openPdfPicker() {
-        if (_state.value.isBusy) return
+        if (_state.value.isSubmitting) return
 
         viewModelScope.launch {
             _effects.emit(UploadCvEffect.OpenPdfPicker)
@@ -54,8 +57,7 @@ class UploadCvViewModel @Inject constructor(
     }
 
     private fun prepareAndUpload(uri: String) {
-        uploadJob?.cancel()
-        uploadJob = viewModelScope.launch {
+        uploadJob.getAndSet(viewModelScope.launch {
             _state.value = UploadCvUiState(
                 stage = CvUploadStage.PREPARING,
             )
@@ -86,7 +88,7 @@ class UploadCvViewModel @Inject constructor(
                     uploadSelectedDocument(result.data)
                 }
             }
-        }
+        })?.cancel()
     }
 
     private suspend fun uploadSelectedDocument(document: PdfFile) {
@@ -134,14 +136,16 @@ class UploadCvViewModel @Inject constructor(
         if (!_state.value.canAnalyze) return
 
         viewModelScope.launch {
+            datastore.setHasCompletedOnboarding(true)
             _effects.emit(UploadCvEffect.NavigateNext)
         }
     }
 
     private fun skipUpload() {
-        uploadJob?.cancel()
+        uploadJob.get()?.cancel()
 
         viewModelScope.launch {
+            datastore.setHasCompletedOnboarding(true)
             _effects.emit(UploadCvEffect.Skip)
         }
     }

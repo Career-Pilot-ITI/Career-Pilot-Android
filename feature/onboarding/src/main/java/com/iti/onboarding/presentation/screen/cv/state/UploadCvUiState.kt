@@ -8,12 +8,15 @@ data class UploadCvUiState(
     val stage: CvUploadStage = CvUploadStage.EMPTY,
     val uploadProgress: Float = 0f,
 ) {
-    val isBusy: Boolean
+    val isSubmitting: Boolean
         get() = stage == CvUploadStage.PREPARING ||
             stage == CvUploadStage.UPLOADING
 
     val canAnalyze: Boolean
         get() = stage == CvUploadStage.UPLOADED
+
+    val isFormValid: Boolean
+        get() = canAnalyze
 }
 
 @Immutable
