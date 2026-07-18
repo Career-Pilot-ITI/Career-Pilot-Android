@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -54,6 +58,7 @@ class EditProfileViewModel @Inject constructor(
                     email = profile.email,
                     gender = profile.gender,
                     dateOfBirth = profile.dateOfBirth,
+                    dateOfBirthMillis = calculateMillis(profile.dateOfBirth),
                     targetRole = profile.targetRole,
                     industry = profile.industry,
                     experienceLevel = profile.experienceLevel,
@@ -100,7 +105,25 @@ class EditProfileViewModel @Inject constructor(
                 _state.update { it.copy(gender = action.value) }
 
             is EditProfileAction.OnDateOfBirthChange ->
-                _state.update { it.copy(dateOfBirth = action.value) }
+                _state.update { 
+                    it.copy(
+                        dateOfBirth = action.value,
+                        dateOfBirthMillis = calculateMillis(action.value)
+                    ) 
+                }
+
+            is EditProfileAction.OnDateSelected -> {
+                val date = Instant.ofEpochMilli(action.millis)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                val formatted = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                _state.update { 
+                    it.copy(
+                        dateOfBirth = formatted,
+                        dateOfBirthMillis = action.millis
+                    ) 
+                }
+            }
 
             is EditProfileAction.OnTargetRoleChange ->
                 _state.update { it.copy(targetRole = action.value) }
@@ -155,7 +178,7 @@ class EditProfileViewModel @Inject constructor(
 
                         // Wait for upload to actually start or fail/finish
                         while (!isDone && realProgress == 0) {
-                            delay(50)
+                            delay(50.milliseconds)
                         }
 
                         var displayProgress = 0
@@ -382,6 +405,15 @@ class EditProfileViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    private fun calculateMillis(dateString: String): Long? {
+        return runCatching {
+            LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        }.getOrNull()
     }
 
     private fun sendEvent(event: EditProfileEvent) {

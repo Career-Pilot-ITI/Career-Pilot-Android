@@ -1,5 +1,7 @@
 package com.iti.careerpilot.editprofile.presentation.screen
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,11 +23,15 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -33,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.editprofile.R
@@ -47,12 +54,14 @@ import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledDro
 import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledTextField
 import com.iti.careerpilot.editprofile.presentation.screen.components.LoadingDialog
 import com.iti.careerpilot.editprofile.presentation.screen.components.SaveBar
+import com.iti.careerpilot.editprofile.presentation.screen.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.screen.models.EducationLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.ExperienceLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.Gender
 import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
-import com.iti.careerpilot.editprofile.presentation.screen.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.viewmodel.EditProfileViewModel
+import com.iti.common.model.ProfileEditSection
+import java.time.LocalDate
 
 @Composable
 fun EditProfileRoot(
@@ -188,13 +197,58 @@ fun EditProfileScreen(
                                 options = Gender.entries.map { stringResource(it.labelRes) },
                                 onValueChange = { onAction(EditProfileAction.OnGenderChange(it)) }
                             )
+                            val dateInteractionSource = remember { MutableInteractionSource() }
+                            val isPressed by dateInteractionSource.collectIsPressedAsState()
+                            var showDatePicker by remember { mutableStateOf(false) }
+                            
+                            if (isPressed) {
+                                showDatePicker = true
+                            }
+
                             LabeledTextField(
                                 label = stringResource(R.string.date_of_birth),
                                 value = state.dateOfBirth,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_calendar),
                                 placeholder = stringResource(R.string.yyyy_mm_dd),
-                                onValueChange = { onAction(EditProfileAction.OnDateOfBirthChange(it)) }
+                                onValueChange = { },
+                                readOnly = true,
+                                interactionSource = dateInteractionSource
                             )
+
+                            if (showDatePicker) {
+                                val datePickerState = rememberDatePickerState(
+                                    initialSelectedDateMillis = state.dateOfBirthMillis,
+                                    selectableDates = object : androidx.compose.material3.SelectableDates {
+                                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                                            return utcTimeMillis <= System.currentTimeMillis()
+                                        }
+
+                                        override fun isSelectableYear(year: Int): Boolean {
+                                            return year <= LocalDate.now().year
+                                        }
+                                    }
+                                )
+                                DatePickerDialog(
+                                    onDismissRequest = { showDatePicker = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            datePickerState.selectedDateMillis?.let { millis ->
+                                                onAction(EditProfileAction.OnDateSelected(millis))
+                                            }
+                                            showDatePicker = false
+                                        }) {
+                                            Text(stringResource(R.string.allow))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDatePicker = false }) {
+                                            Text(stringResource(R.string.cancel))
+                                        }
+                                    }
+                                ) {
+                                    DatePicker(state = datePickerState)
+                                }
+                            }
                         }
                     }
                 }

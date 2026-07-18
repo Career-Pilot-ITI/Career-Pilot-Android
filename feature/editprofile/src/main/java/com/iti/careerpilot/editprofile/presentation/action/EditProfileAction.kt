@@ -10,6 +10,7 @@ sealed interface EditProfileAction {
     data class OnEmailChange(val value: String) : EditProfileAction
     data class OnGenderChange(val value: String) : EditProfileAction
     data class OnDateOfBirthChange(val value: String) : EditProfileAction
+    data class OnDateSelected(val millis: Long) : EditProfileAction
     data class OnTargetRoleChange(val value: String) : EditProfileAction
     data class OnIndustryChange(val value: String) : EditProfileAction
     data class OnExperienceLevelChange(val value: String) : EditProfileAction

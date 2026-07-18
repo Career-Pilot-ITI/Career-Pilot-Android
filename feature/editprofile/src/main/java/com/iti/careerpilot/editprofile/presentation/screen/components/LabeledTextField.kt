@@ -1,5 +1,6 @@
 package com.iti.careerpilot.editprofile.presentation.screen.components
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
@@ -39,7 +41,9 @@ fun LabeledTextField(
     leadingIcon: ImageVector? = null,
     placeholder: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
-    errorText: String? = null
+    errorText: String? = null,
+    readOnly: Boolean = false,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
 ) {
     OutlinedTextField(
         value = value,
@@ -63,6 +67,8 @@ fun LabeledTextField(
         supportingText = errorText?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next),
         colors = fieldColors,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        readOnly = readOnly,
+        interactionSource = interactionSource
     )
 }
