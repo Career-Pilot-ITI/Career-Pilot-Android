@@ -164,7 +164,7 @@ fun EditProfileScreen(
 
                     item {
                         FormSection(
-                            title = stringResource(R.string.basic_info),
+                            title = stringResource(R.string.personal_info),
                             icon = ImageVector.vectorResource(R.drawable.ic_account)
                         ) {
                             LabeledTextField(

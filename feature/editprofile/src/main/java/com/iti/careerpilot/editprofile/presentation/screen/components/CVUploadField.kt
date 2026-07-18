@@ -196,10 +196,9 @@ private fun CVUploadingState(uploadProgress: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CircularProgressIndicator(
+        CircularWavyProgressIndicator(
             progress = { uploadProgress / 100f },
             modifier = Modifier.size(32.dp),
-            strokeWidth = 3.dp,
             color = MaterialTheme.colorScheme.primary
         )
         Column {

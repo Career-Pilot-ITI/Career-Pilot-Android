@@ -47,7 +47,10 @@ fun EditProfileHeader(
 ) {
     var showPickerSheet by remember { mutableStateOf(false) }
 
-    CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
+    CareerPilotCard(
+        elevation = 8.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -58,15 +61,14 @@ fun EditProfileHeader(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
                             listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
-                        )
+                        ),
+                        CircleShape
                     )
                     .padding(2.5.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(MaterialTheme.colorScheme.surface, CircleShape)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,

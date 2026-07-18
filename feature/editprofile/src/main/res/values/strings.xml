@@ -37,7 +37,7 @@
     <string name="update_profile_photo">Update profile photo</string>
     <string name="choose_from_gallery">Choose from gallery</string>
     <string name="take_a_photo">Take a photo</string>
-    <string name="basic_info">Basic info</string>
+    <string name="personal_info">Personal Info</string>
     <string name="display_name">Display name</string>
     <string name="gender">Gender</string>
     <string name="date_of_birth">Date of birth</string>

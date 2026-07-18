@@ -3,6 +3,7 @@ package com.iti.careerpilot.editprofile.presentation.screen.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,7 +75,8 @@ fun LabeledDropdownField(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             containerColor = MaterialTheme.colorScheme.surface,
-            shape = CareerPilotShapes.medium
+            shape = CareerPilotShapes.medium,
+            modifier = Modifier.padding(top = 4.dp)
         ) {
             options.forEach { option ->
                 val isSelected = option == value

@@ -34,8 +34,10 @@ fun FormSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
         ) {
-            GradientIcon(
-                icon = icon,
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(8.dp))
@@ -45,7 +47,10 @@ fun FormSection(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
+        CareerPilotCard(
+            elevation = 8.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),

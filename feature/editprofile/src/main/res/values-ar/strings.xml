@@ -37,7 +37,7 @@
     <string name="update_profile_photo">تحديث صورة الملف الشخصي</string>
     <string name="choose_from_gallery">اختيار من المعرض</string>
     <string name="take_a_photo">التقاط صورة</string>
-    <string name="basic_info">المعلومات الأساسية</string>
+    <string name="personal_info">المعلومات الشخصية</string>
     <string name="display_name">اسم العرض</string>
     <string name="gender">الجنس</string>
     <string name="date_of_birth">تاريخ الميلاد</string>
