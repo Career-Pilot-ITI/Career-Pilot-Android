@@ -9,10 +9,9 @@ import kotlinx.collections.immutable.persistentListOf
 data class ChoosingTracksUiState(
     val tracks: ImmutableList<Track> = persistentListOf(),
     val selectedTrack: Track? = null,
-    val customTrack: String = "",
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
 ) {
     val isFormValid: Boolean
-        get() = selectedTrack != null && (selectedTrack.name != "Other" || customTrack.isNotBlank())
+        get() = selectedTrack != null
 }

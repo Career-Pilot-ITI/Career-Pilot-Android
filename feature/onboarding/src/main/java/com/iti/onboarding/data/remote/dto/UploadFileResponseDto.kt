@@ -1,4 +1,4 @@
-package com.iti.onboarding.data.dto
+package com.iti.onboarding.data.remote.dto
 
 import kotlinx.serialization.Serializable
 

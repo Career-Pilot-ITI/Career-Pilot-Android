@@ -11,7 +11,6 @@ import com.iti.core.model.PdfFile
 import com.iti.onboarding.data.local.datasource.OnboardingLocalDataSource
 import com.iti.onboarding.data.mapper.toDomain
 import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSource
-import com.iti.onboarding.domain.error.TracksScreenError
 import com.iti.onboarding.domain.model.FileUploadData
 import com.iti.onboarding.domain.model.Track
 import com.iti.onboarding.domain.model.UploadedFile
@@ -76,8 +75,21 @@ class OnboardingRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun getTracks(): CareerPilotResult<List<Track>, TracksScreenError> {
-        return remoteDataSource.getTracks()
+    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> {
+        return try {
+            val tracks = remoteDataSource.getTracks()
+            CareerPilotResult.Success(tracks.map { it.toDomain() } )
+        } catch (e: ClientRequestException) {
+            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
+        } catch (e: ServerResponseException) {
+            CareerPilotResult.Error(NetworkError.SERVER)
+        } catch (e: SerializationException) {
+            CareerPilotResult.Error(NetworkError.SERIALIZATION)
+        } catch (e: UnresolvedAddressException) {
+            CareerPilotResult.Error(NetworkError.NO_INTERNET)
+        } catch (e: Exception) {
+            CareerPilotResult.Error(NetworkError.UNKNOWN)
+        }
     }
 
     override suspend fun uploadCv(

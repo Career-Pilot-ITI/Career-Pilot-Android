@@ -3,16 +3,15 @@ package com.iti.onboarding.data.remote.datasource
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserResponseDto
-import com.iti.common.result.CareerPilotResult
 import com.iti.core.model.PdfFile
-import com.iti.onboarding.data.dto.UploadFileResponseDto
-import com.iti.onboarding.domain.error.TracksScreenError
+import com.iti.onboarding.data.remote.dto.TracksResponseDto
+import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
 import com.iti.onboarding.domain.model.FileUploadData
-import com.iti.onboarding.domain.model.Track
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -54,19 +53,10 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
         }.body()
     }
 
-    override suspend fun getTracks(): CareerPilotResult<List<Track>, TracksScreenError> {
-        delay(1000)
-        return CareerPilotResult.Success(
-            listOf(
-                Track("1", "Android Development"),
-                Track("2", "iOS Development"),
-                Track("3", "Web Development"),
-                Track("4", "Data Science"),
-                Track("5", "Machine Learning"),
-                Track("6", "UI/UX Design"),
-                Track("7", "Other")
-            )
-        )
+    override suspend fun getTracks(): List<TracksResponseDto> {
+        return httpClient.get(Endpoints.GET_TRACKS){
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 
     override suspend fun uploadCv(

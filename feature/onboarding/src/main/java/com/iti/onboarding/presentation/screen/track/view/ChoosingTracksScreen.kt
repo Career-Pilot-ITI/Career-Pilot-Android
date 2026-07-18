@@ -22,19 +22,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.iti.onboarding.R
-import com.iti.onboarding.presentation.components.CustomTrackTextField
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
-import com.iti.onboarding.presentation.screen.track.view.components.ActionButton
 import com.iti.onboarding.presentation.screen.track.view.components.ChoosingTracksScreenHeader
 import com.iti.onboarding.presentation.screen.track.view.components.TracksFlow
 import com.iti.onboarding.presentation.screen.track.viewmodel.ChoosingTracksViewModel
@@ -81,10 +77,6 @@ fun ChoosingTracksScreenContent(
 ) {
     val colors = MaterialTheme.colorScheme
     val pullToRefreshState = rememberPullToRefreshState()
-    val enabledActionButton = state.selectedTrack?.let { track ->
-        track.name != "Other" || state.customTrack.isNotBlank()
-    } ?: false
-    val showCustomTrackTextField = state.selectedTrack?.name == "Other"
 
     PullToRefreshBox(
         isRefreshing = state.isRefreshing,
@@ -96,7 +88,7 @@ fun ChoosingTracksScreenContent(
             .fillMaxSize()
             .background(colors.background),
         indicator = {
-            PullToRefreshDefaults.Indicator(
+            PullToRefreshDefaults.LoadingIndicator(
                 state = pullToRefreshState,
                 isRefreshing = state.isRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter),
@@ -132,22 +124,6 @@ fun ChoosingTracksScreenContent(
                         )
                     }
 
-                    AnimatedVisibility(visible = showCustomTrackTextField) {
-                        Column {
-                            CustomTrackTextField(
-                                value = state.customTrack,
-                                label = stringResource(R.string.track_name_label),
-                                onValueChange = {
-                                    onIntent(
-                                        ChoosingTracksIntent.OnChangeCustomTrackValue(it)
-                                    )
-                                },
-                            )
-
-                            Spacer(modifier = Modifier.height(40.dp))
-                        }
-                    }
-
                     if (state.isLoading) {
                         Spacer(Modifier.fillParentMaxHeight(0.35f))
                         LoadingIndicator(
@@ -157,7 +133,6 @@ fun ChoosingTracksScreenContent(
                 }
             }
 
-            // Extra spacing for the global button
             item(key = "bottom_spacing") {
                 Spacer(modifier = Modifier.height(120.dp))
             }

@@ -3,20 +3,20 @@ package com.iti.onboarding.presentation.screen.track.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.common.result.CareerPilotResult
-import com.iti.common.util.UIText
+import com.iti.common.util.toUIText
 import com.iti.onboarding.domain.usecase.GetTracksUseCase
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ChoosingTracksViewModel @Inject constructor(
@@ -38,12 +38,6 @@ class ChoosingTracksViewModel @Inject constructor(
             is ChoosingTracksIntent.ToggleTrackSelection -> {
                 _state.update {
                     it.copy(selectedTrack = intent.track)
-                }
-            }
-
-            is ChoosingTracksIntent.OnChangeCustomTrackValue -> {
-                _state.update {
-                    it.copy(customTrack = intent.customTrackValue)
                 }
             }
 
@@ -82,9 +76,7 @@ class ChoosingTracksViewModel @Inject constructor(
 
                     _effects.emit(
                         ChoosingTracksEffects.ShowError(
-                            UIText.StringResource(
-                                com.iti.common.R.string.error_unknown,
-                            )
+                            result.error.toUIText()
                         )
                     )
                 }
