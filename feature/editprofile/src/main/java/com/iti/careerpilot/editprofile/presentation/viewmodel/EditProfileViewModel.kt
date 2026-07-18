@@ -9,12 +9,15 @@ import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import com.iti.careerpilot.editprofile.presentation.action.EditProfileAction
 import com.iti.careerpilot.editprofile.presentation.event.EditProfileEvent
 import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
+import com.iti.common.dispatcher.CareerPilotDispatchers
+import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +36,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val editProfileRepo: EditProfileRepo,
+    @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditProfileState())
@@ -48,7 +52,7 @@ class EditProfileViewModel @Inject constructor(
     }
 
     private fun loadProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherDefault) {
             val profile = editProfileRepo.userProfile.first()
             original = profile
             _state.update {
@@ -154,7 +158,7 @@ class EditProfileViewModel @Inject constructor(
 
             is EditProfileAction.OnAvatarChange -> {
                 action.value?.let { uri ->
-                    viewModelScope.launch {
+                    viewModelScope.launch(dispatcherDefault) {
                         val startTime = System.currentTimeMillis()
                         var realProgress = 0
                         var isDone = false
@@ -224,7 +228,7 @@ class EditProfileViewModel @Inject constructor(
 
             is EditProfileAction.OnCVUpload -> {
                 action.value?.let { uri ->
-                    viewModelScope.launch {
+                    viewModelScope.launch(dispatcherDefault) {
                         val startTime = System.currentTimeMillis()
                         var realProgress = 0
                         var isDone = false
@@ -347,7 +351,7 @@ class EditProfileViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherDefault) {
             _state.update { it.copy(isLoading = true, fieldErrors = emptyMap()) }
             val request = when (section) {
                 ProfileEditSection.PERSONAL -> {
@@ -417,6 +421,6 @@ class EditProfileViewModel @Inject constructor(
     }
 
     private fun sendEvent(event: EditProfileEvent) {
-        viewModelScope.launch { _events.send(event) }
+        viewModelScope.launch(dispatcherDefault) { _events.send(event) }
     }
 }

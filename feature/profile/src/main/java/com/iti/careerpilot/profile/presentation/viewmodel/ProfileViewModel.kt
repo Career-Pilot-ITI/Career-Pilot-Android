@@ -6,11 +6,15 @@ import com.iti.careerpilot.profile.domain.repo.ProfileRepo
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent
 import com.iti.careerpilot.profile.presentation.state.ProfileState
+import com.iti.common.dispatcher.CareerPilotDispatchers
+import com.iti.common.dispatcher.Dispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -19,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    profileRepo: ProfileRepo
+    profileRepo: ProfileRepo,
+    @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -27,6 +32,7 @@ class ProfileViewModel @Inject constructor(
         .combine(profileRepo.userProfile) { state, profile ->
             state.copy(profile = profile)
         }
+        .flowOn(dispatcherDefault)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
@@ -51,6 +57,6 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun sendEvent(event: ProfileEvent) {
-        viewModelScope.launch { _events.send(event) }
+        viewModelScope.launch(dispatcherDefault) { _events.send(event) }
     }
 }
