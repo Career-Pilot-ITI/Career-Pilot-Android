@@ -72,7 +72,7 @@ fun ProfileHeader(
                 ) {
                     if (profile.avatarUrl.isNotBlank()) {
                         AsyncImage(
-                            model = profile.avatarUrl,
+                            model = profile.avatarLocalUri,
                             contentDescription = stringResource(R.string.profile_avatar),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier

@@ -30,6 +30,7 @@ data class EditProfileState(
     val isUploadingCV: Boolean = false,
     val avatarUploadProgress: Int = 0,
     val cvUploadProgress: Int = 0,
+    val uploadError: String? = null,
     val fieldErrors: Map<String, String> = emptyMap()
 )
 

@@ -3,16 +3,20 @@ package com.iti.careerpilot.editprofile.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.common.model.ProfileEditSection
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import com.iti.careerpilot.editprofile.presentation.action.EditProfileAction
 import com.iti.careerpilot.editprofile.presentation.event.EditProfileEvent
 import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
+import com.iti.common.error.NetworkError
+import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -20,6 +24,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
@@ -126,70 +131,154 @@ class EditProfileViewModel @Inject constructor(
 
             is EditProfileAction.OnAvatarChange -> {
                 action.value?.let { uri ->
-                    _state.update { it.copy(isUploadingAvatar = true) }
                     viewModelScope.launch {
-                        editProfileRepo.uploadImage(
-                            uri = uri,
-                            onProgress = { percent ->
-                                _state.update { it.copy(avatarUploadProgress = percent) }
+                        val startTime = System.currentTimeMillis()
+                        var realProgress = 0
+                        var isDone = false
+                        var uploadResult: CareerPilotResult<FileUploadResponse, NetworkError>? = null
+
+                        _state.update { 
+                            it.copy(
+                                isUploadingAvatar = true, 
+                                avatarUploadProgress = 0,
+                                uploadError = null
+                            ) 
+                        }
+
+                        launch {
+                            uploadResult = editProfileRepo.uploadImage(
+                                uri = uri,
+                                onProgress = { realProgress = it }
+                            )
+                            isDone = true
+                        }
+
+                        // Wait for upload to actually start or fail/finish
+                        while (!isDone && realProgress == 0) {
+                            delay(50)
+                        }
+
+                        var displayProgress = 0
+                        while (true) {
+                            if (isDone && uploadResult is CareerPilotResult.Error) break
+                            
+                            val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
+                            if (displayProgress < target) {
+                                displayProgress++
+                                _state.update { it.copy(avatarUploadProgress = displayProgress) }
                             }
-                        )
-                            .onSuccess {
-                                _state.update {
-                                    it.copy(
-                                        avatarLocalUri = uri.toString(),
-                                        isUploadingAvatar = false,
-                                        avatarUploadProgress = 0
-                                    )
-                                }
+                            
+                            if (isDone && displayProgress >= 100) break
+                            delay(20.milliseconds)
+                        }
+
+                        val elapsed = System.currentTimeMillis() - startTime
+                        
+                        uploadResult?.onSuccess { response ->
+                            if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
+                            _state.update {
+                                it.copy(
+                                    avatarUrl = response.url,
+                                    avatarLocalUri = uri.toString(),
+                                    isUploadingAvatar = false,
+                                    avatarUploadProgress = 0
+                                )
                             }
-                            .onError {
-                                _state.update {
-                                    it.copy(
-                                        isUploadingAvatar = false,
-                                        avatarUploadProgress = 0
-                                    )
-                                }
+                        }?.onError { error ->
+                            _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
+                            delay(2000.milliseconds)
+                            _state.update {
+                                it.copy(
+                                    isUploadingAvatar = false,
+                                    avatarUploadProgress = 0,
+                                    uploadError = null
+                                )
                             }
+                        }
                     }
                 }
             }
 
             is EditProfileAction.OnCVUpload -> {
                 action.value?.let { uri ->
-                    _state.update { it.copy(isUploadingCV = true) }
                     viewModelScope.launch {
-                        editProfileRepo.uploadCV(
-                            uri = uri,
-                            onProgress = { percent ->
-                                _state.update { it.copy(cvUploadProgress = percent) }
+                        val startTime = System.currentTimeMillis()
+                        var realProgress = 0
+                        var isDone = false
+                        var uploadResult: CareerPilotResult<FileUploadResponse, NetworkError>? = null
+
+                        _state.update { 
+                            it.copy(
+                                isUploadingCV = true, 
+                                cvUploadProgress = 0,
+                                uploadError = null
+                            ) 
+                        }
+
+                        launch {
+                            uploadResult = editProfileRepo.uploadCV(
+                                uri = uri,
+                                onProgress = { realProgress = it }
+                            )
+                            isDone = true
+                        }
+
+                        // Wait for upload to actually start or fail/finish
+                        while (!isDone && realProgress == 0) {
+                            delay(50.milliseconds)
+                        }
+
+                        var displayProgress = 0
+                        while (true) {
+                            if (isDone && uploadResult is CareerPilotResult.Error) break
+
+                            val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
+                            if (displayProgress < target) {
+                                displayProgress++
+                                _state.update { it.copy(cvUploadProgress = displayProgress) }
                             }
-                        )
-                            .onSuccess { response ->
-                                _state.update {
-                                    it.copy(
-                                        isUploadingCV = false,
-                                        cvUrl = response.url,
-                                        cvFileName = response.originalName,
-                                        cvUploadProgress = 0
-                                    )
-                                }
+
+                            if (isDone && displayProgress >= 100) break
+                            delay(20.milliseconds)
+                        }
+
+                        val elapsed = System.currentTimeMillis() - startTime
+
+                        uploadResult?.onSuccess { response ->
+                            if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
+                            _state.update {
+                                it.copy(
+                                    isUploadingCV = false,
+                                    cvUrl = response.url,
+                                    cvFileName = response.originalName,
+                                    cvFileSize = if (response.sizeBytes > 0) "${response.sizeBytes / 1024} KB" else "",
+                                    cvUploadProgress = 0
+                                )
                             }
-                            .onError {
-                                _state.update {
-                                    it.copy(
-                                        isUploadingCV = false,
-                                        cvUploadProgress = 0
-                                    )
-                                }
+                        }?.onError { error ->
+                            _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
+                            delay(2000.milliseconds)
+                            _state.update {
+                                it.copy(
+                                    isUploadingCV = false,
+                                    cvUploadProgress = 0,
+                                    uploadError = null
+                                )
                             }
+                        }
                     }
                 }
             }
 
             EditProfileAction.OnCVRemove -> {
-                //todo
-                _state.update { it.copy(cvUrl = "", cvFileName = "") }
+                _state.update {
+                    it.copy(
+                        cvUrl = "",
+                        cvFileName = "",
+                        cvFileSize = "",
+                        cvUploadDate = ""
+                    )
+                }
             }
 
 

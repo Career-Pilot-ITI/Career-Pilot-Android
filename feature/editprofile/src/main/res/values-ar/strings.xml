@@ -67,4 +67,7 @@
     <string name="camera_permission_text">يرجى السماح بإذن الكاميرا للمتابعة</string>
     <string name="remove_x">إزالة</string>
     <string name="add">إضافة</string>
+
+    <string name="animation_percentage">%1$d%%</string>
+    <string name="upload_failed">فشل التحميل</string>
 </resources>

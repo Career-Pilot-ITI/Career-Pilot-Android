@@ -51,6 +51,7 @@ import com.iti.careerpilot.editprofile.presentation.screen.models.EducationLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.ExperienceLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.Gender
 import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
+import com.iti.careerpilot.editprofile.presentation.screen.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.viewmodel.EditProfileViewModel
 
 @Composable
@@ -78,6 +79,22 @@ fun EditProfileRoot(
     )
     if (state.isLoading) {
         LoadingDialog()
+    }
+
+    if (state.isUploadingAvatar) {
+        UploadProgressDialog(
+            progress = state.avatarUploadProgress,
+            title = stringResource(R.string.uploading),
+            error = state.uploadError
+        )
+    }
+
+    if (state.isUploadingCV) {
+        UploadProgressDialog(
+            progress = state.cvUploadProgress,
+            title = stringResource(R.string.uploading),
+            error = state.uploadError
+        )
     }
 }
 
@@ -140,7 +157,7 @@ fun EditProfileScreen(
                         EditProfileHeader(
                             displayName = state.displayName,
                             username = state.username,
-                            avatarUri = state.avatarUrl,
+                            avatarUri = state.avatarLocalUri,
                             onAvatarChange = { uri -> onAction(EditProfileAction.OnAvatarChange(uri)) }
                         )
                     }
