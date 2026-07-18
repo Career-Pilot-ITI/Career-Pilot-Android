@@ -17,7 +17,7 @@ room = "2.8.4"
 workManager = "2.11.2"
 datastore = "1.2.1"
 coil = "3.5.0"
-material3Android = "1.5.0-alpha23"
+material3Android = "1.5.0-alpha24"
 coreSplashscreen = "1.2.0"
 kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.10"
@@ -27,6 +27,7 @@ appcompat = "1.7.1"
 material = "1.14.0"
 coroutines = "1.11.0"
 composeMaterial3 = "1.6.2"
+extendedIcons = "1.7.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -108,6 +109,7 @@ kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-ser
 ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+extended-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "extendedIcons" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
