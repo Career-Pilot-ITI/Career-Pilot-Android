@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
+    <string name="username">\@%1$s</string>
+    <string name="target_role">الوظيفة المستهدفة</string>
+    <string name="industry">المجال</string>
+    <string name="experience">الخبرة</string>
+    <string name="back">رجوع</string>
+
+    <!-- Gender -->
+    <string name="gender_female">أنثى</string>
+    <string name="gender_male">ذكر</string>
+
+    <!-- Experience -->
+    <string name="experience_entry_level">مبتدئ</string>
+    <string name="experience_junior">مبتدئ (جونيور)</string>
+    <string name="experience_mid_level">متوسط</string>
+    <string name="experience_senior">متقدم (سينيور)</string>
+    <string name="experience_lead">قائد فريق</string>
+    <string name="experience_executive">تنفيذي</string>
+
+    <!-- Education -->
+    <string name="education_high_school">الثانوية العامة</string>
+    <string name="education_associate">دبلوم</string>
+    <string name="education_bachelors">بكالوريوس</string>
+    <string name="education_masters">ماجستير</string>
+    <string name="education_doctorate">دكتوراه</string>
+    <string name="education_other">أخرى</string>
+    <string name="cancel">إلغاء</string>
+    <string name="allow">السماح</string>
+    <string name="camera_permission">إذن الكاميرا</string>
+    <string name="please_allow_camera_permission">يرجى السماح بإذن الكاميرا للمتابعة</string>
+    <string name="profile_photo">صورة الملف الشخصي</string>
+    <string name="change_photo">تغيير الصورة</string>
+    <string name="your_name">اسمك</string>
+    <string name="username_placeholder">\@اسم_المستخدم</string>
+    <string name="update_profile_photo">تحديث صورة الملف الشخصي</string>
+    <string name="choose_from_gallery">اختيار من المعرض</string>
+    <string name="take_a_photo">التقاط صورة</string>
+    <string name="basic_info">المعلومات الأساسية</string>
+    <string name="display_name">اسم العرض</string>
+    <string name="gender">الجنس</string>
+    <string name="date_of_birth">تاريخ الميلاد</string>
+    <string name="yyyy_mm_dd">YYYY-MM-DD</string>
+    <string name="career">المهنة</string>
+    <string name="experience_level">مستوى الخبرة</string>
+    <string name="current_job_title">المسمى الوظيفي الحالي</string>
+    <string name="years_of_experience">سنوات الخبرة</string>
+    <string name="education_level">المستوى التعليمي</string>
+    <string name="skills">المهارات</string>
+    <string name="add_a_skill_and_press_enter">أضف مهارة واضغط إدخال</string>
+    <string name="target_companies">الشركات المستهدفة</string>
+    <string name="add_a_company_and_press_enter">أضف شركة واضغط إدخال</string>
+    <string name="nothing_added_yet">لم تتم إضافة أي شيء بعد</string>
+    <string name="saving">جارٍ الحفظ…</string>
+    <string name="save_changes">حفظ التغييرات</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="upload_cv">رفع السيرة الذاتية</string>
+    <string name="cv_uploaded">تم رفع السيرة الذاتية</string>
+    <string name="change_cv">تغيير السيرة الذاتية</string>
+    <string name="uploading_cv">جارٍ رفع السيرة الذاتية… %1$d%%</string>
+    <string name="camera_permission_title">إذن الكاميرا</string>
+    <string name="camera_permission_text">يرجى السماح بإذن الكاميرا للمتابعة</string>
+    <string name="remove_x">إزالة</string>
+    <string name="add">إضافة</string>
+</resources>

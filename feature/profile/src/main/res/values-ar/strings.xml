@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_avatar">صورة الملف الشخصي</string>
+    <string name="add_your_name">أضف اسمك</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
+    <string name="username">\@%1$s</string>
+    <string name="coins">العملات</string>
+    <string name="plan">الخطة</string>
+    <string name="free">مجاني</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="not_set">غير محدد</string>
+    <string name="phone">الهاتف</string>
+    <string name="target_role">الوظيفة المستهدفة</string>
+    <string name="industry">المجال</string>
+    <string name="experience">الخبرة</string>
+    <string name="settings">الإعدادات</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="profile">الملف الشخصي</string>
+    <string name="back">رجوع</string>
+    <string name="my_cv">سيرتي الذاتية</string>
+    <string name="no_cv_uploaded">لم يتم رفع سيرة ذاتية</string>
+    <string name="profile_info">معلومات المستخدم</string>
+    <string name="logout_confirm_title">تسجيل الخروج</string>
+    <string name="logout_confirm_body">هل أنت متأكد أنك تريد تسجيل الخروج؟</string>
+    <string name="cancel">إلغاء</string>
+    <string name="personal_info">المعلومات الشخصية</string>
+    <string name="career_info">المعلومات المهنية</string>
+</resources>
