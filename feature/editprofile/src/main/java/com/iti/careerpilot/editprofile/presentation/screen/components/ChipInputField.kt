@@ -82,12 +82,12 @@ fun ChipInputField(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
+                                .background(MaterialTheme.colorScheme.secondary)
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                                 contentDescription = stringResource(R.string.add),
-                                tint = MaterialTheme.colorScheme.onPrimary,
+                                tint = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -102,41 +102,13 @@ fun ChipInputField(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(12.dp))
-
         if (chips.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 chips.forEach { chip -> Chip(text = chip, onRemove = { onRemove(chip) }) }
-            }
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(CareerPilotShapes.medium)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                        shape = CareerPilotShapes.medium
-                    )
-                    .padding(vertical = 10.dp, horizontal = 12.dp)
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_star),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.nothing_added_yet),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
@@ -147,17 +119,13 @@ fun Chip(text: String, onRemove: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f)
-                    )
-                )
+            .clip(CircleShape)
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
+                RoundedCornerShape(50)
             )
-            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(50))
-            .padding(start = 12.dp, end = 6.dp, top = 7.dp, bottom = 7.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = text,
@@ -170,7 +138,7 @@ fun Chip(text: String, onRemove: () -> Unit) {
             modifier = Modifier
                 .size(20.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
                 .clickable(onClick = onRemove)
         ) {
             Icon(

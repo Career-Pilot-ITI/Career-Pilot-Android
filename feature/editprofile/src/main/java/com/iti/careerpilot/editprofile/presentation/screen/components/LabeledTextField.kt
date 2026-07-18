@@ -26,11 +26,13 @@ internal val fieldColors: TextFieldColors
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
         errorContainerColor = MaterialTheme.colorScheme.surface,
         focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+        unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
         cursorColor = MaterialTheme.colorScheme.primary,
         focusedLabelColor = MaterialTheme.colorScheme.primary,
-        focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-        unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+        focusedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
     )
 
 @Composable

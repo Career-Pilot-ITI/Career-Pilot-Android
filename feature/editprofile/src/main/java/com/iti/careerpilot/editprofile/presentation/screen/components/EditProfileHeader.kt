@@ -88,7 +88,7 @@ fun EditProfileHeader(
                     Text(
                         text = displayName.trim().take(1).ifBlank { "?" }.uppercase(),
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
                 Box(

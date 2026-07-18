@@ -6,9 +6,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.editprofile.R
 
 @Composable
@@ -49,7 +65,7 @@ fun CVUploadField(
         Text(
             text = stringResource(R.string.upload_cv),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         when {
@@ -81,24 +97,24 @@ private fun CVEmptyState(onClick: () -> Unit) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(44.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_upload),
                 contentDescription = null,
-                modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             text = stringResource(R.string.no_cv_uploaded),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(2.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = stringResource(R.string.tap_to_upload_pdf),
             style = MaterialTheme.typography.bodySmall,
@@ -113,30 +129,26 @@ private fun CVUploadedState(
     onChange: () -> Unit,
     onRemove: () -> Unit
 ) {
-    val success = MaterialTheme.colorScheme.tertiary
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(CareerPilotShapes.medium)
-            .background(success.copy(alpha = 0.08f))
-            .border(1.dp, success.copy(alpha = 0.3f), CareerPilotShapes.medium)
+            .clip(MaterialTheme.shapes.medium)
+            .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.medium)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
-            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(success.copy(alpha = 0.15f))
+                .size(44.dp)
+                .clip(MaterialTheme.shapes.small)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_docs),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = success
+            GradientIcon(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_docs),
+                modifier = Modifier.size(24.dp)
             )
         }
 
@@ -144,23 +156,24 @@ private fun CVUploadedState(
             Text(
                 text = fileName,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Spacer(Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
                     contentDescription = null,
-                    tint = success,
-                    modifier = Modifier.size(12.dp)
+                    tint = CareerPilotPalette.green,
+                    modifier = Modifier.size(14.dp)
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = stringResource(R.string.cv_uploaded),
                     style = MaterialTheme.typography.labelSmall,
-                    color = success
+                    color = CareerPilotPalette.green
                 )
             }
         }
@@ -170,14 +183,6 @@ private fun CVUploadedState(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
                 contentDescription = stringResource(R.string.change_cv),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-        IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_close),
-                contentDescription = stringResource(R.string.remove_cv),
-                tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -199,12 +204,13 @@ private fun CVUploadingState(uploadProgress: Int) {
         CircularWavyProgressIndicator(
             progress = { uploadProgress / 100f },
             modifier = Modifier.size(32.dp),
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
         Column {
             Text(
                 text = stringResource(R.string.uploading),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
