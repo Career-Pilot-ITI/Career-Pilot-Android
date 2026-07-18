@@ -16,7 +16,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.Dimens
-import com.iti.careerpilot.core.designsystem.components.AudioWaveform
+import com.iti.careerpilot.core.designsystem.components.LoadingWave
 import com.iti.careerpilot.core.designsystem.components.SuccessCheckmark
 import com.iti.careerpilot.login.R
 
@@ -56,7 +56,7 @@ fun OtpSuccessDialog() {
                 textAlign = TextAlign.Center,
             )
 
-            AudioWaveform(
+            LoadingWave(
                 modifier = Modifier.padding(top = Dimens.SpaceXXXL),
             )
         }
