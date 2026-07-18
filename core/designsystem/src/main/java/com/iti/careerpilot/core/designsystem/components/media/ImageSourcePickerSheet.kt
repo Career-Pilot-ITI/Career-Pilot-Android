@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,10 +48,14 @@ fun ImageSourcePickerSheet(
             ) {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(text = stringResource(id = R.string.image_source_take_photo))
+                Text(
+                    text = stringResource(id = R.string.image_source_take_photo),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             Row(
                 modifier = Modifier
@@ -61,10 +66,14 @@ fun ImageSourcePickerSheet(
             ) {
                 Icon(
                     imageVector = Icons.Default.PhotoLibrary,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(text = stringResource(id = R.string.image_source_choose_gallery))
+                Text(
+                    text = stringResource(id = R.string.image_source_choose_gallery),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

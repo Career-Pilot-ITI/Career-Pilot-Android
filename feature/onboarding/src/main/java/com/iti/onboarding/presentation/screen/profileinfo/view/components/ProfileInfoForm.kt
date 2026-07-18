@@ -85,23 +85,26 @@ fun ProfileInfoForm(
                 placeholder = stringResource(R.string.profile_info_title_role_placeholder),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
-            )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-            
-            ProfileFieldRow(
-                icon = Icons.Default.Assessment,
-                label = stringResource(R.string.profile_info_experience_level_label),
-                value = experience,
-                onValueChange = onExperienceChanged,
-                placeholder = stringResource(R.string.profile_info_experience_level_placeholder),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            
+            ProfileDropdownRow(
+                icon = Icons.Default.Assessment,
+                label = stringResource(R.string.profile_info_experience_level_label),
+                value = experience,
+                options = listOf(
+                    "Entry-level",
+                    "Junior",
+                    "Mid-level",
+                    "Senior",
+                    "Lead",
+                    "Executive"
+                ),
+                onValueChange = onExperienceChanged,
+                placeholder = stringResource(R.string.profile_info_experience_level_placeholder)
             )
         }
     }

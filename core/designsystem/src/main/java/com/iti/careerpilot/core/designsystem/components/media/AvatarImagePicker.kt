@@ -1,6 +1,7 @@
 package com.iti.careerpilot.core.designsystem.components.media
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -44,6 +46,17 @@ fun AvatarImagePicker(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .border(
+                    width = 2.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF81C784), // Light Green
+                            Color(0xFFFF7A30)  // Orange
+                        )
+                    ),
+                    shape = CircleShape
+                )
+                .padding(4.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .clickable(enabled = !isUploading, onClick = onClick),
@@ -91,17 +104,29 @@ fun AvatarImagePicker(
         }
         
         if (!isUploading) {
-            FilledIconButton(
-                onClick = onClick,
+            Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(28.dp)
                     .align(Alignment.BottomEnd)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .padding(2.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = stringResource(id = R.string.avatar_picker_add_photo),
-                    modifier = Modifier.size(16.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                        .background(Color(0xFFFF7A30))
+                        .clickable(onClick = onClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CameraAlt,
+                        contentDescription = stringResource(id = R.string.avatar_picker_add_photo),
+                        modifier = Modifier.size(14.dp),
+                        tint = Color.White
+                    )
+                }
             }
         }
     }
