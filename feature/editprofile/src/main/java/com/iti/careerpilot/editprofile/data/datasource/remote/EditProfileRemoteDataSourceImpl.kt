@@ -12,15 +12,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import io.ktor.http.headers
 import java.io.File
 import javax.inject.Inject
 
-private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsInN1YiI6InVzZXJfMTAxMDEwIiwiaWF0IjoxNzg0MzI1Mzc1LCJleHAiOjE3ODQzMjg5NzV9.4Dw6VmbCj1DFujFWXk5etRvi3eVxpIYYzADGqr7ihYk"
+private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsInN1YiI6InVzZXJfMTAxMDEwIiwiaWF0IjoxNzg0MzUyOTYxLCJleHAiOjE3ODQzNTY1NjF9.k1LlTpwj9vjJwjXLmpzi8kwWLvSF7eVqpRB_VOyh98k"
 
 class EditProfileRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient
@@ -31,12 +31,10 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<UpdateProfileResponseDto, NetworkError> {
         return safeApiCall<UpdateProfileResponseDto> {
             httpClient.patch("${BuildConfig.BASE_URL}api/v1/auth/profile") {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer $testToken"
-                    )
-                }
+                header(
+                    HttpHeaders.Authorization,
+                    "Bearer $testToken"
+                )
                 setBody(request)
             }
         }
@@ -60,12 +58,10 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     append("type", "AVATAR")
                 }
             ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer $testToken"
-                    )
-                }
+                header(
+                    HttpHeaders.Authorization,
+                    "Bearer $testToken"
+                )
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)
@@ -95,12 +91,10 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     append("type", "RESUME")
                 }
             ) {
-                headers {
-                    append(
-                        HttpHeaders.Authorization,
-                        "Bearer $testToken"
-                    )
-                }
+                header(
+                    HttpHeaders.Authorization,
+                    "Bearer $testToken"
+                )
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)
