@@ -44,6 +44,7 @@
     <string name="profile_info_add_skill_confirm">Add</string>
     <string name="profile_info_add_skill_cancel">Cancel</string>
     <string name="profile_info_email_invalid">Please enter a valid email address</string>
+    <string name="pager_header">%1$d of %2$d</string>
 
     <string-array name="profile_info_default_skills">
         <item>React</item>

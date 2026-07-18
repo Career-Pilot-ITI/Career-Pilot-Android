@@ -24,25 +24,24 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.Velocity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
@@ -109,12 +108,10 @@ fun OnboardingPagerScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.Start
         ) {
-            PagerIndicator(
-                pageCount = ONBOARDING_PAGE_COUNT,
-                currentPage = pagerState.currentPage,
-            )
+            PagerHeader(currentPage = pagerState.currentPage)
 
             HorizontalPager(
                 state = pagerState,
@@ -130,12 +127,14 @@ fun OnboardingPagerScreen(
                             scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
                         }
                     )
+
                     PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
                         viewModel = tracksViewModel,
                         onNavigateNext = {
                             scope.launch { pagerState.animateScrollToPage(PAGE_UPLOAD_CV) }
                         }
                     )
+
                     PAGE_UPLOAD_CV -> UploadCvScreen(
                         viewModel = cvViewModel,
                         onNavigateNext = onOnboardingFinished,
@@ -206,12 +205,35 @@ fun OnboardingPagerScreen(
 }
 
 @Composable
-private fun PagerIndicator(pageCount: Int, currentPage: Int) {
+private fun PagerHeader(currentPage: Int) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(vertical = Dimens.SpaceL),
+            .padding(vertical = Dimens.SpaceL, horizontal = Dimens.SpaceM),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        PagerIndicator(
+            pageCount = ONBOARDING_PAGE_COUNT,
+            currentPage = currentPage,
+        )
+
+        Text(
+            stringResource(R.string.pager_header, currentPage + 1, ONBOARDING_PAGE_COUNT),
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground.copy(
+                    alpha = 0.7f
+                )
+            )
+        )
+    }
+}
+
+@Composable
+private fun PagerIndicator(pageCount: Int, currentPage: Int) {
+    Row(
+        modifier = Modifier,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
