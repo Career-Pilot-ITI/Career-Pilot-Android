@@ -24,6 +24,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import io.ktor.client.request.header
 import javax.inject.Singleton
 
 @Module
@@ -65,7 +66,7 @@ object NetworkModule {
 
         if (BuildConfig.DEBUG) {
             install(Logging) {
-                level = LogLevel.BODY
+                level = LogLevel.INFO
                 logger = object : Logger {
                     override fun log(message: String) {
                         Log.d("KtorClient", message)
@@ -77,6 +78,7 @@ object NetworkModule {
 
         defaultRequest {
             url(BuildConfig.BASE_URL)
+            header(HttpHeaders.Authorization, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEyLCJlbWFpbCI6ImhhemVta29yYTY2MEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzAwMDAwNiIsImlhdCI6MTc4NDM4MDk3NCwiZXhwIjoxNzg0Mzg0NTc0fQ.Qlk1lPwU96WkXGUb5S9_iMhlBw7Knd9trx1v1WJ37M4")
         }
     }
 }
