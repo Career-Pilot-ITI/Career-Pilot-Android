@@ -13,4 +13,5 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:model"))
     implementation(project(":core:common"))
+    testImplementation(libs.junit)
 }
