@@ -78,7 +78,7 @@ object NetworkModule {
 
         defaultRequest {
             url(BuildConfig.BASE_URL)
-            header(HttpHeaders.Authorization, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEyLCJlbWFpbCI6ImhhemVta29yYTY2MEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzAwMDAwNiIsImlhdCI6MTc4NDM4MDk3NCwiZXhwIjoxNzg0Mzg0NTc0fQ.Qlk1lPwU96WkXGUb5S9_iMhlBw7Knd9trx1v1WJ37M4")
+            header(HttpHeaders.Authorization, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEyLCJlbWFpbCI6ImhhemVta29yYTY2MEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzAwMDAwNiIsImlhdCI6MTc4NDQwNjU3OSwiZXhwIjoxNzg0NDEwMTc5fQ.bdb2GWFRpyP4E_tGcz0NF7IVNaJpC0K3b8C8xHRNTyA")
         }
     }
 }
