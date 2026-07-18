@@ -6,11 +6,14 @@ import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import com.iti.careerpilot.editprofile.domain.datasource.local.EditProfileLocalDataSource
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -20,7 +23,7 @@ private const val ERROR_TAG = "CareerPilot: EditProfileLocalDataSource"
 
 class EditProfileLocalDataSourceImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val dataStore: DataStore<UserProfile>
+    private val userProfileRepo: UserProfileRepo,
 ): EditProfileLocalDataSource {
 
     companion object {
@@ -28,16 +31,10 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
         private const val CV_DIR = "cvs"
     }
 
-    override val userProfile: Flow<UserProfile> = dataStore.data
+    override val userProfile: StateFlow<UserProfile> = userProfileRepo.userProfile
 
     override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {
-        try {
-            dataStore.updateData { currentData ->
-                updateBlock(currentData)
-            }
-        } catch (e: IOException) {
-            Log.e(ERROR_TAG, "Failed to update user profile: ${e.localizedMessage}", e)
-        }
+        userProfileRepo.updateUserProfile(updateBlock)
     }
 
     override suspend fun moveImageToInternalStorage(

@@ -1,12 +1,12 @@
 package com.iti.careerpilot.editprofile.domain.datasource.local
 
 import com.iti.core.datastore.models.UserProfile
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 
 interface EditProfileLocalDataSource {
 
-    val userProfile: Flow<UserProfile>
+    val userProfile: StateFlow<UserProfile>
 
     suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile)
 

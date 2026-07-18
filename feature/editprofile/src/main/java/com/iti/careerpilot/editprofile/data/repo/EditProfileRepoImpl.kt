@@ -16,7 +16,7 @@ import com.iti.common.result.mapToEmptyResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.core.datastore.models.UserProfile
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class EditProfileRepoImpl @Inject constructor(
@@ -25,7 +25,7 @@ class EditProfileRepoImpl @Inject constructor(
     private val imageCompressor: ImageCompressor
 ) : EditProfileRepo {
 
-    override val userProfile: Flow<UserProfile> = localDataSource.userProfile
+    override val userProfile: StateFlow<UserProfile> = localDataSource.userProfile
 
     override suspend fun updateProfile(
         request: RequestProfileUpdate

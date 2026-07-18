@@ -6,11 +6,11 @@ import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface EditProfileRepo {
 
-    val userProfile: Flow<UserProfile>
+    val userProfile: StateFlow<UserProfile>
 
     suspend fun updateProfile(
         request: RequestProfileUpdate
