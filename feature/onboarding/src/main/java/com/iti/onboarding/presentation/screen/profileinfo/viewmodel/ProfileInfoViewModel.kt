@@ -83,16 +83,10 @@ class ProfileInfoViewModel @Inject constructor(
                 _state.update { it.updateData { data -> data.copy(selectedImageUri = intent.uri.toString()) }.copy(hasSuccessfullySubmitted = false) }
             }
 
-            is ProfileInfoIntent.OnCameraPermissionDenied ->
-                viewModelScope.launch {
-                    _effect.emit(
-                        ProfileInfoEffect.ShowSnackbar(
-                            messageRes = R.string.profile_info_camera_permission_message,
-                            actionLabelRes = R.string.profile_info_open_settings,
-                            actionIntent = ProfileInfoIntent.OnOpenAppSettings
-                        )
-                    )
-                }
+            is ProfileInfoIntent.OnCameraPermissionDenied -> {
+                _state.update { it.copy(isImageSourceSheetVisible = false) }
+                viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
+            }
 
             is ProfileInfoIntent.OnRetryPhotoUpload ->
                 submitProfile()
