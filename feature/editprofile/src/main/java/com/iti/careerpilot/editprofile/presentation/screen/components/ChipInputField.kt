@@ -80,15 +80,15 @@ fun ChipInputField(
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.secondary)
+                                .background(MaterialTheme.colorScheme.primary)
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_add),
                                 contentDescription = stringResource(R.string.add),
                                 tint = MaterialTheme.colorScheme.onSecondary,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
@@ -103,7 +103,7 @@ fun ChipInputField(
         )
 
         if (chips.isNotEmpty()) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -122,29 +122,29 @@ fun Chip(text: String, onRemove: () -> Unit) {
             .clip(CircleShape)
             .border(
                 1.dp,
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f),
+                MaterialTheme.colorScheme.secondary,
                 RoundedCornerShape(50)
             )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(12.dp))
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(20.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
+                .background(MaterialTheme.colorScheme.error)
                 .clickable(onClick = onRemove)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_close),
                 contentDescription = stringResource(R.string.remove_x, text),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(12.dp)
             )
         }

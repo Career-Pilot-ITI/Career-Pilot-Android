@@ -20,7 +20,7 @@ import io.ktor.http.HttpHeaders
 import java.io.File
 import javax.inject.Inject
 
-private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsImVtYWlsIjoiaEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzEwMTAxMCIsImlhdCI6MTc4NDM2ODE1MCwiZXhwIjoxNzg0MzcxNzUwfQ.RmsZrpsX0e-kn3801v_2L0a6vOEiu_oPvq-u6IT5FzY"
+private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsImVtYWlsIjoiaEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzEwMTAxMCIsImlhdCI6MTc4NDM3OTg2MiwiZXhwIjoxNzg0NzM5ODYyfQ.ktxu9dIQ2yMF8lufEIIf8sDntjTdAfcdkmyb6mbTiS8"
 
 class EditProfileRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient
