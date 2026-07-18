@@ -17,8 +17,7 @@ import com.iti.common.result.onError
 import com.iti.common.util.toUIText
 import com.iti.common.util.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.putJsonArray
@@ -27,7 +26,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -57,10 +58,10 @@ class ProfileInfoViewModel @Inject constructor(
         }
     }
 
-    private val _effect = Channel<ProfileInfoEffect>(Channel.BUFFERED)
-    val effect: Flow<ProfileInfoEffect> = _effect.receiveAsFlow()
+    private val _effect = MutableSharedFlow<ProfileInfoEffect>()
+    val effect: SharedFlow<ProfileInfoEffect> = _effect.asSharedFlow()
 
-    private var lastPickedUri: Uri? = null
+
 
     fun onIntent(intent: ProfileInfoIntent) {
         when (intent) {
@@ -72,21 +73,19 @@ class ProfileInfoViewModel @Inject constructor(
                 when (intent.source) {
                     ImageSource.CAMERA -> viewModelScope.launch {
                         val uri = imageCaptureUriProvider.createImageCaptureUri()
-                        lastPickedUri = uri
-                        _effect.send(ProfileInfoEffect.LaunchCamera(uri))
+                        _effect.emit(ProfileInfoEffect.LaunchCamera(uri))
                     }
                     ImageSource.GALLERY -> Unit
                 }
             }
 
             is ProfileInfoIntent.OnImagePicked -> {
-                lastPickedUri = intent.uri
-                _state.update { it.updateData { data -> data.copy(selectedImageUri = intent.uri.toString()) } }
+                _state.update { it.updateData { data -> data.copy(selectedImageUri = intent.uri.toString()) }.copy(hasSuccessfullySubmitted = false) }
             }
 
             is ProfileInfoIntent.OnCameraPermissionDenied ->
                 viewModelScope.launch {
-                    _effect.send(
+                    _effect.emit(
                         ProfileInfoEffect.ShowSnackbar(
                             messageRes = R.string.profile_info_camera_permission_message,
                             actionLabelRes = R.string.profile_info_open_settings,
@@ -98,11 +97,11 @@ class ProfileInfoViewModel @Inject constructor(
             is ProfileInfoIntent.OnRetryPhotoUpload ->
                 submitProfile()
 
-            is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) } }
-            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) } }
-            is ProfileInfoIntent.OnTitleChanged -> _state.update { it.updateData { data -> data.copy(title = intent.title) } }
-            is ProfileInfoIntent.OnExperienceChanged -> _state.update { it.updateData { data -> data.copy(experience = intent.experience) } }
-            is ProfileInfoIntent.OnSkillsChanged -> _state.update { it.updateData { data -> data.copy(skills = intent.skills.toPersistentList()) } }
+            is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnTitleChanged -> _state.update { it.updateData { data -> data.copy(title = intent.title) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnExperienceChanged -> _state.update { it.updateData { data -> data.copy(experience = intent.experience) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnSkillsChanged -> _state.update { it.updateData { data -> data.copy(skills = intent.skills.toPersistentList()) }.copy(hasSuccessfullySubmitted = false) }
             is ProfileInfoIntent.OnSubmit -> {
                 submitProfile()
             }
@@ -110,7 +109,7 @@ class ProfileInfoViewModel @Inject constructor(
                 _state.update { it.copy(isImageSourceSheetVisible = false) }
             }
             is ProfileInfoIntent.OnOpenAppSettings ->
-                viewModelScope.launch { _effect.send(ProfileInfoEffect.OpenAppSettings) }
+                viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
             is ProfileInfoIntent.OnShowAddSkillDialogChanged -> {
                 _state.update { it.copy(showAddSkillDialog = intent.show) }
             }
@@ -133,7 +132,8 @@ class ProfileInfoViewModel @Inject constructor(
                             allSkills = newAllSkills,
                             data = currentState.data.copy(skills = newDataSkills),
                             newSkillText = "",
-                            showAddSkillDialog = false
+                            showAddSkillDialog = false,
+                            hasSuccessfullySubmitted = false
                         )
                     }
                 } else {
@@ -152,6 +152,10 @@ class ProfileInfoViewModel @Inject constructor(
 
     private fun submitProfile() {
         viewModelScope.launch {
+            if (_state.value.hasSuccessfullySubmitted) {
+                _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
+                return@launch
+            }
             _state.update { it.copy(isSubmitting = true) }
             
             var currentData = _state.value.data
@@ -176,7 +180,7 @@ class ProfileInfoViewModel @Inject constructor(
                         currentData = _state.value.data
                         uploadSuccess = true
                     }.onError { error ->
-                        _effect.send(
+                        _effect.emit(
                             ProfileInfoEffect.ShowSnackbar(
                                 messageRes = (error.toUIText() as UIText.StringResource).resId,
                                 actionLabelRes = R.string.profile_info_photo_retry,
@@ -189,7 +193,7 @@ class ProfileInfoViewModel @Inject constructor(
                         return@launch
                     }
                 } catch (e: Exception) {
-                    _effect.send(
+                    _effect.emit(
                         ProfileInfoEffect.ShowSnackbar(
                             messageRes = R.string.profile_info_photo_upload_error,
                             actionLabelRes = R.string.profile_info_photo_retry,
@@ -216,10 +220,11 @@ class ProfileInfoViewModel @Inject constructor(
             
             updateProfileUseCase(request)
                 .onSuccess {
-                    _effect.send(ProfileInfoEffect.NavigateToNextScreen)
+                    _state.update { it.copy(hasSuccessfullySubmitted = true) }
+                    _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 }
                 .onError { error ->
-                    _effect.send(
+                    _effect.emit(
                         ProfileInfoEffect.ShowSnackbar(
                             messageRes = (error.toUIText() as UIText.StringResource).resId
                         )

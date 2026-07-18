@@ -22,10 +22,17 @@ data class ProfileInfoUiState(
     val isImageSourceSheetVisible: Boolean = false,
     val isImageUploading: Boolean = false,
     val isSubmitting: Boolean = false,
+    val hasSuccessfullySubmitted: Boolean = false,
     val allSkills: ImmutableList<String> = persistentListOf(),
     val showAddSkillDialog: Boolean = false,
     val newSkillText: String = ""
-)
+) {
+    val isFormValid: Boolean
+        get() {
+            val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
+            return data.name.isNotBlank() && isEmailValid && data.title.isNotBlank() && data.experience.isNotBlank()
+        }
+}
 
 fun ProfileInfoUiState.updateData(
     transform: (ProfileInfoData) -> ProfileInfoData
