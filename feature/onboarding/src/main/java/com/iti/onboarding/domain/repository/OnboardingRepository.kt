@@ -14,9 +14,6 @@ interface OnboardingRepository {
     suspend fun saveAvatarUrl(url: String)
     suspend fun updateProfile(request: UpdateProfileRequestDto): CareerPilotResult<UserResponseDto, NetworkError>
     suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError>
-    suspend fun uploadCv(
-        document: PdfFile,
-        onProgress: (Float) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError>
+    suspend fun uploadCv(document: PdfFile): CareerPilotResult<Unit, NetworkError>
     suspend fun updateProfileTrack(trackId: Int): CareerPilotResult<Unit, NetworkError>
 }

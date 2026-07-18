@@ -7,11 +7,5 @@ import javax.inject.Inject
 class UploadCvUseCase @Inject constructor(
     private val repository: OnboardingRepository,
 ) {
-    suspend operator fun invoke(
-        document: PdfFile,
-        onProgress: (Float) -> Unit,
-    ) = repository.uploadCv(
-        document = document,
-        onProgress = onProgress,
-    )
+    suspend operator fun invoke(document: PdfFile) = repository.uploadCv(document = document)
 }

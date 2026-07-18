@@ -18,10 +18,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class OnboardingRemoteDataSourceImpl @Inject constructor(
@@ -54,51 +50,25 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getTracks(): List<TracksResponseDto> {
-        return httpClient.get(Endpoints.GET_TRACKS){
+        return httpClient.get(Endpoints.GET_TRACKS) {
             contentType(ContentType.Application.Json)
         }.body()
     }
 
-    override suspend fun uploadCv(
-        document: PdfFile,
-        onProgress: (Float) -> Unit,
-    ): UploadFileResponseDto {
-        return coroutineScope {
-            launch {
-                val totalBytes = document.bytes.size.coerceAtLeast(1)
-                var uploadedBytes = 0
-
-                while (uploadedBytes < totalBytes) {
-                    delay(UPLOAD_PROGRESS_DELAY_MS)
-                    uploadedBytes = minOf(
-                        uploadedBytes + UPLOAD_CHUNK_SIZE_BYTES,
-                        totalBytes,
-                    )
-                    onProgress(uploadedBytes.toFloat() / totalBytes.toFloat())
-                }
-            }
-
-            async<UploadFileResponseDto> {
-                return@async httpClient.submitFormWithBinaryData(
-                    url = Endpoints.UPLOAD_FILE,
-                    formData = formData {
-                        append("type", "cvs")
-                        append(
-                            "file",
-                            document.bytes,
-                            Headers.build {
-                                append(HttpHeaders.ContentType, document.mimeType)
-                                append(HttpHeaders.ContentDisposition, "filename=\"${document.name}\"")
-                            }
-                        )
+    override suspend fun uploadCv(document: PdfFile): UploadFileResponseDto {
+        return httpClient.submitFormWithBinaryData(
+            url = Endpoints.UPLOAD_FILE,
+            formData = formData {
+                append("type", "cvs")
+                append(
+                    "file",
+                    document.bytes,
+                    Headers.build {
+                        append(HttpHeaders.ContentType, document.mimeType)
+                        append(HttpHeaders.ContentDisposition, "filename=\"${document.name}\"")
                     }
-                ).body()
-            }.await()
-        }
-    }
-
-    private companion object {
-        const val UPLOAD_CHUNK_SIZE_BYTES = 256 * 1024
-        const val UPLOAD_PROGRESS_DELAY_MS = 40L
+                )
+            }
+        ).body()
     }
 }

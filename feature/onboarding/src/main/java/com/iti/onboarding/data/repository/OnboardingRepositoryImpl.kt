@@ -92,15 +92,9 @@ class OnboardingRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadCv(
-        document: PdfFile,
-        onProgress: (Float) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError> {
+    override suspend fun uploadCv(document: PdfFile): CareerPilotResult<Unit, NetworkError> {
         return try {
-            val response = remoteDataSource.uploadCv(
-                document = document,
-                onProgress = onProgress,
-            )
+            val response = remoteDataSource.uploadCv(document = document)
 
             localDataSource.savePdfUrl(response.url)
             CareerPilotResult.Success(Unit)

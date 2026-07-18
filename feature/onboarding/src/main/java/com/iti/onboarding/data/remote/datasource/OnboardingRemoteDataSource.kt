@@ -11,8 +11,5 @@ interface OnboardingRemoteDataSource {
     suspend fun uploadFile(fileData: FileUploadData): UploadFileResponseDto
     suspend fun updateProfile(request: UpdateProfileRequestDto): UserResponseDto
     suspend fun getTracks(): List<TracksResponseDto>
-    suspend fun uploadCv(
-        document: PdfFile,
-        onProgress: (Float) -> Unit,
-    ): UploadFileResponseDto
+    suspend fun uploadCv(document: PdfFile): UploadFileResponseDto
 }

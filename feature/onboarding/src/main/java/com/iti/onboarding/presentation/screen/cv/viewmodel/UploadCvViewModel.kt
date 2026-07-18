@@ -2,9 +2,10 @@ package com.iti.onboarding.presentation.screen.cv.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.common.media.pdfpicker.PdfReader
+import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
+import com.iti.core.datastore.CareerPilotPreferencesDataSource
 import com.iti.core.model.PdfFile
 import com.iti.onboarding.domain.usecase.UploadCvUseCase
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
@@ -13,23 +14,28 @@ import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvIntent
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
-import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Inject
 
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
     private val uploadCv: UploadCvUseCase,
-    private val pdfReader: PdfReader,
+    private val pdfOperations: PdfOperations,
     private val datastore: CareerPilotPreferencesDataSource
 ) : ViewModel() {
+
+    private companion object {
+        const val UPLOAD_CHUNK_SIZE_BYTES = 256 * 1024
+        const val UPLOAD_PROGRESS_DELAY_MS = 40L
+    }
 
     private val _state = MutableStateFlow(UploadCvUiState())
     val state = _state.asStateFlow()
@@ -62,30 +68,62 @@ class UploadCvViewModel @Inject constructor(
                 stage = CvUploadStage.PREPARING,
             )
 
-            when (val result = pdfReader.readPdf(uri)) {
-                is CareerPilotResult.Error -> {
-                    _state.value = UploadCvUiState()
+            launch {
+                when (val result = pdfOperations.readPdf(uri)) {
+                    is CareerPilotResult.Error -> {
+                        _state.value = UploadCvUiState()
 
-                    _effects.emit(
-                        UploadCvEffect.ShowError(
-                            result.error.toUIText(),
-                        )
-                    )
-                }
-
-                is CareerPilotResult.Success -> {
-                    _state.update {
-                        it.copy(
-                            selectedFile = SelectedCvUiModel(
-                                name = result.data.name,
-                                sizeBytes = result.data.sizeBytes,
-                            ),
-                            stage = CvUploadStage.SELECTED,
-                            uploadProgress = 0f,
+                        _effects.emit(
+                            UploadCvEffect.ShowError(
+                                result.error.toUIText(),
+                            )
                         )
                     }
 
-                    uploadSelectedDocument(result.data)
+                    is CareerPilotResult.Success -> {
+                        launch {
+                            val totalBytes = result.data.bytes.size.coerceAtLeast(1)
+                            var uploadedBytes = 0
+
+                            while (uploadedBytes < totalBytes) {
+                                delay(UPLOAD_PROGRESS_DELAY_MS)
+                                uploadedBytes = minOf(
+                                    uploadedBytes + UPLOAD_CHUNK_SIZE_BYTES,
+                                    totalBytes,
+                                )
+                                val progress = uploadedBytes.toFloat() / totalBytes.toFloat()
+                                _state.update {
+                                    it.copy(
+                                        uploadProgress = progress.coerceIn(0f, 1f),
+                                    )
+                                }
+                            }
+                        }
+
+                        _state.update {
+                            it.copy(
+                                selectedFile = SelectedCvUiModel(
+                                    name = result.data.name,
+                                    sizeBytes = result.data.sizeBytes,
+                                ),
+                                stage = CvUploadStage.SELECTED,
+                                uploadProgress = 0f,
+                            )
+                        }
+
+                        uploadSelectedDocument(result.data)
+                    }
+                }
+            }
+
+            launch {
+                when (
+                    val result = pdfOperations.storePdfInternally(uri)
+                ) {
+                    is CareerPilotResult.Success<String> ->
+                        datastore.setPdfInternalFileUri(result.data)
+
+                    is CareerPilotResult.Error<*> -> Unit
                 }
             }
         })?.cancel()
@@ -100,13 +138,7 @@ class UploadCvViewModel @Inject constructor(
         }
 
         when (
-            val result = uploadCv(document) { progress ->
-                _state.update {
-                    it.copy(
-                        uploadProgress = progress.coerceIn(0f, 1f),
-                    )
-                }
-            }
+            val result = uploadCv(document)
         ) {
             is CareerPilotResult.Error -> {
                 _state.update {
@@ -121,6 +153,7 @@ class UploadCvViewModel @Inject constructor(
                     )
                 )
             }
+
             is CareerPilotResult.Success -> {
                 _state.update {
                     it.copy(
