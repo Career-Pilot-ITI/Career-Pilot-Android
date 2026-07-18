@@ -3,8 +3,10 @@ package com.iti.onboarding.presentation.screen.track.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.onboarding.domain.usecase.GetTracksUseCase
+import com.iti.onboarding.domain.usecase.UpdateProfileTrackUseCase
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ChoosingTracksViewModel @Inject constructor(
     private val getTracksUseCase: GetTracksUseCase,
+    private val updateProfileTrackUseCase: UpdateProfileTrackUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChoosingTracksUiState())
@@ -47,7 +50,19 @@ class ChoosingTracksViewModel @Inject constructor(
 
             ChoosingTracksIntent.OnNavigateNext -> {
                 viewModelScope.launch {
-                    _effects.emit(ChoosingTracksEffects.NavigateNext)
+                    val result = updateProfileTrackUseCase(_state.value.selectedTrack?.id ?: 0)
+                    when (result) {
+                        is CareerPilotResult.Success -> {
+                            _effects.emit(ChoosingTracksEffects.NavigateNext)
+                        }
+                        else -> {
+                            _effects.emit(
+                                ChoosingTracksEffects.ShowError(
+                                    UIText.StringResource(com.iti.common.R.string.error_unknown)
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -116,4 +116,21 @@ class OnboardingRepositoryImpl @Inject constructor(
             CareerPilotResult.Error(NetworkError.UNKNOWN)
         }
     }
+
+    override suspend fun updateProfileTrack(trackId: Int): CareerPilotResult<Unit, NetworkError> {
+        return try {
+            updateProfile(UpdateProfileRequestDto(trackId = trackId))
+            CareerPilotResult.Success(Unit)
+        } catch (e: ClientRequestException) {
+            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
+        } catch (e: ServerResponseException) {
+            CareerPilotResult.Error(NetworkError.SERVER)
+        } catch (e: SerializationException) {
+            CareerPilotResult.Error(NetworkError.SERIALIZATION)
+        } catch (e: UnresolvedAddressException) {
+            CareerPilotResult.Error(NetworkError.NO_INTERNET)
+        } catch (e: Exception) {
+            CareerPilotResult.Error(NetworkError.UNKNOWN)
+        }
+    }
 }

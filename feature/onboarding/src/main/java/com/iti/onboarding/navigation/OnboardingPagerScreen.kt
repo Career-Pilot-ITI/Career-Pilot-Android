@@ -72,7 +72,7 @@ fun OnboardingPagerScreen(
     cvViewModel: UploadCvViewModel = hiltViewModel(),
 ) {
     val pagerState = rememberPagerState(
-        initialPage = 1,
+        initialPage = PAGE_PROFILE_INFO,
         pageCount = { ONBOARDING_PAGE_COUNT }
     )
     val scope = rememberCoroutineScope()

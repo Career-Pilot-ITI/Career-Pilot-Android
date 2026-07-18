@@ -17,5 +17,6 @@ data class UpdateProfileRequestDto(
     val educationLevel: String? = null,
     val targetCompanies: List<String>? = null,
     val timezone: String? = null,
-    val cvFileId: Long? = null
+    val cvFileId: Long? = null,
+    val trackId: Int? = null,
 )

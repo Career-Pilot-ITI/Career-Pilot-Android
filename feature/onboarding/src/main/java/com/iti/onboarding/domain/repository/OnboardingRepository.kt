@@ -18,4 +18,5 @@ interface OnboardingRepository {
         document: PdfFile,
         onProgress: (Float) -> Unit,
     ): CareerPilotResult<Unit, NetworkError>
+    suspend fun updateProfileTrack(trackId: Int): CareerPilotResult<Unit, NetworkError>
 }
