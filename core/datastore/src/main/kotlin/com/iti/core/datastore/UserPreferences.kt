@@ -8,4 +8,5 @@ data class UserPreferences(
     val token: String? = null,
     val avatarUrl: String? = null,
     val pdfUrl: String? = null,
+    val pdfInternalFileUri: String? = null,
 )

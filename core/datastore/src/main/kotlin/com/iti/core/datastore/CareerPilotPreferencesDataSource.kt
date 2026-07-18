@@ -20,6 +20,9 @@ class CareerPilotPreferencesDataSource @Inject constructor(
     val pdfUrl: Flow<String?> =
         userPreferences.data.map { it.pdfUrl }
 
+    val pdfInternalFileUri: Flow<String?> =
+        userPreferences.data.map { it.pdfInternalFileUri }
+
     suspend fun setHasCompletedOnboarding(completed: Boolean) {
         userPreferences.updateData { it.copy(hasCompletedOnboarding = completed) }
     }
@@ -34,5 +37,9 @@ class CareerPilotPreferencesDataSource @Inject constructor(
 
     suspend fun savePdfUrl(url: String) {
         userPreferences.updateData { it.copy(pdfUrl = url) }
+    }
+
+    suspend fun setPdfInternalFileUri(uri: String) {
+        userPreferences.updateData { it.copy(pdfInternalFileUri = uri) }
     }
 }
