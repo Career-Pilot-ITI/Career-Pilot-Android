@@ -1,10 +1,8 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.careerpilot.module.network)
+    alias(libs.plugins.careerpilot.testing)
 }
 
 val baseUrl: String = run {
@@ -26,7 +24,7 @@ val baseUrl: String = run {
             Local development - add this line to local.properties in the project root:
 
                 careerpilot.baseUrl=http://10.0.2.2:8080/
-                
+
             The URL must end with '/'.
             """.trimIndent()
         )
@@ -34,42 +32,12 @@ val baseUrl: String = run {
 
 android {
     namespace = "com.iti.careerpilot.core.network"
-    compileSdk {
-        version = release(37)
-    }
 
     defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildFeatures {
         buildConfig = true
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-}
-
-dependencies {
-    // ktor
-    api(libs.bundles.ktor)
-
-    // kotlin json
-    implementation(libs.kotlinx.serialization.json)
-
-    // hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-
-    implementation(project(":core:common"))
 }

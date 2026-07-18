@@ -1,29 +1,14 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.careerpilot.android.library)
+    alias(libs.plugins.careerpilot.android.compose)
 }
 
 android {
     namespace = "com.iti.careerpilot.core.designsystem"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 26
-    }
-
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.googlefonts)
-    implementation(libs.androidx.core.ktx)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.compose.material3)
 }

@@ -32,6 +32,9 @@
     <string name="error_incompatible_file">This file type is not supported.</string>
     <string name="error_storage_unknown">Unable to process the selected file. Please try another file.</string>
 
+    <!-- Snackbar actions -->
+    <string name="snackbar_action_undo">Undo</string>
+
     <!-- Profile Sections -->
     <string name="edit_personal_info">Edit Personal Info</string>
     <string name="edit_career_info">Edit Career Info</string>
