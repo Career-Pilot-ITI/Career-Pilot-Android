@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brand_name">CareerPilot</string>
+    <string name="logo_symbol_fallback">CP</string>
+    <string name="login_heading">Your AI Interview Coach Awaits</string>
+    <string name="login_subheading">Practice realistic interviews, get instant feedback, and land your dream role.</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="phone_placeholder">01X XXXX XXXX</string>
+    <string name="btn_continue">Continue</string>
+
+    <string name="error_phone_empty">Please enter your phone number</string>
+    <string name="error_phone_too_short">This phone number is too short</string>
+    <string name="error_phone_too_long">This phone number is too long</string>
+    <string name="error_phone_invalid">Please enter a valid phone number</string>
+
+</resources>

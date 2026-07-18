@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brand_name">CareerPilot</string>
+    <string name="logo_symbol_fallback">CP</string>
+    <string name="login_heading">مدرب الذكاء الاصطناعي للمقابلات في انتظارك</string>
+    <string name="login_subheading">تدرب على مقابلات واقعية، واحصل على تقييم فوري، واحصل على وظيفة أحلامك.</string>
+    <string name="phone_number_label">رقم الهاتف</string>
+    <string name="phone_placeholder">٠١x xxxx xxxx</string>
+    <string name="btn_continue">متابعة</string>
+
+    <string name="error_phone_empty">من فضلك أدخل رقم هاتفك</string>
+    <string name="error_phone_too_short">رقم الهاتف قصير جدًا</string>
+    <string name="error_phone_too_long">رقم الهاتف طويل جدًا</string>
+    <string name="error_phone_invalid">من فضلك أدخل رقم هاتف صحيح</string>
+</resources>

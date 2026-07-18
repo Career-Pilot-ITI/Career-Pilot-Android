@@ -11,8 +11,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.features.login.LoginRoot
-import com.iti.careerpilot.features.otp.OTPRoot
+import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
+import com.iti.careerpilot.login.presentation.otp.OTPRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
@@ -52,15 +52,16 @@ fun RootNavDisplay() {
         entryProvider = entryProvider {
             entry<Route.Login> {
                 LoginRoot(
-                    openOTP = {
+                    openOTP = { phoneNumber ->
                         rootBackStack.apply {
-                            navigateSingleTop(Route.OTP)
+                            navigateSingleTop(Route.OTP(phoneNumber = phoneNumber))
                         }
                     },
                 )
             }
             entry<Route.OTP> {
                 OTPRoot(
+                    phoneNumber = it.phoneNumber,
                     openHome = {
                         rootBackStack.apply {
                             clear()
