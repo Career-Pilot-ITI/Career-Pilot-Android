@@ -24,6 +24,7 @@ internal val fieldColors: TextFieldColors
     @Composable get() = TextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+        errorContainerColor = MaterialTheme.colorScheme.surface,
         focusedIndicatorColor = MaterialTheme.colorScheme.primary,
         unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
         cursorColor = MaterialTheme.colorScheme.primary,

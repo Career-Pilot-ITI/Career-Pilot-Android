@@ -48,9 +48,9 @@
     <string name="years_of_experience">سنوات الخبرة</string>
     <string name="education_level">المستوى التعليمي</string>
     <string name="skills">المهارات</string>
-    <string name="add_a_skill_and_press_enter">أضف مهارة واضغط إدخال</string>
+    <string name="add_skills">أضف مهارات</string>
     <string name="target_companies">الشركات المستهدفة</string>
-    <string name="add_a_company_and_press_enter">أضف شركة واضغط إدخال</string>
+    <string name="add_a_company_and_press_enter">أضف شركات</string>
     <string name="nothing_added_yet">لم تتم إضافة أي شيء بعد</string>
     <string name="saving">جارٍ الحفظ…</string>
     <string name="save_changes">حفظ التغييرات</string>
@@ -70,4 +70,6 @@
 
     <string name="animation_percentage">%1$d%%</string>
     <string name="upload_failed">فشل التحميل</string>
+    <string name="error_empty_display_name">الاسم يجب ان يكون موجود</string>
+    <string name="error_invalid_email">الرجاء ادخال عنوان بريد صالح</string>
 </resources>

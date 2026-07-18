@@ -180,7 +180,8 @@ fun EditProfileScreen(
                                 label = stringResource(R.string.display_name),
                                 value = state.displayName,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_account),
-                                onValueChange = { onAction(EditProfileAction.OnDisplayNameChange(it)) }
+                                onValueChange = { onAction(EditProfileAction.OnDisplayNameChange(it)) },
+                                errorText = if (state.displayNameError) stringResource(R.string.error_empty_display_name) else null
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.email),
@@ -188,12 +189,12 @@ fun EditProfileScreen(
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_email),
                                 onValueChange = { onAction(EditProfileAction.OnEmailChange(it)) },
                                 keyboardType = KeyboardType.Email,
-                                errorText = state.fieldErrors["email"]
+                                errorText = if (state.emailError) stringResource(R.string.error_invalid_email) else null
                             )
                             LabeledDropdownField(
                                 label = stringResource(R.string.gender),
                                 value = state.gender,
-                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_account),
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_person),
                                 options = Gender.entries.map { stringResource(it.labelRes) },
                                 onValueChange = { onAction(EditProfileAction.OnGenderChange(it)) }
                             )
@@ -208,7 +209,7 @@ fun EditProfileScreen(
                             LabeledTextField(
                                 label = stringResource(R.string.date_of_birth),
                                 value = state.dateOfBirth,
-                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_calendar),
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_edit_calendar),
                                 placeholder = stringResource(R.string.yyyy_mm_dd),
                                 onValueChange = { },
                                 readOnly = true,
@@ -316,7 +317,7 @@ fun EditProfileScreen(
                             ChipInputField(
                                 label = stringResource(R.string.skills),
                                 chips = state.skills,
-                                placeholder = stringResource(R.string.add_a_skill_and_press_enter),
+                                placeholder = stringResource(R.string.add_skills),
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_star),
                                 onAdd = { onAction(EditProfileAction.OnSkillAdd(it)) },
                                 onRemove = { onAction(EditProfileAction.OnSkillRemove(it)) }
@@ -327,7 +328,7 @@ fun EditProfileScreen(
                     item {
                         FormSection(
                             title = stringResource(R.string.target_companies),
-                            icon = ImageVector.vectorResource(R.drawable.ic_business)
+                            icon = ImageVector.vectorResource(R.drawable.ic_company)
                         ) {
                             ChipInputField(
                                 label = stringResource(R.string.target_companies),

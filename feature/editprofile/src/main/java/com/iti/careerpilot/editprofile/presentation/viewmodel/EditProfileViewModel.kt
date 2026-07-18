@@ -1,5 +1,6 @@
 package com.iti.careerpilot.editprofile.presentation.viewmodel
 
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.common.model.ProfileEditSection
@@ -87,13 +88,17 @@ class EditProfileViewModel @Inject constructor(
     fun onAction(action: EditProfileAction) {
         when (action) {
             is EditProfileAction.OnDisplayNameChange ->
-                _state.update { it.copy(displayName = action.value) }
+                _state.update { 
+                    it.copy(
+                        displayName = action.value,
+                        displayNameError = false
+                    ) 
+                }
 
             is EditProfileAction.OnUsernameChange ->
                 _state.update {
                     it.copy(
-                        username = action.value,
-                        fieldErrors = it.fieldErrors - "username"
+                        username = action.value
                     )
                 }
 
@@ -101,7 +106,7 @@ class EditProfileViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         email = action.value,
-                        fieldErrors = it.fieldErrors - "email"
+                        emailError = false
                     )
                 }
 
@@ -339,20 +344,39 @@ class EditProfileViewModel @Inject constructor(
     private fun save(section: ProfileEditSection) {
         val current = _state.value
 
-        val errors = mutableMapOf<String, String>()
+        var hasError = false
+        var displayNameErr = false
+        var emailErr = false
+
         if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
-            if (current.username.isBlank()) errors["username"] = "Username can't be empty"
-            if (current.email.isNotBlank() && !current.email.contains("@")) errors["email"] =
-                "Enter a valid email"
+            if (current.displayName.isBlank()) {
+                displayNameErr = true
+                hasError = true
+            }
+            if (current.email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(current.email).matches()) {
+                emailErr = true
+                hasError = true
+            }
         }
 
-        if (errors.isNotEmpty()) {
-            _state.update { it.copy(fieldErrors = errors) }
+        if (hasError) {
+            _state.update { 
+                it.copy(
+                    displayNameError = displayNameErr,
+                    emailError = emailErr
+                ) 
+            }
             return
         }
 
         viewModelScope.launch(dispatcherDefault) {
-            _state.update { it.copy(isLoading = true, fieldErrors = emptyMap()) }
+            _state.update { 
+                it.copy(
+                    isLoading = true, 
+                    displayNameError = false,
+                    emailError = false
+                ) 
+            }
             val request = when (section) {
                 ProfileEditSection.PERSONAL -> {
                     RequestProfileUpdate(
