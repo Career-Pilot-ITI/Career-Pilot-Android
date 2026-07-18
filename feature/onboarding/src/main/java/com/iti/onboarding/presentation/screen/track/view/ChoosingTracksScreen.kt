@@ -28,6 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksUiState
@@ -49,7 +50,9 @@ fun ChoosingTracksScreen(
             viewModel.effects.collect { effect ->
                 when (effect) {
                     is ChoosingTracksEffects.ShowError -> {
-                        // TODO: Show the localized message with the base snackbar.
+                        CareerPilotSnackbarController.show(
+                            message = effect.message,
+                        )
                     }
 
                     ChoosingTracksEffects.NavigateNext -> onNavigateNext()

@@ -31,6 +31,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.common.media.pdfpicker.rememberPdfPickerLauncher
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.snackbar.SnackbarController
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
@@ -69,7 +71,9 @@ fun UploadCvScreen(
                     UploadCvEffect.NavigateNext -> onNavigateNext()
                     UploadCvEffect.Skip -> onSkip()
                     is UploadCvEffect.ShowError -> {
-                        // TODO: Show the localized message with the base snackbar.
+                        CareerPilotSnackbarController.show(
+                            message = effect.message,
+                        )
                     }
                 }
             }

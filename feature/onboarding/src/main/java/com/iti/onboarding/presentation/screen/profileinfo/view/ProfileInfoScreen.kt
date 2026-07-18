@@ -1,12 +1,10 @@
 package com.iti.onboarding.presentation.screen.profileinfo.view
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import com.iti.common.media.ImageSource
-import com.iti.common.media.rememberImagePickerLauncher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,21 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,19 +30,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.components.media.AvatarImagePicker
 import com.iti.careerpilot.core.designsystem.components.media.ImageSourcePickerSheet
+import com.iti.common.media.ImageSource
+import com.iti.common.media.rememberImagePickerLauncher
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.UIText
 import com.iti.onboarding.R
-
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.AddSkillDialog
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileBanner
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileHeader
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileInfoForm
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileSkillsSection
-
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileTitle
 import com.iti.onboarding.presentation.screen.profileinfo.viewmodel.ProfileInfoEffect
 import com.iti.onboarding.presentation.screen.profileinfo.viewmodel.ProfileInfoIntent
@@ -66,7 +58,7 @@ fun ProfileInfoScreen(
     onNavigateNext: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
+
     ProfileScreenContent(
         state = state,
         effectFlow = viewModel.effect,
@@ -103,19 +95,26 @@ fun ProfileScreenContent(
                 is ProfileInfoEffect.LaunchCamera -> {
                     imagePicker.launchCamera(effect.captureUri)
                 }
+
                 is ProfileInfoEffect.RequestCameraPermission -> {
                     imagePicker.requestCameraPermission()
                 }
+
                 is ProfileInfoEffect.ShowSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(
-                        message = context.getString(effect.messageRes),
-                        actionLabel = effect.actionLabelRes?.let { context.getString(it) },
-                        duration = SnackbarDuration.Long
+                    val result = effect.actionLabelRes?.let {
+                        CareerPilotSnackbarController.show(
+                            message = UIText.StringResource(effect.messageRes),
+                            actionLabel = UIText.StringResource(effect.actionLabelRes)
+                        )
+                    } ?: CareerPilotSnackbarController.show(
+                        message = UIText.StringResource(effect.messageRes)
                     )
+
                     if (result == SnackbarResult.ActionPerformed) {
                         effect.actionIntent?.let { onIntent(it) }
                     }
                 }
+
                 is ProfileInfoEffect.OpenAppSettings -> {
                     context.startActivity(
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -123,6 +122,7 @@ fun ProfileScreenContent(
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     )
                 }
+
                 is ProfileInfoEffect.NavigateToNextScreen -> {
                     onNavigateNext()
                 }
@@ -132,9 +132,9 @@ fun ProfileScreenContent(
 
     val focusManager = LocalFocusManager.current
     val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
-    
+
     val defaultSkills = stringArrayResource(id = R.array.profile_info_default_skills).toList()
-    
+
     LaunchedEffect(defaultSkills) {
         onIntent(ProfileInfoIntent.OnInitDefaultSkills(defaultSkills))
     }
@@ -156,16 +156,17 @@ fun ProfileScreenContent(
             Spacer(modifier = Modifier.height(16.dp))
             ProfileTitle(modifier = Modifier.align(Alignment.Start))
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             AvatarImagePicker(
                 imageUrl = data.selectedImageUri ?: data.avatarUrl,
                 isUploading = isImageUploading,
                 onClick = { onIntent(ProfileInfoIntent.OnAvatarClicked) },
-                name = data.name.takeIf { it.isNotBlank() } ?: androidx.compose.ui.res.stringResource(id = R.string.profile_info_full_name_placeholder)
+                name = data.name.takeIf { it.isNotBlank() }
+                    ?: androidx.compose.ui.res.stringResource(id = R.string.profile_info_full_name_placeholder)
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             ProfileInfoForm(
                 name = data.name,
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
@@ -178,9 +179,9 @@ fun ProfileScreenContent(
                 onExperienceChanged = { onIntent(ProfileInfoIntent.OnExperienceChanged(it)) },
                 focusManager = focusManager
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             ProfileSkillsSection(
                 skills = data.skills,
                 allSkills = state.allSkills,
@@ -188,11 +189,11 @@ fun ProfileScreenContent(
                 onAddSkillClicked = { onIntent(ProfileInfoIntent.OnShowAddSkillDialogChanged(true)) },
                 modifier = Modifier.align(Alignment.Start)
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             ProfileBanner()
-            
+
             Spacer(modifier = Modifier.height(24.dp))
         }
 
@@ -212,7 +213,7 @@ fun ProfileScreenContent(
             )
         }
     }
-    
+
     if (state.showAddSkillDialog) {
         AddSkillDialog(
             newSkillText = state.newSkillText,
@@ -228,7 +229,11 @@ fun ProfileScreenContent(
     if (isImageSourceSheetVisible) {
         ImageSourcePickerSheet(
             onTakePhoto = {
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     onIntent(ProfileInfoIntent.OnImageSourceSelected(ImageSource.CAMERA))
                 } else {
                     imagePicker.requestCameraPermission()
