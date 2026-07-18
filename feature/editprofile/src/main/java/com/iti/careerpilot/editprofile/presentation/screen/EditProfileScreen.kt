@@ -191,12 +191,18 @@ fun EditProfileScreen(
                                 keyboardType = KeyboardType.Email,
                                 errorText = if (state.emailError) stringResource(R.string.error_invalid_email) else null
                             )
+                            val genderOptions = Gender.entries.map { stringResource(it.labelRes) }
                             LabeledDropdownField(
                                 label = stringResource(R.string.gender),
-                                value = state.gender,
+                                value = Gender.fromBackendValue(state.gender)?.let { stringResource(it.labelRes) } ?: state.gender,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_person),
-                                options = Gender.entries.map { stringResource(it.labelRes) },
-                                onValueChange = { onAction(EditProfileAction.OnGenderChange(it)) }
+                                options = genderOptions,
+                                onValueChange = { selectedLabel ->
+                                    val index = genderOptions.indexOf(selectedLabel)
+                                    if (index != -1) {
+                                        onAction(EditProfileAction.OnGenderChange(Gender.entries[index].backendValue))
+                                    }
+                                }
                             )
                             val dateInteractionSource = remember { MutableInteractionSource() }
                             val isPressed by dateInteractionSource.collectIsPressedAsState()
