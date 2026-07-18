@@ -38,8 +38,10 @@ class EditProfileRepoImpl @Inject constructor(
                 )?.let { newProfile ->
                     localDataSource.updateUserProfile { current ->
                         newProfile.copy(
+                            avatarUrl = newProfile.avatarUrl.ifBlank { current.avatarUrl },
                             avatarLocalUri = current.avatarLocalUri,
                             avatarSizeBytes = current.avatarSizeBytes,
+                            cvUrl = newProfile.cvUrl.ifBlank { current.cvUrl },
                             cvLocalUri = current.cvLocalUri,
                             cvFileName = current.cvFileName,
                             cvSizeBytes = current.cvSizeBytes

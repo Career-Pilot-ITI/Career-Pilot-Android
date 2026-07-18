@@ -70,7 +70,7 @@ fun ProfileHeader(
                         .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profile.avatarUrl.isNotBlank()) {
+                    if (profile.avatarLocalUri.isNotBlank()) {
                         AsyncImage(
                             model = profile.avatarLocalUri,
                             contentDescription = stringResource(R.string.profile_avatar),
