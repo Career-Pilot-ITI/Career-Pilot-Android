@@ -5,7 +5,7 @@ import com.iti.onboarding.domain.model.Track
 
 fun TracksResponseDto.toDomain(): Track{
     return Track(
-        id = id.toString(),
+        id = id,
         name = name
     )
 }
