@@ -39,5 +39,5 @@ sealed interface Route : NavKey {
     data object Paywall : Route
 
     @Serializable
-    data object ProfileInfo : Route
+    data object Onboarding: Route
 }

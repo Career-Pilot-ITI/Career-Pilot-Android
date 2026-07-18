@@ -95,14 +95,10 @@ fun ProfileInfoForm(
                 icon = Icons.Default.Assessment,
                 label = stringResource(R.string.profile_info_experience_level_label),
                 value = experience,
-                onValueChange = { newValue -> 
-                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
-                        onExperienceChanged(newValue)
-                    }
-                },
+                onValueChange = onExperienceChanged,
                 placeholder = stringResource(R.string.profile_info_experience_level_placeholder),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })

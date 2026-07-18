@@ -22,9 +22,11 @@ import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun RootNavDisplay() {
+fun RootNavDisplay(
+    startRoute: Route
+) {
 
-    val rootBackStack = rememberNavBackStack(Route.ProfileInfo)
+    val rootBackStack = rememberNavBackStack(startRoute)
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -52,9 +54,7 @@ fun RootNavDisplay() {
             )
         },
         entryProvider = entryProvider {
-            entry<Route.ProfileInfo> {
-                ProfileInfoScreen()
-            }
+
             entry<Route.Login> {
                 LoginRoot(
                     openOTP = {
@@ -119,6 +119,17 @@ fun RootNavDisplay() {
                     },
                 )
             }
+            entry<Route.Onboarding> {
+                com.iti.onboarding.navigation.OnboardingPagerScreen(
+                    onOnboardingFinished = {
+                        rootBackStack.apply {
+                            clear()
+                            navigateSingleTop(Route.NestedNav)
+                        }
+                    }
+                )
+            }
+
             entry<Route.SessionDetails> {
                 SessionDetailsRoot(
                     sessionId = it.id
@@ -132,4 +143,6 @@ fun RootNavDisplay() {
             }
         }
     )
+
+
 }

@@ -41,7 +41,7 @@ import com.iti.onboarding.presentation.screen.track.viewmodel.ChoosingTracksView
 
 @Composable
 fun ChoosingTracksScreen(
-    onNavigateToNext: () -> Unit,
+    onNavigateNext: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChoosingTracksViewModel = hiltViewModel(),
 ) {
@@ -56,7 +56,7 @@ fun ChoosingTracksScreen(
                         // TODO: Show the localized message with the base snackbar.
                     }
 
-                    ChoosingTracksEffects.NavigateNext -> onNavigateToNext()
+                    ChoosingTracksEffects.NavigateNext -> onNavigateNext()
                 }
             }
         }
@@ -157,14 +157,9 @@ fun ChoosingTracksScreenContent(
                 }
             }
 
-            item(key = "tracks_action") {
-                ActionButton(
-                    label = stringResource(R.string.next_button_label),
-                    onClick = {
-                        onIntent(ChoosingTracksIntent.OnNavigateNext)
-                    },
-                    enabled = enabledActionButton,
-                )
+            // Extra spacing for the global button
+            item(key = "bottom_spacing") {
+                Spacer(modifier = Modifier.height(120.dp))
             }
         }
     }

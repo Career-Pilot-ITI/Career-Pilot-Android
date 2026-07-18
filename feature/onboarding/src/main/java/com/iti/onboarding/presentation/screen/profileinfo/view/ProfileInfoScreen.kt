@@ -16,8 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -46,7 +51,7 @@ import com.iti.onboarding.presentation.screen.profileinfo.view.components.Profil
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileHeader
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileInfoForm
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileSkillsSection
-import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileSubmitButton
+
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileTitle
 import com.iti.onboarding.presentation.screen.profileinfo.viewmodel.ProfileInfoEffect
 import com.iti.onboarding.presentation.screen.profileinfo.viewmodel.ProfileInfoIntent
@@ -143,7 +148,8 @@ fun ProfileScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(24.dp)
+                .padding(bottom = 120.dp), // Extra padding for the global floating button
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ProfileHeader(modifier = Modifier.align(Alignment.Start))
@@ -188,17 +194,6 @@ fun ProfileScreenContent(
             ProfileBanner()
             
             Spacer(modifier = Modifier.height(24.dp))
-            
-            val isFormValid = data.name.isNotBlank() && 
-                              isEmailValid && 
-                              data.title.isNotBlank() && 
-                              data.experience.isNotBlank()
-            
-            ProfileSubmitButton(
-                isFormValid = isFormValid,
-                isSubmitting = state.isSubmitting,
-                onSubmit = { onIntent(ProfileInfoIntent.OnSubmit) }
-            )
         }
 
         SnackbarHost(
@@ -206,6 +201,7 @@ fun ProfileScreenContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
+                .padding(bottom = 80.dp) // So it floats above the new global button
         ) { data ->
             androidx.compose.material3.Snackbar(
                 snackbarData = data,
