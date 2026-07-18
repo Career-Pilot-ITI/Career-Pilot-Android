@@ -20,6 +20,7 @@ sealed interface EditProfileAction {
     data class OnTimezoneChange(val value: String) : EditProfileAction
     data class OnAvatarChange(val value: Uri?) : EditProfileAction
     data class OnCVUpload(val value: Uri?) : EditProfileAction
+    data object OnCVRemove : EditProfileAction
 
     data class OnSkillAdd(val skill: String) : EditProfileAction
     data class OnSkillRemove(val skill: String) : EditProfileAction

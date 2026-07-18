@@ -56,8 +56,12 @@
     <string name="save_changes">حفظ التغييرات</string>
     <string name="email">البريد الإلكتروني</string>
     <string name="upload_cv">رفع السيرة الذاتية</string>
+    <string name="no_cv_uploaded">لم يتم رفع سيرة ذاتية بعد</string>
+    <string name="tap_to_upload_pdf">انقر لرفع سيرتك الذاتية بصيغة PDF</string>
     <string name="cv_uploaded">تم رفع السيرة الذاتية</string>
     <string name="change_cv">تغيير السيرة الذاتية</string>
+    <string name="remove_cv">إزالة السيرة الذاتية</string>
+    <string name="uploading">جارٍ الرفع…</string>
     <string name="uploading_cv">جارٍ رفع السيرة الذاتية… %1$d%%</string>
     <string name="camera_permission_title">إذن الكاميرا</string>
     <string name="camera_permission_text">يرجى السماح بإذن الكاميرا للمتابعة</string>

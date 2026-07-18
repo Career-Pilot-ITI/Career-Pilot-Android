@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 
@@ -32,13 +32,11 @@ fun FormSection(
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 10.dp, start = 4.dp)
+            modifier = Modifier.padding(bottom = 12.dp, start = 4.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
+            GradientIcon(
+                icon = icon,
+                modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(8.dp))
             Text(
@@ -49,8 +47,8 @@ fun FormSection(
         }
         CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 content = content
             )
         }

@@ -56,8 +56,12 @@
     <string name="save_changes">Save changes</string>
     <string name="email">Email</string>
     <string name="upload_cv">Upload CV</string>
+    <string name="no_cv_uploaded">No CV uploaded yet</string>
+    <string name="tap_to_upload_pdf">Tap to upload your CV in PDF format</string>
     <string name="cv_uploaded">CV Uploaded</string>
     <string name="change_cv">Change CV</string>
+    <string name="remove_cv">Remove CV</string>
+    <string name="uploading">Uploading…</string>
     <string name="uploading_cv">Uploading CV… %1$d%%</string>
     <string name="camera_permission_title">Camera Permission</string>
     <string name="camera_permission_text">Please allow the camera permission to continue</string>

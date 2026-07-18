@@ -187,6 +187,12 @@ class EditProfileViewModel @Inject constructor(
                 }
             }
 
+            EditProfileAction.OnCVRemove -> {
+                //todo
+                _state.update { it.copy(cvUrl = "", cvFileName = "") }
+            }
+
+
             is EditProfileAction.OnSkillAdd -> {
                 val skill = action.skill.trim()
                 if (skill.isNotEmpty() && skill !in _state.value.skills) {

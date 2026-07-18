@@ -1,7 +1,9 @@
 package com.iti.careerpilot.editprofile.presentation.screen.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,9 +22,11 @@ fun LoadingDialog() {
     ) {
         CareerPilotCard(
             useShadow = false,
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier
         ) {
-            CircularWavyProgressIndicator()
+            Box(modifier = Modifier.padding(20.dp)) {
+                CircularWavyProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
         }
     }
 }

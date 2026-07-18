@@ -2,17 +2,15 @@ package com.iti.careerpilot.editprofile.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -83,6 +81,7 @@ fun EditProfileRoot(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     state: EditProfileState,
@@ -91,25 +90,30 @@ fun EditProfileScreen(
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        text = stringResource(section.titleRes)
+                        text = stringResource(section.titleRes),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         snackbarHost = {
@@ -127,7 +131,8 @@ fun EditProfileScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(top = 8.dp)
             ) {
 
                 if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
@@ -136,13 +141,7 @@ fun EditProfileScreen(
                             displayName = state.displayName,
                             username = state.username,
                             avatarUri = state.avatarUrl,
-                            onAvatarChange = { uri ->
-                                onAction(
-                                    EditProfileAction.OnAvatarChange(
-                                        uri
-                                    )
-                                )
-                            }
+                            onAvatarChange = { uri -> onAction(EditProfileAction.OnAvatarChange(uri)) }
                         )
                     }
 
@@ -154,54 +153,30 @@ fun EditProfileScreen(
                             LabeledTextField(
                                 label = stringResource(R.string.display_name),
                                 value = state.displayName,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnDisplayNameChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_account),
+                                onValueChange = { onAction(EditProfileAction.OnDisplayNameChange(it)) }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.email),
                                 value = state.email,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnEmailChange(
-                                            it
-                                        )
-                                    )
-                                },
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_email),
+                                onValueChange = { onAction(EditProfileAction.OnEmailChange(it)) },
                                 keyboardType = KeyboardType.Email,
                                 errorText = state.fieldErrors["email"]
                             )
                             LabeledDropdownField(
                                 label = stringResource(R.string.gender),
                                 value = state.gender,
-                                options = Gender.entries.map {
-                                    stringResource(
-                                        it.labelRes
-                                    )
-                                },
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnGenderChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_account),
+                                options = Gender.entries.map { stringResource(it.labelRes) },
+                                onValueChange = { onAction(EditProfileAction.OnGenderChange(it)) }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.date_of_birth),
                                 value = state.dateOfBirth,
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_calendar),
                                 placeholder = stringResource(R.string.yyyy_mm_dd),
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnDateOfBirthChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                onValueChange = { onAction(EditProfileAction.OnDateOfBirthChange(it)) }
                             )
                         }
                     }
@@ -216,88 +191,48 @@ fun EditProfileScreen(
                             LabeledTextField(
                                 label = stringResource(R.string.target_role),
                                 value = state.targetRole,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnTargetRoleChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_flag),
+                                onValueChange = { onAction(EditProfileAction.OnTargetRoleChange(it)) }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.industry),
                                 value = state.industry,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnIndustryChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_business),
+                                onValueChange = { onAction(EditProfileAction.OnIndustryChange(it)) }
                             )
                             LabeledDropdownField(
                                 label = stringResource(R.string.experience_level),
                                 value = state.experienceLevel,
-                                options = ExperienceLevel.entries.map {
-                                    stringResource(
-                                        it.labelRes
-                                    )
-                                },
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnExperienceLevelChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_briefcase),
+                                options = ExperienceLevel.entries.map { stringResource(it.labelRes) },
+                                onValueChange = { onAction(EditProfileAction.OnExperienceLevelChange(it)) }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.current_job_title),
                                 value = state.currentJobTitle,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnCurrentJobTitleChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_work),
+                                onValueChange = { onAction(EditProfileAction.OnCurrentJobTitleChange(it)) }
                             )
                             LabeledTextField(
                                 label = stringResource(R.string.years_of_experience),
                                 value = state.yearsOfExperience,
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnYearsOfExperienceChange(
-                                            it
-                                        )
-                                    )
-                                },
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_calendar),
+                                onValueChange = { onAction(EditProfileAction.OnYearsOfExperienceChange(it)) },
                                 keyboardType = KeyboardType.Number
                             )
                             LabeledDropdownField(
                                 label = stringResource(R.string.education_level),
                                 value = state.educationLevel,
-                                options = EducationLevel.entries.map {
-                                    stringResource(
-                                        it.labelRes
-                                    )
-                                },
-                                onValueChange = {
-                                    onAction(
-                                        EditProfileAction.OnEducationLevelChange(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_school),
+                                options = EducationLevel.entries.map { stringResource(it.labelRes) },
+                                onValueChange = { onAction(EditProfileAction.OnEducationLevelChange(it)) }
                             )
-
                             CVUploadField(
                                 fileName = state.cvFileName,
                                 isUploading = state.isUploadingCV,
                                 uploadProgress = state.cvUploadProgress,
-                                onCVSelected = { uri ->
-                                    onAction(EditProfileAction.OnCVUpload(uri))
-                                }
+                                onCVSelected = { uri -> onAction(EditProfileAction.OnCVUpload(uri)) },
+                                onCVRemove = { onAction(EditProfileAction.OnCVRemove) }
                             )
                         }
                     }
@@ -308,22 +243,12 @@ fun EditProfileScreen(
                             icon = ImageVector.vectorResource(R.drawable.ic_star)
                         ) {
                             ChipInputField(
+                                label = stringResource(R.string.skills),
                                 chips = state.skills,
                                 placeholder = stringResource(R.string.add_a_skill_and_press_enter),
-                                onAdd = {
-                                    onAction(
-                                        EditProfileAction.OnSkillAdd(
-                                            it
-                                        )
-                                    )
-                                },
-                                onRemove = {
-                                    onAction(
-                                        EditProfileAction.OnSkillRemove(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_star),
+                                onAdd = { onAction(EditProfileAction.OnSkillAdd(it)) },
+                                onRemove = { onAction(EditProfileAction.OnSkillRemove(it)) }
                             )
                         }
                     }
@@ -334,29 +259,20 @@ fun EditProfileScreen(
                             icon = ImageVector.vectorResource(R.drawable.ic_business)
                         ) {
                             ChipInputField(
+                                label = stringResource(R.string.target_companies),
                                 chips = state.targetCompanies,
                                 placeholder = stringResource(R.string.add_a_company_and_press_enter),
-                                onAdd = {
-                                    onAction(
-                                        EditProfileAction.OnTargetCompanyAdd(
-                                            it
-                                        )
-                                    )
-                                },
-                                onRemove = {
-                                    onAction(
-                                        EditProfileAction.OnTargetCompanyRemove(
-                                            it
-                                        )
-                                    )
-                                }
+                                leadingIcon = ImageVector.vectorResource(R.drawable.ic_business),
+                                onAdd = { onAction(EditProfileAction.OnTargetCompanyAdd(it)) },
+                                onRemove = { onAction(EditProfileAction.OnTargetCompanyRemove(it)) }
                             )
                         }
                     }
                 }
 
-                item { Spacer(Modifier.height(12.dp)) }
+                item { Spacer(Modifier.height(4.dp)) }
             }
+
             SaveBar(
                 isSaving = state.isLoading,
                 onSave = { onAction(EditProfileAction.OnSaveClick(section)) },
