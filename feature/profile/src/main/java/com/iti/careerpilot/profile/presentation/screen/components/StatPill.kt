@@ -17,10 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 
@@ -28,11 +26,15 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 fun StatPill(
     modifier: Modifier = Modifier,
     icon: ImageVector,
+    containerColor: Color,
     iconTint: Color,
     label: String,
     value: String
 ) {
-    CareerPilotCard(modifier = modifier) {
+    CareerPilotCard(
+        elevation = 8.dp,
+        modifier = modifier
+    ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -42,21 +44,15 @@ fun StatPill(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(iconTint.copy(alpha = 0.12f)),
+                    .background(containerColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(18.dp)
-                )
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
             }
             Column {
                 Text(
                     text = value,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -64,7 +60,7 @@ fun StatPill(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodySmall,
-                    color = CareerPilotPalette.gray600
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

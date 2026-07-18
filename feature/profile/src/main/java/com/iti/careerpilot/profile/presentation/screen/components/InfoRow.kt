@@ -17,11 +17,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 
 
 @Composable
-fun InfoRow(
-    label: String,
-    value: String,
-    showDivider: Boolean = true
-) {
+fun InfoRow(label: String, value: String, showDivider: Boolean = true) {
     Column {
         Row(
             modifier = Modifier
@@ -32,7 +28,7 @@ fun InfoRow(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
-                color = CareerPilotPalette.gray600
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = value,

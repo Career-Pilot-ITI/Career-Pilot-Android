@@ -3,6 +3,7 @@ package com.iti.careerpilot.profile.presentation.screen.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,9 +16,7 @@ import com.iti.core.datastore.models.UserProfile
 
 
 @Composable
-fun StatsRow(
-    profile: UserProfile
-) {
+fun StatsRow(profile: UserProfile) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -25,14 +24,16 @@ fun StatsRow(
         StatPill(
             modifier = Modifier.weight(1f),
             icon = ImageVector.vectorResource(id = R.drawable.ic_monetization),
-            iconTint = CareerPilotPalette.amber,
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            iconTint = MaterialTheme.colorScheme.primary,
             label = stringResource(R.string.coins),
             value = profile.coinBalance.toString()
         )
         StatPill(
             modifier = Modifier.weight(1f),
             icon = ImageVector.vectorResource(id = R.drawable.ic_workspace_premium),
-            iconTint = CareerPilotPalette.teal,
+            containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+            iconTint = MaterialTheme.colorScheme.secondary,
             label = stringResource(R.string.plan),
             value = profile.subscriptionTier.ifBlank { stringResource(R.string.free) }
         )

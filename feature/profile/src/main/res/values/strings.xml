@@ -19,6 +19,11 @@
     <string name="back">Back</string>
     <string name="my_cv">My CV</string>
     <string name="no_cv_uploaded">No CV uploaded</string>
+    <string name="profile_info">User Info</string>
+    <string name="logout_confirm_title">Logout</string>
+    <string name="logout_confirm_body">Are you sure you want to logout?</string>
+    <string name="cancel">Cancel</string>
+    <string name="personal_info">Personal Info</string>
     <string name="career_info">Career Info</string>
 
 </resources>

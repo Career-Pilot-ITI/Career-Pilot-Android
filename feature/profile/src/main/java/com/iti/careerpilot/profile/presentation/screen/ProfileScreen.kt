@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -64,60 +69,58 @@ fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.profile),
-                )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            ),
-            windowInsets = TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
-        )
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.profile),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
+                windowInsets = TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
+            )
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
+    ) { innerPadding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(20.dp)
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
         ) {
-
             item {
                 ProfileHeader(
                     profile = state.profile,
-                    onEditPersonalInfoClick = { onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.PERSONAL)) }
                 )
             }
-
-            item {
-                StatsRow(profile = state.profile)
-            }
-
+            item { StatsRow(profile = state.profile) }
             item {
                 InfoCard(
                     profile = state.profile,
-                    onEditCareerClick = { onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.CAREER)) }
                 )
             }
-
             item {
                 CVCard(
                     fileName = state.profile.cvFileName,
                     fileSize = if (state.profile.cvSizeBytes > 0) "${state.profile.cvSizeBytes / 1024} KB" else ""
                 )
             }
-
             item {
                 MenuSection(
-                    onOpenSettings = {
-                        onAction(ProfileAction.OnSettingsClick)
+                    onOpenSettings = { onAction(ProfileAction.OnSettingsClick) },
+                    onLogOut = { onAction(ProfileAction.OnLogoutClick) },
+                    onEditPersonalInfoClick = {
+                        onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.PERSONAL))
                     },
-                    onLogOut = {
-                        onAction(ProfileAction.OnLogoutClick)
-                    }
+                    onEditCareerClick = {
+                        onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.CAREER))
+                    },
                 )
             }
         }

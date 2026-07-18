@@ -47,7 +47,7 @@ fun MenuRow(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_keyboard_arrow_right),
                 contentDescription = null,
-                tint = CareerPilotPalette.gray400
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
