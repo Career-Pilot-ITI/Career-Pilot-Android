@@ -12,4 +12,12 @@
     <string name="error_phone_too_short">رقم الهاتف قصير جدًا</string>
     <string name="error_phone_too_long">رقم الهاتف طويل جدًا</string>
     <string name="error_phone_invalid">من فضلك أدخل رقم هاتف صحيح</string>
+
+    <string name="otp_back">رجوع</string>
+    <string name="otp_title">أدخل الرمز</string>
+    <string name="otp_sent_to">تم الإرسال إلى %1$s</string>
+    <string name="otp_resend_in_prefix">إعادة الإرسال خلال </string>
+    <string name="otp_resend">إعادة الإرسال</string>
+    <string name="otp_success_title">تم تسجيل دخولك!</string>
+    <string name="otp_success_subtitle">جارٍ إعداد جلسة التدريب…</string>
 </resources>

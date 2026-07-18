@@ -60,8 +60,8 @@ fun LoginScreen(
 ) {
     Column(
         modifier = Modifier
-            .padding(Dimens.SpaceXXL)
             .background(MaterialTheme.colorScheme.background)
+            .padding(Dimens.SpaceXXL)
             .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(Dimens.SpaceXXXL + Dimens.SpaceXXXL))

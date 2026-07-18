@@ -13,4 +13,12 @@
     <string name="error_phone_too_long">This phone number is too long</string>
     <string name="error_phone_invalid">Please enter a valid phone number</string>
 
+    <string name="otp_back">Back</string>
+    <string name="otp_title">Enter your code</string>
+    <string name="otp_sent_to">Sent to %1$s</string>
+    <string name="otp_resend_in_prefix">Resend in </string>
+    <string name="otp_resend">Resend</string>
+    <string name="otp_success_title">You\'re in!</string>
+    <string name="otp_success_subtitle">Setting up your coaching session…</string>
+
 </resources>

@@ -12,7 +12,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
-import com.iti.careerpilot.login.presentation.otp.OTPRoot
+import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
@@ -68,11 +68,8 @@ fun RootNavDisplay() {
                             navigateSingleTop(Route.NestedNav)
                         }
                     },
-                    openRegister = {
-                        rootBackStack.apply {
-                            clear()
-                            navigateSingleTop(Route.Register)
-                        }
+                    onBack = {
+                        rootBackStack.removeLastOrNull()
                     }
                 )
             }

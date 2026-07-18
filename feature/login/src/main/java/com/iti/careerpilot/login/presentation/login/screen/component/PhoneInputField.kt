@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -39,6 +43,7 @@ fun PhoneInputField(
     modifier: Modifier = Modifier
 ) {
     val countryCodePickerState = rememberKomposeCountryCodePickerState(
+        defaultCountryCode = "eg",
         showCountryCode = true,
         showCountryFlag = true,
     )
@@ -72,6 +77,16 @@ fun PhoneInputField(
                 text = "",
                 onValueChange = {},
                 showOnlyCountryCodePicker = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                dropDownIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowDropDown,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
                 modifier = Modifier
                     .padding(horizontal = Dimens.SpaceM)
                     .fillMaxHeight(),
@@ -93,6 +108,7 @@ fun PhoneInputField(
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
                 singleLine = true,
                 enabled = !isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
