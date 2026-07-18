@@ -1,7 +1,7 @@
 package com.iti.careerpilot.profile.presentation.screen
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
@@ -19,13 +19,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.profile.R
@@ -39,7 +40,9 @@ import com.iti.careerpilot.profile.presentation.screen.components.ProfileHeader
 import com.iti.careerpilot.profile.presentation.screen.components.StatsRow
 import com.iti.careerpilot.profile.presentation.state.ProfileState
 import com.iti.careerpilot.profile.presentation.viewmodel.ProfileViewModel
+import com.iti.common.model.ProfileEditSection
 import com.iti.core.datastore.models.UserProfile
+import java.io.File
 
 @Composable
 fun ProfileRoot(
@@ -49,12 +52,35 @@ fun ProfileRoot(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val chooserTitle = stringResource(R.string.open_cv_with)
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             is ProfileEvent.NavigateToEditProfile -> openEditProfile(event.section)
             ProfileEvent.NavigateToSettings -> openSettings()
             ProfileEvent.NavigateToLogout -> logout()
+            is ProfileEvent.OpenCV -> {
+                if (event.url.isNotBlank()) {
+                    val uri = if (event.url.startsWith("file://")) {
+                        val file = File(event.url.toUri().path!!)
+                        FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+                    } else {
+                        event.url.toUri()
+                    }
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/pdf")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    val chooser = Intent.createChooser(intent, chooserTitle)
+                    context.startActivity(chooser)
+                }
+            }
         }
     }
 
@@ -108,7 +134,11 @@ fun ProfileScreen(
             item {
                 CVCard(
                     fileName = state.profile.cvFileName,
-                    fileSize = if (state.profile.cvSizeBytes > 0) "${state.profile.cvSizeBytes / 1024} KB" else ""
+                    fileSize = if (state.profile.cvSizeBytes > 0) "${state.profile.cvSizeBytes / 1024} KB" else "",
+                    onClick = {
+                        val cvUri = state.profile.cvLocalUri.ifBlank { state.profile.cvUrl }
+                        onAction(ProfileAction.OnCVClick(cvUri))
+                    }
                 )
             }
             item {

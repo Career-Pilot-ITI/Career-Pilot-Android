@@ -9,4 +9,5 @@ sealed interface ProfileAction {
     data object OnLogoutClick : ProfileAction
     data object OnLogoutConfirm : ProfileAction
     data object OnLogoutDismiss : ProfileAction
+    data class OnCVClick(val cvLocalUriOrUrl: String) : ProfileAction
 }

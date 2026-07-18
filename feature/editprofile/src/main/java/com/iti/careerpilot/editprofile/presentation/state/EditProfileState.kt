@@ -23,6 +23,7 @@ data class EditProfileState(
     val avatarUrl: String = "",
     val avatarLocalUri: String = "",
     val cvUrl: String = "",
+    val cvLocalUri: String = "",
     val cvFileName: String = "",
     val cvFileSize: String = "",
     val cvUploadDate: String = "",

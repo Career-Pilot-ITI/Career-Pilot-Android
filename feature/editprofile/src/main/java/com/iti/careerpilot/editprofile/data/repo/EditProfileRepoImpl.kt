@@ -40,6 +40,7 @@ class EditProfileRepoImpl @Inject constructor(
                         newProfile.copy(
                             avatarLocalUri = current.avatarLocalUri,
                             avatarSizeBytes = current.avatarSizeBytes,
+                            cvLocalUri = current.cvLocalUri,
                             cvFileName = current.cvFileName,
                             cvSizeBytes = current.cvSizeBytes
                         )
@@ -80,10 +81,11 @@ class EditProfileRepoImpl @Inject constructor(
         return file?.let {
             remoteDataSource.uploadCV(file, onProgress)
                 .onSuccess { response ->
-                    localDataSource.moveCVToInternalStorage(file)
+                    val localCvUri = localDataSource.moveCVToInternalStorage(file)
                     localDataSource.updateUserProfile {
                         it.copy(
                             cvUrl = response.url,
+                            cvLocalUri = localCvUri,
                             cvFileName = response.originalName,
                             cvSizeBytes = response.sizeBytes
                         )

@@ -53,6 +53,8 @@ class ProfileViewModel @Inject constructor(
                 _state.update { it.copy(showLogoutDialog = false) }
                 sendEvent(ProfileEvent.NavigateToLogout)
             }
+
+            is ProfileAction.OnCVClick -> sendEvent(ProfileEvent.OpenCV(action.cvLocalUriOrUrl))
         }
     }
 

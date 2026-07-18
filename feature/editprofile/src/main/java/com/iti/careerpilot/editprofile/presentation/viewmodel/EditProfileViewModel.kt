@@ -3,7 +3,6 @@ package com.iti.careerpilot.editprofile.presentation.viewmodel
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
@@ -13,6 +12,7 @@ import com.iti.careerpilot.editprofile.presentation.state.EditProfileState
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
+import com.iti.common.model.ProfileEditSection
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
@@ -23,7 +23,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -77,6 +76,7 @@ class EditProfileViewModel @Inject constructor(
                     avatarUrl = profile.avatarUrl,
                     avatarLocalUri = profile.avatarLocalUri,
                     cvUrl = profile.cvUrl,
+                    cvLocalUri = profile.cvLocalUri,
                     cvFileName = profile.cvFileName,
                     cvFileSize = if (profile.cvSizeBytes > 0) "${profile.cvSizeBytes / 1024} KB" else "",
                     isLoading = false
@@ -282,6 +282,7 @@ class EditProfileViewModel @Inject constructor(
                                 it.copy(
                                     isUploadingCV = false,
                                     cvUrl = response.url,
+                                    cvLocalUri = uri.toString(),
                                     cvFileName = response.originalName,
                                     cvFileSize = if (response.sizeBytes > 0) "${response.sizeBytes / 1024} KB" else "",
                                     cvUploadProgress = 0
@@ -306,6 +307,7 @@ class EditProfileViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         cvUrl = "",
+                        cvLocalUri = "",
                         cvFileName = "",
                         cvFileSize = "",
                         cvUploadDate = ""
