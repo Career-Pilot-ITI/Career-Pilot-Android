@@ -18,6 +18,7 @@ import com.iti.onboarding.domain.repository.OnboardingRepository
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
@@ -31,100 +32,121 @@ class OnboardingRepositoryImpl @Inject constructor(
 ) : OnboardingRepository {
 
     override suspend fun uploadFile(
-        fileData: FileUploadData
-    ): CareerPilotResult<UploadedFile, NetworkError> = withContext(ioDispatcher) {
-        try {
-            val dto = remoteDataSource.uploadFile(fileData)
-            CareerPilotResult.Success(dto.toDomain())
-        } catch (e: ClientRequestException) {
-            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        } catch (e: ServerResponseException) {
-            CareerPilotResult.Error(NetworkError.SERVER)
-        } catch (e: SerializationException) {
-            CareerPilotResult.Error(NetworkError.SERIALIZATION)
-        } catch (e: UnresolvedAddressException) {
-            CareerPilotResult.Error(NetworkError.NO_INTERNET)
-        } catch (e: Exception) {
-            CareerPilotResult.Error(NetworkError.UNKNOWN)
+        fileData: FileUploadData,
+    ): CareerPilotResult<UploadedFile, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource
+                .uploadFile(fileData)
+                .toDomain()
+        }
+
+    override suspend fun saveAvatarUrl(url: String) {
+        withContext(ioDispatcher) {
+            localDataSource.saveAvatarUrl(url)
         }
     }
 
-    override suspend fun saveAvatarUrl(url: String) {
-        localDataSource.saveAvatarUrl(url)
-    }
+    override suspend fun updateProfile(
+        request: UpdateProfileRequestDto,
+    ): CareerPilotResult<UserResponseDto, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource.updateProfile(request)
+        }
 
-    override suspend fun updateProfile(request: UpdateProfileRequestDto): CareerPilotResult<UserResponseDto, NetworkError> =
+    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource
+                .getTracks()
+                .map { trackDto ->
+                    trackDto.toDomain()
+                }
+        }
+
+    override suspend fun uploadCv(
+        document: PdfFile,
+    ): CareerPilotResult<Unit, NetworkError> =
+        safeNetworkCall {
+            val response = remoteDataSource.uploadCv(
+                document = document,
+            )
+
+            localDataSource.savePdfUrl(response.url)
+        }
+
+    override suspend fun updateProfileTrack(
+        trackId: Int,
+    ): CareerPilotResult<Unit, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource.updateProfile(
+                request = UpdateProfileRequestDto(
+                    trackId = trackId,
+                ),
+            )
+        }
+
+    private suspend fun <T> safeNetworkCall(
+        block: suspend () -> T,
+    ): CareerPilotResult<T, NetworkError> =
         withContext(ioDispatcher) {
             try {
-                val response = remoteDataSource.updateProfile(request)
-                CareerPilotResult.Success(response)
-            } catch (e: ClientRequestException) {
-                Log.e(
-                    "ProfileError",
-                    "HTTP Status: ${e.response.status}, Body: ${e.response.bodyAsText()}"
+                CareerPilotResult.Success(
+                    data = block(),
                 )
-                CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-            } catch (e: ServerResponseException) {
-                CareerPilotResult.Error(NetworkError.SERVER)
-            } catch (e: SerializationException) {
-                CareerPilotResult.Error(NetworkError.SERIALIZATION)
-            } catch (e: UnresolvedAddressException) {
-                CareerPilotResult.Error(NetworkError.NO_INTERNET)
-            } catch (e: Exception) {
-                CareerPilotResult.Error(NetworkError.UNKNOWN)
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (exception: ClientRequestException) {
+                logClientRequestException(exception)
+
+                CareerPilotResult.Error(
+                    error = NetworkError.BAD_REQUEST,
+                )
+            } catch (_: ServerResponseException) {
+                CareerPilotResult.Error(
+                    error = NetworkError.SERVER,
+                )
+            } catch (_: SerializationException) {
+                CareerPilotResult.Error(
+                    error = NetworkError.SERIALIZATION,
+                )
+            } catch (_: UnresolvedAddressException) {
+                CareerPilotResult.Error(
+                    error = NetworkError.NO_INTERNET,
+                )
+            } catch (exception: Exception) {
+                Log.e(
+                    TAG,
+                    "Unexpected onboarding repository error",
+                    exception,
+                )
+
+                CareerPilotResult.Error(
+                    error = NetworkError.UNKNOWN,
+                )
             }
         }
 
-    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> {
-        return try {
-            val tracks = remoteDataSource.getTracks()
-            CareerPilotResult.Success(tracks.map { it.toDomain() } )
-        } catch (e: ClientRequestException) {
-            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        } catch (e: ServerResponseException) {
-            CareerPilotResult.Error(NetworkError.SERVER)
-        } catch (e: SerializationException) {
-            CareerPilotResult.Error(NetworkError.SERIALIZATION)
-        } catch (e: UnresolvedAddressException) {
-            CareerPilotResult.Error(NetworkError.NO_INTERNET)
-        } catch (e: Exception) {
-            CareerPilotResult.Error(NetworkError.UNKNOWN)
-        }
+    private suspend fun logClientRequestException(
+        exception: ClientRequestException,
+    ) {
+        val responseBody = runCatching {
+            exception.response.bodyAsText()
+        }.getOrNull()
+
+        Log.e(
+            TAG,
+            buildString {
+                append("Client request failed. ")
+                append("Status: ${exception.response.status}")
+
+                if (!responseBody.isNullOrBlank()) {
+                    append(", Body: $responseBody")
+                }
+            },
+            exception,
+        )
     }
 
-    override suspend fun uploadCv(document: PdfFile): CareerPilotResult<Unit, NetworkError> {
-        return try {
-            val response = remoteDataSource.uploadCv(document = document)
-
-            localDataSource.savePdfUrl(response.url)
-            CareerPilotResult.Success(Unit)
-        } catch (e: ClientRequestException) {
-            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        } catch (e: ServerResponseException) {
-            CareerPilotResult.Error(NetworkError.SERVER)
-        } catch (e: SerializationException) {
-            CareerPilotResult.Error(NetworkError.SERIALIZATION)
-        } catch (e: UnresolvedAddressException) {
-            CareerPilotResult.Error(NetworkError.NO_INTERNET)
-        } catch (e: Exception) {
-            CareerPilotResult.Error(NetworkError.UNKNOWN)
-        }
-    }
-
-    override suspend fun updateProfileTrack(trackId: Int): CareerPilotResult<Unit, NetworkError> {
-        return try {
-            updateProfile(UpdateProfileRequestDto(trackId = trackId))
-            CareerPilotResult.Success(Unit)
-        } catch (e: ClientRequestException) {
-            CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        } catch (e: ServerResponseException) {
-            CareerPilotResult.Error(NetworkError.SERVER)
-        } catch (e: SerializationException) {
-            CareerPilotResult.Error(NetworkError.SERIALIZATION)
-        } catch (e: UnresolvedAddressException) {
-            CareerPilotResult.Error(NetworkError.NO_INTERNET)
-        } catch (e: Exception) {
-            CareerPilotResult.Error(NetworkError.UNKNOWN)
-        }
+    private companion object {
+        const val TAG = "OnboardingRepository"
     }
 }
