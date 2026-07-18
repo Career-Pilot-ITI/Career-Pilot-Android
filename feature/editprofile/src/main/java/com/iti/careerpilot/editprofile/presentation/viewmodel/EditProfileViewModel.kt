@@ -1,5 +1,6 @@
 package com.iti.careerpilot.editprofile.presentation.viewmodel
 
+import android.net.Uri
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -88,37 +89,23 @@ class EditProfileViewModel @Inject constructor(
     fun onAction(action: EditProfileAction) {
         when (action) {
             is EditProfileAction.OnDisplayNameChange ->
-                _state.update { 
-                    it.copy(
-                        displayName = action.value,
-                        displayNameError = false
-                    ) 
-                }
+                _state.update { it.copy(displayName = action.value, displayNameError = false) }
 
             is EditProfileAction.OnUsernameChange ->
-                _state.update {
-                    it.copy(
-                        username = action.value
-                    )
-                }
+                _state.update { it.copy(username = action.value) }
 
             is EditProfileAction.OnEmailChange ->
-                _state.update {
-                    it.copy(
-                        email = action.value,
-                        emailError = false
-                    )
-                }
+                _state.update { it.copy(email = action.value, emailError = false) }
 
             is EditProfileAction.OnGenderChange ->
                 _state.update { it.copy(gender = action.value) }
 
             is EditProfileAction.OnDateOfBirthChange ->
-                _state.update { 
+                _state.update {
                     it.copy(
                         dateOfBirth = action.value,
                         dateOfBirthMillis = calculateMillis(action.value)
-                    ) 
+                    )
                 }
 
             is EditProfileAction.OnDateSelected -> {
@@ -126,11 +113,11 @@ class EditProfileViewModel @Inject constructor(
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate()
                 val formatted = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                _state.update { 
+                _state.update {
                     it.copy(
                         dateOfBirth = formatted,
                         dateOfBirthMillis = action.millis
-                    ) 
+                    )
                 }
             }
 
@@ -161,149 +148,11 @@ class EditProfileViewModel @Inject constructor(
             is EditProfileAction.OnTimezoneChange ->
                 _state.update { it.copy(timezone = action.value) }
 
-            is EditProfileAction.OnAvatarChange -> {
-                action.value?.let { uri ->
-                    viewModelScope.launch(dispatcherDefault) {
-                        val startTime = System.currentTimeMillis()
-                        var realProgress = 0
-                        var isDone = false
-                        var uploadResult: CareerPilotResult<FileUploadResponse, NetworkError>? = null
+            is EditProfileAction.OnAvatarChange -> uploadAvatar(action.value)
 
-                        _state.update { 
-                            it.copy(
-                                isUploadingAvatar = true, 
-                                avatarUploadProgress = 0,
-                                uploadError = null
-                            ) 
-                        }
+            is EditProfileAction.OnCVUpload -> uploadCV(action.value)
 
-                        launch {
-                            uploadResult = editProfileRepo.uploadImage(
-                                uri = uri,
-                                onProgress = { realProgress = it }
-                            )
-                            isDone = true
-                        }
-
-                        // Wait for upload to actually start or fail/finish
-                        while (!isDone && realProgress == 0) {
-                            delay(50.milliseconds)
-                        }
-
-                        var displayProgress = 0
-                        while (true) {
-                            if (isDone && uploadResult is CareerPilotResult.Error) break
-                            
-                            val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
-                            if (displayProgress < target) {
-                                displayProgress++
-                                _state.update { it.copy(avatarUploadProgress = displayProgress) }
-                            }
-                            
-                            if (isDone && displayProgress >= 100) break
-                            delay(20.milliseconds)
-                        }
-
-                        val elapsed = System.currentTimeMillis() - startTime
-                        
-                        uploadResult?.onSuccess { response ->
-                            if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
-                            _state.update {
-                                it.copy(
-                                    avatarUrl = response.url,
-                                    avatarLocalUri = uri.toString(),
-                                    isUploadingAvatar = false,
-                                    avatarUploadProgress = 0
-                                )
-                            }
-                        }?.onError { error ->
-                            _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
-                            delay(2000.milliseconds)
-                            _state.update {
-                                it.copy(
-                                    isUploadingAvatar = false,
-                                    avatarUploadProgress = 0,
-                                    uploadError = null
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            is EditProfileAction.OnCVUpload -> {
-                action.value?.let { uri ->
-                    viewModelScope.launch(dispatcherDefault) {
-                        val startTime = System.currentTimeMillis()
-                        var realProgress = 0
-                        var isDone = false
-                        var uploadResult: CareerPilotResult<FileUploadResponse, NetworkError>? = null
-
-                        _state.update { 
-                            it.copy(
-                                isUploadingCV = true, 
-                                cvUploadProgress = 0,
-                                uploadError = null
-                            ) 
-                        }
-
-                        launch {
-                            uploadResult = editProfileRepo.uploadCV(
-                                uri = uri,
-                                onProgress = { realProgress = it }
-                            )
-                            isDone = true
-                        }
-
-                        // Wait for upload to actually start or fail/finish
-                        while (!isDone && realProgress == 0) {
-                            delay(50.milliseconds)
-                        }
-
-                        var displayProgress = 0
-                        while (true) {
-                            if (isDone && uploadResult is CareerPilotResult.Error) break
-
-                            val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
-                            if (displayProgress < target) {
-                                displayProgress++
-                                _state.update { it.copy(cvUploadProgress = displayProgress) }
-                            }
-
-                            if (isDone && displayProgress >= 100) break
-                            delay(20.milliseconds)
-                        }
-
-                        val elapsed = System.currentTimeMillis() - startTime
-
-                        uploadResult?.onSuccess { response ->
-                            if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
-                            _state.update {
-                                it.copy(
-                                    isUploadingCV = false,
-                                    cvUrl = response.url,
-                                    cvLocalUri = uri.toString(),
-                                    cvFileName = response.originalName,
-                                    cvFileSize = if (response.sizeBytes > 0) "${response.sizeBytes / 1024} KB" else "",
-                                    cvUploadProgress = 0
-                                )
-                            }
-                        }?.onError { error ->
-                            _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
-                            delay(2000.milliseconds)
-                            _state.update {
-                                it.copy(
-                                    isUploadingCV = false,
-                                    cvUploadProgress = 0,
-                                    uploadError = null
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            EditProfileAction.OnCVRemove -> {
+            EditProfileAction.OnCVRemove ->
                 _state.update {
                     it.copy(
                         cvUrl = "",
@@ -313,8 +162,6 @@ class EditProfileViewModel @Inject constructor(
                         cvUploadDate = ""
                     )
                 }
-            }
-
 
             is EditProfileAction.OnSkillAdd -> {
                 val skill = action.skill.trim()
@@ -343,97 +190,177 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    private fun uploadAvatar(uri: Uri?) {
+        uri?.let { newUri ->
+            performFileUpload(
+                uri = newUri,
+                uploadCall = { u, p -> editProfileRepo.uploadImage(u, p) },
+                onStart = {
+                    _state.update { s ->
+                        s.copy(isUploadingAvatar = true, avatarUploadProgress = 0, uploadError = null)
+                    }
+                },
+                onProgress = { p -> _state.update { it.copy(avatarUploadProgress = p) } },
+                onSuccess = { resp ->
+                    _state.update { it.copy(avatarUrl = resp.url, avatarLocalUri = uri.toString()) }
+                },
+                onFinish = {
+                    _state.update { it.copy(isUploadingAvatar = false, avatarUploadProgress = 0) }
+                }
+            )
+        }
+    }
+
+    private fun uploadCV(uri: Uri?) {
+        uri?.let { newUri ->
+            performFileUpload(
+                uri = newUri,
+                uploadCall = { u, p -> editProfileRepo.uploadCV(u, p) },
+                onStart = {
+                    _state.update { s ->
+                        s.copy(isUploadingCV = true, cvUploadProgress = 0, uploadError = null)
+                    }
+                },
+                onProgress = { p -> _state.update { it.copy(cvUploadProgress = p) } },
+                onSuccess = { resp ->
+                    _state.update {
+                        it.copy(
+                            cvUrl = resp.url,
+                            cvLocalUri = uri.toString(),
+                            cvFileName = resp.originalName,
+                            cvFileSize = if (resp.sizeBytes > 0) "${resp.sizeBytes / 1024} KB" else ""
+                        )
+                    }
+                },
+                onFinish = {
+                    _state.update { it.copy(isUploadingCV = false, cvUploadProgress = 0) }
+                }
+            )
+        }
+    }
+
+    private fun performFileUpload(
+        uri: Uri,
+        uploadCall: suspend (Uri, (Int) -> Unit) -> CareerPilotResult<FileUploadResponse, NetworkError>,
+        onStart: () -> Unit,
+        onProgress: (Int) -> Unit,
+        onSuccess: suspend (FileUploadResponse) -> Unit,
+        onFinish: () -> Unit
+    ) {
+        viewModelScope.launch(dispatcherDefault) {
+            val startTime = System.currentTimeMillis()
+            var realProgress = 0
+            var isDone = false
+            var uploadResult: CareerPilotResult<FileUploadResponse, NetworkError>? = null
+
+            onStart()
+
+            launch {
+                uploadResult = uploadCall(uri) { realProgress = it }
+                isDone = true
+            }
+
+            while (!isDone && realProgress == 0) delay(50.milliseconds)
+
+            var displayProgress = 0
+            while (true) {
+                if (isDone && uploadResult is CareerPilotResult.Error) break
+                val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
+                if (displayProgress < target) {
+                    displayProgress++
+                    onProgress(displayProgress)
+                }
+                if (isDone && displayProgress >= 100) break
+                delay(20.milliseconds)
+            }
+
+            val elapsed = System.currentTimeMillis() - startTime
+            uploadResult?.onSuccess { response ->
+                if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
+                onSuccess(response)
+            }?.onError { error ->
+                _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
+                delay(2000.milliseconds)
+                _state.update { it.copy(uploadError = null) }
+            }
+            onFinish()
+        }
+    }
+
     private fun save(section: ProfileEditSection) {
-        val current = _state.value
-
-        var hasError = false
-        var displayNameErr = false
-        var emailErr = false
-
-        if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
-            if (current.displayName.isBlank()) {
-                displayNameErr = true
-                hasError = true
-            }
-            if (current.email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(current.email).matches()) {
-                emailErr = true
-                hasError = true
-            }
-        }
-
-        if (hasError) {
-            _state.update { 
-                it.copy(
-                    displayNameError = displayNameErr,
-                    emailError = emailErr
-                ) 
-            }
-            return
-        }
+        if (!validateInputs(section)) return
 
         viewModelScope.launch(dispatcherDefault) {
-            _state.update { 
-                it.copy(
-                    isLoading = true, 
-                    displayNameError = false,
-                    emailError = false
-                ) 
-            }
-            val request = when (section) {
-                ProfileEditSection.PERSONAL -> {
-                    RequestProfileUpdate(
-                        username = current.username.takeIf { it != original.username },
-                        email = current.email.takeIf { it != original.email },
-                        displayName = current.displayName.takeIf { it != original.displayName },
-                        gender = current.gender.takeIf { it != original.gender },
-                        dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
-                    )
-                }
-                ProfileEditSection.CAREER -> {
-                    RequestProfileUpdate(
-                        targetRole = current.targetRole.takeIf { it != original.targetRole },
-                        industry = current.industry.takeIf { it != original.industry },
-                        experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
-                        currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
-                        yearsOfExperience = current.yearsOfExperience.toIntOrNull()
-                            ?.takeIf { it != original.yearsOfExperience },
-                        skills = current.skills.takeIf { it != original.skills },
-                        targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
-                        educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
-                        timezone = current.timezone.takeIf { it != original.timezone },
-                    )
-                }
-                else -> {
-                    RequestProfileUpdate(
-                        username = current.username.takeIf { it != original.username },
-                        email = current.email.takeIf { it != original.email },
-                        displayName = current.displayName.takeIf { it != original.displayName },
-                        gender = current.gender.takeIf { it != original.gender },
-                        dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
-                        targetRole = current.targetRole.takeIf { it != original.targetRole },
-                        industry = current.industry.takeIf { it != original.industry },
-                        experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
-                        currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
-                        yearsOfExperience = current.yearsOfExperience.toIntOrNull()
-                            ?.takeIf { it != original.yearsOfExperience },
-                        skills = current.skills.takeIf { it != original.skills },
-                        targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
-                        educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
-                        timezone = current.timezone.takeIf { it != original.timezone },
-                    )
-                }
-            }
+            _state.update { it.copy(isLoading = true, displayNameError = false, emailError = false) }
+            val request = createUpdateRequest(section)
 
             editProfileRepo.updateProfile(request)
                 .onSuccess {
                     _state.update { it.copy(isLoading = false) }
                     _events.send(EditProfileEvent.NavigateBack)
                 }
-                .onError {
-                    _state.update {
-                        it.copy(isLoading = false)
-                    }
-                }
+                .onError { _state.update { it.copy(isLoading = false) } }
+        }
+    }
+
+    private fun validateInputs(section: ProfileEditSection): Boolean {
+        val current = _state.value
+        var displayNameErr = false
+        var emailErr = false
+
+        if (section == ProfileEditSection.ALL || section == ProfileEditSection.PERSONAL) {
+            if (current.displayName.isBlank()) displayNameErr = true
+            if (current.email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(current.email).matches()) emailErr = true
+        }
+
+        val hasError = displayNameErr || emailErr
+        if (hasError) {
+            _state.update { it.copy(displayNameError = displayNameErr, emailError = emailErr) }
+        }
+        return !hasError
+    }
+
+    private fun createUpdateRequest(section: ProfileEditSection): RequestProfileUpdate {
+        val current = _state.value
+        return when (section) {
+            ProfileEditSection.PERSONAL -> RequestProfileUpdate(
+                username = current.username.takeIf { it != original.username },
+                email = current.email.takeIf { it != original.email },
+                displayName = current.displayName.takeIf { it != original.displayName },
+                gender = current.gender.takeIf { it != original.gender },
+                dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
+            )
+
+            ProfileEditSection.CAREER -> RequestProfileUpdate(
+                targetRole = current.targetRole.takeIf { it != original.targetRole },
+                industry = current.industry.takeIf { it != original.industry },
+                experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
+                currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
+                yearsOfExperience = current.yearsOfExperience.toIntOrNull()
+                    ?.takeIf { it != original.yearsOfExperience },
+                skills = current.skills.takeIf { it != original.skills },
+                targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
+                educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
+                timezone = current.timezone.takeIf { it != original.timezone },
+            )
+
+            else -> RequestProfileUpdate(
+                username = current.username.takeIf { it != original.username },
+                email = current.email.takeIf { it != original.email },
+                displayName = current.displayName.takeIf { it != original.displayName },
+                gender = current.gender.takeIf { it != original.gender },
+                dateOfBirth = current.dateOfBirth.takeIf { it != original.dateOfBirth },
+                targetRole = current.targetRole.takeIf { it != original.targetRole },
+                industry = current.industry.takeIf { it != original.industry },
+                experienceLevel = current.experienceLevel.takeIf { it != original.experienceLevel },
+                currentJobTitle = current.currentJobTitle.takeIf { it != original.currentJobTitle },
+                yearsOfExperience = current.yearsOfExperience.toIntOrNull()
+                    ?.takeIf { it != original.yearsOfExperience },
+                skills = current.skills.takeIf { it != original.skills },
+                targetCompanies = current.targetCompanies.takeIf { it != original.targetCompanies },
+                educationLevel = current.educationLevel.takeIf { it != original.educationLevel },
+                timezone = current.timezone.takeIf { it != original.timezone },
+            )
         }
     }
 
