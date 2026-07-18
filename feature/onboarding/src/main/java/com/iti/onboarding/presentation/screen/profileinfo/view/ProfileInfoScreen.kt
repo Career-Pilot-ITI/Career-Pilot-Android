@@ -16,13 +16,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -78,9 +75,7 @@ fun ProfileScreenContent(
     val data = state.data
     val isImageUploading = state.isImageUploading
     val isImageSourceSheetVisible = state.isImageSourceSheetVisible
-
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val imagePicker = rememberImagePickerLauncher(
         onImagePicked = { uri -> onIntent(ProfileInfoIntent.OnImagePicked(uri)) },
@@ -195,22 +190,6 @@ fun ProfileScreenContent(
             ProfileBanner()
 
             Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp)
-                .padding(bottom = 80.dp) // So it floats above the new global button
-        ) { data ->
-            androidx.compose.material3.Snackbar(
-                snackbarData = data,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-                containerColor = MaterialTheme.colorScheme.inverseSurface,
-                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                actionColor = MaterialTheme.colorScheme.primary
-            )
         }
     }
 
