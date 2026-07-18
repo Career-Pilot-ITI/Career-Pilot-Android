@@ -8,6 +8,7 @@ enum class NetworkError : IError {
     SERIALIZATION,
     EMPTY_RESULT,
     BAD_REQUEST,
+    OTP_EXPIRED,
     INVALID_COUPON,
     ADDRESS_ERROR,
     UNKNOWN,

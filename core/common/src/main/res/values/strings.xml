@@ -11,6 +11,7 @@
     <string name="error_serialization">The server returned an invalid response.</string>
     <string name="error_empty_result">No results were found.</string>
     <string name="error_bad_request">The request is invalid. Please check your information and try again.</string>
+    <string name="error_otp_expired">This code has expired. Request a new one.</string>
     <string name="error_invalid_coupon">This coupon code is invalid or has expired.</string>
     <string name="error_address">The address information is invalid or incomplete.</string>
 

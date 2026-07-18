@@ -42,6 +42,7 @@ class AuthRepositoryImpl @Inject constructor(
             CareerPilotResult.Error(
                 when (e.response.status) {
                     HttpStatusCode.TooManyRequests -> NetworkError.TOO_MANY_REQUESTS
+                    HttpStatusCode.Gone -> NetworkError.OTP_EXPIRED
                     else -> NetworkError.BAD_REQUEST
                 }
             )

@@ -11,6 +11,7 @@
     <string name="error_serialization">أرسل الخادم استجابة غير صالحة.</string>
     <string name="error_empty_result">لم يتم العثور على نتائج.</string>
     <string name="error_bad_request">الطلب غير صالح. تحقق من البيانات ثم حاول مرة أخرى.</string>
+    <string name="error_otp_expired">انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.</string>
     <string name="error_invalid_coupon">كود الخصم غير صالح أو انتهت صلاحيته.</string>
     <string name="error_address">بيانات العنوان غير صحيحة أو غير مكتملة.</string>
 
