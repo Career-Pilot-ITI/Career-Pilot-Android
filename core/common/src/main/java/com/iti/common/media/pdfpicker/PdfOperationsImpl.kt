@@ -14,14 +14,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import javax.inject.Inject
 
 
-class PdfReaderImpl @Inject constructor(
-    @ApplicationContext context: Context,
+class PdfOperationsImpl @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     @param:Dispatcher(CareerPilotDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-) : PdfReader {
+) : PdfOperations {
 
     private val contentResolver: ContentResolver = context.contentResolver
 
@@ -78,6 +79,32 @@ class PdfReaderImpl @Inject constructor(
             CareerPilotResult.Error(StorageError.UNKNOWN)
         }
     }
+
+    override suspend fun storePdfInternally(uri: String): CareerPilotResult<String, StorageError> =
+        withContext(ioDispatcher) {
+            try {
+                val parsedUri = uri.toUri()
+
+                val inputStream = context.contentResolver.openInputStream(parsedUri)
+                    ?: return@withContext CareerPilotResult.Error(StorageError.FileNotFound)
+
+                val fileName = "cv_${System.currentTimeMillis()}.pdf"
+                val destinationFile = File(context.filesDir, fileName)
+
+                inputStream.use { input ->
+                    destinationFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                val savedUriString = Uri.fromFile(destinationFile).toString()
+                CareerPilotResult.Success(savedUriString)
+            } catch (e: SecurityException) {
+                CareerPilotResult.Error(StorageError.PermissionDenied)
+            } catch (e: Exception) {
+                CareerPilotResult.Error(StorageError.UNKNOWN)
+            }
+        }
 
     private fun readMetadata(uri: Uri): FileMetadata {
         var name = DEFAULT_FILE_NAME

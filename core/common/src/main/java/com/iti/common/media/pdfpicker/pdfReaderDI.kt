@@ -11,6 +11,6 @@ abstract class PDFReaderDI {
 
     @Binds
     abstract fun bindsPdfReader(
-        impl: PdfReaderImpl
-    ): PdfReader
+        impl: PdfOperationsImpl
+    ): PdfOperations
 }

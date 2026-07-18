@@ -16,5 +16,7 @@ enum class NetworkError : IError {
 enum class StorageError : IError {
     FILE_TOO_LARGE,
     INCOMPATIBLE_FILE,
-    UNKNOWN
+    UNKNOWN,
+    FileNotFound,
+    PermissionDenied
 }
