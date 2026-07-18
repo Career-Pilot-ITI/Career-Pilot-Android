@@ -32,4 +32,7 @@
     <string name="error_file_too_large">The selected file is too large.</string>
     <string name="error_incompatible_file">This file type is not supported.</string>
     <string name="error_storage_unknown">Unable to process the selected file. Please try another file.</string>
+
+    <!-- Snackbar actions -->
+    <string name="snackbar_action_undo">Undo</string>
 </resources>

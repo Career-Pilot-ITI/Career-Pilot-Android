@@ -32,4 +32,7 @@
     <string name="error_file_too_large">حجم الملف المحدد كبير جدًا.</string>
     <string name="error_incompatible_file">نوع هذا الملف غير مدعوم.</string>
     <string name="error_storage_unknown">تعذر معالجة الملف المحدد. حاول اختيار ملف آخر.</string>
+
+    <!-- إجراءات شريط الإشعار -->
+    <string name="snackbar_action_undo">تراجع</string>
 </resources>
