@@ -5,4 +5,5 @@
     <string name="image_source_take_photo">التقاط صورة</string>
     <string name="image_source_choose_gallery">اختيار من المعرض</string>
     <string name="image_source_cancel">إلغاء</string>
+    <string name="snackbar_dismiss_action">إغلاق الرسالة</string>
 </resources>

@@ -5,4 +5,5 @@
     <string name="image_source_take_photo">Take Photo</string>
     <string name="image_source_choose_gallery">Choose from Gallery</string>
     <string name="image_source_cancel">Cancel</string>
+    <string name="snackbar_dismiss_action">Dismiss message</string>
 </resources>

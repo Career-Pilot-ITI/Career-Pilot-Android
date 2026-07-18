@@ -13,4 +13,6 @@ dependencies {
     api(libs.androidx.material3.android)
     api(libs.coil.compose)
     api(libs.extended.icons)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.compose.material3)
 }
