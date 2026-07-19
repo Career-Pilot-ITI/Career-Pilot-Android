@@ -30,7 +30,9 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -56,6 +58,7 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             val profile = editProfileRepo.userProfile.value
             original = profile
+            val birthMillis = calculateMillis(profile.personal.dateOfBirth)
             _state.update {
                 it.copy(
                     displayName = profile.personal.displayName,
@@ -63,7 +66,8 @@ class EditProfileViewModel @Inject constructor(
                     email = profile.account.email,
                     gender = profile.personal.gender,
                     dateOfBirth = profile.personal.dateOfBirth,
-                    dateOfBirthMillis = calculateMillis(profile.personal.dateOfBirth),
+                    dateOfBirthMillis = birthMillis,
+                    dateOfBirthDisplay = formatLocalizedDate(birthMillis),
                     targetRole = profile.career.targetRole,
                     industry = profile.career.industry,
                     experienceLevel = profile.career.experienceLevel,
@@ -100,23 +104,23 @@ class EditProfileViewModel @Inject constructor(
             is EditProfileAction.OnGenderChange ->
                 _state.update { it.copy(gender = action.value) }
 
-            is EditProfileAction.OnDateOfBirthChange ->
+            is EditProfileAction.OnDateOfBirthChange -> {
+                val millis = calculateMillis(action.value)
                 _state.update {
                     it.copy(
                         dateOfBirth = action.value,
-                        dateOfBirthMillis = calculateMillis(action.value)
+                        dateOfBirthMillis = millis,
+                        dateOfBirthDisplay = formatLocalizedDate(millis)
                     )
                 }
+            }
 
             is EditProfileAction.OnDateSelected -> {
-                val date = Instant.ofEpochMilli(action.millis)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
-                val formatted = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
                 _state.update {
                     it.copy(
-                        dateOfBirth = formatted,
-                        dateOfBirthMillis = action.millis
+                        dateOfBirth = formatBackendDate(action.millis),
+                        dateOfBirthMillis = action.millis,
+                        dateOfBirthDisplay = formatLocalizedDate(action.millis)
                     )
                 }
             }
@@ -367,10 +371,28 @@ class EditProfileViewModel @Inject constructor(
     private fun calculateMillis(dateString: String): Long? {
         return runCatching {
             LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
-                .atStartOfDay(ZoneId.systemDefault())
+                .atStartOfDay(ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli()
         }.getOrNull()
+    }
+
+    private fun formatLocalizedDate(millis: Long?): String {
+        return millis?.let {
+            Instant.ofEpochMilli(it)
+                .atZone(ZoneOffset.UTC)
+                .toLocalDate()
+                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+        } ?: ""
+    }
+
+    private fun formatBackendDate(millis: Long?): String {
+        return millis?.let {
+            Instant.ofEpochMilli(it)
+                .atZone(ZoneOffset.UTC)
+                .toLocalDate()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE)
+        } ?: ""
     }
 
     private fun sendEvent(event: EditProfileEvent) {

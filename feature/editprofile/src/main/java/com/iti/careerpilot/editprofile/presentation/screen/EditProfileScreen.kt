@@ -120,6 +120,19 @@ fun EditProfileScreen(
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = state.dateOfBirthMillis,
+        selectableDates = object :
+            androidx.compose.material3.SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+
+            override fun isSelectableYear(year: Int): Boolean {
+                return year <= LocalDate.now().year
+            }
+        }
+    )
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -219,7 +232,7 @@ fun EditProfileScreen(
 
                             LabeledTextField(
                                 label = stringResource(R.string.date_of_birth),
-                                value = state.dateOfBirth,
+                                value = state.dateOfBirthDisplay,
                                 leadingIcon = ImageVector.vectorResource(R.drawable.ic_edit_calendar),
                                 placeholder = stringResource(R.string.yyyy_mm_dd),
                                 onValueChange = { },
@@ -228,19 +241,6 @@ fun EditProfileScreen(
                             )
 
                             if (showDatePicker) {
-                                val datePickerState = rememberDatePickerState(
-                                    initialSelectedDateMillis = state.dateOfBirthMillis,
-                                    selectableDates = object :
-                                        androidx.compose.material3.SelectableDates {
-                                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                                            return utcTimeMillis <= System.currentTimeMillis()
-                                        }
-
-                                        override fun isSelectableYear(year: Int): Boolean {
-                                            return year <= LocalDate.now().year
-                                        }
-                                    }
-                                )
                                 DatePickerDialog(
                                     onDismissRequest = { showDatePicker = false },
                                     confirmButton = {

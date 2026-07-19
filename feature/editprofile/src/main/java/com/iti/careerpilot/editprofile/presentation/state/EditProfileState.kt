@@ -9,6 +9,7 @@ data class EditProfileState(
     val email: String = "",
     val gender: String = "",
     val dateOfBirth: String = "",
+    val dateOfBirthDisplay: String = "",
     val dateOfBirthMillis: Long? = null,
     val targetRole: String = "",
     val industry: String = "",
