@@ -6,7 +6,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-kotlin = "2.4.0"
+kotlin = "2.4.10"
 composeBom = "2026.06.01"
 #
 lottieCompose = "6.7.1"
@@ -28,6 +28,7 @@ material = "1.14.0"
 coroutines = "1.11.0"
 composeMaterial3 = "1.6.2"
 extendedIcons = "1.7.8"
+exifinterface = "1.4.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,7 +46,7 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
-androidx-compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version = "1.6.0" }
+androidx-compose-googlefonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version = "1.11.4" }
 #lottie
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 #kotlinx datetime
@@ -90,6 +91,8 @@ androidx-navigation3 = { module = "androidx.navigation3:navigation3-runtime", ve
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+#image utils
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 # Kotlin coroutines
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -115,6 +118,7 @@ extended-icons = { group = "androidx.compose.material", name = "material-icons-e
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+
 #added plugins
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -139,6 +143,7 @@ careerpilot-module-models = { id = "careerpilot.module.models" }
 careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
 careerpilot-feature-data = { id = "careerpilot.feature.data" }
 careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
+careerpilot-feature-profile = { id = "careerpilot.feature.profile" }
 careerpilot-testing = { id = "careerpilot.testing" }
 
 [bundles]

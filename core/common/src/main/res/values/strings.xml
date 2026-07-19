@@ -39,4 +39,9 @@
 
     <!-- Snackbar actions -->
     <string name="snackbar_action_undo">Undo</string>
+
+    <!-- Profile Sections -->
+    <string name="edit_personal_info">Edit Personal Info</string>
+    <string name="edit_career_info">Edit Career Info</string>
+    <string name="edit_profile">Edit Profile</string>
 </resources>

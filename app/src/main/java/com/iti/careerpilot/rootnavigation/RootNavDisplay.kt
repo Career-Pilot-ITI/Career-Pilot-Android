@@ -18,6 +18,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
+import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.components.CareerPilotSnackbarHost
+import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.login.LoginRoot
 import com.iti.careerpilot.features.otp.OTPRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
@@ -187,6 +190,9 @@ fun RootNavDisplay(
                                 Route.Settings,
                             )
                         },
+                        openEditProfile = { section ->
+                            rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
+                        },
                         openPaywall = {
                             rootBackStack.navigateSingleTop(
                                 Route.Paywall,
@@ -205,6 +211,14 @@ fun RootNavDisplay(
                     SettingsRoot()
                 }
 
+                entry<Route.EditProfile> {
+                    EditProfileRoot(
+                        section = it.section,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.EditProfile>()
+                        }
+                    )
+                }
                 entry<Route.Paywall> {
                     PaywallRoot()
                 }
