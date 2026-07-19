@@ -2,9 +2,12 @@ package com.iti.careerpilot.core.designsystem.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +25,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.iti.careerpilot.core.designsystem.CareerPilotTypography
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.R
 
@@ -31,7 +35,8 @@ fun NoNetworkConnectionAnimation(
     animationSize: Dp = 120.dp,
     titleColor: Color = MaterialTheme.colorScheme.onBackground.copy(
         alpha = 0.65f,
-    )
+    ),
+    retryBlock: (() -> Unit)? = null,
 ) {
     val composition by rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(
@@ -61,5 +66,23 @@ fun NoNetworkConnectionAnimation(
             color = titleColor,
             textAlign = TextAlign.Center,
         )
+
+        if (retryBlock != null) {
+            Spacer(modifier = Modifier.height(Dimens.SpaceM))
+
+            Button(
+                onClick = {
+                    retryBlock()
+                },
+                contentPadding = PaddingValues(vertical = 8.dp, horizontal = 20.dp),
+                shape = MaterialTheme.shapes.small,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            ) {
+                Text(text = "Retry", style = CareerPilotTypography.labelMedium)
+            }
+        }
     }
 }
