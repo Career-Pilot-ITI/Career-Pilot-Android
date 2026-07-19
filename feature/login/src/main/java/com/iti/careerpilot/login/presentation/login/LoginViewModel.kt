@@ -43,13 +43,19 @@ class LoginViewModel @Inject constructor(
 
     fun onAction(action: LoginAction) {
         when (action) {
-            is LoginAction.PhoneNumberChanged ->
-                _state.update { it.copy(phoneNumber = action.phoneNumber, error = null) }
+            is LoginAction.PhoneNumberChanged -> onPhoneNumberChanged(action.phoneNumber)
 
             is LoginAction.RegionChanged ->
                 _state.update { it.copy(regionCode = action.regionCode) }
 
             is LoginAction.SendOtpClicked -> sendOtp()
+        }
+    }
+
+    private fun onPhoneNumberChanged(phoneNumber: String) {
+        cooldownJob?.cancel()
+        _state.update {
+            it.copy(phoneNumber = phoneNumber, error = null, cooldownSecondsRemaining = 0)
         }
     }
 
