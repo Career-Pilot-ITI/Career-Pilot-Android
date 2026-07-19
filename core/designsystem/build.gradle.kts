@@ -11,4 +11,5 @@ dependencies {
     implementation(libs.androidx.compose.googlefonts)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.compose.material3)
+    implementation(libs.androidx.activity.compose)
 }
