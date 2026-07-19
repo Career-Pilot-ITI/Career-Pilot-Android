@@ -65,8 +65,9 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
-                val fileName = getFileName(uri) ?: "temp_file"
-                val file = File(context.cacheDir, fileName)
+                val file: File = getFileName(uri)?.let { fileName ->
+                    File(context.cacheDir, fileName)
+                } ?: File.createTempFile("temp_file", ".tmp", context.cacheDir)
                 file.outputStream().use { outputStream ->
                     inputStream.copyTo(outputStream)
                 }

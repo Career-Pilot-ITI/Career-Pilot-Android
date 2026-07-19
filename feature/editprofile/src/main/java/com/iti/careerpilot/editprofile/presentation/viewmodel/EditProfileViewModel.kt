@@ -53,7 +53,7 @@ class EditProfileViewModel @Inject constructor(
     }
 
     private fun loadProfile() {
-        viewModelScope.launch(dispatcherDefault) {
+        viewModelScope.launch {
             val profile = editProfileRepo.userProfile.value
             original = profile
             _state.update {
