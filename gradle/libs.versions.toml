@@ -142,6 +142,7 @@ careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
 careerpilot-feature-data = { id = "careerpilot.feature.data" }
 careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
 careerpilot-feature-profile = { id = "careerpilot.feature.profile" }
+careerpilot-feature-reports = { id = "careerpilot.feature.reports" }
 careerpilot-testing = { id = "careerpilot.testing" }
 
 [bundles]
