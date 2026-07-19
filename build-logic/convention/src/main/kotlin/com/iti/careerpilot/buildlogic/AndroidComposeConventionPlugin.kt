@@ -24,6 +24,7 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
 
         addPlatform("implementation", "androidx-compose-bom")
 
+        addLibrary("implementation", "androidx-activity-compose")
         addLibrary("implementation", "androidx-compose-ui")
         addLibrary("implementation", "androidx-compose-ui-graphics")
         addLibrary("implementation", "androidx-compose-ui-tooling-preview")

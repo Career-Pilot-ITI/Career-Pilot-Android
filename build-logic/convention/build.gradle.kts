@@ -105,6 +105,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.presentation.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.FeaturePresentationConventionPlugin"
         }
+        register("careerPilotFeatureProfile") {
+            id = libs.plugins.careerpilot.feature.profile.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.ProfileConventionPlugin"
+        }
         register("careerPilotTesting") {
             id = libs.plugins.careerpilot.testing.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.TestingConventionPlugin"
