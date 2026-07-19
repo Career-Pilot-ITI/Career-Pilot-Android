@@ -1,9 +1,11 @@
 package com.iti.careerpilot.login.presentation.otp
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.login.domain.usecase.SendOtpUseCase
 import com.iti.careerpilot.login.domain.usecase.VerifyOtpUseCase
+import com.iti.common.util.countdownFlow
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
@@ -24,21 +26,23 @@ import kotlin.time.Duration.Companion.milliseconds
 class OTPViewModel @Inject constructor(
     private val verifyOtp: VerifyOtpUseCase,
     private val sendOtp: SendOtpUseCase,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(OTPState())
+    private val _state = MutableStateFlow(
+        OTPState(phoneNumber = savedStateHandle[KEY_PHONE_NUMBER] ?: ""),
+    )
     val state = _state
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = OTPState()
+            initialValue = _state.value,
         )
 
     private val _events = Channel<OTPEvent>()
     val events = _events.receiveAsFlow()
 
     private var resendTimerJob: Job? = null
-    private var initialized = false
 
     fun onAction(action: OTPAction) {
         when (action) {
@@ -49,8 +53,8 @@ class OTPViewModel @Inject constructor(
     }
 
     private fun initialize(phoneNumber: String) {
-        if (initialized) return
-        initialized = true
+        if (KEY_PHONE_NUMBER in savedStateHandle) return
+        savedStateHandle[KEY_PHONE_NUMBER] = phoneNumber
         _state.update { it.copy(phoneNumber = phoneNumber) }
         startResendCountdown()
     }
@@ -102,10 +106,8 @@ class OTPViewModel @Inject constructor(
     private fun startResendCountdown() {
         resendTimerJob?.cancel()
         resendTimerJob = viewModelScope.launch {
-            _state.update { it.copy(resendSecondsRemaining = RESEND_SECONDS) }
-            while (_state.value.resendSecondsRemaining > 0) {
-                delay(1_000L.milliseconds)
-                _state.update { it.copy(resendSecondsRemaining = it.resendSecondsRemaining - 1) }
+            countdownFlow(RESEND_SECONDS).collect { remaining ->
+                _state.update { it.copy(resendSecondsRemaining = remaining) }
             }
         }
     }
@@ -114,5 +116,6 @@ class OTPViewModel @Inject constructor(
         const val OTP_LENGTH = 6
         private const val RESEND_SECONDS = 60
         private const val SUCCESS_DISMISS_MILLIS = 1_800L
+        private const val KEY_PHONE_NUMBER = "otp_phone_number"
     }
 }

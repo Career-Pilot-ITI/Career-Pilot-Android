@@ -118,9 +118,13 @@ fun LoginScreen(
                 }
             } else {
                 CareerPilotButton(
-                    text = stringResource(id = R.string.btn_continue),
+                    text = if (state.isInCooldown) {
+                        stringResource(id = R.string.btn_retry_in_seconds, state.cooldownSecondsRemaining)
+                    } else {
+                        stringResource(id = R.string.btn_continue)
+                    },
                     onClick = { onAction(LoginAction.SendOtpClicked) },
-                    enabled = state.phoneNumber.isNotBlank()
+                    enabled = state.phoneNumber.isNotBlank() && !state.isInCooldown
                 )
             }
         }

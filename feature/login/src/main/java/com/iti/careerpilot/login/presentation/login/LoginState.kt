@@ -7,4 +7,7 @@ data class LoginState(
     val regionCode: String = "",
     val isLoading: Boolean = false,
     val error: UIText? = null,
-)
+    val cooldownSecondsRemaining: Int = 0,
+) {
+    val isInCooldown: Boolean get() = cooldownSecondsRemaining > 0
+}

@@ -7,6 +7,7 @@
     <string name="phone_number_label">رقم الهاتف</string>
     <string name="phone_placeholder">٠١x xxxx xxxx</string>
     <string name="btn_continue">متابعة</string>
+    <string name="btn_retry_in_seconds">حاول مرة أخرى خلال %1$d ثانية</string>
 
     <string name="error_phone_empty">من فضلك أدخل رقم هاتفك</string>
     <string name="error_phone_too_short">رقم الهاتف قصير جدًا</string>
