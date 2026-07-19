@@ -41,3 +41,6 @@ android {
         buildConfig = true
     }
 }
+dependencies{
+    implementation(project(":core:common"))
+}

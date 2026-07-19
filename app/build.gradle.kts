@@ -28,7 +28,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -49,6 +48,7 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
-
     implementation(project(":feature:login"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:editprofile"))
 }

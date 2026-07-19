@@ -11,6 +11,11 @@
     <string name="error_serialization">أرسل الخادم استجابة غير صالحة.</string>
     <string name="error_empty_result">لم يتم العثور على نتائج.</string>
     <string name="error_bad_request">الطلب غير صالح. تحقق من البيانات ثم حاول مرة أخرى.</string>
+    <string name="error_unauthorized">انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="error_forbidden">لا يمكنك الوصول إلى هذا حاليًا.</string>
+    <string name="error_not_found">لم نتمكن من العثور على ما تبحث عنه.</string>
+    <string name="error_conflict">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_gone">انتهت صلاحية هذا. يرجى المحاولة مرة أخرى.</string>
     <string name="error_otp_expired">انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.</string>
     <string name="error_invalid_coupon">كود الخصم غير صالح أو انتهت صلاحيته.</string>
     <string name="error_address">بيانات العنوان غير صحيحة أو غير مكتملة.</string>
@@ -35,4 +40,8 @@
 
     <!-- إجراءات شريط الإشعار -->
     <string name="snackbar_action_undo">تراجع</string>
+
+    <string name="edit_personal_info">تعديل المعلومات الشخصية</string>
+    <string name="edit_career_info">تعديل المعلومات المهنية</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
 </resources>

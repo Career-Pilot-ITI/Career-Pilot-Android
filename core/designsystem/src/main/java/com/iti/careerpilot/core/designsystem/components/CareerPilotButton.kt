@@ -22,10 +22,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
-import com.iti.careerpilot.core.designsystem.CareerPilotTypography
 import com.iti.careerpilot.core.designsystem.Dimens
 
 enum class ButtonVariant {
@@ -60,13 +58,13 @@ fun CareerPilotButton(
                 shape = shape,
                 interactionSource = interactionSource,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CareerPilotPalette.amber,
-                    contentColor = CareerPilotPalette.white,
-                    disabledContainerColor = CareerPilotPalette.amber.copy(alpha = 0.4f),
-                    disabledContentColor = CareerPilotPalette.white.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = CareerPilotTypography.labelLarge)
+                Text(text = text, style = MaterialTheme.typography.labelLarge)
             }
         }
         ButtonVariant.SECONDARY -> {
@@ -77,13 +75,13 @@ fun CareerPilotButton(
                 shape = shape,
                 interactionSource = interactionSource,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CareerPilotPalette.white.copy(alpha = 0.1f),
-                    contentColor = CareerPilotPalette.white,
-                    disabledContainerColor = CareerPilotPalette.white.copy(alpha = 0.04f),
-                    disabledContentColor = CareerPilotPalette.white.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.04f),
+                    disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = CareerPilotTypography.labelLarge)
+                Text(text = text, style = MaterialTheme.typography.labelLarge)
             }
         }
         ButtonVariant.GHOST -> {
@@ -94,11 +92,11 @@ fun CareerPilotButton(
                 shape = shape,
                 interactionSource = interactionSource,
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = CareerPilotPalette.amber,
-                    disabledContentColor = CareerPilotPalette.amber.copy(alpha = 0.4f)
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = CareerPilotTypography.labelLarge)
+                Text(text = text, style = MaterialTheme.typography.labelLarge)
             }
         }
         ButtonVariant.OUTLINE -> {
@@ -114,7 +112,7 @@ fun CareerPilotButton(
                     disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = CareerPilotTypography.labelLarge)
+                Text(text = text, style = MaterialTheme.typography.labelLarge)
             }
         }
     }
