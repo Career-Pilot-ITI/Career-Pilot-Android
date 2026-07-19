@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,9 +27,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
-import com.iti.careerpilot.core.designsystem.CareerPilotTypography
 
 @Composable
 fun ScoreRing(
@@ -44,7 +43,7 @@ fun ScoreRing(
     centerContent: @Composable (animatedProgress: Float) -> Unit = { animatedProgress ->
         Text(
             text = "${(animatedProgress * 100).toInt()}%",
-            style = CareerPilotTypography.titleLarge
+            style = MaterialTheme.typography.titleLarge
         )
     }
 ) {
@@ -106,8 +105,8 @@ fun ScoreRingPreview() {
     CareerPilotTheme {
         ScoreRing(
             progress = 0.85f,
-            progressColor = CareerPilotPalette.green,
-            trackColor = CareerPilotPalette.gray200,
+            progressColor = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
             modifier = Modifier.size(100.dp).padding(16.dp)
         )
     }
