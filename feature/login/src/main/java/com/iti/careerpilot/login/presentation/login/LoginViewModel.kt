@@ -15,9 +15,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,12 +28,7 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
-    val state = _state
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = LoginState()
-        )
+    val state = _state.asStateFlow()
 
     private val _events = Channel<LoginEvent>()
     val events = _events.receiveAsFlow()
@@ -53,9 +47,11 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun onPhoneNumberChanged(phoneNumber: String) {
+        val digitsOnly = phoneNumber.filter(Char::isDigit)
+
         cooldownJob?.cancel()
         _state.update {
-            it.copy(phoneNumber = phoneNumber, error = null, cooldownSecondsRemaining = 0)
+            it.copy(phoneNumber = digitsOnly, error = null, cooldownSecondsRemaining = 0)
         }
     }
 

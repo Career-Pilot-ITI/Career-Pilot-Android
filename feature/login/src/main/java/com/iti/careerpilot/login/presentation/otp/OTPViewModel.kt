@@ -14,9 +14,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,12 +31,7 @@ class OTPViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         OTPState(phoneNumber = savedStateHandle[KEY_PHONE_NUMBER] ?: ""),
     )
-    val state = _state
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = _state.value,
-        )
+    val state = _state.asStateFlow()
 
     private val _events = Channel<OTPEvent>()
     val events = _events.receiveAsFlow()
@@ -60,9 +54,9 @@ class OTPViewModel @Inject constructor(
     }
 
     private fun onCodeChanged(input: String) {
-        val sanitized = input.filter(Char::isDigit).take(OTP_LENGTH)
-        _state.update { it.copy(code = sanitized, error = null) }
-        if (sanitized.length == OTP_LENGTH) verify()
+        val digitsOnly = input.filter(Char::isDigit).take(OTP_LENGTH)
+        _state.update { it.copy(code = digitsOnly, error = null) }
+        if (digitsOnly.length == OTP_LENGTH) verify()
     }
 
     private fun verify() {
