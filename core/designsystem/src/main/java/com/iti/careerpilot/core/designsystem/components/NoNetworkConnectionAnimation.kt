@@ -81,7 +81,7 @@ fun NoNetworkConnectionAnimation(
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 )
             ) {
-                Text(text = "Retry", style = CareerPilotTypography.labelMedium)
+                Text(text = stringResource(R.string.retry), style = CareerPilotTypography.labelMedium)
             }
         }
     }
