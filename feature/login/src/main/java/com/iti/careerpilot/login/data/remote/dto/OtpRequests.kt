@@ -1,14 +1,15 @@
 package com.iti.careerpilot.login.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SendOtpRequest(
-    val phoneNumber: String,
+    @SerialName("phoneNumber") val phoneNumber: String,
 )
 
 @Serializable
 data class VerifyOtpRequest(
-    val phoneNumber: String,
-    val code: String,
+    @SerialName("phoneNumber") val phoneNumber: String,
+    @SerialName("code") val code: String,
 )

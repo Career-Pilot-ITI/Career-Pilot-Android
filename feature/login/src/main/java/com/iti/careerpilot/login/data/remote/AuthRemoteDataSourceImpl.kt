@@ -10,9 +10,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
 
-class AuthDataSourceImpl @Inject constructor(
+class AuthRemoteDataSourceImpl @Inject constructor(
     private val client: HttpClient,
-) : AuthDataSource {
+) : AuthRemoteDataSource {
 
     override suspend fun sendOtp(request: SendOtpRequest): ApiMessageResponse =
         client.post("api/v1/otp/send") {

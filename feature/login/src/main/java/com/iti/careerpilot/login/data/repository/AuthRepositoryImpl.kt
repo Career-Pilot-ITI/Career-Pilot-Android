@@ -1,7 +1,7 @@
 package com.iti.careerpilot.login.data.repository
 
 import com.iti.careerpilot.login.data.mapper.toDomain
-import com.iti.careerpilot.login.data.remote.AuthDataSource
+import com.iti.careerpilot.login.data.remote.AuthRemoteDataSource
 import com.iti.careerpilot.login.data.remote.dto.SendOtpRequest
 import com.iti.careerpilot.login.data.remote.dto.VerifyOtpRequest
 import com.iti.careerpilot.login.domain.model.AuthSession
@@ -17,12 +17,12 @@ import java.io.IOException
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val dataSource: AuthDataSource,
+    private val remote: AuthRemoteDataSource,
 ) : AuthRepository {
 
     override suspend fun sendOtp(phoneNumber: String): CareerPilotResult<Unit, NetworkError> =
         safeCall {
-            dataSource.sendOtp(SendOtpRequest(phoneNumber = phoneNumber))
+            remote.sendOtp(SendOtpRequest(phoneNumber = phoneNumber))
         }
 
     override suspend fun verifyOtp(
@@ -30,7 +30,7 @@ class AuthRepositoryImpl @Inject constructor(
         code: String,
     ): CareerPilotResult<AuthSession, NetworkError> =
         safeCall {
-            dataSource.verifyOtp(VerifyOtpRequest(phoneNumber = phoneNumber, code = code)).toDomain()
+            remote.verifyOtp(VerifyOtpRequest(phoneNumber = phoneNumber, code = code)).toDomain()
         }
 
     inline fun <T> safeCall(block: () -> T): CareerPilotResult<T, NetworkError> =

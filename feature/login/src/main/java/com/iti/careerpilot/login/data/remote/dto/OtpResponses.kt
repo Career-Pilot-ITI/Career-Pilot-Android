@@ -1,38 +1,39 @@
 package com.iti.careerpilot.login.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ApiMessageResponse(
-    val message: String? = null,
-    val success: Boolean = false,
+    @SerialName("message") val message: String? = null,
+    @SerialName("success") val success: Boolean = false,
 )
 
 @Serializable
 data class OtpAuthResponse(
-    val authTokens: AuthTokensDto,
-    val user: AuthUserDto,
+    @SerialName("authTokens") val authTokens: AuthTokensDto,
+    @SerialName("user") val user: AuthUserDto,
 )
 
 @Serializable
 data class AuthTokensDto(
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresIn: Long = 0L,
+    @SerialName("accessToken") val accessToken: String,
+    @SerialName("refreshToken") val refreshToken: String,
+    @SerialName("expiresIn") val expiresIn: Long = 0L,
 )
 
 @Serializable
 data class AuthUserDto(
-    val id: Long,
-    val phoneNumber: String? = null,
-    val profile: AuthUserProfileDto? = null,
-    val newUser: Boolean = false,
+    @SerialName("id") val id: Long,
+    @SerialName("phoneNumber") val phoneNumber: String? = null,
+    @SerialName("profile") val profile: AuthUserProfileDto? = null,
+    @SerialName("newUser") val newUser: Boolean = false,
 )
 
 @Serializable
 data class AuthUserProfileDto(
-    val username: String? = null,
-    val displayName: String? = null,
-    val email: String? = null,
-    val onboardingCompleted: Boolean = false,
+    @SerialName("username") val username: String? = null,
+    @SerialName("displayName") val displayName: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("onboardingCompleted") val onboardingCompleted: Boolean = false,
 )
