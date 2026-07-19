@@ -1,7 +1,7 @@
 package com.iti.careerpilot.editprofile.presentation.screen
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,6 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -120,19 +122,41 @@ fun EditProfileScreen(
     onBack: () -> Unit,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = state.dateOfBirthMillis,
-        selectableDates = object :
-            androidx.compose.material3.SelectableDates {
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val selectableDates = remember {
+        val currentTime = System.currentTimeMillis()
+        val currentYear = LocalDate.now().year
+        object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                return utcTimeMillis <= System.currentTimeMillis()
+                return utcTimeMillis <= currentTime
             }
 
             override fun isSelectableYear(year: Int): Boolean {
-                return year <= LocalDate.now().year
+                return year <= currentYear
             }
         }
+    }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = state.dateOfBirthMillis,
+        selectableDates = selectableDates
     )
+    val dateInteractionSource = remember { MutableInteractionSource() }
+    LaunchedEffect(dateInteractionSource) {
+        dateInteractionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) {
+                showDatePicker = true
+            }
+        }
+    }
+
+    LaunchedEffect(state.dateOfBirthMillis) {
+        if (datePickerState.selectedDateMillis != state.dateOfBirthMillis) {
+            datePickerState.selectedDateMillis = state.dateOfBirthMillis
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -222,13 +246,6 @@ fun EditProfileScreen(
                                     }
                                 }
                             )
-                            val dateInteractionSource = remember { MutableInteractionSource() }
-                            val isPressed by dateInteractionSource.collectIsPressedAsState()
-                            var showDatePicker by remember { mutableStateOf(false) }
-
-                            if (isPressed) {
-                                showDatePicker = true
-                            }
 
                             LabeledTextField(
                                 label = stringResource(R.string.date_of_birth),
@@ -240,38 +257,6 @@ fun EditProfileScreen(
                                 interactionSource = dateInteractionSource
                             )
 
-                            if (showDatePicker) {
-                                DatePickerDialog(
-                                    onDismissRequest = { showDatePicker = false },
-                                    confirmButton = {
-                                        Button(
-                                            onClick = {
-                                                datePickerState.selectedDateMillis?.let { millis ->
-                                                    onAction(EditProfileAction.OnDateSelected(millis))
-                                                }
-                                                showDatePicker = false
-                                            },
-                                            modifier = Modifier.width(100.dp)
-                                        ) {
-                                            Text(stringResource(R.string.ok))
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(
-                                            onClick = { showDatePicker = false },
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                                containerColor = Color.Transparent
-                                            ),
-                                            modifier = Modifier.width(100.dp)
-                                        ) {
-                                            Text(stringResource(R.string.cancel))
-                                        }
-                                    }
-                                ) {
-                                    DatePicker(state = datePickerState)
-                                }
-                            }
                         }
                     }
                 }
@@ -398,6 +383,39 @@ fun EditProfileScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             )
+        }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            onAction(EditProfileAction.OnDateSelected(millis))
+                        }
+                        showDatePicker = false
+                    },
+                    modifier = Modifier.width(100.dp)
+                ) {
+                    Text(stringResource(R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDatePicker = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        containerColor = Color.Transparent
+                    ),
+                    modifier = Modifier.width(100.dp)
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
