@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val hasCompletedOnboarding by viewModel.hasCompletedOnboarding.collectAsStateWithLifecycle()
 
+            val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
             if (hasCompletedOnboarding != null) {
                 val startRoute = if (hasCompletedOnboarding == true) {
                     Route.NestedNav
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
                     Route.Onboarding
                 }
                 CareerPilotTheme {
-                    RootNavDisplay(startRoute = startRoute)
+                    RootNavDisplay(startRoute = startRoute, isOnline)
                 }
             }
         }
