@@ -1,3 +1,7 @@
 <resources>
     <string name="snackbar_dismiss_action">إغلاق الرسالة</string>
+    <string name="offline_mode_message">أنت غير متصل بالإنترنت. قد تكون بعض الميزات محدودة.</string>
+    <string name="dismiss">إغلاق</string>
+    <string name="no_network_connection">لا يوجد اتصال بالإنترنت</string>
+    <string name="retry">أعد المحاولة</string>
 </resources>
