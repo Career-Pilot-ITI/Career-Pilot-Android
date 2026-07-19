@@ -24,6 +24,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.login.R
 import com.iti.careerpilot.login.presentation.otp.OTPAction
 import com.iti.careerpilot.login.presentation.otp.OTPEvent
@@ -46,11 +47,9 @@ fun OTPRoot(
         viewModel.onAction(OTPAction.PhoneNumberReceived(phoneNumber))
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is OTPEvent.NavigateToHome -> openHome()
-            }
+    ObserveEvent(viewModel.events) { event ->
+        when (event) {
+            is OTPEvent.NavigateToHome -> openHome()
         }
     }
 

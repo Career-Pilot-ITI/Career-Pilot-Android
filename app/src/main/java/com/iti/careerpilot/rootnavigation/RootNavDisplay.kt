@@ -132,7 +132,7 @@ fun RootNavDisplay(
                             }
                         },
                         onBack = {
-                            rootBackStack.removeLastOrNull()
+                            rootBackStack.popIfCurrentIs<Route.OTP>()
                         },
                     )
                 }
