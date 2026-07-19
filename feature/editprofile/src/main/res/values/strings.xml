@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="username">\@%1$s</string>
+    <string name="target_role">Target role</string>
+    <string name="industry">Industry</string>
+    <string name="experience">Experience</string>
+    <string name="back">Back</string>
+
+    <!-- Gender -->
+    <string name="gender_female">Female</string>
+    <string name="gender_male">Male</string>
+
+    <!-- Experience -->
+    <string name="experience_entry_level">Entry-level</string>
+    <string name="experience_junior">Junior</string>
+    <string name="experience_mid_level">Mid-level</string>
+    <string name="experience_senior">Senior</string>
+    <string name="experience_lead">Lead</string>
+    <string name="experience_executive">Executive</string>
+
+    <!-- Education -->
+    <string name="education_high_school">High school</string>
+    <string name="education_associate">Associate</string>
+    <string name="education_bachelors">Bachelor\'s</string>
+    <string name="education_masters">Master\'s</string>
+    <string name="education_doctorate">Doctorate</string>
+    <string name="education_other">Other</string>
+    <string name="cancel">Cancel</string>
+    <string name="allow">Allow</string>
+    <string name="camera_permission">Camera Permission</string>
+    <string name="please_allow_camera_permission">Please allow the camera permission to continue</string>
+    <string name="profile_photo">Profile photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="your_name">Your name</string>
+    <string name="username_placeholder">\@username</string>
+    <string name="update_profile_photo">Update profile photo</string>
+    <string name="choose_from_gallery">Choose from gallery</string>
+    <string name="take_a_photo">Take a photo</string>
+    <string name="personal_info">Personal Info</string>
+    <string name="display_name">Display name</string>
+    <string name="gender">Gender</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="yyyy_mm_dd">YYYY-MM-DD</string>
+    <string name="career">Career</string>
+    <string name="experience_level">Experience level</string>
+    <string name="current_job_title">Current job title</string>
+    <string name="years_of_experience">Years of experience</string>
+    <string name="education_level">Education level</string>
+    <string name="skills">Skills</string>
+    <string name="add_skills">Add skills</string>
+    <string name="target_companies">Target companies</string>
+    <string name="add_a_company_and_press_enter">Add companies</string>
+    <string name="nothing_added_yet">Nothing added yet</string>
+    <string name="saving">Saving…</string>
+    <string name="save_changes">Save changes</string>
+    <string name="email">Email</string>
+    <string name="upload_cv">Upload CV</string>
+    <string name="no_cv_uploaded">No CV uploaded yet</string>
+    <string name="tap_to_upload_pdf">Tap to upload your CV in PDF format</string>
+    <string name="cv_uploaded">CV Uploaded</string>
+    <string name="change_cv">Change CV</string>
+    <string name="remove_cv">Remove CV</string>
+    <string name="uploading">Uploading…</string>
+    <string name="uploading_cv">Uploading CV… %1$d%%</string>
+    <string name="camera_permission_title">Camera Permission</string>
+    <string name="camera_permission_text">Please allow the camera permission to continue</string>
+    <string name="remove_x">remove</string>
+    <string name="add">Add</string>
+    <string name="animation_percentage">%1$d%%</string>
+    <string name="upload_failed">Upload Failed</string>
+    <string name="error_empty_display_name">Display name cannot be empty</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="ok">OK</string>
+
+</resources>

@@ -28,6 +28,21 @@ fun NetworkError.toUIText(): UIText {
             NetworkError.BAD_REQUEST ->
                 R.string.error_bad_request
 
+            NetworkError.UNAUTHORIZED ->
+                R.string.error_unauthorized
+
+            NetworkError.FORBIDDEN ->
+                R.string.error_forbidden
+
+            NetworkError.NOT_FOUND ->
+                R.string.error_not_found
+
+            NetworkError.CONFLICT ->
+                R.string.error_conflict
+
+            NetworkError.GONE ->
+                R.string.error_gone
+
             NetworkError.INVALID_COUPON ->
                 R.string.error_invalid_coupon
 

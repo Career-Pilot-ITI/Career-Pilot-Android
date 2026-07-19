@@ -32,3 +32,10 @@ inline fun <D, E : IError> CareerPilotResult<D, E>.onError(
 
     return this
 }
+
+fun <D, E : IError> CareerPilotResult<D, E>.mapToEmptyResult(): CareerPilotResult<Unit, E> {
+    return when (this) {
+        is CareerPilotResult.Success -> CareerPilotResult.Success(Unit)
+        is CareerPilotResult.Error -> this
+    }
+}

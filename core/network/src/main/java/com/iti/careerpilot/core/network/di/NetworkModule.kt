@@ -66,7 +66,7 @@ object NetworkModule {
 
         if (BuildConfig.DEBUG) {
             install(Logging) {
-                level = LogLevel.INFO
+                level = LogLevel.ALL
                 logger = object : Logger {
                     override fun log(message: String) {
                         Log.d("KtorClient", message)

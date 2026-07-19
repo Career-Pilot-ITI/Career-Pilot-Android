@@ -11,6 +11,11 @@
     <string name="error_serialization">The server returned an invalid response.</string>
     <string name="error_empty_result">No results were found.</string>
     <string name="error_bad_request">The request is invalid. Please check your information and try again.</string>
+    <string name="error_unauthorized">Your session has expired. Please sign in again.</string>
+    <string name="error_forbidden">You can\'t access this right now.</string>
+    <string name="error_not_found">We couldn\'t find what you were looking for.</string>
+    <string name="error_conflict">Something went wrong. Please try again.</string>
+    <string name="error_gone">This has expired. Please try again.</string>
     <string name="error_invalid_coupon">This coupon code is invalid or has expired.</string>
     <string name="error_address">The address information is invalid or incomplete.</string>
 
@@ -36,4 +41,9 @@
 
     <!-- Snackbar actions -->
     <string name="snackbar_action_undo">Undo</string>
+
+    <!-- Profile Sections -->
+    <string name="edit_personal_info">Edit Personal Info</string>
+    <string name="edit_career_info">Edit Career Info</string>
+    <string name="edit_profile">Edit Profile</string>
 </resources>

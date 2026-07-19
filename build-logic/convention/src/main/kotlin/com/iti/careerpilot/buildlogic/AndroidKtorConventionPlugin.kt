@@ -6,6 +6,6 @@ import org.gradle.api.Project
 class AndroidKtorConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("careerpilot.kotlin.serialization")
-        addBundle("implementation", "ktor")
+        addBundle("api", "ktor")
     }
 }
