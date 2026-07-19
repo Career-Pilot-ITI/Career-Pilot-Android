@@ -36,6 +36,8 @@
     <string name="error_file_too_large">The selected file is too large.</string>
     <string name="error_incompatible_file">This file type is not supported.</string>
     <string name="error_storage_unknown">Unable to process the selected file. Please try another file.</string>
+    <string name="error_storage_file_not_found">File not found. It may have been moved or deleted.</string>
+    <string name="error_storage_permission_denied">We couldn\'t find the selected PDF. Please check if the file still exists and try selecting it again.</string>
 
     <!-- Snackbar actions -->
     <string name="snackbar_action_undo">Undo</string>

@@ -1,0 +1,48 @@
+<resources>
+    <string name="write_track">اكتب مسارك…</string>
+    <string name="track_name_label">اسم المسار</string>
+    <string name="choose_your_track_title">اختر مسارك المهني</string>
+    <string name="choose_your_track_subtitle">سنخصص الأسئلة والملاحظات بما يتناسب مع دورك المهني.</string>
+    <string name="next_btn_content_description">زر المتابعة</string>
+    <string name="next_button_label">التالي</string>
+    <string name="upload_cv_title">ارفع سيرتك الذاتية</string>
+    <string name="upload_cv_subtitle">سنستخرج خبراتك لتصبح الأسئلة أكثر ملاءمة لك.</string>
+    <string name="tap_to_upload_cv">اضغط لرفع سيرتك الذاتية</string>
+    <string name="cv_upload_requirements">PDF · الحد الأقصى 10 ميجابايت</string>
+    <string name="preparing_cv">جارٍ تجهيز السيرة الذاتية…</string>
+    <string name="cv_ready_to_upload">جاهزة للرفع</string>
+    <string name="cv_uploaded_label">تم الرفع</string>
+    <string name="cv_upload_progress">تم رفع %1$d%%</string>
+    <string name="cv_file_details">%1$.1f ميجابايت · %2$s</string>
+    <string name="cv_uploaded_successfully">تم رفع السيرة الذاتية بنجاح</string>
+    <string name="skip_for_now">تخطي الآن</string>
+    <string name="analyze_my_cv">حلّل سيرتي الذاتية</string>
+    <string name="profile_info_photo_upload_error">تعذر رفع صورتك. حاول مرة أخرى.</string>
+    <string name="profile_info_photo_retry">إعادة المحاولة</string>
+    <string name="profile_info_camera_permission_message">يلزم الوصول إلى الكاميرا لالتقاط صورة.</string>
+    <string name="profile_info_open_settings">فتح الإعدادات</string>
+
+    <string name="profile_info_ready_to_go">جاهز للبدء!</string>
+    <string name="profile_info_title">تم إعداد ملفك الشخصي</string>
+    <string name="profile_info_subtitle">إليك ما وجدناه. يمكنك دائماً تحديث ذلك لاحقاً.</string>
+    <string name="profile_info_full_name_label">الاسم الكامل</string>
+    <string name="profile_info_full_name_placeholder">سارة تشين</string>
+    <string name="profile_info_email_label">البريد الإلكتروني</string>
+    <string name="profile_info_email_placeholder">sarah.chen@gmail.com</string>
+    <string name="profile_info_title_role_label">المسمى الوظيفي / الدور الحالي</string>
+    <string name="profile_info_title_role_placeholder">مهندس برمجيات أول</string>
+    <string name="profile_info_experience_level_label">مستوى الخبرة</string>
+    <string name="profile_info_experience_level_placeholder">متقدم (سينيور)</string>
+    <string name="profile_info_skills_detected_label">المهارات المكتشفة</string>
+    <string name="profile_info_banner_text">جلستك الأولى على حسابنا — لا حاجة لبطاقة ائتمان!</string>
+    <string name="profile_info_start_practising_button">ابدأ التدريب</string>
+
+    <!-- Add Skill Dialog -->
+    <string name="profile_info_other_skill">أخرى</string>
+    <string name="profile_info_add_skill_title">إضافة مهارة</string>
+    <string name="profile_info_add_skill_label">اسم المهارة</string>
+    <string name="profile_info_add_skill_confirm">إضافة</string>
+    <string name="profile_info_add_skill_cancel">إلغاء</string>
+    <string name="profile_info_email_invalid">يرجى إدخال عنوان بريد إلكتروني صحيح</string>
+    <string name="pager_header">%1$d من %2$d</string>
+</resources>

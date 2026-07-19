@@ -16,4 +16,11 @@ interface SnackbarController {
         type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
         duration: SnackbarDuration = type.defaultDuration(),
     ): SnackbarResult
+
+    suspend fun show(
+        message: UIText,
+        actionLabel: UIText,
+        type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
+        duration: SnackbarDuration = type.defaultDuration(),
+    ): SnackbarResult
 }

@@ -36,6 +36,8 @@
     <string name="error_file_too_large">حجم الملف المحدد كبير جدًا.</string>
     <string name="error_incompatible_file">نوع هذا الملف غير مدعوم.</string>
     <string name="error_storage_unknown">تعذر معالجة الملف المحدد. حاول اختيار ملف آخر.</string>
+    <string name="error_storage_file_not_found">الملف غير موجود. ربما تم نقله أو حذفه.</string>
+    <string name="error_storage_permission_denied">تعذر العثور على ملف PDF المحدد. يرجى التحقق من وجود الملف ومحاولة اختياره مرة أخرى.</string>
 
     <!-- إجراءات شريط الإشعار -->
     <string name="snackbar_action_undo">تراجع</string>

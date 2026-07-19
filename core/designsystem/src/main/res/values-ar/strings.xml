@@ -1,4 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="avatar_picker_content_description">الصورة الشخصية</string>
+    <string name="avatar_picker_add_photo">إضافة صورة</string>
+    <string name="image_source_take_photo">التقاط صورة</string>
+    <string name="image_source_choose_gallery">اختيار من المعرض</string>
+    <string name="image_source_cancel">إلغاء</string>
     <string name="snackbar_dismiss_action">إغلاق الرسالة</string>
     <string name="offline_mode_message">أنت غير متصل بالإنترنت. قد تكون بعض الميزات محدودة.</string>
     <string name="dismiss">إغلاق</string>

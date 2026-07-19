@@ -66,6 +66,12 @@ fun StorageError.toUIText(): UIText {
 
             StorageError.UNKNOWN ->
                 R.string.error_storage_unknown
+
+            StorageError.FileNotFound ->
+                R.string.error_storage_file_not_found
+
+            StorageError.PermissionDenied ->
+                R.string.error_storage_permission_denied
         }
     )
 }
