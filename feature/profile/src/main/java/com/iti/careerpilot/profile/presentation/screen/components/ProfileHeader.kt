@@ -70,9 +70,9 @@ fun ProfileHeader(
                         .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profile.avatarLocalUri.isNotBlank()) {
+                    if (profile.avatar.avatarLocalUri.isNotBlank()) {
                         AsyncImage(
-                            model = profile.avatarLocalUri,
+                            model = profile.avatar.avatarLocalUri,
                             contentDescription = stringResource(R.string.profile_avatar),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -98,23 +98,23 @@ fun ProfileHeader(
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    text = profile.displayName.ifBlank { stringResource(R.string.add_your_name) },
+                    text = profile.personal.displayName.ifBlank { stringResource(R.string.add_your_name) },
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                if (profile.username.isNotBlank()) {
+                if (profile.account.username.isNotBlank()) {
                     Text(
-                        text = stringResource(R.string.username, profile.username),
+                        text = stringResource(R.string.username, profile.account.username),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                if (profile.currentJobTitle.isNotBlank()) {
+                if (profile.career.currentJobTitle.isNotBlank()) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = profile.currentJobTitle,
+                        text = profile.career.currentJobTitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

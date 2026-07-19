@@ -41,6 +41,9 @@ import com.iti.careerpilot.profile.presentation.screen.components.StatsRow
 import com.iti.careerpilot.profile.presentation.state.ProfileState
 import com.iti.careerpilot.profile.presentation.viewmodel.ProfileViewModel
 import com.iti.common.model.ProfileEditSection
+import com.iti.core.datastore.models.AccountInfo
+import com.iti.core.datastore.models.CareerInfo
+import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
 import java.io.File
 
@@ -133,10 +136,10 @@ fun ProfileScreen(
             }
             item {
                 CVCard(
-                    fileName = state.profile.cvFileName,
-                    fileSize = if (state.profile.cvSizeBytes > 0) "${state.profile.cvSizeBytes / 1024} KB" else "",
+                    fileName = state.profile.cv.cvFileName,
+                    fileSize = if (state.profile.cv.cvSizeBytes > 0) "${state.profile.cv.cvSizeBytes / 1024} KB" else "",
                     onClick = {
-                        val cvUri = state.profile.cvLocalUri.ifBlank { state.profile.cvUrl }
+                        val cvUri = state.profile.cv.cvLocalUri.ifBlank { state.profile.cv.cvUrl }
                         onAction(ProfileAction.OnCVClick(cvUri))
                     }
                 )
@@ -172,15 +175,21 @@ private fun ProfileScreenPreview() {
         ProfileScreen(
             state = ProfileState(
                 profile = UserProfile(
-                    displayName = "Amina Hassan",
-                    username = "amina.h",
-                    email = "amina@example.com",
-                    currentJobTitle = "Product Designer",
-                    targetRole = "Senior Product Designer",
-                    industry = "Technology",
-                    experienceLevel = "Mid-level",
-                    subscriptionTier = "Pro",
-                    coinBalance = 240
+                    personal = PersonalInfo(
+                        displayName = "Amina Hassan",
+                    ),
+                    account = AccountInfo(
+                        username = "amina.h",
+                        email = "amina@example.com",
+                        subscriptionTier = "Pro",
+                        coinBalance = 240
+                    ),
+                    career = CareerInfo(
+                        currentJobTitle = "Product Designer",
+                        targetRole = "Senior Product Designer",
+                        industry = "Technology",
+                        experienceLevel = "Mid-level",
+                    )
                 )
             ),
             onAction = {}

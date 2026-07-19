@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.profile.R
 import com.iti.core.datastore.models.UserProfile
 
@@ -27,7 +26,7 @@ fun StatsRow(profile: UserProfile) {
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
             iconTint = MaterialTheme.colorScheme.primary,
             label = stringResource(R.string.coins),
-            value = profile.coinBalance.toString()
+            value = profile.account.coinBalance.toString()
         )
         StatPill(
             modifier = Modifier.weight(1f),
@@ -35,7 +34,7 @@ fun StatsRow(profile: UserProfile) {
             containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
             iconTint = MaterialTheme.colorScheme.secondary,
             label = stringResource(R.string.plan),
-            value = profile.subscriptionTier.ifBlank { stringResource(R.string.free) }
+            value = profile.account.subscriptionTier.ifBlank { stringResource(R.string.free) }
         )
     }
 }

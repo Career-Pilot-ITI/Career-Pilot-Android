@@ -38,13 +38,17 @@ class EditProfileRepoImpl @Inject constructor(
                 )?.let { newProfile ->
                     localDataSource.updateUserProfile { current ->
                         newProfile.copy(
-                            avatarUrl = newProfile.avatarUrl.ifBlank { current.avatarUrl },
-                            avatarLocalUri = current.avatarLocalUri,
-                            avatarSizeBytes = current.avatarSizeBytes,
-                            cvUrl = newProfile.cvUrl.ifBlank { current.cvUrl },
-                            cvLocalUri = current.cvLocalUri,
-                            cvFileName = current.cvFileName,
-                            cvSizeBytes = current.cvSizeBytes
+                            avatar = newProfile.avatar.copy(
+                                avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl },
+                                avatarLocalUri = current.avatar.avatarLocalUri,
+                                avatarSizeBytes = current.avatar.avatarSizeBytes,
+                            ),
+                            cv = newProfile.cv.copy(
+                                cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl },
+                                cvLocalUri = current.cv.cvLocalUri,
+                                cvFileName = current.cv.cvFileName,
+                                cvSizeBytes = current.cv.cvSizeBytes,
+                            )
                         )
                     }
                 }
@@ -66,9 +70,11 @@ class EditProfileRepoImpl @Inject constructor(
                     val localImageUri = localDataSource.moveImageToInternalStorage(file)
                     localDataSource.updateUserProfile {
                         it.copy(
-                            avatarUrl = response.url,
-                            avatarLocalUri = localImageUri,
-                            avatarSizeBytes = response.sizeBytes
+                            avatar = it.avatar.copy(
+                                avatarUrl = response.url,
+                                avatarLocalUri = localImageUri,
+                                avatarSizeBytes = response.sizeBytes
+                            )
                         )
                     }
                 }
@@ -86,10 +92,12 @@ class EditProfileRepoImpl @Inject constructor(
                     val localCvUri = localDataSource.moveCVToInternalStorage(file)
                     localDataSource.updateUserProfile {
                         it.copy(
-                            cvUrl = response.url,
-                            cvLocalUri = localCvUri,
-                            cvFileName = response.originalName,
-                            cvSizeBytes = response.sizeBytes
+                            cv = it.cv.copy(
+                                cvUrl = response.url,
+                                cvLocalUri = localCvUri,
+                                cvFileName = response.originalName,
+                                cvSizeBytes = response.sizeBytes
+                            )
                         )
                     }
                 }
