@@ -34,4 +34,8 @@
 
     <!-- إجراءات شريط الإشعار -->
     <string name="snackbar_action_undo">تراجع</string>
+
+    <string name="edit_personal_info">تعديل المعلومات الشخصية</string>
+    <string name="edit_career_info">تعديل المعلومات المهنية</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
 </resources>
