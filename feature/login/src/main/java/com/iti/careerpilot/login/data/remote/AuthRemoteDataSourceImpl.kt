@@ -1,11 +1,13 @@
 package com.iti.careerpilot.login.data.remote
 
+import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.login.data.remote.dto.ApiMessageResponse
 import com.iti.careerpilot.login.data.remote.dto.OtpAuthResponse
 import com.iti.careerpilot.login.data.remote.dto.SendOtpRequest
 import com.iti.careerpilot.login.data.remote.dto.VerifyOtpRequest
+import com.iti.common.error.NetworkError
+import com.iti.common.result.CareerPilotResult
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
@@ -14,14 +16,21 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     private val client: HttpClient,
 ) : AuthRemoteDataSource {
 
-    override suspend fun sendOtp(request: SendOtpRequest): ApiMessageResponse =
-        client.post("api/v1/otp/send") {
-            setBody(request)
-        }.body()
+    override suspend fun sendOtp(
+        request: SendOtpRequest,
+    ): CareerPilotResult<ApiMessageResponse, NetworkError> =
+        safeCall {
+            client.post("api/v1/otp/send") {
+                setBody(request)
+            }
+        }
 
-    override suspend fun verifyOtp(request: VerifyOtpRequest): OtpAuthResponse =
-        client.post("api/v1/otp/verify") {
-            setBody(request)
-        }.body()
+    override suspend fun verifyOtp(
+        request: VerifyOtpRequest,
+    ): CareerPilotResult<OtpAuthResponse, NetworkError> =
+        safeCall {
+            client.post("api/v1/otp/verify") {
+                setBody(request)
+            }
+        }
 }
-
