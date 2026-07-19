@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.extended.icons)
     implementation(libs.androidx.compose.googlefonts)
     api(libs.androidx.compose.material3)
     api(libs.androidx.material3.android)
@@ -15,5 +16,6 @@ dependencies {
     api(libs.extended.icons)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.compose.material3)
+    implementation(libs.lottie.compose)
     implementation(libs.androidx.activity.compose)
 }

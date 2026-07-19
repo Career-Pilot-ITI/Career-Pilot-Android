@@ -6,4 +6,8 @@
     <string name="image_source_choose_gallery">Choose from Gallery</string>
     <string name="image_source_cancel">Cancel</string>
     <string name="snackbar_dismiss_action">Dismiss message</string>
+    <string name="offline_mode_message">You’re offline. Some features may be limited.</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="no_network_connection">No internet connection</string>
+    <string name="retry">Retry</string>
 </resources>
