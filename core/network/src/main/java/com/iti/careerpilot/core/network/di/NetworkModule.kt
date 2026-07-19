@@ -17,8 +17,14 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
+import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import io.ktor.client.request.header
 import javax.inject.Singleton
 
 @Module
@@ -32,11 +38,12 @@ object NetworkModule {
         isLenient = true
         coerceInputValues = true
         encodeDefaults = true
+        explicitNulls = false
     }
 
     @Provides
     @Singleton
-    fun provideHttpClient(json: Json): HttpClient = HttpClient(OkHttp) {
+    fun provideHttpClient(json: Json, datastore: CareerPilotPreferencesDataSource): HttpClient = HttpClient(OkHttp) {
         expectSuccess = true
 
         install(ContentNegotiation) {
@@ -47,6 +54,14 @@ object NetworkModule {
             connectTimeoutMillis = 15_000
             requestTimeoutMillis = 30_000
             socketTimeoutMillis = 30_000
+        }
+
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    datastore.token.firstOrNull()?.let { BearerTokens(it, "") }
+                }
+            }
         }
 
         if (BuildConfig.DEBUG) {
@@ -62,8 +77,9 @@ object NetworkModule {
         }
 
         defaultRequest {
-            contentType(ContentType.Application.Json)
             url(BuildConfig.BASE_URL)
+            header(HttpHeaders.Authorization, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEyLCJlbWFpbCI6ImhhemVta29yYTY2MEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzAwMDAwNiIsImlhdCI6MTc4NDQwNjU3OSwiZXhwIjoxNzg0NDEwMTc5fQ.bdb2GWFRpyP4E_tGcz0NF7IVNaJpC0K3b8C8xHRNTyA")
         }
     }
 }
+

@@ -1,0 +1,57 @@
+<resources>
+    <string name="write_track">Write your track</string>
+    <string name="track_name_label">Track Name</string>
+    <string name="choose_your_track_title">Choose your track</string>
+    <string name="choose_your_track_subtitle">We’ll tailor questions and feedback for your role.</string>
+    <string name="next_btn_content_description">Next Button</string>
+    <string name="next_button_label">Next</string>
+    <string name="upload_cv_title">Upload your CV</string>
+    <string name="upload_cv_subtitle">We’ll extract your experience so questions feel personal.</string>
+    <string name="tap_to_upload_cv">Tap to upload your CV</string>
+    <string name="cv_upload_requirements">PDF · Max 10 MB</string>
+    <string name="preparing_cv">Preparing your CV…</string>
+    <string name="cv_ready_to_upload">Ready</string>
+    <string name="cv_uploaded_label">Uploaded</string>
+    <string name="cv_upload_progress">%1$d%% uploaded</string>
+    <string name="cv_file_details">%1$.1f MB · %2$s</string>
+    <string name="cv_uploaded_successfully">CV uploaded successfully</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="analyze_my_cv">Analyse My CV</string>
+    <string name="profile_info_photo_upload_error">Couldn\'t upload your photo. Please try again.</string>
+    <string name="profile_info_photo_retry">Retry</string>
+    <string name="profile_info_camera_permission_message">Camera access is needed to take a photo.</string>
+    <string name="profile_info_open_settings">Open Settings</string>
+
+    <string name="profile_info_ready_to_go">Ready to go!</string>
+    <string name="profile_info_title">Your profile is set up</string>
+    <string name="profile_info_subtitle">Here\'s what we found. You can always update this later.</string>
+    <string name="profile_info_full_name_label">FULL NAME</string>
+    <string name="profile_info_full_name_placeholder">e.g. John Doe</string>
+    <string name="profile_info_email_label">EMAIL</string>
+    <string name="profile_info_email_placeholder">e.g. john@example.com</string>
+    <string name="profile_info_title_role_label">TITLE / CURRENT ROLE</string>
+    <string name="profile_info_title_role_placeholder">e.g. Software Engineer</string>
+    <string name="profile_info_experience_level_label">EXPERIENCE LEVEL</string>
+    <string name="profile_info_experience_level_placeholder">e.g. Junior, Mid-Level, Senior</string>
+    <string name="profile_info_skills_detected_label">SKILLS</string>
+    <string name="profile_info_banner_text">Your first session is on us — no card needed!</string>
+    <string name="profile_info_start_practising_button">Continue</string>
+
+    <!-- Add Skill Dialog -->
+    <string name="profile_info_other_skill">Other</string>
+    <string name="profile_info_add_skill_title">Add Skill</string>
+    <string name="profile_info_add_skill_label">Skill Name</string>
+    <string name="profile_info_add_skill_confirm">Add</string>
+    <string name="profile_info_add_skill_cancel">Cancel</string>
+    <string name="profile_info_email_invalid">Please enter a valid email address</string>
+    <string name="pager_header">%1$d of %2$d</string>
+
+    <string-array name="profile_info_default_skills">
+        <item>React</item>
+        <item>Node.js</item>
+        <item>TypeScript</item>
+        <item>Python</item>
+        <item>AWS</item>
+        <item>System Design</item>
+    </string-array>
+</resources>

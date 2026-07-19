@@ -32,11 +32,14 @@ import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.CancellationException
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RootNavDisplay(
+    startRoute: Route,
     isOnline: Boolean,
 ) {
-    val rootBackStack = rememberNavBackStack(Route.Login)
+
+    val rootBackStack = rememberNavBackStack(startRoute)
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val currentRootRoute = rootBackStack.lastOrNull()
@@ -194,7 +197,16 @@ fun RootNavDisplay(
                         },
                     )
                 }
-
+                entry<Route.Onboarding> {
+                    com.iti.onboarding.navigation.OnboardingPagerScreen(
+                        onOnboardingFinished = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav)
+                            }
+                        }
+                    )
+                }
                 entry<Route.SessionDetails> {
                     SessionDetailsRoot(
                         sessionId = it.id,

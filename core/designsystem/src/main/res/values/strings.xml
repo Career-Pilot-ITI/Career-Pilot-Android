@@ -1,4 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="avatar_picker_content_description">Profile photo</string>
+    <string name="avatar_picker_add_photo">Add photo</string>
+    <string name="image_source_take_photo">Take Photo</string>
+    <string name="image_source_choose_gallery">Choose from Gallery</string>
+    <string name="image_source_cancel">Cancel</string>
     <string name="snackbar_dismiss_action">Dismiss message</string>
     <string name="offline_mode_message">You’re offline. Some features may be limited.</string>
     <string name="dismiss">Dismiss</string>
