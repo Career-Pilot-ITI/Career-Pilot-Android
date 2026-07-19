@@ -27,6 +27,7 @@ appcompat = "1.7.1"
 material = "1.14.0"
 coroutines = "1.11.0"
 composeMaterial3 = "1.6.2"
+extendedIcons = "1.7.8"
 exifinterface = "1.4.2"
 
 [libraries]
@@ -111,6 +112,7 @@ kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-ser
 ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 compose-material3 = { group = "androidx.wear.compose", name = "compose-material3", version.ref = "composeMaterial3" }
+extended-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "extendedIcons" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
