@@ -1,7 +1,6 @@
 package com.iti.careerpilot.core.network.di
 
 import android.util.Log
-import com.iti.careerpilot.core.network.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,21 +9,25 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
+import com.iti.careerpilot.core.network.Endpoints
+import com.iti.careerpilot.core.network.model.AuthTokensDto
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
-import io.ktor.client.request.header
+import com.iti.core.datastore.UserTokensRepo
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import javax.inject.Singleton
 
 @Module
@@ -43,28 +46,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(json: Json, datastore: CareerPilotPreferencesDataSource): HttpClient = HttpClient(OkHttp) {
-        expectSuccess = true
+    fun provideHttpClient(json: Json, datastore: UserTokensRepo): HttpClient {
+        return HttpClient(OkHttp) {
+            expectSuccess = true
 
-        install(ContentNegotiation) {
-            json(json)
-        }
-
-        install(HttpTimeout) {
-            connectTimeoutMillis = 15_000
-            requestTimeoutMillis = 30_000
-            socketTimeoutMillis = 30_000
-        }
-
-        install(Auth) {
-            bearer {
-                loadTokens {
-                    datastore.token.firstOrNull()?.let { BearerTokens(it, "") }
-                }
+            install(ContentNegotiation) {
+                json(json)
             }
-        }
 
-        if (BuildConfig.DEBUG) {
+            install(HttpTimeout) {
+                connectTimeoutMillis = 15_000
+                requestTimeoutMillis = 30_000
+                socketTimeoutMillis = 30_000
+            }
+
             install(Logging) {
                 level = LogLevel.ALL
                 logger = object : Logger {
@@ -74,11 +69,60 @@ object NetworkModule {
                 }
                 sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
             }
-        }
 
-        defaultRequest {
-            url(BuildConfig.BASE_URL)
-            header(HttpHeaders.Authorization, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEyLCJlbWFpbCI6ImhhemVta29yYTY2MEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzAwMDAwNiIsImlhdCI6MTc4NDQwNjU3OSwiZXhwIjoxNzg0NDEwMTc5fQ.bdb2GWFRpyP4E_tGcz0NF7IVNaJpC0K3b8C8xHRNTyA")
+            install(DefaultRequest) {
+                contentType(
+                    ContentType.Application.Json
+                )
+            }
+
+            install(Auth) {
+                bearer {
+                    sendWithoutRequest { request ->
+                        val path = request.url.pathSegments.joinToString("/")
+                        val skipAuth = path.contains("otp", ignoreCase = true) ||
+                                path.contains("refresh", ignoreCase = true)
+                        !skipAuth
+                    }
+                    loadTokens {
+                        val accessToken = datastore.accessToken
+                        val refreshToken = datastore.refreshToken
+                        if (!accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
+                            BearerTokens(accessToken, refreshToken)
+                        } else {
+                            null
+                        }
+                    }
+                    refreshTokens {
+                        val refreshToken = oldTokens?.refreshToken ?: datastore.refreshToken
+
+                        if (refreshToken.isNullOrBlank()) {
+                            return@refreshTokens null
+                        }
+
+                        try {
+                            val response = client.post(Endpoints.REFRESH_TOKEN) {
+                                markAsRefreshTokenRequest()
+                                setBody(mapOf("refreshToken" to refreshToken))
+                            }
+
+                            if (response.status == HttpStatusCode.OK) {
+                                val tokens = response.body<AuthTokensDto>()
+                                datastore.setAccessToken(tokens.accessToken)
+                                datastore.setRefreshToken(tokens.refreshToken)
+                                BearerTokens(tokens.accessToken, tokens.refreshToken)
+                            } else {
+                                datastore.clear()
+                                null
+                            }
+                        } catch (e: Exception) {
+                            Log.e("KtorClient", "Error refreshing tokens", e)
+                            datastore.clear()
+                            null
+                        }
+                    }
+                }
+            }
         }
     }
 }

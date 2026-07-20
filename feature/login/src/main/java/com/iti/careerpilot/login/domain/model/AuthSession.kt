@@ -6,5 +6,5 @@ data class AuthSession(
     val expiresInMillis: Long,
     val userId: Long,
     val username: String?,
-    val isNewUser: Boolean,
+    val hasCompletedOnboarding: Boolean,
 )

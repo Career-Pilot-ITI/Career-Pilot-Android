@@ -1,5 +1,6 @@
 package com.iti.careerpilot.login.data.remote
 
+import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.login.data.remote.dto.ApiMessageResponse
 import com.iti.careerpilot.login.data.remote.dto.OtpAuthResponse
@@ -20,7 +21,7 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         request: SendOtpRequest,
     ): CareerPilotResult<ApiMessageResponse, NetworkError> =
         safeCall {
-            client.post("api/v1/otp/send") {
+            client.post(Endpoints.SEND_OTP) {
                 setBody(request)
             }
         }
@@ -29,7 +30,7 @@ class AuthRemoteDataSourceImpl @Inject constructor(
         request: VerifyOtpRequest,
     ): CareerPilotResult<OtpAuthResponse, NetworkError> =
         safeCall {
-            client.post("api/v1/otp/verify") {
+            client.post(Endpoints.VERIFY_OTP) {
                 setBody(request)
             }
         }

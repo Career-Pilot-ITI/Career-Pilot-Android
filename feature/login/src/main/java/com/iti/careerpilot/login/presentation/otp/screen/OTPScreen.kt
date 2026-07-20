@@ -38,6 +38,7 @@ import com.iti.careerpilot.login.presentation.otp.screen.component.OtpSuccessDia
 fun OTPRoot(
     phoneNumber: String,
     openHome: () -> Unit,
+    openOnboarding: () -> Unit,
     onBack: () -> Unit,
     viewModel: OTPViewModel = hiltViewModel(),
 ) {
@@ -50,6 +51,7 @@ fun OTPRoot(
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             is OTPEvent.NavigateToHome -> openHome()
+            is OTPEvent.NavigateToOnBoarding -> openOnboarding()
         }
     }
 
@@ -110,15 +112,6 @@ fun OTPScreen(
             canResend = state.canResend,
             onResend = { onAction(OTPAction.ResendClicked) },
         )
-
-        state.error?.let { error ->
-            Spacer(modifier = Modifier.height(Dimens.SpaceL))
-            Text(
-                text = error.asString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
     }
 }
 

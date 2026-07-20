@@ -6,6 +6,7 @@ import com.iti.careerpilot.profile.domain.repo.ProfileRepo
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent
 import com.iti.careerpilot.profile.presentation.state.ProfileState
+import com.iti.core.datastore.UserTokensRepo
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    profileRepo: ProfileRepo,
+    private val profileRepo: ProfileRepo,
+    private val datastore: UserTokensRepo,
     @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -51,7 +53,11 @@ class ProfileViewModel @Inject constructor(
             ProfileAction.OnLogoutDismiss -> _state.update { it.copy(showLogoutDialog = false) }
             ProfileAction.OnLogoutConfirm -> {
                 _state.update { it.copy(showLogoutDialog = false) }
-                sendEvent(ProfileEvent.NavigateToLogout)
+                viewModelScope.launch {
+                    datastore.clear()
+                    profileRepo.clearUserProfile()
+                    sendEvent(ProfileEvent.NavigateToLogout)
+                }
             }
 
             is ProfileAction.OnCVClick -> sendEvent(ProfileEvent.OpenCV(action.cvLocalUriOrUrl))

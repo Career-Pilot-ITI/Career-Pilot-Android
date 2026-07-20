@@ -1,5 +1,6 @@
 package com.iti.careerpilot.login.data.remote.dto
 
+import com.iti.careerpilot.core.network.model.AuthTokensDto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,13 +17,6 @@ data class OtpAuthResponse(
 )
 
 @Serializable
-data class AuthTokensDto(
-    @SerialName("accessToken") val accessToken: String,
-    @SerialName("refreshToken") val refreshToken: String,
-    @SerialName("expiresIn") val expiresIn: Long = 0L,
-)
-
-@Serializable
 data class AuthUserDto(
     @SerialName("id") val id: Long,
     @SerialName("phoneNumber") val phoneNumber: String? = null,
@@ -35,5 +29,20 @@ data class AuthUserProfileDto(
     @SerialName("username") val username: String? = null,
     @SerialName("displayName") val displayName: String? = null,
     @SerialName("email") val email: String? = null,
+    @SerialName("avatarUrl") val avatarUrl: String? = null,
+    @SerialName("gender") val gender: String? = null,
+    @SerialName("dateOfBirth") val dateOfBirth: String? = null,
+    @SerialName("targetRole") val targetRole: String? = null,
+    @SerialName("industry") val industry: String? = null,
+    @SerialName("experienceLevel") val experienceLevel: String? = null,
+    @SerialName("currentJobTitle") val currentJobTitle: String? = null,
+    @SerialName("yearsOfExperience") val yearsOfExperience: Int? = null,
+    @SerialName("cvUrl") val cvUrl: String? = null,
+    @SerialName("skills") val skills: List<String?>? = null,
+    @SerialName("targetCompanies") val targetCompanies: List<String?>? = null,
+    @SerialName("educationLevel") val educationLevel: String? = null,
+    @SerialName("timezone") val timezone: String? = null,
+    @SerialName("termsAccepted") val termsAccepted: Boolean? = null,
     @SerialName("onboardingCompleted") val onboardingCompleted: Boolean = false,
+    @SerialName("trackName") val trackName: String? = null,
 )

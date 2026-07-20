@@ -21,6 +21,7 @@ data class ProfileInfoUiState(
     val data: ProfileInfoData = ProfileInfoData(),
     val isImageSourceSheetVisible: Boolean = false,
     val isImageUploading: Boolean = false,
+    val uploadProgress: Int = 0,
     val isSubmitting: Boolean = false,
     val hasSuccessfullySubmitted: Boolean = false,
     val allSkills: ImmutableList<String> = persistentListOf(),
@@ -61,11 +62,6 @@ sealed interface ProfileInfoIntent {
 sealed interface ProfileInfoEffect {
     data class LaunchCamera(val captureUri: Uri) : ProfileInfoEffect
     data object RequestCameraPermission : ProfileInfoEffect
-    data class ShowSnackbar(
-        @StringRes val messageRes: Int,
-        @StringRes val actionLabelRes: Int? = null,
-        val actionIntent: ProfileInfoIntent? = null
-    ) : ProfileInfoEffect
     data object OpenAppSettings : ProfileInfoEffect
     data object NavigateToNextScreen : ProfileInfoEffect
 }

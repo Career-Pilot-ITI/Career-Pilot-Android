@@ -20,7 +20,7 @@ class UserProfileRepoImpl @Inject constructor(
 
     override val userProfile: StateFlow<UserProfile> = dataStore.data
         .stateIn(
-            scope, SharingStarted.WhileSubscribed(5_000), UserProfile()
+            scope, SharingStarted.Eagerly, UserProfile()
         )
 
     override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {
@@ -30,6 +30,16 @@ class UserProfileRepoImpl @Inject constructor(
             }
         } catch (e: IOException) {
             Log.e(ERROR_TAG, "Failed to update user profile: ${e.localizedMessage}", e)
+        }
+    }
+
+    override suspend fun clearUserProfile() {
+        try {
+            dataStore.updateData {
+                UserProfile()
+            }
+        } catch (e: IOException) {
+            Log.e(ERROR_TAG, "Failed to clear user profile: ${e.localizedMessage}", e)
         }
     }
 }

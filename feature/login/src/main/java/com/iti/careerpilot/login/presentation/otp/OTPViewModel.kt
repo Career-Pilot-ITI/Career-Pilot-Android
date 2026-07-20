@@ -10,6 +10,7 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -67,15 +68,29 @@ class OTPViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
 
             verifyOtp(current.phoneNumber, current.code)
-                .onSuccess {
-                    // TODO: save session tokens for authenticated calls
-                    resendTimerJob?.cancel()
-                    _state.update { it.copy(isLoading = false, isVerified = true) }
-                    delay(SUCCESS_DISMISS_MILLIS.milliseconds)
-                    _events.send(OTPEvent.NavigateToHome)
+                .onSuccess { session ->
+                    viewModelScope.launch {
+
+                        resendTimerJob?.cancel()
+                        _state.update { it.copy(isLoading = false, isVerified = true) }
+                        delay(SUCCESS_DISMISS_MILLIS.milliseconds)
+                        if (session.hasCompletedOnboarding) {
+                            _events.send(OTPEvent.NavigateToHome)
+                        } else {
+                            _events.send(OTPEvent.NavigateToOnBoarding)
+                        }
+                    }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = error.toUIText(), code = "") }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            code = ""
+                        )
+                    }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
         }
     }
@@ -92,7 +107,10 @@ class OTPViewModel @Inject constructor(
                     startResendCountdown()
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = error.toUIText()) }
+                    _state.update { it.copy(isLoading = false) }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
         }
     }
