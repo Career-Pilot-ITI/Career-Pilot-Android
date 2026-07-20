@@ -50,4 +50,5 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
+    implementation(project(":feature:reports"))
 }
