@@ -3,10 +3,12 @@ package com.iti.onboarding.domain.usecase
 import com.iti.onboarding.domain.repository.OnboardingRepository
 import javax.inject.Inject
 
+import com.iti.onboarding.domain.model.UploadedFile
+
 class SaveAvatarUrlUseCase @Inject constructor(
     private val repository: OnboardingRepository,
 ) {
-    suspend operator fun invoke(url: String) {
-        repository.saveAvatarUrl(url)
+    suspend operator fun invoke(file: UploadedFile) {
+        repository.saveAvatarUrl(file)
     }
 }

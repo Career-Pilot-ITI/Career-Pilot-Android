@@ -8,9 +8,7 @@ import com.iti.onboarding.domain.usecase.UploadImageUseCase
 import com.iti.onboarding.domain.usecase.SaveAvatarUrlUseCase
 import com.iti.onboarding.domain.usecase.UpdateProfileUseCase
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
-import com.iti.onboarding.domain.model.FileUploadData
 import com.iti.common.media.ImageCaptureUriProvider
-import com.iti.common.media.ImageCompressor
 import com.iti.common.media.ImageSource
 import com.iti.common.result.onSuccess
 import com.iti.common.result.onError
@@ -18,31 +16,24 @@ import com.iti.common.util.toUIText
 import com.iti.common.util.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.putJsonArray
-import kotlinx.serialization.json.add
-import kotlinx.coroutines.flow.Flow
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import com.iti.onboarding.domain.usecase.GetUserProfileUseCase
 
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
     private val imageCaptureUriProvider: ImageCaptureUriProvider,
-    private val imageCompressor: ImageCompressor,
     private val uploadImageUseCase: UploadImageUseCase,
     private val saveAvatarUrlUseCase: SaveAvatarUrlUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
-    private val datastore: CareerPilotPreferencesDataSource,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ProfileInfoUiState>(ProfileInfoUiState())
@@ -50,9 +41,10 @@ class ProfileInfoViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            datastore.avatarUrl.collect { url ->
-                if (url != null) {
-                    _state.update { it.updateData { data -> data.copy(avatarUrl = url) } }
+            getUserProfileUseCase().collect { profile ->
+                val url = profile.avatar.avatarUrl
+                if (url.isNotBlank()) {
+                    _state.update { it.updateData { data -> data.copy(avatarUrl = url, avatarFileId = profile.id.toLong()) } }
                 }
             }
         }
@@ -60,8 +52,6 @@ class ProfileInfoViewModel @Inject constructor(
 
     private val _effect = MutableSharedFlow<ProfileInfoEffect>()
     val effect: SharedFlow<ProfileInfoEffect> = _effect.asSharedFlow()
-
-
 
     fun onIntent(intent: ProfileInfoIntent) {
         when (intent) {
@@ -81,6 +71,7 @@ class ProfileInfoViewModel @Inject constructor(
 
             is ProfileInfoIntent.OnImagePicked -> {
                 _state.update { it.updateData { data -> data.copy(selectedImageUri = intent.uri.toString()) }.copy(hasSuccessfullySubmitted = false) }
+                uploadAvatar(intent.uri)
             }
 
             is ProfileInfoIntent.OnCameraPermissionDenied -> {
@@ -88,8 +79,11 @@ class ProfileInfoViewModel @Inject constructor(
                 viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
             }
 
-            is ProfileInfoIntent.OnRetryPhotoUpload ->
-                submitProfile()
+            is ProfileInfoIntent.OnRetryPhotoUpload -> {
+                _state.value.data.selectedImageUri?.let { uri ->
+                    uploadAvatar(Uri.parse(uri))
+                }
+            }
 
             is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) }.copy(hasSuccessfullySubmitted = false) }
             is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false) }
@@ -144,6 +138,27 @@ class ProfileInfoViewModel @Inject constructor(
         }
     }
 
+    private fun uploadAvatar(uri: Uri) {
+        viewModelScope.launch {
+            _state.update { it.copy(isImageUploading = true) }
+            uploadImageUseCase(uri)
+                .onSuccess { uploaded ->
+                    saveAvatarUrlUseCase(uploaded)
+                    _state.update { it.updateData { data -> data.copy(avatarUrl = uploaded.url, avatarFileId = uploaded.id) } }
+                }
+                .onError { error ->
+                    _effect.emit(
+                        ProfileInfoEffect.ShowSnackbar(
+                            messageRes = (error.toUIText() as UIText.StringResource).resId,
+                            actionLabelRes = R.string.profile_info_photo_retry,
+                            actionIntent = ProfileInfoIntent.OnRetryPhotoUpload
+                        )
+                    )
+                }
+            _state.update { it.copy(isImageUploading = false) }
+        }
+    }
+
     private fun submitProfile() {
         viewModelScope.launch {
             if (_state.value.hasSuccessfullySubmitted) {
@@ -152,55 +167,7 @@ class ProfileInfoViewModel @Inject constructor(
             }
             _state.update { it.copy(isSubmitting = true) }
             
-            var currentData = _state.value.data
-            val selectedImageUri = currentData.selectedImageUri
-            
-            // Upload image if there is a new local selection
-            if (selectedImageUri != null && !selectedImageUri.startsWith("http") && currentData.avatarFileId == null) {
-                _state.update { it.copy(isImageUploading = true) }
-                try {
-                    val uri = Uri.parse(selectedImageUri)
-                    val file = imageCompressor.compressImage(uri)
-                    var uploadSuccess = false
-                    uploadImageUseCase(
-                        FileUploadData(
-                            bytes = file.readBytes(),
-                            fileName = file.name,
-                            mimeType = "image/jpeg"
-                        )
-                    ).onSuccess { uploaded ->
-                        saveAvatarUrlUseCase(uploaded.url)
-                        _state.update { it.updateData { data -> data.copy(avatarUrl = uploaded.url, avatarFileId = uploaded.id) } }
-                        currentData = _state.value.data
-                        uploadSuccess = true
-                    }.onError { error ->
-                        _effect.emit(
-                            ProfileInfoEffect.ShowSnackbar(
-                                messageRes = (error.toUIText() as UIText.StringResource).resId,
-                                actionLabelRes = R.string.profile_info_photo_retry,
-                                actionIntent = ProfileInfoIntent.OnSubmit
-                            )
-                        )
-                    }
-                    if (!uploadSuccess) {
-                        _state.update { it.copy(isSubmitting = false, isImageUploading = false) }
-                        return@launch
-                    }
-                } catch (e: Exception) {
-                    _effect.emit(
-                        ProfileInfoEffect.ShowSnackbar(
-                            messageRes = R.string.profile_info_photo_upload_error,
-                            actionLabelRes = R.string.profile_info_photo_retry,
-                            actionIntent = ProfileInfoIntent.OnSubmit
-                        )
-                    )
-                    _state.update { it.copy(isSubmitting = false, isImageUploading = false) }
-                    return@launch
-                } finally {
-                    _state.update { it.copy(isImageUploading = false) }
-                }
-            }
-            
+            val currentData = _state.value.data
             val yearsOfExperience = currentData.experience.toIntOrNull()
             
             val request = UpdateProfileRequestDto(

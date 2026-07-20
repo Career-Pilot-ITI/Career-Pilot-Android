@@ -23,9 +23,8 @@ import io.ktor.http.HttpStatusCode
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.model.AuthTokensDto
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import com.iti.core.datastore.UserTokensRepo
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -47,7 +46,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(json: Json, datastore: CareerPilotPreferencesDataSource): HttpClient {
+    fun provideHttpClient(json: Json, datastore: UserTokensRepo): HttpClient {
         return HttpClient(OkHttp) {
             expectSuccess = true
 
@@ -86,18 +85,18 @@ object NetworkModule {
                         !skipAuth
                     }
                     loadTokens {
-                        val accessToken = datastore.token.firstOrNull()
-                        val refreshToken = datastore.refreshToken.firstOrNull()
-                        if (!accessToken.isNullOrEmpty()) {
-                            BearerTokens(accessToken, refreshToken ?: "")
+                        val accessToken = datastore.accessToken
+                        val refreshToken = datastore.refreshToken
+                        if (!accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
+                            BearerTokens(accessToken, refreshToken)
                         } else {
                             null
                         }
                     }
                     refreshTokens {
-                        val refreshToken = oldTokens?.refreshToken ?: datastore.refreshToken.firstOrNull()
+                        val refreshToken = oldTokens?.refreshToken ?: datastore.refreshToken
 
-                        if (refreshToken.isNullOrEmpty()) {
+                        if (refreshToken.isNullOrBlank()) {
                             return@refreshTokens null
                         }
 
@@ -109,7 +108,7 @@ object NetworkModule {
 
                             if (response.status == HttpStatusCode.OK) {
                                 val tokens = response.body<AuthTokensDto>()
-                                datastore.setToken(tokens.accessToken)
+                                datastore.setAccessToken(tokens.accessToken)
                                 datastore.setRefreshToken(tokens.refreshToken)
                                 BearerTokens(tokens.accessToken, tokens.refreshToken)
                             } else {

@@ -6,7 +6,7 @@ import com.iti.careerpilot.profile.domain.repo.ProfileRepo
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent
 import com.iti.careerpilot.profile.presentation.state.ProfileState
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import com.iti.core.datastore.UserTokensRepo
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,8 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    profileRepo: ProfileRepo,
-    private val datastore: CareerPilotPreferencesDataSource,
+    private val profileRepo: ProfileRepo,
+    private val datastore: UserTokensRepo,
     @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -55,6 +55,7 @@ class ProfileViewModel @Inject constructor(
                 _state.update { it.copy(showLogoutDialog = false) }
                 viewModelScope.launch {
                     datastore.clear()
+                    profileRepo.clearUserProfile()
                     sendEvent(ProfileEvent.NavigateToLogout)
                 }
             }

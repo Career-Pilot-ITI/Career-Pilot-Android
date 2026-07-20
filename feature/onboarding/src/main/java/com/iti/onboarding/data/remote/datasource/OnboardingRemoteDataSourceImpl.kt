@@ -3,12 +3,11 @@ package com.iti.onboarding.data.remote.datasource
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserResponseDto
-import com.iti.core.model.PdfFile
 import com.iti.onboarding.data.remote.dto.TracksResponseDto
 import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
-import com.iti.onboarding.domain.model.FileUploadData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
@@ -18,13 +17,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import java.io.File
 import javax.inject.Inject
 
 class OnboardingRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient,
 ) : OnboardingRemoteDataSource {
     override suspend fun uploadFile(
-        fileData: FileUploadData
+        file: File,
+        onProgress: (Int) -> Unit
     ): UploadFileResponseDto {
         return httpClient.submitFormWithBinaryData(
             url = Endpoints.UPLOAD_FILE,
@@ -32,14 +33,22 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
                 append("type", "avatars")
                 append(
                     "file",
-                    fileData.bytes,
+                    file.readBytes(),
                     Headers.build {
-                        append(HttpHeaders.ContentType, fileData.mimeType)
-                        append(HttpHeaders.ContentDisposition, "filename=\"${fileData.fileName}\"")
+                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                     }
                 )
             }
-        ).body()
+        ) {
+            onUpload { bytesSentTotal, contentLength ->
+                val total = contentLength ?: 0L
+                val progress = if (total > 0) {
+                    ((bytesSentTotal.toDouble() / total.toDouble()) * 100).toInt()
+                } else 0
+                onProgress(progress)
+            }
+        }.body()
     }
 
     override suspend fun updateProfile(request: UpdateProfileRequestDto): UserResponseDto {
@@ -55,20 +64,31 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
         }.body()
     }
 
-    override suspend fun uploadCv(document: PdfFile): UploadFileResponseDto {
+    override suspend fun uploadCv(
+        file: File,
+        onProgress: (Int) -> Unit
+    ): UploadFileResponseDto {
         return httpClient.submitFormWithBinaryData(
             url = Endpoints.UPLOAD_FILE,
             formData = formData {
                 append("type", "cvs")
                 append(
                     "file",
-                    document.bytes,
+                    file.readBytes(),
                     Headers.build {
-                        append(HttpHeaders.ContentType, document.mimeType)
-                        append(HttpHeaders.ContentDisposition, "filename=\"${document.name}\"")
+                        append(HttpHeaders.ContentType, "application/pdf")
+                        append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                     }
                 )
             }
-        ).body()
+        ) {
+            onUpload { bytesSentTotal, contentLength ->
+                val total = contentLength ?: 0L
+                val progress = if (total > 0) {
+                    ((bytesSentTotal.toDouble() / total.toDouble()) * 100).toInt()
+                } else 0
+                onProgress(progress)
+            }
+        }.body()
     }
 }

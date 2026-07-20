@@ -7,9 +7,12 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class ProfileRepoImpl @Inject constructor(
-    localDataSource: ProfileLocalDataSource,
+    private val localDataSource: ProfileLocalDataSource,
 ): ProfileRepo {
 
     override val userProfile: StateFlow<UserProfile> = localDataSource.userProfile
+    override suspend fun clearUserProfile() {
+        localDataSource.clearUserProfile()
+    }
 
 }

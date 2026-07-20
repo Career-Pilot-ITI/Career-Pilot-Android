@@ -24,7 +24,6 @@ fun UserProfileDto.toDomain(
             termsAccepted = termsAccepted ?: false,
             subscriptionTier = subscriptionTier.orEmpty(),
             coinBalance = coinBalance ?: 0,
-            onboardingCompleted = onboardingCompleted ?: false,
         ),
         personal = PersonalInfo(
             phoneNumber = phoneNumber.orEmpty(),

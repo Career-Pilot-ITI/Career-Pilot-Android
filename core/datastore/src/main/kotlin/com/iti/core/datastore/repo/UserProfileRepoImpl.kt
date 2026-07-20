@@ -32,4 +32,14 @@ class UserProfileRepoImpl @Inject constructor(
             Log.e(ERROR_TAG, "Failed to update user profile: ${e.localizedMessage}", e)
         }
     }
+
+    override suspend fun clearUserProfile() {
+        try {
+            dataStore.updateData {
+                UserProfile()
+            }
+        } catch (e: IOException) {
+            Log.e(ERROR_TAG, "Failed to clear user profile: ${e.localizedMessage}", e)
+        }
+    }
 }

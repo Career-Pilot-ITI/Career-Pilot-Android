@@ -20,7 +20,6 @@ data class AccountInfo(
     val termsAccepted: Boolean = false,
     val subscriptionTier: String = "",
     val coinBalance: Int = 0,
-    val onboardingCompleted: Boolean = false
 )
 
 @Serializable

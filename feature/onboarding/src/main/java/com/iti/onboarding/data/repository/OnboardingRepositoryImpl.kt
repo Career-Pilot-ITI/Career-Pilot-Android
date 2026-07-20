@@ -1,5 +1,6 @@
 package com.iti.onboarding.data.repository
 
+import android.net.Uri
 import android.util.Log
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserResponseDto
@@ -7,11 +8,10 @@ import com.iti.common.dispatcher.CareerPilotDispatchers.IO
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.PdfFile
+import com.iti.common.result.onSuccess
 import com.iti.onboarding.data.local.datasource.OnboardingLocalDataSource
 import com.iti.onboarding.data.mapper.toDomain
 import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSource
-import com.iti.onboarding.domain.model.FileUploadData
 import com.iti.onboarding.domain.model.Track
 import com.iti.onboarding.domain.model.UploadedFile
 import com.iti.onboarding.domain.repository.OnboardingRepository
@@ -20,6 +20,7 @@ import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import java.nio.channels.UnresolvedAddressException
@@ -31,18 +32,34 @@ class OnboardingRepositoryImpl @Inject constructor(
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : OnboardingRepository {
 
-    override suspend fun uploadFile(
-        fileData: FileUploadData,
-    ): CareerPilotResult<UploadedFile, NetworkError> =
-        safeNetworkCall {
-            remoteDataSource
-                .uploadFile(fileData)
-                .toDomain()
-        }
+    override val userProfile: StateFlow<com.iti.core.datastore.models.UserProfile> = localDataSource.userProfile
 
-    override suspend fun saveAvatarUrl(url: String) {
+    override suspend fun uploadFile(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<UploadedFile, NetworkError> {
+        val file = localDataSource.uriToCacheFile(uri)
+        return file?.let {
+            safeNetworkCall {
+                remoteDataSource.uploadFile(file, onProgress).toDomain()
+            }.onSuccess { uploaded ->
+                val localImageUri = localDataSource.moveImageToInternalStorage(file)
+                localDataSource.updateUserProfile {
+                    it.copy(
+                        avatar = it.avatar.copy(
+                            avatarUrl = uploaded.url,
+                            avatarLocalUri = localImageUri,
+                            avatarSizeBytes = uploaded.sizeBytes
+                        )
+                    )
+                }
+            }
+        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+
+    override suspend fun saveAvatarUrl(file: UploadedFile) {
         withContext(ioDispatcher) {
-            localDataSource.saveAvatarUrl(url)
+            localDataSource.saveAvatarUrl(file)
         }
     }
 
@@ -50,7 +67,9 @@ class OnboardingRepositoryImpl @Inject constructor(
         request: UpdateProfileRequestDto,
     ): CareerPilotResult<UserResponseDto, NetworkError> =
         safeNetworkCall {
-            remoteDataSource.updateProfile(request)
+            val response = remoteDataSource.updateProfile(request)
+            updateLocalProfile(response)
+            response
         }
 
     override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> =
@@ -63,26 +82,54 @@ class OnboardingRepositoryImpl @Inject constructor(
         }
 
     override suspend fun uploadCv(
-        document: PdfFile,
-    ): CareerPilotResult<Unit, NetworkError> =
-        safeNetworkCall {
-            val response = remoteDataSource.uploadCv(
-                document = document,
-            )
-
-            localDataSource.savePdfUrl(response.url)
-        }
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<UploadedFile, NetworkError> {
+        val file = localDataSource.uriToCacheFile(uri)
+        return file?.let {
+            safeNetworkCall {
+                remoteDataSource.uploadCv(file, onProgress).toDomain()
+            }.onSuccess { uploaded ->
+                val localCvUri = localDataSource.moveCVToInternalStorage(file)
+                localDataSource.updateUserProfile {
+                    it.copy(
+                        cv = it.cv.copy(
+                            cvUrl = uploaded.url,
+                            cvLocalUri = localCvUri,
+                            cvFileName = uploaded.originalName,
+                            cvSizeBytes = uploaded.sizeBytes
+                        )
+                    )
+                }
+            }
+        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
 
     override suspend fun updateProfileTrack(
         trackId: Int,
     ): CareerPilotResult<Unit, NetworkError> =
         safeNetworkCall {
-            remoteDataSource.updateProfile(
+            val response = remoteDataSource.updateProfile(
                 request = UpdateProfileRequestDto(
                     trackId = trackId,
                 ),
             )
+            updateLocalProfile(response)
         }
+
+    private suspend fun updateLocalProfile(response: UserResponseDto) {
+        localDataSource.updateUserProfile { current ->
+            val newProfile = response.toDomain()
+            newProfile.copy(
+                avatar = newProfile.avatar.copy(
+                    avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl },
+                    avatarLocalUri = current.avatar.avatarLocalUri,
+                    avatarSizeBytes = current.avatar.avatarSizeBytes,
+                ),
+                cv = current.cv
+            )
+        }
+    }
 
     private suspend fun <T> safeNetworkCall(
         block: suspend () -> T,

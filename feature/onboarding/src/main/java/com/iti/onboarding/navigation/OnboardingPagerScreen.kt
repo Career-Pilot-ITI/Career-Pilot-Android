@@ -118,7 +118,7 @@ fun OnboardingPagerScreen(
                 modifier = Modifier
                     .weight(1f)
                     .nestedScroll(scrollConnection),
-                userScrollEnabled = true,
+                userScrollEnabled = false,
             ) { page ->
                 when (page) {
                     PAGE_PROFILE_INFO -> ProfileInfoScreen(

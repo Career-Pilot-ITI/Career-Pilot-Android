@@ -38,14 +38,16 @@ class MainActivity : ComponentActivity() {
 
             val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
 
-            var isTimeOut by rememberSaveable { mutableStateOf(false) }
+            var showSplashScreen by rememberSaveable { mutableStateOf(true) }
             LaunchedEffect(Unit) {
                 delay(2000L.milliseconds)
-                isTimeOut = true
+                showSplashScreen = false
             }
 
             CareerPilotTheme {
-                if (hasCompletedOnboarding != null && isLoggedIn != null && isTimeOut) {
+                if (showSplashScreen) {
+                    CareerPilotSplash()
+                } else {
                     val startRoute = when {
                         isLoggedIn == false -> Route.Login
                         hasCompletedOnboarding == false -> Route.Onboarding
@@ -55,10 +57,7 @@ class MainActivity : ComponentActivity() {
                         startRoute = startRoute,
                         isOnline = isOnline,
                         isLoggedIn = isLoggedIn == true,
-                        hasCompletedOnboarding = hasCompletedOnboarding == true
                     )
-                } else {
-                    CareerPilotSplash()
                 }
             }
         }

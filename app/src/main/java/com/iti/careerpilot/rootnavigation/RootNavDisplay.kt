@@ -35,7 +35,6 @@ fun RootNavDisplay(
     startRoute: Route,
     isOnline: Boolean,
     isLoggedIn: Boolean,
-    hasCompletedOnboarding: Boolean,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -134,10 +133,10 @@ fun RootNavDisplay(
             entry<Route.OTP> {
                 OTPRoot(
                     phoneNumber = it.phoneNumber,
-                        openHome = {
+                        openHome = { isUserRegistered ->
                             rootBackStack.apply {
+                                val nextRoute = if (isUserRegistered) Route.NestedNav else Route.Onboarding
                                 clear()
-                                val nextRoute = if (hasCompletedOnboarding) Route.NestedNav else Route.Onboarding
                                 navigateSingleTop(nextRoute)
                             }
                         },

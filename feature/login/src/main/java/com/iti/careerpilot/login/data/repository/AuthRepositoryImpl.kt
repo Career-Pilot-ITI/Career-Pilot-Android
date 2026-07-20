@@ -9,9 +9,14 @@ import com.iti.careerpilot.login.domain.repository.AuthRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import javax.inject.Inject
+import com.iti.careerpilot.login.data.mapper.toUserProfile
+import com.iti.core.datastore.UserTokensRepo
+import com.iti.core.datastore.repo.UserProfileRepo
 
 class AuthRepositoryImpl @Inject constructor(
     private val remote: AuthRemoteDataSource,
+    private val userProfileRepo: UserProfileRepo,
+    private val userTokensRepo: UserTokensRepo,
 ) : AuthRepository {
 
     override suspend fun sendOtp(phoneNumber: String): CareerPilotResult<Unit, NetworkError> =
@@ -27,7 +32,14 @@ class AuthRepositoryImpl @Inject constructor(
         when (
             val result = remote.verifyOtp(VerifyOtpRequest(phoneNumber = phoneNumber, code = code))
         ) {
-            is CareerPilotResult.Success -> CareerPilotResult.Success(result.data.toDomain())
+            is CareerPilotResult.Success -> {
+                userProfileRepo.updateUserProfile {
+                    result.data.toUserProfile()
+                }
+                userTokensRepo.setAccessToken(result.data.authTokens.accessToken)
+                userTokensRepo.setRefreshToken(result.data.authTokens.refreshToken)
+                CareerPilotResult.Success(result.data.toDomain())
+            }
 
             is CareerPilotResult.Error -> CareerPilotResult.Error(
                 if (result.error == NetworkError.GONE) NetworkError.OTP_EXPIRED else result.error

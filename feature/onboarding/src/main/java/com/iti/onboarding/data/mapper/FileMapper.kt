@@ -7,4 +7,6 @@ fun UploadFileResponseDto.toDomain(): UploadedFile = UploadedFile(
     id = id,
     url = url,
     type = type,
+    sizeBytes = sizeBytes,
+    originalName = originalName,
 )

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.login.domain.usecase.SendOtpUseCase
 import com.iti.careerpilot.login.domain.usecase.VerifyOtpUseCase
-import com.iti.core.datastore.CareerPilotPreferencesDataSource
+import com.iti.core.datastore.UserTokensRepo
 import com.iti.common.util.countdownFlow
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
@@ -26,7 +26,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class OTPViewModel @Inject constructor(
     private val verifyOtp: VerifyOtpUseCase,
     private val sendOtp: SendOtpUseCase,
-    private val datastore: CareerPilotPreferencesDataSource,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -71,14 +70,11 @@ class OTPViewModel @Inject constructor(
             verifyOtp(current.phoneNumber, current.code)
                 .onSuccess { session ->
                     viewModelScope.launch {
-                        datastore.setToken(session.accessToken)
-                        datastore.setRefreshToken(session.refreshToken)
-                        datastore.setHasCompletedOnboarding(session.hasCompletedOnboarding)
 
                         resendTimerJob?.cancel()
                         _state.update { it.copy(isLoading = false, isVerified = true) }
                         delay(SUCCESS_DISMISS_MILLIS.milliseconds)
-                        _events.send(OTPEvent.NavigateToHome)
+                        _events.send(OTPEvent.NavigateToHome(session.hasCompletedOnboarding))
                     }
                 }
                 .onError { error ->
