@@ -1,4 +1,4 @@
-package com.iti.careerpilot.core.designsystem.components
+package com.iti.careerpilot.features.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
@@ -22,13 +22,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.iti.careerpilot.R
 import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.ObserveEvent
+import com.iti.careerpilot.core.designsystem.components.LoadingWave
 
 @Composable
-fun CareerPilotSplash(
+fun SplashRoot(
+    onNavigateToLogin: () -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToOnboarding: () -> Unit,
+    viewModel: SplashViewModel = hiltViewModel()
+) {
+    ObserveEvent(viewModel.navigationEvent) { event ->
+        when (event) {
+            SplashEvent.NavigateToHome -> onNavigateToHome()
+            SplashEvent.NavigateToLogin -> onNavigateToLogin()
+            SplashEvent.NavigateToOnboarding -> onNavigateToOnboarding()
+        }
+    }
+
+    SplashScreen()
+}
+
+
+@Composable
+fun SplashScreen(
     modifier: Modifier = Modifier,
 ) {
     val scale = remember { Animatable(0.5f) }
@@ -61,7 +85,7 @@ fun CareerPilotSplash(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "CP",
+                    text = "CP", //todo add logo
                     color = Color.White,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
@@ -71,7 +95,7 @@ fun CareerPilotSplash(
             Spacer(modifier = Modifier.height(Dimens.SpaceL))
 
             Text(
-                text = "Career Pilot",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.ExtraBold,

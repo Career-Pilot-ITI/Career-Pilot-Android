@@ -22,6 +22,7 @@ import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
+import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
@@ -40,7 +41,7 @@ fun RootNavDisplay(
     val rootBackStack = rememberNavBackStack(startRoute)
 
     LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn && rootBackStack.lastOrNull() != Route.Login) {
+        if (!isLoggedIn && rootBackStack.lastOrNull() != Route.Login && rootBackStack.lastOrNull() != Route.Splash) {
             rootBackStack.apply {
                 clear()
                 add(Route.Login)
@@ -122,6 +123,28 @@ fun RootNavDisplay(
                 )
             },
             entryProvider = entryProvider {
+                entry<Route.Splash> {
+                    SplashRoot(
+                        onNavigateToLogin = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.Login)
+                            }
+                        },
+                        onNavigateToHome = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav)
+                            }
+                        },
+                        onNavigateToOnboarding = {
+                            rootBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.Onboarding)
+                            }
+                        }
+                    )
+                }
                 entry<Route.Login> {
                     LoginRoot(
                         openOTP = { phoneNumber ->
