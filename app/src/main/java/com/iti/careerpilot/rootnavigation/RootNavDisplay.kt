@@ -126,22 +126,13 @@ fun RootNavDisplay(
                 entry<Route.Splash> {
                     SplashRoot(
                         onNavigateToLogin = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(Route.Login)
-                            }
+                            rootBackStack.replaceAll(Route.Login)
                         },
                         onNavigateToHome = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(Route.NestedNav)
-                            }
+                            rootBackStack.replaceAll(Route.NestedNav)
                         },
                         onNavigateToOnboarding = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(Route.Onboarding)
-                            }
+                            rootBackStack.replaceAll(Route.Onboarding)
                         }
                     )
                 }
@@ -153,15 +144,14 @@ fun RootNavDisplay(
                     )
                 }
 
-            entry<Route.OTP> {
-                OTPRoot(
-                    phoneNumber = it.phoneNumber,
-                        openHome = { isUserRegistered ->
-                            rootBackStack.apply {
-                                val nextRoute = if (isUserRegistered) Route.NestedNav else Route.Onboarding
-                                clear()
-                                navigateSingleTop(nextRoute)
-                            }
+                entry<Route.OTP> {
+                    OTPRoot(
+                        phoneNumber = it.phoneNumber,
+                        openHome = {
+                            rootBackStack.replaceAll(Route.NestedNav)
+                        },
+                        openOnboarding = {
+                            rootBackStack.replaceAll(Route.Onboarding)
                         },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.OTP>()
@@ -208,10 +198,7 @@ fun RootNavDisplay(
                 entry<Route.Onboarding> {
                     com.iti.onboarding.navigation.OnboardingPagerScreen(
                         onOnboardingFinished = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(Route.NestedNav)
-                            }
+                            rootBackStack.replaceAll(Route.NestedNav)
                         }
                     )
                 }

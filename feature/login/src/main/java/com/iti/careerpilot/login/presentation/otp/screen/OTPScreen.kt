@@ -37,7 +37,8 @@ import com.iti.careerpilot.login.presentation.otp.screen.component.OtpSuccessDia
 @Composable
 fun OTPRoot(
     phoneNumber: String,
-    openHome: (Boolean) -> Unit,
+    openHome: () -> Unit,
+    openOnboarding: () -> Unit,
     onBack: () -> Unit,
     viewModel: OTPViewModel = hiltViewModel(),
 ) {
@@ -49,7 +50,8 @@ fun OTPRoot(
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is OTPEvent.NavigateToHome -> openHome(event.isUserRegistered)
+            is OTPEvent.NavigateToHome -> openHome()
+            is OTPEvent.NavigateToOnBoarding -> openOnboarding()
         }
     }
 

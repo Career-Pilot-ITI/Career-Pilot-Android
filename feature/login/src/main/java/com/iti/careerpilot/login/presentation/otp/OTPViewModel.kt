@@ -74,11 +74,21 @@ class OTPViewModel @Inject constructor(
                         resendTimerJob?.cancel()
                         _state.update { it.copy(isLoading = false, isVerified = true) }
                         delay(SUCCESS_DISMISS_MILLIS.milliseconds)
-                        _events.send(OTPEvent.NavigateToHome(session.hasCompletedOnboarding))
+                        if (session.hasCompletedOnboarding) {
+                            _events.send(OTPEvent.NavigateToHome)
+                        } else {
+                            _events.send(OTPEvent.NavigateToOnBoarding)
+                        }
                     }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = error.toUIText(), code = "") }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.toUIText(),
+                            code = ""
+                        )
+                    }
                 }
         }
     }
