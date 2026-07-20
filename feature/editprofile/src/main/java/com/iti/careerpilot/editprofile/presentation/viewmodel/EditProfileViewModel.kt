@@ -17,6 +17,8 @@ import com.iti.common.model.ProfileEditSection
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.toUIText
 import com.iti.core.datastore.models.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -201,7 +203,7 @@ class EditProfileViewModel @Inject constructor(
                 uploadCall = { u, p -> editProfileRepo.uploadImage(u, p) },
                 onStart = {
                     _state.update { s ->
-                        s.copy(isUploadingAvatar = true, avatarUploadProgress = 0, uploadError = null)
+                        s.copy(isUploadingAvatar = true, avatarUploadProgress = 0)
                     }
                 },
                 onProgress = { p -> _state.update { it.copy(avatarUploadProgress = p) } },
@@ -222,7 +224,7 @@ class EditProfileViewModel @Inject constructor(
                 uploadCall = { u, p -> editProfileRepo.uploadCV(u, p) },
                 onStart = {
                     _state.update { s ->
-                        s.copy(isUploadingCV = true, cvUploadProgress = 0, uploadError = null)
+                        s.copy(isUploadingCV = true, cvUploadProgress = 0)
                     }
                 },
                 onProgress = { p -> _state.update { it.copy(cvUploadProgress = p) } },
@@ -232,7 +234,7 @@ class EditProfileViewModel @Inject constructor(
                             cvUrl = resp.url,
                             cvLocalUri = uri.toString(),
                             cvFileName = resp.originalName,
-                            cvFileSize = if (resp.sizeBytes > 0) "${resp.sizeBytes / 1024} KB" else ""
+                            cvFileSize = if (resp.sizeBytes > 0) "${resp.sizeBytes / (1024f * 1024f)} MB" else ""
                         )
                     }
                 },
@@ -283,9 +285,9 @@ class EditProfileViewModel @Inject constructor(
                 if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
                 onSuccess(response)
             }?.onError { error ->
-                _state.update { it.copy(uploadError = "Upload failed: ${error.name}") }
-                delay(2000.milliseconds)
-                _state.update { it.copy(uploadError = null) }
+                viewModelScope.launch {
+                    CareerPilotSnackbarController.show(error.toUIText())
+                }
             }
             onFinish()
         }
@@ -303,7 +305,12 @@ class EditProfileViewModel @Inject constructor(
                     _state.update { it.copy(isLoading = false) }
                     _events.send(EditProfileEvent.NavigateBack)
                 }
-                .onError { _state.update { it.copy(isLoading = false) } }
+                .onError {
+                    _state.update { it.copy(isLoading = false) }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(it.toUIText())
+                    }
+                }
         }
     }
 

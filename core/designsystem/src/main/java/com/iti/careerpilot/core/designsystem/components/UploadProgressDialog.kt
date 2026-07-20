@@ -1,4 +1,4 @@
-package com.iti.careerpilot.editprofile.presentation.screen.components
+package com.iti.careerpilot.core.designsystem.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
@@ -18,8 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
-import com.iti.careerpilot.editprofile.R
+import com.iti.careerpilot.core.designsystem.R
 
 @Composable
 fun UploadProgressDialog(

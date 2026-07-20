@@ -20,7 +20,7 @@ class UserProfileRepoImpl @Inject constructor(
 
     override val userProfile: StateFlow<UserProfile> = dataStore.data
         .stateIn(
-            scope, SharingStarted.WhileSubscribed(5_000), UserProfile()
+            scope, SharingStarted.Eagerly, UserProfile()
         )
 
     override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {

@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.login.domain.usecase.SendOtpUseCase
 import com.iti.careerpilot.login.domain.usecase.VerifyOtpUseCase
-import com.iti.core.datastore.UserTokensRepo
 import com.iti.common.util.countdownFlow
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -85,9 +85,11 @@ class OTPViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = error.toUIText(),
                             code = ""
                         )
+                    }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
                     }
                 }
         }
@@ -105,7 +107,10 @@ class OTPViewModel @Inject constructor(
                     startResendCountdown()
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = error.toUIText()) }
+                    _state.update { it.copy(isLoading = false) }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
         }
     }

@@ -25,10 +25,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
+import com.iti.common.media.ImageCompressor
 
 class OnboardingRepositoryImpl @Inject constructor(
     private val remoteDataSource: OnboardingRemoteDataSource,
     private val localDataSource: OnboardingLocalDataSource,
+    private val imageCompressor: ImageCompressor,
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : OnboardingRepository {
 
@@ -38,23 +40,21 @@ class OnboardingRepositoryImpl @Inject constructor(
         uri: Uri,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<UploadedFile, NetworkError> {
-        val file = localDataSource.uriToCacheFile(uri)
-        return file?.let {
-            safeNetworkCall {
-                remoteDataSource.uploadFile(file, onProgress).toDomain()
-            }.onSuccess { uploaded ->
-                val localImageUri = localDataSource.moveImageToInternalStorage(file)
-                localDataSource.updateUserProfile {
-                    it.copy(
-                        avatar = it.avatar.copy(
-                            avatarUrl = uploaded.url,
-                            avatarLocalUri = localImageUri,
-                            avatarSizeBytes = uploaded.sizeBytes
-                        )
+        val file = imageCompressor.compressImage(uri)
+        return safeNetworkCall {
+            remoteDataSource.uploadFile(file, onProgress).toDomain()
+        }.onSuccess { uploaded ->
+            val localImageUri = localDataSource.moveImageToInternalStorage(file)
+            localDataSource.updateUserProfile {
+                it.copy(
+                    avatar = it.avatar.copy(
+                        avatarUrl = uploaded.url,
+                        avatarLocalUri = localImageUri,
+                        avatarSizeBytes = uploaded.sizeBytes
                     )
-                }
+                )
             }
-        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+        }
     }
 
     override suspend fun saveAvatarUrl(file: UploadedFile) {

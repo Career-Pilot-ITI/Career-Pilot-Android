@@ -27,6 +27,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.iti.onboarding.domain.usecase.GetUserProfileUseCase
 
+import com.iti.common.dispatcher.CareerPilotDispatchers
+import com.iti.common.dispatcher.Dispatcher
+import com.iti.common.result.CareerPilotResult
+import com.iti.onboarding.domain.model.UploadedFile
+import com.iti.common.error.NetworkError
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+
+import com.iti.common.snackbar.CareerPilotSnackbarController
+
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
     private val imageCaptureUriProvider: ImageCaptureUriProvider,
@@ -34,6 +45,7 @@ class ProfileInfoViewModel @Inject constructor(
     private val saveAvatarUrlUseCase: SaveAvatarUrlUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
+    @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ProfileInfoUiState>(ProfileInfoUiState())
@@ -139,23 +151,78 @@ class ProfileInfoViewModel @Inject constructor(
     }
 
     private fun uploadAvatar(uri: Uri) {
-        viewModelScope.launch {
-            _state.update { it.copy(isImageUploading = true) }
-            uploadImageUseCase(uri)
-                .onSuccess { uploaded ->
-                    saveAvatarUrlUseCase(uploaded)
-                    _state.update { it.updateData { data -> data.copy(avatarUrl = uploaded.url, avatarFileId = uploaded.id) } }
+        performFileUpload(
+            uri = uri,
+            uploadCall = { u, p -> uploadImageUseCase(u, p) },
+            onStart = {
+                _state.update { s ->
+                    s.copy(isImageUploading = true, uploadProgress = 0)
                 }
-                .onError { error ->
-                    _effect.emit(
-                        ProfileInfoEffect.ShowSnackbar(
-                            messageRes = (error.toUIText() as UIText.StringResource).resId,
-                            actionLabelRes = R.string.profile_info_photo_retry,
-                            actionIntent = ProfileInfoIntent.OnRetryPhotoUpload
+            },
+            onProgress = { p -> _state.update { it.copy(uploadProgress = p) } },
+            onSuccess = { uploaded ->
+                saveAvatarUrlUseCase(uploaded)
+                _state.update {
+                    it.updateData { data ->
+                        data.copy(
+                            avatarUrl = uploaded.url,
+                            avatarFileId = uploaded.id
                         )
-                    )
+                    }
                 }
-            _state.update { it.copy(isImageUploading = false) }
+            },
+            onFinish = {
+                _state.update { it.copy(isImageUploading = false, uploadProgress = 0) }
+            }
+        )
+    }
+
+    private fun performFileUpload(
+        uri: Uri,
+        uploadCall: suspend (Uri, (Int) -> Unit) -> CareerPilotResult<UploadedFile, NetworkError>,
+        onStart: () -> Unit,
+        onProgress: (Int) -> Unit,
+        onSuccess: suspend (UploadedFile) -> Unit,
+        onFinish: () -> Unit
+    ) {
+        viewModelScope.launch(dispatcherDefault) {
+            val startTime = System.currentTimeMillis()
+            var realProgress = 0
+            var isDone = false
+            var uploadResult: CareerPilotResult<UploadedFile, NetworkError>? = null
+
+            onStart()
+
+            launch {
+                uploadResult = uploadCall(uri) { realProgress = it }
+                isDone = true
+            }
+
+            while (!isDone && realProgress == 0) delay(50.milliseconds)
+
+            var displayProgress = 0
+            while (true) {
+                if (isDone && uploadResult is CareerPilotResult.Error) break
+                val target =
+                    if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
+                if (displayProgress < target) {
+                    displayProgress++
+                    onProgress(displayProgress)
+                }
+                if (isDone && displayProgress >= 100) break
+                delay(20.milliseconds)
+            }
+
+            val elapsed = System.currentTimeMillis() - startTime
+            uploadResult?.onSuccess { response ->
+                if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
+                onSuccess(response)
+            }?.onError { error ->
+                viewModelScope.launch {
+                    CareerPilotSnackbarController.show(error.toUIText())
+                }
+            }
+            onFinish()
         }
     }
 
@@ -185,11 +252,9 @@ class ProfileInfoViewModel @Inject constructor(
                     _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 }
                 .onError { error ->
-                    _effect.emit(
-                        ProfileInfoEffect.ShowSnackbar(
-                            messageRes = (error.toUIText() as UIText.StringResource).resId
-                        )
-                    )
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
                 
             _state.update { it.copy(isSubmitting = false) }

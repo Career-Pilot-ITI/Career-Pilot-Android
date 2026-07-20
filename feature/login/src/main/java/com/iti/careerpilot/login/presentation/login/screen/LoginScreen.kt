@@ -92,15 +92,6 @@ fun LoginScreen(
                 onRegionChange = { onAction(LoginAction.RegionChanged(it)) }
             )
 
-            state.error?.let { error ->
-                Spacer(modifier = Modifier.height(Dimens.SpaceS))
-                Text(
-                    text = error.asString(),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
             Spacer(modifier = Modifier.height(Dimens.SpaceL))
 
             if (state.isLoading) {

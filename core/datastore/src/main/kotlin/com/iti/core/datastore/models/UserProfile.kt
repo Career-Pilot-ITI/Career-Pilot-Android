@@ -10,7 +10,10 @@ data class UserProfile(
     val career: CareerInfo = CareerInfo(),
     val avatar: AvatarInfo = AvatarInfo(),
     val cv: CvInfo = CvInfo()
-)
+) {
+    val hasCompletedOnboarding: Boolean
+        get() = personal.displayName.isNotBlank()
+}
 
 @Serializable
 data class AccountInfo(

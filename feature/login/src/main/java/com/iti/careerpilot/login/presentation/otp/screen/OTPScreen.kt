@@ -112,15 +112,6 @@ fun OTPScreen(
             canResend = state.canResend,
             onResend = { onAction(OTPAction.ResendClicked) },
         )
-
-        state.error?.let { error ->
-            Spacer(modifier = Modifier.height(Dimens.SpaceL))
-            Text(
-                text = error.asString(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
     }
 }
 

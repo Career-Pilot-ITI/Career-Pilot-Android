@@ -7,8 +7,6 @@ import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -23,6 +21,7 @@ class SplashViewModel @Inject constructor(
 
     private val _navigationEvent = Channel<SplashEvent>()
     val navigationEvent = _navigationEvent.receiveAsFlow()
+
 
     init {
         decideNextScreen()
@@ -40,9 +39,7 @@ class SplashViewModel @Inject constructor(
             }
 
             val userProfile = userProfileRepo.userProfile.first()
-            val hasCompletedOnboarding = userProfile.personal.displayName.isNotBlank()
-
-            if (hasCompletedOnboarding) {
+            if (userProfile.hasCompletedOnboarding) {
                 _navigationEvent.send(SplashEvent.NavigateToHome)
             } else {
                 _navigationEvent.send(SplashEvent.NavigateToOnboarding)

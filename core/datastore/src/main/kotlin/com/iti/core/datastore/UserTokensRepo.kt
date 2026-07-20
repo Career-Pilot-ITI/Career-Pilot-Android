@@ -4,15 +4,19 @@ import androidx.datastore.core.DataStore
 import com.iti.common.dispatcher.di.ApplicationScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import javax.inject.Singleton
 
+
+@Singleton
 class UserTokensRepo @Inject constructor(
     private val userTokens: DataStore<UserTokens>,
     @param:ApplicationScope private val scope: CoroutineScope
 ) {
 
-    val tokens = userTokens.data
+    val tokens: StateFlow<UserTokens> = userTokens.data
         .stateIn(scope, SharingStarted.Eagerly, UserTokens())
 
     val accessToken: String?

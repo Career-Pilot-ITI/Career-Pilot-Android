@@ -58,7 +58,6 @@ fun RootNavDisplay(
         CareerPilotSnackbarController.requests.collect { request ->
             try {
                 val event = request.event
-
                 val materialResult = snackbarHostState.showSnackbar(
                     message = event.message.asString(context),
                     withDismissAction =

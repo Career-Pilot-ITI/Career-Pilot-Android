@@ -13,6 +13,7 @@ import com.iti.common.util.countdownFlow
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,7 +64,9 @@ class LoginViewModel @Inject constructor(
             val result = validatePhoneNumber(current.phoneNumber, current.regionCode)
         ) {
             is CareerPilotResult.Error -> {
-                _state.update { it.copy(error = result.error.toUIText()) }
+                viewModelScope.launch {
+                    CareerPilotSnackbarController.show(result.error.toUIText())
+                }
                 return
             }
 
@@ -79,7 +82,10 @@ class LoginViewModel @Inject constructor(
                     _events.send(LoginEvent.NavigateToOtp(fullPhoneNumber))
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false, error = error.toUIText()) }
+                    _state.update { it.copy(isLoading = false) }
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                     if (error == NetworkError.TOO_MANY_REQUESTS) startCooldown()
                 }
         }
