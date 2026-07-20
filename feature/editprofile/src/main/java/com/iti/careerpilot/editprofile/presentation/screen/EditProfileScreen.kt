@@ -58,9 +58,9 @@ import com.iti.careerpilot.editprofile.presentation.screen.components.EditProfil
 import com.iti.careerpilot.editprofile.presentation.screen.components.FormSection
 import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledDropdownField
 import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledTextField
-import com.iti.careerpilot.editprofile.presentation.screen.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.screen.components.SaveBar
-import com.iti.careerpilot.editprofile.presentation.screen.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.screen.models.EducationLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.ExperienceLevel
 import com.iti.careerpilot.editprofile.presentation.screen.models.Gender
@@ -99,16 +99,14 @@ fun EditProfileRoot(
     if (state.isUploadingAvatar) {
         UploadProgressDialog(
             progress = state.avatarUploadProgress,
-            title = stringResource(R.string.uploading),
-            error = state.uploadError
+            title = stringResource(R.string.uploading)
         )
     }
 
     if (state.isUploadingCV) {
         UploadProgressDialog(
             progress = state.cvUploadProgress,
-            title = stringResource(R.string.uploading),
-            error = state.uploadError
+            title = stringResource(R.string.uploading)
         )
     }
 }

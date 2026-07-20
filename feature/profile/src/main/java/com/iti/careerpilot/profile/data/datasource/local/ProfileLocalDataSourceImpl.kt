@@ -8,9 +8,12 @@ import javax.inject.Inject
 
 
 class ProfileLocalDataSourceImpl @Inject constructor(
-    userProfileRepo: UserProfileRepo
+    private val userProfileRepo: UserProfileRepo
 ): ProfileLocalDataSource {
 
     override val userProfile: StateFlow<UserProfile> = userProfileRepo.userProfile
+    override suspend fun clearUserProfile() {
+        userProfileRepo.clearUserProfile()
+    }
 
 }

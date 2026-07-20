@@ -1,6 +1,6 @@
 package com.iti.careerpilot.editprofile.data.datasource.remote
 
-import com.iti.careerpilot.core.network.BuildConfig
+import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.safecall.safeApiCall
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
@@ -12,15 +12,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
-import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import java.io.File
 import javax.inject.Inject
-
-private const val testToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwiaWQiOjEsImVtYWlsIjoiaEBnbWFpbC5jb20iLCJzdWIiOiJ1c2VyXzEwMTAxMCIsImlhdCI6MTc4NDM3OTg2MiwiZXhwIjoxNzg0NzM5ODYyfQ.ktxu9dIQ2yMF8lufEIIf8sDntjTdAfcdkmyb6mbTiS8"
 
 class EditProfileRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient
@@ -30,11 +27,7 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
         request: UpdateProfileRequestDto
     ): CareerPilotResult<UpdateProfileResponseDto, NetworkError> {
         return safeApiCall<UpdateProfileResponseDto> {
-            httpClient.patch("${BuildConfig.BASE_URL}api/v1/auth/profile") {
-                header(
-                    HttpHeaders.Authorization,
-                    "Bearer $testToken"
-                )
+            httpClient.patch(Endpoints.UPDATE_PROFILE) {
                 setBody(request)
             }
         }
@@ -45,7 +38,7 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<FileUploadResponse, NetworkError> {
         return safeApiCall<FileUploadResponse> {
             httpClient.submitFormWithBinaryData(
-                url = "${BuildConfig.BASE_URL}api/v1/files/upload",
+                url = Endpoints.UPLOAD_FILE,
                 formData = formData {
                     append(
                         key = "file",
@@ -58,10 +51,6 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     append("type", "AVATAR")
                 }
             ) {
-                header(
-                    HttpHeaders.Authorization,
-                    "Bearer $testToken"
-                )
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)
@@ -78,7 +67,7 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<FileUploadResponse, NetworkError> {
         return safeApiCall<FileUploadResponse> {
             httpClient.submitFormWithBinaryData(
-                url = "${BuildConfig.BASE_URL}api/v1/files/upload",
+                url = Endpoints.UPLOAD_FILE,
                 formData = formData {
                     append(
                         key = "file",
@@ -91,10 +80,6 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     append("type", "RESUME")
                 }
             ) {
-                header(
-                    HttpHeaders.Authorization,
-                    "Bearer $testToken"
-                )
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)

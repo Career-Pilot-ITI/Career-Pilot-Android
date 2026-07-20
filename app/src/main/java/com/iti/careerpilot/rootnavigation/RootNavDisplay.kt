@@ -18,15 +18,13 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
-import com.iti.careerpilot.core.designsystem.Dimens
-import com.iti.careerpilot.core.designsystem.components.CareerPilotSnackbarHost
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
-import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
-import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
-import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
+import com.iti.careerpilot.features.splash.SplashRoot
+import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
+import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
@@ -37,9 +35,19 @@ import kotlinx.coroutines.CancellationException
 fun RootNavDisplay(
     startRoute: Route,
     isOnline: Boolean,
+    isLoggedIn: Boolean,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
+
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn && rootBackStack.lastOrNull() != Route.Login && rootBackStack.lastOrNull() != Route.Splash) {
+            rootBackStack.apply {
+                clear()
+                add(Route.Login)
+            }
+        }
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val currentRootRoute = rootBackStack.lastOrNull()
@@ -50,7 +58,6 @@ fun RootNavDisplay(
         CareerPilotSnackbarController.requests.collect { request ->
             try {
                 val event = request.event
-
                 val materialResult = snackbarHostState.showSnackbar(
                     message = event.message.asString(context),
                     withDismissAction =
@@ -115,6 +122,19 @@ fun RootNavDisplay(
                 )
             },
             entryProvider = entryProvider {
+                entry<Route.Splash> {
+                    SplashRoot(
+                        onNavigateToLogin = {
+                            rootBackStack.replaceAll(Route.Login)
+                        },
+                        onNavigateToHome = {
+                            rootBackStack.replaceAll(Route.NestedNav)
+                        },
+                        onNavigateToOnboarding = {
+                            rootBackStack.replaceAll(Route.Onboarding)
+                        }
+                    )
+                }
                 entry<Route.Login> {
                     LoginRoot(
                         openOTP = { phoneNumber ->
@@ -123,40 +143,17 @@ fun RootNavDisplay(
                     )
                 }
 
-            entry<Route.OTP> {
-                OTPRoot(
-                    phoneNumber = it.phoneNumber,
+                entry<Route.OTP> {
+                    OTPRoot(
+                        phoneNumber = it.phoneNumber,
                         openHome = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(
-                                    Route.NestedNav,
-                                )
-                            }
+                            rootBackStack.replaceAll(Route.NestedNav)
+                        },
+                        openOnboarding = {
+                            rootBackStack.replaceAll(Route.Onboarding)
                         },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.OTP>()
-                        },
-                    )
-                }
-
-                entry<Route.Register> {
-                    RegisterRoot(
-                        openHome = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(
-                                    Route.NestedNav,
-                                )
-                            }
-                        },
-                        openLogin = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(
-                                    Route.Login,
-                                )
-                            }
                         },
                     )
                 }
@@ -200,10 +197,7 @@ fun RootNavDisplay(
                 entry<Route.Onboarding> {
                     com.iti.onboarding.navigation.OnboardingPagerScreen(
                         onOnboardingFinished = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(Route.NestedNav)
-                            }
+                            rootBackStack.replaceAll(Route.NestedNav)
                         }
                     )
                 }

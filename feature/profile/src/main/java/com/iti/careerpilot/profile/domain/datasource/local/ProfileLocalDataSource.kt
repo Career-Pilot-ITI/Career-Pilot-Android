@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 interface ProfileLocalDataSource {
 
     val userProfile: StateFlow<UserProfile>
+    suspend fun clearUserProfile()
 
 }

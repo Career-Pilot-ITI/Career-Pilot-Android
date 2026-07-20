@@ -16,7 +16,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,12 +28,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.UploadProgressDialog
 import com.iti.careerpilot.core.designsystem.components.media.AvatarImagePicker
 import com.iti.careerpilot.core.designsystem.components.media.ImageSourcePickerSheet
+import com.iti.careerpilot.core.designsystem.R as DesignSystemR
 import com.iti.common.media.ImageSource
 import com.iti.common.media.rememberImagePickerLauncher
 import com.iti.common.snackbar.CareerPilotSnackbarController
-import com.iti.common.util.UIText
+import androidx.compose.ui.res.stringResource
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.AddSkillDialog
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.ProfileBanner
@@ -93,21 +95,6 @@ fun ProfileScreenContent(
 
                 is ProfileInfoEffect.RequestCameraPermission -> {
                     imagePicker.requestCameraPermission()
-                }
-
-                is ProfileInfoEffect.ShowSnackbar -> {
-                    val result = effect.actionLabelRes?.let {
-                        CareerPilotSnackbarController.show(
-                            message = UIText.StringResource(effect.messageRes),
-                            actionLabel = UIText.StringResource(effect.actionLabelRes)
-                        )
-                    } ?: CareerPilotSnackbarController.show(
-                        message = UIText.StringResource(effect.messageRes)
-                    )
-
-                    if (result == SnackbarResult.ActionPerformed) {
-                        effect.actionIntent?.let { onIntent(it) }
-                    }
                 }
 
                 is ProfileInfoEffect.OpenAppSettings -> {
@@ -225,6 +212,17 @@ fun ProfileScreenContent(
             onDismissRequest = {
                 onIntent(ProfileInfoIntent.OnDismissSheet)
             }
+        )
+    }
+
+    if (state.isSubmitting) {
+        LoadingDialog()
+    }
+
+    if (isImageUploading) {
+        UploadProgressDialog(
+            progress = state.uploadProgress,
+            title = stringResource(DesignSystemR.string.uploading)
         )
     }
 }

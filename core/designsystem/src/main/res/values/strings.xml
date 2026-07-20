@@ -10,4 +10,7 @@
     <string name="dismiss">Dismiss</string>
     <string name="no_network_connection">No internet connection</string>
     <string name="retry">Retry</string>
+    <string name="uploading">Uploading…</string>
+    <string name="animation_percentage">%1$d%%</string>
+    <string name="upload_failed">Upload Failed</string>
 </resources>
