@@ -13,6 +13,7 @@ enum class NetworkError : IError {
     NOT_FOUND,
     CONFLICT,
     GONE,
+    OTP_EXPIRED,
     INVALID_COUPON,
     ADDRESS_ERROR,
     UNKNOWN,
@@ -24,4 +25,11 @@ enum class StorageError : IError {
     UNKNOWN,
     FileNotFound,
     PermissionDenied
+}
+
+enum class PhoneValidationError : IError {
+    EMPTY,
+    TOO_SHORT,
+    TOO_LONG,
+    INVALID_FORMAT,
 }

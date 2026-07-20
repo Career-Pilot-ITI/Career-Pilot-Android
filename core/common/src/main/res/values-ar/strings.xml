@@ -16,6 +16,7 @@
     <string name="error_not_found">لم نتمكن من العثور على ما تبحث عنه.</string>
     <string name="error_conflict">حدث خطأ ما. يرجى المحاولة مرة أخرى.</string>
     <string name="error_gone">انتهت صلاحية هذا. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_otp_expired">انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.</string>
     <string name="error_invalid_coupon">كود الخصم غير صالح أو انتهت صلاحيته.</string>
     <string name="error_address">بيانات العنوان غير صحيحة أو غير مكتملة.</string>
 

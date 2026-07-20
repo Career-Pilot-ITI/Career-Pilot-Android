@@ -21,8 +21,8 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotSnackbarHost
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
-import com.iti.careerpilot.features.login.LoginRoot
-import com.iti.careerpilot.features.otp.OTPRoot
+import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
+import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
 import com.iti.careerpilot.features.register.RegisterRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
@@ -117,16 +117,15 @@ fun RootNavDisplay(
             entryProvider = entryProvider {
                 entry<Route.Login> {
                     LoginRoot(
-                        openOTP = {
-                            rootBackStack.navigateSingleTop(
-                                Route.OTP,
-                            )
+                        openOTP = { phoneNumber ->
+                            rootBackStack.navigateSingleTop(Route.OTP(phoneNumber = phoneNumber))
                         },
                     )
                 }
 
-                entry<Route.OTP> {
-                    OTPRoot(
+            entry<Route.OTP> {
+                OTPRoot(
+                    phoneNumber = it.phoneNumber,
                         openHome = {
                             rootBackStack.apply {
                                 clear()
@@ -135,13 +134,8 @@ fun RootNavDisplay(
                                 )
                             }
                         },
-                        openRegister = {
-                            rootBackStack.apply {
-                                clear()
-                                navigateSingleTop(
-                                    Route.Register,
-                                )
-                            }
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.OTP>()
                         },
                     )
                 }

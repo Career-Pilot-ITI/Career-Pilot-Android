@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:login"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
 }

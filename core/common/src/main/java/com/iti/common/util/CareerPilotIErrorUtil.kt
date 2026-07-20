@@ -43,6 +43,9 @@ fun NetworkError.toUIText(): UIText {
             NetworkError.GONE ->
                 R.string.error_gone
 
+            NetworkError.OTP_EXPIRED ->
+                R.string.error_otp_expired
+
             NetworkError.INVALID_COUPON ->
                 R.string.error_invalid_coupon
 
