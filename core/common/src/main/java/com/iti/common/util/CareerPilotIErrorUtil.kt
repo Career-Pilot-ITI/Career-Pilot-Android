@@ -43,6 +43,9 @@ fun NetworkError.toUIText(): UIText {
             NetworkError.GONE ->
                 R.string.error_gone
 
+            NetworkError.OTP_EXPIRED ->
+                R.string.error_otp_expired
+
             NetworkError.INVALID_COUPON ->
                 R.string.error_invalid_coupon
 
@@ -66,6 +69,12 @@ fun StorageError.toUIText(): UIText {
 
             StorageError.UNKNOWN ->
                 R.string.error_storage_unknown
+
+            StorageError.FileNotFound ->
+                R.string.error_storage_file_not_found
+
+            StorageError.PermissionDenied ->
+                R.string.error_storage_permission_denied
         }
     )
 }

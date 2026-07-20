@@ -10,7 +10,7 @@ sealed interface Route : NavKey {
     data object Login : Route
 
     @Serializable
-    data object OTP : Route
+    data class OTP(val phoneNumber: String) : Route
 
     @Serializable
     data object Register : Route
@@ -41,4 +41,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Paywall : Route
+
+    @Serializable
+    data object Onboarding: Route
 }

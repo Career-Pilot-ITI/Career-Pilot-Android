@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brand_name">CareerPilot</string>
+    <string name="logo_symbol_fallback">CP</string>
+    <string name="login_heading">مدرب الذكاء الاصطناعي للمقابلات في انتظارك</string>
+    <string name="login_subheading">تدرب على مقابلات واقعية، واحصل على تقييم فوري، واحصل على وظيفة أحلامك.</string>
+    <string name="phone_number_label">رقم الهاتف</string>
+    <string name="phone_placeholder">٠١x xxxx xxxx</string>
+    <string name="btn_continue">متابعة</string>
+    <string name="btn_retry_in_seconds">حاول مرة أخرى خلال %1$d ثانية</string>
+
+    <string name="error_phone_empty">من فضلك أدخل رقم هاتفك</string>
+    <string name="error_phone_too_short">رقم الهاتف قصير جدًا</string>
+    <string name="error_phone_too_long">رقم الهاتف طويل جدًا</string>
+    <string name="error_phone_invalid">من فضلك أدخل رقم هاتف صحيح</string>
+
+    <string name="otp_back">رجوع</string>
+    <string name="otp_title">أدخل الرمز</string>
+    <string name="otp_sent_to">تم الإرسال إلى %1$s</string>
+    <string name="otp_resend_in_prefix">إعادة الإرسال خلال </string>
+    <string name="otp_resend">إعادة الإرسال</string>
+    <string name="otp_success_title">تم تسجيل دخولك!</string>
+    <string name="otp_success_subtitle">جارٍ إعداد جلسة التدريب…</string>
+</resources>

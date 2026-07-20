@@ -1,0 +1,167 @@
+package com.iti.onboarding.presentation.screen.cv.view
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.iti.common.media.pdfpicker.rememberPdfPickerLauncher
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.snackbar.SnackbarController
+import com.iti.onboarding.R
+import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
+import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
+import com.iti.onboarding.presentation.screen.cv.state.UploadCvIntent
+import com.iti.onboarding.presentation.screen.cv.state.UploadCvUiState
+import com.iti.onboarding.presentation.screen.cv.view.components.UploadCvCard
+import com.iti.onboarding.presentation.screen.cv.view.components.UploadCvHeader
+import com.iti.onboarding.presentation.screen.cv.viewmodel.UploadCvViewModel
+import com.iti.onboarding.presentation.screen.track.view.components.ActionButton
+
+
+@Composable
+fun UploadCvScreen(
+    onNavigateNext: () -> Unit,
+    onSkip: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: UploadCvViewModel = hiltViewModel(),
+) {
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val pdfPicker = rememberPdfPickerLauncher(
+        onPdfSelected = { uri ->
+            viewModel.onIntent(UploadCvIntent.OnPdfSelected(uri.toString()))
+        }
+    )
+
+    LaunchedEffect(viewModel, lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    UploadCvEffect.OpenPdfPicker -> {
+                        pdfPicker.launchPdfPicker()
+                    }
+
+                    UploadCvEffect.NavigateNext -> onNavigateNext()
+                    UploadCvEffect.Skip -> onSkip()
+                    is UploadCvEffect.ShowError -> {
+                        CareerPilotSnackbarController.show(
+                            message = effect.message,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    UploadCvScreenContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        modifier = modifier.safeContentPadding(),
+    )
+}
+
+@Composable
+fun UploadCvScreenContent(
+    state: State<UploadCvUiState>,
+    onIntent: (UploadCvIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        UploadCvHeader()
+
+        Column {
+            UploadCvCard(
+                selectedFile = state.value.selectedFile,
+                stage = state.value.stage,
+                uploadProgress = state.value.uploadProgress,
+                onClick = {
+                    onIntent(UploadCvIntent.OnUploadAreaClick)
+                },
+            )
+
+            AnimatedVisibility(
+                visible = state.value.stage == CvUploadStage.UPLOADED,
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = colors.secondary,
+                    )
+
+                    Text(
+                        text = stringResource(R.string.cv_uploaded_successfully),
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.secondary,
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = {
+                    onIntent(UploadCvIntent.OnSkipClick)
+                },
+                enabled = !state.value.isSubmitting,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.skip_for_now),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
+                )
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                    contentDescription = null,
+                    tint = colors.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 4.dp),
+                )
+            }
+        }
+
+        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
+    }
+}

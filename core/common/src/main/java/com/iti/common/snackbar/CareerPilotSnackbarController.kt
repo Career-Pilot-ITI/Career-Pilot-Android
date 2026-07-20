@@ -44,6 +44,22 @@ object CareerPilotSnackbarController : SnackbarController {
         )
     }
 
+    override suspend fun show(
+        message: UIText,
+        actionLabel: UIText,
+        type: CareerPilotSnackbarType,
+        duration: SnackbarDuration
+    ): SnackbarResult {
+        return show(
+            event = CareerPilotSnackbarEvent(
+                message = message,
+                type = type,
+                duration = duration,
+                actionLabel = actionLabel
+            ),
+        )
+    }
+
     private suspend fun show(
         event: CareerPilotSnackbarEvent,
     ): SnackbarResult {
