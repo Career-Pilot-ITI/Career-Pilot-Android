@@ -1,5 +1,6 @@
 package com.iti.careerpilot.login.data.remote.dto
 
+import com.iti.careerpilot.core.network.model.AuthTokensDto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,13 +14,6 @@ data class ApiMessageResponse(
 data class OtpAuthResponse(
     @SerialName("authTokens") val authTokens: AuthTokensDto,
     @SerialName("user") val user: AuthUserDto,
-)
-
-@Serializable
-data class AuthTokensDto(
-    @SerialName("accessToken") val accessToken: String,
-    @SerialName("refreshToken") val refreshToken: String,
-    @SerialName("expiresIn") val expiresIn: Long = 0L,
 )
 
 @Serializable

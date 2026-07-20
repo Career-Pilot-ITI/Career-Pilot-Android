@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.login.domain.usecase.SendOtpUseCase
 import com.iti.careerpilot.login.domain.usecase.VerifyOtpUseCase
+import com.iti.core.datastore.CareerPilotPreferencesDataSource
 import com.iti.common.util.countdownFlow
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
@@ -25,6 +26,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class OTPViewModel @Inject constructor(
     private val verifyOtp: VerifyOtpUseCase,
     private val sendOtp: SendOtpUseCase,
+    private val datastore: CareerPilotPreferencesDataSource,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -67,12 +69,17 @@ class OTPViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
 
             verifyOtp(current.phoneNumber, current.code)
-                .onSuccess {
-                    // TODO: save session tokens for authenticated calls
-                    resendTimerJob?.cancel()
-                    _state.update { it.copy(isLoading = false, isVerified = true) }
-                    delay(SUCCESS_DISMISS_MILLIS.milliseconds)
-                    _events.send(OTPEvent.NavigateToHome)
+                .onSuccess { session ->
+                    viewModelScope.launch {
+                        datastore.setToken(session.accessToken)
+                        datastore.setRefreshToken(session.refreshToken)
+                        datastore.setHasCompletedOnboarding(session.hasCompletedOnboarding)
+
+                        resendTimerJob?.cancel()
+                        _state.update { it.copy(isLoading = false, isVerified = true) }
+                        delay(SUCCESS_DISMISS_MILLIS.milliseconds)
+                        _events.send(OTPEvent.NavigateToHome)
+                    }
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false, error = error.toUIText(), code = "") }

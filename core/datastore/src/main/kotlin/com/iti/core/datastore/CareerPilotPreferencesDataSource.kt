@@ -11,17 +11,14 @@ class CareerPilotPreferencesDataSource @Inject constructor(
     val hasCompletedOnboarding: Flow<Boolean> =
         userPreferences.data.map { it.hasCompletedOnboarding }
 
-    val token: Flow<String?> = 
+    val token: Flow<String?> =
         userPreferences.data.map { it.token }
+
+    val refreshToken: Flow<String?> =
+        userPreferences.data.map { it.refreshToken }
 
     val avatarUrl: Flow<String?> =
         userPreferences.data.map { it.avatarUrl }
-
-    val pdfUrl: Flow<String?> =
-        userPreferences.data.map { it.pdfUrl }
-
-    val pdfInternalFileUri: Flow<String?> =
-        userPreferences.data.map { it.pdfInternalFileUri }
 
     suspend fun setHasCompletedOnboarding(completed: Boolean) {
         userPreferences.updateData { it.copy(hasCompletedOnboarding = completed) }
@@ -29,6 +26,10 @@ class CareerPilotPreferencesDataSource @Inject constructor(
 
     suspend fun setToken(token: String?) {
         userPreferences.updateData { it.copy(token = token) }
+    }
+
+    suspend fun setRefreshToken(refreshToken: String?) {
+        userPreferences.updateData { it.copy(refreshToken = refreshToken) }
     }
 
     suspend fun setAvatarUrl(avatarUrl: String?) {
@@ -41,5 +42,9 @@ class CareerPilotPreferencesDataSource @Inject constructor(
 
     suspend fun setPdfInternalFileUri(uri: String) {
         userPreferences.updateData { it.copy(pdfInternalFileUri = uri) }
+    }
+
+    suspend fun clear() {
+        userPreferences.updateData { UserPreferences() }
     }
 }

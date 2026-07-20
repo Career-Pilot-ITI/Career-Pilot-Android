@@ -23,9 +23,8 @@ val baseUrl: String = run {
 
             Local development - add this line to local.properties in the project root:
 
-                careerpilot.baseUrl=http://10.0.2.2:8080/
+                careerpilot.baseUrl=http://10.0.2.2:8080
 
-            The URL must end with '/'.
             """.trimIndent()
         )
 }

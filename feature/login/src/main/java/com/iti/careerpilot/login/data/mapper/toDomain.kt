@@ -10,5 +10,5 @@ fun OtpAuthResponse.toDomain(): AuthSession =
         expiresInMillis = authTokens.expiresIn,
         userId = user.id,
         username = user.profile?.username,
-        isNewUser = user.newUser,
+        hasCompletedOnboarding = user.profile?.displayName != null,
     )

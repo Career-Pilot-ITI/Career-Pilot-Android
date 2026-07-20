@@ -1,5 +1,7 @@
 package com.iti.careerpilot.core.network.util
 
+import android.util.Log
+import com.iti.careerpilot.core.safecall.TAG
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import io.ktor.client.call.body
@@ -24,26 +26,37 @@ suspend inline fun <reified T> safeCall(
     val response = try {
         execute()
     } catch (e: RedirectResponseException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(e.toNetworkError())
     } catch (e: ClientRequestException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(e.toNetworkError())
     } catch (e: ServerResponseException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(e.toNetworkError())
     } catch (e: HttpRequestTimeoutException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.TIME_OUT)
     } catch (e: ConnectTimeoutException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.TIME_OUT)
     } catch (e: SocketTimeoutException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.TIME_OUT)
     } catch (e: UnresolvedAddressException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.NO_INTERNET)
     } catch (e: UnknownHostException) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.NO_INTERNET)
     } catch (e: IOException) { // connection reset / refused / dropped
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.NO_INTERNET)
     } catch (e: CancellationException) {
+        Log.e(TAG, "KtorClient: ", e)
         throw e
     } catch (e: Exception) {
+        Log.e(TAG, "KtorClient: ", e)
         return CareerPilotResult.Error(NetworkError.UNKNOWN)
     }
 
@@ -54,12 +67,16 @@ suspend inline fun <reified T> HttpResponse.toResult(): CareerPilotResult<T, Net
     return try {
         CareerPilotResult.Success(body<T>())
     } catch (e: SerializationException) {
+        Log.e(TAG, "KtorClient: ", e)
         CareerPilotResult.Error(NetworkError.SERIALIZATION)
     } catch (e: ContentConvertException) {
+        Log.e(TAG, "KtorClient: ", e)
         CareerPilotResult.Error(NetworkError.SERIALIZATION)
     } catch (e: CancellationException) {
+        Log.e(TAG, "KtorClient: ", e)
         throw e
     } catch (e: Exception) {
+        Log.e(TAG, "KtorClient: ", e)
         CareerPilotResult.Error(NetworkError.UNKNOWN)
     }
 }

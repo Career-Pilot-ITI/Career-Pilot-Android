@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class UserPreferences(
     val hasCompletedOnboarding: Boolean = false,
     val token: String? = null,
+    val refreshToken: String? = null,
     val avatarUrl: String? = null,
     val pdfUrl: String? = null,
     val pdfInternalFileUri: String? = null,

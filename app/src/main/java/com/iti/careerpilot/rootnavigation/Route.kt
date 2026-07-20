@@ -13,9 +13,6 @@ sealed interface Route : NavKey {
     data class OTP(val phoneNumber: String) : Route
 
     @Serializable
-    data object Register : Route
-
-    @Serializable
     data object NestedNav : Route {
 
         @Serializable
