@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
 import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
+import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
+import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
 import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
 import com.iti.careerpilot.whisper.domain.WhisperEngine
@@ -21,7 +24,10 @@ import javax.inject.Inject
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
     private val sessionRepo: SessionRepo,
-    private val whisperEngine: WhisperEngine
+    private val voiceRecorder: VoiceRecorder,
+    private val audioPlayer: AudioPlayer,
+    private val whisperEngine: WhisperEngine,
+    private val textToSpeechManager: TextToSpeechManager,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false

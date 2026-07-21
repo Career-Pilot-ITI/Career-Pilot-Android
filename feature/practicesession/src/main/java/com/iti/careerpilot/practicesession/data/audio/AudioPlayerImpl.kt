@@ -1,0 +1,131 @@
+package com.iti.careerpilot.practicesession.data.audio
+
+import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioTrack
+import com.iti.common.dispatcher.di.ApplicationScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.io.File
+import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
+class AudioPlayerImpl @Inject constructor(
+    @param:ApplicationScope private val applicationScope: CoroutineScope,
+    private val exoPlayer: ExoPlayer,
+) : AudioPlayer {
+
+    private val _activeTrack = MutableStateFlow(AudioTrack())
+    override val activeTrack = _activeTrack.asStateFlow()
+
+    private var durationJob: Job? = null
+
+    override fun play(filePath: String, onComplete: () -> Unit) {
+
+        stop()
+        val mediaItem = MediaItem.fromUri(
+            File(filePath).toUri()
+        )
+
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+        exoPlayer.play()
+
+        exoPlayer.addListener(
+            object : Player.Listener {
+                override fun onPlayerError(error: PlaybackException) {
+                    super.onPlayerError(error)
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+                    when (playbackState) {
+                        Player.STATE_READY -> {
+                            _activeTrack.update {
+                                AudioTrack(
+                                    totalDuration = exoPlayer.duration.milliseconds,
+                                    durationPlayed = Duration.ZERO,
+                                    isPlaying = true,
+                                    filePath = filePath,
+                                )
+                            }
+                            trackDuration()
+                        }
+
+                        Player.STATE_ENDED -> {
+                            onComplete()
+                            stop()
+                        }
+
+                        else -> {}
+                    }
+                }
+            }
+        )
+    }
+
+    override fun pause() {
+        if (!activeTrack.value.isPlaying) {
+            return
+        }
+        _activeTrack.update {
+            it.copy(
+                isPlaying = false
+            )
+        }
+        durationJob?.cancel()
+        exoPlayer.pause()
+    }
+
+    override fun resume() {
+        if (activeTrack.value.isPlaying) {
+            return
+        }
+        _activeTrack.update {
+            it.copy(
+                isPlaying = true
+            )
+        }
+        exoPlayer.play()
+        trackDuration()
+    }
+
+    override fun stop() {
+        _activeTrack.update {
+            it.copy(
+                isPlaying = false,
+                durationPlayed = Duration.ZERO,
+                totalDuration = Duration.ZERO,
+                filePath = "",
+            )
+        }
+        durationJob?.cancel()
+        exoPlayer.stop()
+    }
+
+    private fun trackDuration() {
+        durationJob?.cancel()
+        durationJob = applicationScope.launch(Dispatchers.Main.immediate) {
+            do {
+                _activeTrack.update {
+                    it.copy(
+                        totalDuration = exoPlayer.duration.milliseconds,
+                        durationPlayed = exoPlayer.currentPosition.milliseconds
+                    )
+                }
+                delay(10L)
+            } while (activeTrack.value.isPlaying && exoPlayer.isPlaying)
+        }
+    }
+}
