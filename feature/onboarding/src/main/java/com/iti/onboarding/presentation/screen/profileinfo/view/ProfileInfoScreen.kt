@@ -85,7 +85,6 @@ fun ProfileScreenContent(
         onCameraPermissionDenied = { onIntent(ProfileInfoIntent.OnCameraPermissionDenied) }
     )
 
-    @Suppress("LocalContextGetResourceValueCall")
     LaunchedEffect(Unit) {
         effectFlow.collect { effect ->
             when (effect) {
@@ -113,8 +112,6 @@ fun ProfileScreenContent(
     }
 
     val focusManager = LocalFocusManager.current
-    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
-
     val defaultSkills = stringArrayResource(id = R.array.profile_info_default_skills).toList()
 
     LaunchedEffect(defaultSkills) {
@@ -154,7 +151,7 @@ fun ProfileScreenContent(
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
                 email = data.email,
                 onEmailChanged = { onIntent(ProfileInfoIntent.OnEmailChanged(it)) },
-                isEmailValid = isEmailValid,
+                isEmailValid = state.isEmailValid,
                 title = data.title,
                 onTitleChanged = { onIntent(ProfileInfoIntent.OnTitleChanged(it)) },
                 experience = data.experience,
