@@ -9,10 +9,11 @@ data class UserProfile(
     val personal: PersonalInfo = PersonalInfo(),
     val career: CareerInfo = CareerInfo(),
     val avatar: AvatarInfo = AvatarInfo(),
-    val cv: CvInfo = CvInfo()
+    val cv: CvInfo = CvInfo(),
+    val onboardingCompleted: Boolean? = null,
 ) {
     val hasCompletedOnboarding: Boolean
-        get() = personal.displayName.isNotBlank()
+        get() = onboardingCompleted ?: personal.displayName.isNotBlank()
 }
 
 @Serializable

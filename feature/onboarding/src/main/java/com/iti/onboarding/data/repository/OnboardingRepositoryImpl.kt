@@ -3,7 +3,7 @@ package com.iti.onboarding.data.repository
 import android.net.Uri
 import android.util.Log
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
-import com.iti.careerpilot.core.network.model.UserResponseDto
+import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.common.dispatcher.CareerPilotDispatchers.IO
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
@@ -65,7 +65,7 @@ class OnboardingRepositoryImpl @Inject constructor(
 
     override suspend fun updateProfile(
         request: UpdateProfileRequestDto,
-    ): CareerPilotResult<UserResponseDto, NetworkError> =
+    ): CareerPilotResult<UserProfileDto, NetworkError> =
         safeNetworkCall {
             val response = remoteDataSource.updateProfile(request)
             updateLocalProfile(response)
@@ -106,7 +106,7 @@ class OnboardingRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateProfileTrack(
-        trackId: Int,
+        trackId: Long,
     ): CareerPilotResult<Unit, NetworkError> =
         safeNetworkCall {
             val response = remoteDataSource.updateProfile(
@@ -117,7 +117,20 @@ class OnboardingRepositoryImpl @Inject constructor(
             updateLocalProfile(response)
         }
 
-    private suspend fun updateLocalProfile(response: UserResponseDto) {
+    override suspend fun completeOnboarding(
+        cvFileId: Long?,
+    ): CareerPilotResult<Unit, NetworkError> =
+        safeNetworkCall {
+            val response = remoteDataSource.updateProfile(
+                request = UpdateProfileRequestDto(
+                    cvFileId = cvFileId,
+                    onboardingCompleted = true,
+                ),
+            )
+            updateLocalProfile(response)
+        }
+
+    private suspend fun updateLocalProfile(response: UserProfileDto) {
         localDataSource.updateUserProfile { current ->
             val newProfile = response.toDomain()
             newProfile.copy(
@@ -126,7 +139,12 @@ class OnboardingRepositoryImpl @Inject constructor(
                     avatarLocalUri = current.avatar.avatarLocalUri,
                     avatarSizeBytes = current.avatar.avatarSizeBytes,
                 ),
-                cv = current.cv
+                cv = newProfile.cv.copy(
+                    cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl },
+                    cvLocalUri = current.cv.cvLocalUri,
+                    cvFileName = current.cv.cvFileName,
+                    cvSizeBytes = current.cv.cvSizeBytes,
+                ),
             )
         }
     }

@@ -1,6 +1,6 @@
 package com.iti.onboarding.domain.model
 
 data class Track(
-    val id: Int,
+    val id: Long,
     val name: String
 )
