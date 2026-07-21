@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -145,16 +147,21 @@ fun OnboardingPagerScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.1f)
+                .imePadding()
+                .navigationBarsPadding()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
                             MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                            MaterialTheme.colorScheme.background
-                        )
-                    )
+                            MaterialTheme.colorScheme.background,
+                        ),
+                    ),
                 )
+                .padding(
+                    horizontal = Dimens.SpaceXXL,
+                    vertical = Dimens.SpaceXXL,
+                ),
         ) {
             val currentPage = pagerState.currentPage
 
@@ -191,9 +198,7 @@ fun OnboardingPagerScreen(
                 text = buttonText,
                 enabled = isButtonEnabled && !isSubmitting,
                 onClick = onClick,
-                modifier = Modifier
-                    .padding(horizontal = Dimens.SpaceXXL)
-                    .padding(bottom = Dimens.SpaceXXL)
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
