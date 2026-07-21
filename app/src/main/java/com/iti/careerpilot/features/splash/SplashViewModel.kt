@@ -6,8 +6,8 @@ import com.iti.core.datastore.UserTokensRepo
 import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,21 +29,21 @@ class SplashViewModel @Inject constructor(
 
     private fun decideNextScreen() {
         viewModelScope.launch {
+            val destination = async { determineNextDestination() }
             delay(2.seconds)
-            val tokens = userTokensRepo.tokens.first()
-            val isLoggedIn = !tokens.accessToken.isNullOrBlank()
+            _navigationEvent.send(destination.await())
+        }
+    }
 
-            if (!isLoggedIn) {
-                _navigationEvent.send(SplashEvent.NavigateToLogin)
-                return@launch
-            }
+    private suspend fun determineNextDestination(): SplashEvent {
+        val tokens = userTokensRepo.readTokens()
+        if (tokens.accessToken.isNullOrBlank()) return SplashEvent.NavigateToLogin
 
-            val userProfile = userProfileRepo.userProfile.first()
-            if (userProfile.hasCompletedOnboarding) {
-                _navigationEvent.send(SplashEvent.NavigateToHome)
-            } else {
-                _navigationEvent.send(SplashEvent.NavigateToOnboarding)
-            }
+        val userProfile = userProfileRepo.readUserProfile()
+        return if (userProfile.hasCompletedOnboarding) {
+            SplashEvent.NavigateToHome
+        } else {
+            SplashEvent.NavigateToOnboarding
         }
     }
 }

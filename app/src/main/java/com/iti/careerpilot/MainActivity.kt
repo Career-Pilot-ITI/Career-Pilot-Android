@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 RootNavDisplay(
                     startRoute = Route.Splash,
                     isOnline = isOnline,
-                    isLoggedIn = isLoggedIn == true,
+                    isLoggedIn = isLoggedIn,
                 )
             }
         }
