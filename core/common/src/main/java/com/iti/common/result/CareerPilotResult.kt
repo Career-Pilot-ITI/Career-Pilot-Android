@@ -39,3 +39,12 @@ fun <D, E : IError> CareerPilotResult<D, E>.mapToEmptyResult(): CareerPilotResul
         is CareerPilotResult.Error -> this
     }
 }
+
+inline fun <D, E : IError, T> CareerPilotResult<D, E>.map(
+    action: (D) -> T
+): CareerPilotResult<T, E> {
+    return when (this) {
+        is CareerPilotResult.Success -> CareerPilotResult.Success(action(data))
+        is CareerPilotResult.Error -> this
+    }
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">Back</string>
+    <string name="mic_permission">Mic Permission</string>
+    <string name="please_allow_microphone_permission_to_continue">Please allow microphone permission to continue.</string>
+    <string name="cancel">Cancel</string>
+    <string name="allow">Allow</string>
+</resources>

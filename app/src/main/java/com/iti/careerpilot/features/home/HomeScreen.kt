@@ -17,7 +17,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 @Composable
 fun HomeRoot(
     openPaywall: () -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -33,7 +33,7 @@ fun HomeRoot(
 @Composable
 fun HomeScreen(
     openPaywall: () -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Int) -> Unit,
     state: HomeState,
     onAction: (HomeAction) -> Unit,
 ) {
@@ -51,7 +51,7 @@ fun HomeScreen(
             Text(text = "open Paywall")
         }
         Button(
-            onClick = { openSessionDetails("132") }
+            onClick = { openSessionDetails(1) }
         ) {
             Text(text = "Open Session Details")
         }
