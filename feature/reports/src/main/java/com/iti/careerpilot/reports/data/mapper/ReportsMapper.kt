@@ -1,14 +1,10 @@
 package com.iti.careerpilot.reports.data.mapper
 
-import com.iti.careerpilot.reports.data.datasource.remote.dto.CoachingSuggestionDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.PerformanceMetricsDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.QuestionBreakdownDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.QuestionReportDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.ReportDetailsDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionSummaryDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
 import com.iti.careerpilot.reports.domain.model.CoachingImpact
 import com.iti.careerpilot.reports.domain.model.CoachingSuggestion
-import com.iti.careerpilot.reports.domain.model.CoachingSuggestionType
 import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
 import com.iti.careerpilot.reports.domain.model.PerformanceMetrics
 import com.iti.careerpilot.reports.domain.model.PerformanceTier
@@ -16,115 +12,136 @@ import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
 import com.iti.careerpilot.reports.domain.model.QuestionReport
 import com.iti.careerpilot.reports.domain.model.ReportDetails
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import kotlinx.serialization.SerializationException
 
-fun SessionSummaryDto.toDomain(): InterviewSessionSummary {
-    validateIdentifier(id)
+internal fun InterviewSessionDto.toHistoryDomainOrNull(): InterviewSessionSummary? {
+    if (!status.equals(COMPLETED_STATUS, ignoreCase = true)) return null
+    val score = overallScore ?: return null
     validateScore(score)
-    validateNonNegative(durationMinutes, "durationMinutes")
-    validateNonNegative(questionCount, "questionCount")
+    val durationMinutes = ((durationSeconds ?: 0).coerceAtLeast(0) + 59) / 60
     return InterviewSessionSummary(
-        id = id,
+        id = id.toString(),
         score = score,
-        category = category,
-        completedAt = parseInstant(completedAt),
+        category = trackName.orEmpty(),
+        completedAt = parseBackendTimestamp(completedAt ?: createdAt),
         durationMinutes = durationMinutes,
-        questionCount = questionCount,
+        questionCount = maxQuestions?.coerceAtLeast(0) ?: 0,
     )
 }
 
-fun ReportDetailsDto.toDomain(): ReportDetails {
-    validateIdentifier(sessionId)
+internal fun FeedbackReportDto.toDomain(
+    session: InterviewSessionDto,
+): ReportDetails {
     validateScore(overallScore)
-    validateScore(topPercent)
+    val metricValues = listOf(
+        clarityScore,
+        confidenceScore,
+        pacingScore,
+        fillerWordsScore,
+        contentRelevanceScore,
+    )
+    metricValues.forEach(::validateScore)
+    val nonBlankTips = coachingTips.filter(String::isNotBlank)
     return ReportDetails(
-        sessionId = sessionId,
-        completedAt = parseInstant(completedAt),
+        sessionId = sessionId.toString(),
+        completedAt = parseBackendTimestamp(
+            session.completedAt ?: generatedAt ?: createdAt,
+        ),
         overallScore = overallScore,
-        performanceTier = performanceTier.toPerformanceTier(),
-        topPercent = topPercent,
-        metrics = metrics.toDomain(),
-        coachingSuggestions = coachingSuggestions.map(CoachingSuggestionDto::toDomain),
+        performanceTier = overallScore.toPerformanceTier(),
+        topPercent = null,
+        metrics = PerformanceMetrics(
+            clarity = clarityScore,
+            confidence = confidenceScore,
+            pacing = pacingScore,
+            fillerWords = fillerWordsScore,
+            content = contentRelevanceScore,
+        ),
+        coachingSuggestions = nonBlankTips.mapIndexed { index, tip ->
+                CoachingSuggestion(
+                    id = "$sessionId-suggestion-${index + 1}",
+                    ordinal = index + 1,
+                    description = tip,
+                    impact = impactFor(index = index, count = nonBlankTips.size),
+                )
+            },
     )
 }
 
-fun QuestionBreakdownDto.toDomain(): QuestionBreakdown {
-    validateIdentifier(sessionId)
-    return QuestionBreakdown(
-        sessionId = sessionId,
-        questions = questions.map(QuestionReportDto::toDomain),
-    )
+internal fun List<SessionQuestionDto>.toDomain(
+    sessionId: Long,
+): QuestionBreakdown = QuestionBreakdown(
+    sessionId = sessionId.toString(),
+    questions = sortedBy(SessionQuestionDto::questionOrder).map { question ->
+        val transcript = question.userTranscript.orEmpty()
+        val fillerWords = findFillerWords(transcript)
+        question.score?.overallScore?.let(::validateScore)
+        QuestionReport(
+            id = question.id.toString(),
+            index = question.questionOrder,
+            question = question.questionText,
+            score = question.score?.overallScore ?: 0,
+            fillerWordCount = countFillerWords(transcript),
+            durationSeconds = ((question.durationMs ?: 0L) / MILLIS_PER_SECOND)
+                .coerceAtMost(Int.MAX_VALUE.toLong())
+                .toInt(),
+            coachFeedback = question.score?.coachingTip.orEmpty(),
+            transcript = transcript,
+            fillerWords = fillerWords,
+        )
+    },
+)
+
+internal fun findFillerWords(transcript: String): List<String> = FILLER_WORDS.filter { word ->
+    fillerWordRegex(word).containsMatchIn(transcript)
 }
 
-private fun PerformanceMetricsDto.toDomain(): PerformanceMetrics {
-    listOf(clarity, confidence, pacing, fillerWords, content).forEach(::validateScore)
-    return PerformanceMetrics(clarity, confidence, pacing, fillerWords, content)
+internal fun countFillerWords(transcript: String): Int = FILLER_WORDS.sumOf { word ->
+    fillerWordRegex(word).findAll(transcript).count()
 }
 
-private fun CoachingSuggestionDto.toDomain(): CoachingSuggestion {
-    validateIdentifier(id)
-    return CoachingSuggestion(
-        id = id,
-        type = when (type.lowercase()) {
-            "filler_words" -> CoachingSuggestionType.FILLER_WORDS
-            "technical_depth" -> CoachingSuggestionType.TECHNICAL_DEPTH
-            "story_structure" -> CoachingSuggestionType.STORY_STRUCTURE
-            else -> CoachingSuggestionType.OTHER
-        },
-        title = title,
-        description = description,
-        impact = when (impact.lowercase()) {
-            "high" -> CoachingImpact.HIGH
-            "medium" -> CoachingImpact.MEDIUM
-            "low" -> CoachingImpact.LOW
-            else -> throw SerializationException("Unknown coaching impact")
-        },
-    )
+private fun fillerWordRegex(word: String): Regex = Regex(
+    pattern = "(?i)(?<!\\p{L})${Regex.escape(word)}(?!\\p{L})",
+)
+
+private fun impactFor(index: Int, count: Int): CoachingImpact {
+    if (count <= 0) return CoachingImpact.LOW
+    return when (index * IMPACT_GROUP_COUNT / count) {
+        0 -> CoachingImpact.HIGH
+        1 -> CoachingImpact.MEDIUM
+        else -> CoachingImpact.LOW
+    }
 }
 
-private fun QuestionReportDto.toDomain(): QuestionReport {
-    validateIdentifier(id)
-    validateNonNegative(index, "index")
-    validateScore(score)
-    validateNonNegative(fillerWordCount, "fillerWordCount")
-    validateNonNegative(durationSeconds, "durationSeconds")
-    return QuestionReport(
-        id = id,
-        index = index,
-        question = question,
-        score = score,
-        fillerWordCount = fillerWordCount,
-        durationSeconds = durationSeconds,
-        coachFeedback = coachFeedback,
-        transcript = transcript,
-        fillerWords = fillerWords,
-    )
+private fun Int.toPerformanceTier(): PerformanceTier = when {
+    this >= STRONG_SCORE -> PerformanceTier.STRONG
+    this >= GOOD_SCORE -> PerformanceTier.GOOD
+    else -> PerformanceTier.NEEDS_IMPROVEMENT
 }
 
-private fun String.toPerformanceTier(): PerformanceTier = when (lowercase()) {
-    "strong" -> PerformanceTier.STRONG
-    "good" -> PerformanceTier.GOOD
-    "needs_improvement" -> PerformanceTier.NEEDS_IMPROVEMENT
-    else -> throw SerializationException("Unknown performance tier")
-}
-
-private fun parseInstant(value: String): Instant = try {
+private fun parseBackendTimestamp(value: String): Instant = try {
     Instant.parse(value)
-} catch (exception: Exception) {
-    throw SerializationException("Invalid report timestamp", exception)
-}
-
-private fun validateIdentifier(value: String) {
-    if (value.isBlank()) throw SerializationException("A report identifier is blank")
+} catch (_: Exception) {
+    try {
+        LocalDateTime.parse(value).atZone(ZoneId.systemDefault()).toInstant()
+    } catch (exception: Exception) {
+        throw SerializationException("Invalid report timestamp", exception)
+    }
 }
 
 private fun validateScore(value: Int) {
-    if (value !in 0..100) throw SerializationException("A report score is out of range")
+    if (value !in MIN_SCORE..MAX_SCORE) {
+        throw SerializationException("A report score is out of range")
+    }
 }
 
-private fun validateNonNegative(
-    value: Int,
-    field: String,
-) {
-    if (value < 0) throw SerializationException("$field cannot be negative")
-}
+private const val COMPLETED_STATUS = "COMPLETED"
+private const val MILLIS_PER_SECOND = 1_000L
+private const val IMPACT_GROUP_COUNT = 3
+private const val STRONG_SCORE = 80
+private const val GOOD_SCORE = 70
+private const val MIN_SCORE = 0
+private const val MAX_SCORE = 100
+private val FILLER_WORDS = listOf("uh", "um", "you know", "basically")
