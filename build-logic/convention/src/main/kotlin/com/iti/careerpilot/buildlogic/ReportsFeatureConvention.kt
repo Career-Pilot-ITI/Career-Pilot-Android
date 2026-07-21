@@ -10,5 +10,6 @@ class ReportsFeatureConvention : Plugin<Project> {
         pluginManager.apply("careerpilot.testing")
 
         addLibrary("implementation", "kotlinx-collections-immutable")
+        addLibrary("testImplementation", "ktor-client-mock")
     }
 }
