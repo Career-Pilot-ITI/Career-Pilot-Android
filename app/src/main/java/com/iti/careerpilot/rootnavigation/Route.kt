@@ -34,6 +34,9 @@ sealed interface Route : NavKey {
     data class SessionDetails(val id: String) : Route
 
     @Serializable
+    data class QuestionBreakdown(val sessionId: String) : Route
+
+    @Serializable
     data object Settings : Route
 
     @Serializable

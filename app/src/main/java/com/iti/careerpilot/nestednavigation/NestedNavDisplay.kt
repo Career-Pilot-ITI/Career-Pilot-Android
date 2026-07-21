@@ -18,9 +18,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.common.model.ProfileEditSection
-import com.iti.careerpilot.features.reports.ReportsRoot
 import com.iti.careerpilot.features.home.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
+import com.iti.careerpilot.reports.presentation.screen.history.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 
@@ -89,7 +89,9 @@ fun NestedNavDisplay(
                     )
                 }
                 entry<Route.NestedNav.Reports> {
-                    ReportsRoot()
+                    SessionHistoryRoot(
+                        openSessionDetails = openSessionDetails,
+                    )
                 }
                 entry<Route.NestedNav.Profile> {
                     ProfileRoot(
