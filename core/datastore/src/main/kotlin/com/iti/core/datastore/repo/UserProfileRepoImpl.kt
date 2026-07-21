@@ -7,6 +7,7 @@ import com.iti.core.datastore.models.UserProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import java.io.IOException
 import javax.inject.Inject
@@ -22,6 +23,8 @@ class UserProfileRepoImpl @Inject constructor(
         .stateIn(
             scope, SharingStarted.Eagerly, UserProfile()
         )
+
+    override suspend fun readUserProfile(): UserProfile = dataStore.data.first()
 
     override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {
         try {

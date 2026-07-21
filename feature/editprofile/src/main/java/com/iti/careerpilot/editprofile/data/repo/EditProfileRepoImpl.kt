@@ -32,25 +32,21 @@ class EditProfileRepoImpl @Inject constructor(
     ): CareerPilotResult<Unit, NetworkError> {
         return remoteDataSource.updateProfile(request.toDto())
             .onSuccess { dto ->
-                dto.profile?.toDomain(
-                    dto.id,
-                    dto.phoneNumber
-                )?.let { newProfile ->
-                    localDataSource.updateUserProfile { current ->
-                        newProfile.copy(
-                            avatar = newProfile.avatar.copy(
-                                avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl },
-                                avatarLocalUri = current.avatar.avatarLocalUri,
-                                avatarSizeBytes = current.avatar.avatarSizeBytes,
-                            ),
-                            cv = newProfile.cv.copy(
-                                cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl },
-                                cvLocalUri = current.cv.cvLocalUri,
-                                cvFileName = current.cv.cvFileName,
-                                cvSizeBytes = current.cv.cvSizeBytes,
-                            )
-                        )
-                    }
+                val newProfile = dto.toDomain()
+                localDataSource.updateUserProfile { current ->
+                    newProfile.copy(
+                        avatar = newProfile.avatar.copy(
+                            avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl },
+                            avatarLocalUri = current.avatar.avatarLocalUri,
+                            avatarSizeBytes = current.avatar.avatarSizeBytes,
+                        ),
+                        cv = newProfile.cv.copy(
+                            cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl },
+                            cvLocalUri = current.cv.cvLocalUri,
+                            cvFileName = current.cv.cvFileName,
+                            cvSizeBytes = current.cv.cvSizeBytes,
+                        ),
+                    )
                 }
             }
             .mapToEmptyResult()

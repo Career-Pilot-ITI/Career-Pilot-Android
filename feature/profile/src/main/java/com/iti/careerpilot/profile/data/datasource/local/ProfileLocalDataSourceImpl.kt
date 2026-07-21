@@ -12,8 +12,12 @@ class ProfileLocalDataSourceImpl @Inject constructor(
 ): ProfileLocalDataSource {
 
     override val userProfile: StateFlow<UserProfile> = userProfileRepo.userProfile
+
+    override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {
+        userProfileRepo.updateUserProfile(updateBlock)
+    }
+
     override suspend fun clearUserProfile() {
         userProfileRepo.clearUserProfile()
     }
-
 }
