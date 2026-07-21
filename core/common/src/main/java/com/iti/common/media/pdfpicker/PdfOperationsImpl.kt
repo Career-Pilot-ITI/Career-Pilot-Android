@@ -141,18 +141,16 @@ class PdfOperationsImpl @Inject constructor(
     }
 
     private fun readBytesWithLimit(uri: Uri): ByteArray? {
-        val inputStream = contentResolver.openInputStream(uri) ?: return null
-
-        inputStream.use { input ->
+        return contentResolver.openInputStream(uri)?.use { input ->
             ByteArrayOutputStream().use { output ->
                 val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                var totalBytes = 0
+                var totalBytes = 0L
 
                 while (true) {
                     val readCount = input.read(buffer)
                     if (readCount == -1) break
 
-                    totalBytes += readCount
+                    totalBytes += readCount.toLong()
                     if (totalBytes > MAX_CV_SIZE_BYTES) {
                         throw FileTooLargeException()
                     }
@@ -160,7 +158,7 @@ class PdfOperationsImpl @Inject constructor(
                     output.write(buffer, 0, readCount)
                 }
 
-                return output.toByteArray()
+                output.toByteArray()
             }
         }
     }
