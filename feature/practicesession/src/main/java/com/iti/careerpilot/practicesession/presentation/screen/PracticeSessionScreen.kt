@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.sessiondetails
+package com.iti.careerpilot.practicesession.presentation.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -6,32 +6,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
+import com.iti.careerpilot.practicesession.presentation.viewmodel.PracticeSessionViewModel
 
 @Composable
-fun SessionDetailsRoot(
+fun PracticeSessionRoot(
     sessionId: String,
-    viewModel: SessionDetailsViewModel = hiltViewModel()
+    viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.onAction(PracticeSessionAction.StartPracticeSession(sessionId))
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    SessionDetailsScreen(
+    PracticeSessionScreen(
         state = state,
         onAction = viewModel::onAction
     )
 }
 
 @Composable
-fun SessionDetailsScreen(
-    state: SessionDetailsState,
-    onAction: (SessionDetailsAction) -> Unit,
+fun PracticeSessionScreen(
+    state: PracticeSessionState,
+    onAction: (PracticeSessionAction) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = Modifier
             .background(Color.Green)
             .fillMaxSize(),

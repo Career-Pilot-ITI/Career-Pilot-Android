@@ -25,7 +25,7 @@ import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
-import com.iti.careerpilot.practicesession.sessiondetails.SessionDetailsRoot
+import com.iti.careerpilot.practicesession.presentation.screen.PracticeSessionRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.CancellationException
@@ -202,7 +202,7 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.SessionDetails> {
-                    SessionDetailsRoot(
+                    PracticeSessionRoot(
                         sessionId = it.id,
                     )
                 }
