@@ -1,4 +1,4 @@
-package com.iti.careerpilot.features.sessiondetails
+package com.iti.careerpilot.practicesession.sessiondetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

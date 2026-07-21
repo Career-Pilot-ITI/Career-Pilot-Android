@@ -1,4 +1,4 @@
-package com.iti.careerpilot.features.sessiondetails
+package com.iti.careerpilot.practicesession.sessiondetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -52,4 +52,5 @@ dependencies {
     implementation(project(":feature:login"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
+    implementation(project(":feature:practicesession"))
 }
