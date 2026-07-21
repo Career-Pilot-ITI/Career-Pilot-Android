@@ -1,6 +1,7 @@
 package com.iti.careerpilot.reports.domain.di
 
-import com.iti.careerpilot.reports.data.datasource.remote.DummyReportsRemoteDataSource
+import com.iti.careerpilot.reports.data.datasource.remote.ReportsRemoteDataSource
+import com.iti.careerpilot.reports.data.datasource.remote.ReportsRemoteDataSourceImpl
 import com.iti.careerpilot.reports.data.repository.ReportsRepositoryImpl
 import com.iti.careerpilot.reports.domain.repository.ReportsRepository
 import dagger.Binds
@@ -13,8 +14,8 @@ import dagger.hilt.components.SingletonComponent
 abstract class ReportsModule {
     @Binds
     abstract fun bindReportsRemoteDataSource(
-        implementation: DummyReportsRemoteDataSource,
-    ): DummyReportsRemoteDataSource
+        implementation: ReportsRemoteDataSourceImpl,
+    ): ReportsRemoteDataSource
 
     @Binds
     abstract fun bindReportsRepository(
