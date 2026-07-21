@@ -45,4 +45,13 @@
     <string name="profile_info_add_skill_cancel">إلغاء</string>
     <string name="profile_info_email_invalid">يرجى إدخال عنوان بريد إلكتروني صحيح</string>
     <string name="pager_header">%1$d من %2$d</string>
+
+    <string-array name="experience_level">
+        <item>مبتدئ</item>
+        <item>مطور مبتدئ</item>
+        <item>متوسط الخبرة</item>
+        <item>خبير</item>
+        <item>قائد فريق</item>
+        <item>تنفيذي</item>
+    </string-array>
 </resources>

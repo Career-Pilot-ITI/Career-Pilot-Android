@@ -54,4 +54,13 @@
         <item>AWS</item>
         <item>System Design</item>
     </string-array>
+
+    <string-array name="experience_level">
+        <item>Entry-level</item>
+        <item>Junior</item>
+        <item>Mid-level</item>
+        <item>Senior</item>
+        <item>Lead</item>
+        <item>Executive</item>
+    </string-array>
 </resources>

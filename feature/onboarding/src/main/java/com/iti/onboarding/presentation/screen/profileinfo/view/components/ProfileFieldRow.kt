@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ProfileFieldRow(
@@ -116,7 +117,7 @@ fun ProfileDropdownRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     value: String,
-    options: List<String>,
+    options: ImmutableList<String>,
     onValueChange: (String) -> Unit,
     placeholder: String
 ) {
