@@ -5,6 +5,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -102,52 +103,49 @@ fun OnboardingPagerScreen(
         }
     }
 
-    Box(
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.Start
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            PagerHeader(currentPage = pagerState.currentPage)
+        PagerHeader(currentPage = pagerState.currentPage)
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .weight(1f)
-                    .nestedScroll(scrollConnection),
-                userScrollEnabled = false,
-            ) { page ->
-                when (page) {
-                    PAGE_PROFILE_INFO -> ProfileInfoScreen(
-                        viewModel = profileViewModel,
-                        onNavigateNext = {
-                            scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
-                        }
-                    )
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .weight(0.9f)
+                .nestedScroll(scrollConnection),
+            userScrollEnabled = false,
+        ) { page ->
+            when (page) {
+                PAGE_PROFILE_INFO -> ProfileInfoScreen(
+                    viewModel = profileViewModel,
+                    onNavigateNext = {
+                        scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
+                    }
+                )
 
-                    PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
-                        viewModel = tracksViewModel,
-                        onNavigateNext = {
-                            scope.launch { pagerState.animateScrollToPage(PAGE_UPLOAD_CV) }
-                        }
-                    )
+                PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
+                    viewModel = tracksViewModel,
+                    onNavigateNext = {
+                        scope.launch { pagerState.animateScrollToPage(PAGE_UPLOAD_CV) }
+                    }
+                )
 
-                    PAGE_UPLOAD_CV -> UploadCvScreen(
-                        viewModel = cvViewModel,
-                        onNavigateNext = onOnboardingFinished,
-                        onSkip = onOnboardingFinished
-                    )
-                }
+                PAGE_UPLOAD_CV -> UploadCvScreen(
+                    viewModel = cvViewModel,
+                    onNavigateNext = onOnboardingFinished,
+                    onSkip = onOnboardingFinished
+                )
             }
         }
 
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .weight(0.1f)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
@@ -157,9 +155,6 @@ fun OnboardingPagerScreen(
                         )
                     )
                 )
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .windowInsetsPadding(WindowInsets.ime)
-                .padding(top = Dimens.SpaceXXXL)
         ) {
             val currentPage = pagerState.currentPage
 

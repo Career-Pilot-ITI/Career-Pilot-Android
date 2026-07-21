@@ -127,8 +127,7 @@ fun ProfileScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp)
-                .padding(bottom = 120.dp), // Extra padding for the global floating button
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ProfileHeader(modifier = Modifier.align(Alignment.Start))
@@ -172,8 +171,6 @@ fun ProfileScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             ProfileBanner()
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
