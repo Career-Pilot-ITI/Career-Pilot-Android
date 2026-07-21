@@ -3,40 +3,38 @@ package com.iti.onboarding.presentation.screen.profileinfo.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.onboarding.R
-import com.iti.onboarding.domain.usecase.UploadImageUseCase
-import com.iti.onboarding.domain.usecase.SaveAvatarUrlUseCase
-import com.iti.onboarding.domain.usecase.UpdateProfileUseCase
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
+import com.iti.common.dispatcher.CareerPilotDispatchers
+import com.iti.common.dispatcher.Dispatcher
+import com.iti.common.error.NetworkError
 import com.iti.common.media.ImageCaptureUriProvider
 import com.iti.common.media.ImageSource
-import com.iti.common.result.onSuccess
+import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
-import com.iti.common.util.UIText
+import com.iti.onboarding.domain.model.UploadedFile
+import com.iti.onboarding.domain.usecase.GetUserProfileUseCase
+import com.iti.onboarding.domain.usecase.SaveAvatarUrlUseCase
+import com.iti.onboarding.domain.usecase.UpdateProfileUseCase
+import com.iti.onboarding.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.iti.onboarding.domain.usecase.GetUserProfileUseCase
-
-import com.iti.common.dispatcher.CareerPilotDispatchers
-import com.iti.common.dispatcher.Dispatcher
-import com.iti.common.result.CareerPilotResult
-import com.iti.onboarding.domain.model.UploadedFile
-import com.iti.common.error.NetworkError
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
-
-import com.iti.common.snackbar.CareerPilotSnackbarController
 
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
@@ -48,7 +46,7 @@ class ProfileInfoViewModel @Inject constructor(
     @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<ProfileInfoUiState>(ProfileInfoUiState())
+    private val _state = MutableStateFlow(ProfileInfoUiState())
     val state: StateFlow<ProfileInfoUiState> = _state.asStateFlow()
 
     init {
@@ -67,85 +65,179 @@ class ProfileInfoViewModel @Inject constructor(
 
     fun onIntent(intent: ProfileInfoIntent) {
         when (intent) {
-            is ProfileInfoIntent.OnAvatarClicked ->
-                _state.update { it.copy(isImageSourceSheetVisible = true) }
+            is ProfileInfoIntent.OnAvatarClicked -> setImageSourceSheetVisible(true)
 
-            is ProfileInfoIntent.OnImageSourceSelected -> {
-                _state.update { it.copy(isImageSourceSheetVisible = false) }
-                when (intent.source) {
-                    ImageSource.CAMERA -> viewModelScope.launch {
-                        val uri = imageCaptureUriProvider.createImageCaptureUri()
-                        _effect.emit(ProfileInfoEffect.LaunchCamera(uri))
+            is ProfileInfoIntent.OnImageSourceSelected -> handleImageSourceSelected(intent.source)
+
+            is ProfileInfoIntent.OnImagePicked -> handleImagePicked(intent.uri)
+
+            is ProfileInfoIntent.OnCameraPermissionDenied -> handleCameraPermissionDenied()
+
+            is ProfileInfoIntent.OnRetryPhotoUpload -> retryPhotoUpload()
+
+            is ProfileInfoIntent.OnNameChanged ->
+                updateProfile {
+                    updateData { it.copy(name = intent.name) }
+                }
+
+            is ProfileInfoIntent.OnEmailChanged ->
+                updateProfile {
+                    updateData { it.copy(email = intent.email) }
+                }
+
+            is ProfileInfoIntent.OnTitleChanged ->
+                updateProfile {
+                    updateData { it.copy(title = intent.title) }
+                }
+
+            is ProfileInfoIntent.OnExperienceChanged ->
+                updateProfile {
+                    updateData { it.copy(experience = intent.experience) }
+                }
+
+            is ProfileInfoIntent.OnSkillsChanged ->
+                updateProfile {
+                    updateData {
+                        it.copy(skills = intent.skills.toPersistentList())
                     }
-                    ImageSource.GALLERY -> Unit
                 }
-            }
 
-            is ProfileInfoIntent.OnImagePicked -> {
-                _state.update { it.updateData { data -> data.copy(selectedImageUri = intent.uri.toString()) }.copy(hasSuccessfullySubmitted = false) }
-                uploadAvatar(intent.uri)
-            }
+            is ProfileInfoIntent.OnSubmit -> submitProfile()
 
-            is ProfileInfoIntent.OnCameraPermissionDenied -> {
-                _state.update { it.copy(isImageSourceSheetVisible = false) }
-                viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
-            }
+            is ProfileInfoIntent.OnDismissSheet -> setImageSourceSheetVisible(false)
 
-            is ProfileInfoIntent.OnRetryPhotoUpload -> {
-                _state.value.data.selectedImageUri?.let { uri ->
-                    uploadAvatar(Uri.parse(uri))
-                }
-            }
+            is ProfileInfoIntent.OnOpenAppSettings -> emitEffect(ProfileInfoEffect.OpenAppSettings)
 
-            is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnTitleChanged -> _state.update { it.updateData { data -> data.copy(title = intent.title) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnExperienceChanged -> _state.update { it.updateData { data -> data.copy(experience = intent.experience) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnSkillsChanged -> _state.update { it.updateData { data -> data.copy(skills = intent.skills.toPersistentList()) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnSubmit -> {
-                submitProfile()
+            is ProfileInfoIntent.OnShowAddSkillDialogChanged -> setAddSkillDialogVisible(intent.show)
+
+            is ProfileInfoIntent.OnNewSkillTextChanged -> updateNewSkillText(intent.text)
+
+            is ProfileInfoIntent.OnConfirmAddSkill -> confirmAddSkill()
+
+            is ProfileInfoIntent.OnInitDefaultSkills -> initializeDefaultSkills(intent.defaultSkills)
+        }
+    }
+
+    private inline fun updateProfile(
+        crossinline transform: ProfileInfoUiState.() -> ProfileInfoUiState,
+    ) {
+        _state.update { currentState ->
+            currentState
+                .transform()
+                .copy(hasSuccessfullySubmitted = false)
+        }
+    }
+
+    private fun setImageSourceSheetVisible(isVisible: Boolean) {
+        _state.update {
+            it.copy(isImageSourceSheetVisible = isVisible)
+        }
+    }
+
+    private fun setAddSkillDialogVisible(isVisible: Boolean) {
+        _state.update {
+            it.copy(showAddSkillDialog = isVisible)
+        }
+    }
+
+    private fun updateNewSkillText(text: String) {
+        _state.update {
+            it.copy(newSkillText = text)
+        }
+    }
+
+    private fun emitEffect(effect: ProfileInfoEffect) {
+        viewModelScope.launch {
+            _effect.emit(effect)
+        }
+    }
+
+    private fun handleImageSourceSelected(source: ImageSource) {
+        setImageSourceSheetVisible(false)
+
+        when (source) {
+            ImageSource.CAMERA -> launchCamera()
+            ImageSource.GALLERY -> Unit
+        }
+    }
+
+    private fun launchCamera() {
+        val uri = imageCaptureUriProvider.createImageCaptureUri()
+
+        emitEffect(
+            ProfileInfoEffect.LaunchCamera(uri),
+        )
+    }
+
+    private fun handleImagePicked(uri: Uri) {
+        updateProfile {
+            updateData {
+                it.copy(selectedImageUri = uri.toString())
             }
-            is ProfileInfoIntent.OnDismissSheet -> {
-                _state.update { it.copy(isImageSourceSheetVisible = false) }
-            }
-            is ProfileInfoIntent.OnOpenAppSettings ->
-                viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
-            is ProfileInfoIntent.OnShowAddSkillDialogChanged -> {
-                _state.update { it.copy(showAddSkillDialog = intent.show) }
-            }
-            is ProfileInfoIntent.OnNewSkillTextChanged -> {
-                _state.update { it.copy(newSkillText = intent.text) }
-            }
-            is ProfileInfoIntent.OnConfirmAddSkill -> {
-                val skill = _state.value.newSkillText.trim()
-                if (skill.isNotEmpty()) {
-                    _state.update { currentState ->
-                        val newAllSkills = if (!currentState.allSkills.contains(skill)) {
-                            (currentState.allSkills + skill).toPersistentList()
-                        } else currentState.allSkills
-                        
-                        val newDataSkills = if (!currentState.data.skills.contains(skill)) {
-                            (currentState.data.skills + skill).toPersistentList()
-                        } else currentState.data.skills
-                        
-                        currentState.copy(
-                            allSkills = newAllSkills,
-                            data = currentState.data.copy(skills = newDataSkills),
-                            newSkillText = "",
-                            showAddSkillDialog = false,
-                            hasSuccessfullySubmitted = false
-                        )
-                    }
-                } else {
-                    _state.update { it.copy(newSkillText = "", showAddSkillDialog = false) }
-                }
-            }
-            is ProfileInfoIntent.OnInitDefaultSkills -> {
-                _state.update { currentState ->
-                    if (currentState.allSkills.isEmpty()) {
-                        currentState.copy(allSkills = intent.defaultSkills.toPersistentList())
-                    } else currentState
-                }
+        }
+
+        uploadAvatar(uri)
+    }
+
+    private fun handleCameraPermissionDenied() {
+        setImageSourceSheetVisible(false)
+        emitEffect(ProfileInfoEffect.OpenAppSettings)
+    }
+
+    private fun retryPhotoUpload() {
+        _state.value.data.selectedImageUri
+            ?.let(Uri::parse)
+            ?.let(::uploadAvatar)
+    }
+
+    private fun confirmAddSkill() {
+        val skill = _state.value.newSkillText.trim()
+
+        if (skill.isBlank()) {
+            closeAddSkillDialog()
+            return
+        }
+
+        _state.update { currentState ->
+            currentState.copy(
+                allSkills = currentState.allSkills.addIfAbsent(skill),
+                data = currentState.data.copy(
+                    skills = currentState.data.skills.addIfAbsent(skill),
+                ),
+                newSkillText = "",
+                showAddSkillDialog = false,
+                hasSuccessfullySubmitted = false,
+            )
+        }
+    }
+
+    private fun ImmutableList<String>.addIfAbsent(
+        skill: String,
+    ): ImmutableList<String> {
+        return if (skill in this) {
+            this
+        } else {
+            (this + skill).toImmutableList()
+        }
+    }
+
+    private fun closeAddSkillDialog() {
+        _state.update {
+            it.copy(
+                newSkillText = "",
+                showAddSkillDialog = false,
+            )
+        }
+    }
+
+    private fun initializeDefaultSkills(defaultSkills: List<String>) {
+        _state.update { currentState ->
+            if (currentState.allSkills.isEmpty()) {
+                currentState.copy(
+                    allSkills = defaultSkills.toPersistentList(),
+                )
+            } else {
+                currentState
             }
         }
     }
@@ -233,10 +325,10 @@ class ProfileInfoViewModel @Inject constructor(
                 return@launch
             }
             _state.update { it.copy(isSubmitting = true) }
-            
+
             val currentData = _state.value.data
             val yearsOfExperience = currentData.experience.toIntOrNull()
-            
+
             val request = UpdateProfileRequestDto(
                 displayName = currentData.name.takeIf { it.isNotBlank() },
                 email = currentData.email.takeIf { it.isNotBlank() },
@@ -245,7 +337,7 @@ class ProfileInfoViewModel @Inject constructor(
                 skills = currentData.skills.takeIf { it.isNotEmpty() },
                 avatarFileId = currentData.avatarFileId
             )
-            
+
             updateProfileUseCase(request)
                 .onSuccess {
                     _state.update { it.copy(hasSuccessfullySubmitted = true) }
@@ -256,7 +348,7 @@ class ProfileInfoViewModel @Inject constructor(
                         CareerPilotSnackbarController.show(error.toUIText())
                     }
                 }
-                
+
             _state.update { it.copy(isSubmitting = false) }
         }
     }
