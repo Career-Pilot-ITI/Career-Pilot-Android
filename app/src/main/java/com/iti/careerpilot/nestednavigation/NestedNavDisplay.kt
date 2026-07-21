@@ -20,7 +20,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.iti.common.model.ProfileEditSection
 import com.iti.careerpilot.features.home.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
-import com.iti.careerpilot.reports.presentation.screen.history.SessionHistoryRoot
+import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 

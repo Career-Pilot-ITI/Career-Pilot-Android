@@ -25,8 +25,8 @@ import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
-import com.iti.careerpilot.reports.presentation.screen.breakdown.QuestionBreakdownRoot
-import com.iti.careerpilot.reports.presentation.screen.details.ReportDetailsRoot
+import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
+import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.CancellationException
