@@ -4,7 +4,7 @@ object Endpoints {
     const val BASE_URL = BuildConfig.BASE_URL
 
     const val UPLOAD_FILE = "$BASE_URL/api/v1/files/upload"
-    const val UPDATE_PROFILE = "$BASE_URL/api/v1/auth/profile"
+    const val UPDATE_PROFILE = "$BASE_URL/api/v1/profile"
     const val GET_TRACKS = "$BASE_URL/api/v1/tracks"
     const val REFRESH_TOKEN = "$BASE_URL/api/v1/auth/refresh"
     const val SEND_OTP = "$BASE_URL/api/v1/otp/send"
