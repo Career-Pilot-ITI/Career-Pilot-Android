@@ -163,6 +163,7 @@ class EditProfileViewModel @Inject constructor(
                     it.copy(
                         cvUrl = "",
                         cvLocalUri = "",
+                        cvFileId = null,
                         cvFileName = "",
                         cvFileSize = "",
                         cvUploadDate = ""
@@ -208,7 +209,13 @@ class EditProfileViewModel @Inject constructor(
                 },
                 onProgress = { p -> _state.update { it.copy(avatarUploadProgress = p) } },
                 onSuccess = { resp ->
-                    _state.update { it.copy(avatarUrl = resp.url, avatarLocalUri = uri.toString()) }
+                    _state.update {
+                        it.copy(
+                            avatarUrl = resp.url,
+                            avatarLocalUri = uri.toString(),
+                            avatarFileId = resp.id,
+                        )
+                    }
                 },
                 onFinish = {
                     _state.update { it.copy(isUploadingAvatar = false, avatarUploadProgress = 0) }
@@ -233,6 +240,7 @@ class EditProfileViewModel @Inject constructor(
                         it.copy(
                             cvUrl = resp.url,
                             cvLocalUri = uri.toString(),
+                            cvFileId = resp.id,
                             cvFileName = resp.originalName,
                             cvFileSize = if (resp.sizeBytes > 0) "${resp.sizeBytes / (1024f * 1024f)} MB" else ""
                         )
@@ -340,6 +348,7 @@ class EditProfileViewModel @Inject constructor(
                 displayName = current.displayName.takeIf { it != original.personal.displayName },
                 gender = current.gender.takeIf { it != original.personal.gender },
                 dateOfBirth = current.dateOfBirth.takeIf { it != original.personal.dateOfBirth },
+                avatarFileId = current.avatarFileId,
             )
 
             ProfileEditSection.CAREER -> RequestProfileUpdate(
@@ -349,6 +358,7 @@ class EditProfileViewModel @Inject constructor(
                 currentJobTitle = current.currentJobTitle.takeIf { it != original.career.currentJobTitle },
                 yearsOfExperience = current.yearsOfExperience.toIntOrNull()
                     ?.takeIf { it != original.career.yearsOfExperience },
+                cvFileId = current.cvFileId,
                 skills = current.skills.takeIf { it != original.career.skills },
                 targetCompanies = current.targetCompanies.takeIf { it != original.career.targetCompanies },
                 educationLevel = current.educationLevel.takeIf { it != original.career.educationLevel },
@@ -361,12 +371,14 @@ class EditProfileViewModel @Inject constructor(
                 displayName = current.displayName.takeIf { it != original.personal.displayName },
                 gender = current.gender.takeIf { it != original.personal.gender },
                 dateOfBirth = current.dateOfBirth.takeIf { it != original.personal.dateOfBirth },
+                avatarFileId = current.avatarFileId,
                 targetRole = current.targetRole.takeIf { it != original.career.targetRole },
                 industry = current.industry.takeIf { it != original.career.industry },
                 experienceLevel = current.experienceLevel.takeIf { it != original.career.experienceLevel },
                 currentJobTitle = current.currentJobTitle.takeIf { it != original.career.currentJobTitle },
                 yearsOfExperience = current.yearsOfExperience.toIntOrNull()
                     ?.takeIf { it != original.career.yearsOfExperience },
+                cvFileId = current.cvFileId,
                 skills = current.skills.takeIf { it != original.career.skills },
                 targetCompanies = current.targetCompanies.takeIf { it != original.career.targetCompanies },
                 educationLevel = current.educationLevel.takeIf { it != original.career.educationLevel },

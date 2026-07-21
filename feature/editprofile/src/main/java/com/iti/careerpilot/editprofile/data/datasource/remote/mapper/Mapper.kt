@@ -11,12 +11,9 @@ import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
 
-fun UserProfileDto.toDomain(
-    id: Int? = null,
-    phoneNumber: String? = null,
-): UserProfile {
+fun UserProfileDto.toDomain(): UserProfile {
     return UserProfile(
-        id = id ?: 0,
+        id = id?.toInt() ?: 0,
         account = AccountInfo(
             username = username.orEmpty(),
             email = email.orEmpty(),
@@ -37,8 +34,8 @@ fun UserProfileDto.toDomain(
             experienceLevel = experienceLevel.orEmpty(),
             currentJobTitle = currentJobTitle.orEmpty(),
             yearsOfExperience = yearsOfExperience ?: 0,
-            skills = skills?.filterNotNull() ?: emptyList(),
-            targetCompanies = targetCompanies?.filterNotNull() ?: emptyList(),
+            skills = skills?.mapNotNull { it.skillName } ?: emptyList(),
+            targetCompanies = targetCompanies ?: emptyList(),
             educationLevel = educationLevel.orEmpty(),
             trackName = trackName.orEmpty(),
         ),
@@ -47,7 +44,8 @@ fun UserProfileDto.toDomain(
         ),
         cv = CvInfo(
             cvUrl = cvUrl.orEmpty(),
-        )
+        ),
+        onboardingCompleted = onboardingCompleted,
     )
 }
 
@@ -56,6 +54,7 @@ fun RequestProfileUpdate.toDto(): UpdateProfileRequestDto {
         username = username,
         email = email,
         displayName = displayName,
+        avatarFileId = avatarFileId,
         gender = gender,
         dateOfBirth = dateOfBirth,
         targetRole = targetRole,
@@ -63,6 +62,7 @@ fun RequestProfileUpdate.toDto(): UpdateProfileRequestDto {
         experienceLevel = experienceLevel,
         currentJobTitle = currentJobTitle,
         yearsOfExperience = yearsOfExperience,
+        cvFileId = cvFileId,
         skills = skills,
         targetCompanies = targetCompanies,
         educationLevel = educationLevel,

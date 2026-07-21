@@ -6,6 +6,7 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
+import com.iti.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.iti.onboarding.domain.usecase.UploadCvUseCase
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
@@ -29,6 +30,7 @@ import androidx.core.net.toUri
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
     private val uploadCv: UploadCvUseCase,
+    private val completeOnboarding: CompleteOnboardingUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UploadCvUiState())
@@ -92,6 +94,7 @@ class UploadCvViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         selectedFile = SelectedCvUiModel(
+                            fileId = response.id,
                             name = response.originalName,
                             sizeBytes = response.sizeBytes,
                         ),
@@ -108,17 +111,37 @@ class UploadCvViewModel @Inject constructor(
 
     private fun navigateAfterAnalysis() {
         if (!_state.value.canAnalyze) return
-
-        viewModelScope.launch {
-            _effects.emit(UploadCvEffect.NavigateNext)
-        }
+        finishOnboarding(
+            cvFileId = _state.value.selectedFile?.fileId,
+            successEffect = UploadCvEffect.NavigateNext,
+        )
     }
 
     private fun skipUpload() {
         uploadJob.get()?.cancel()
 
+        finishOnboarding(
+            cvFileId = null,
+            successEffect = UploadCvEffect.Skip,
+        )
+    }
+
+    private fun finishOnboarding(
+        cvFileId: Long?,
+        successEffect: UploadCvEffect,
+    ) {
         viewModelScope.launch {
-            _effects.emit(UploadCvEffect.Skip)
+            val previousStage = _state.value.stage
+            _state.update { it.copy(stage = CvUploadStage.PREPARING) }
+
+            completeOnboarding(cvFileId)
+                .onSuccess {
+                    _effects.emit(successEffect)
+                }
+                .onError { error ->
+                    _state.update { it.copy(stage = previousStage) }
+                    _effects.emit(UploadCvEffect.ShowError(error.toUIText()))
+                }
         }
     }
 }

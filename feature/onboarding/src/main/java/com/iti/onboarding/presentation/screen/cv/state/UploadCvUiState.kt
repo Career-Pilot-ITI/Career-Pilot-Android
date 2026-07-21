@@ -21,6 +21,7 @@ data class UploadCvUiState(
 
 @Immutable
 data class SelectedCvUiModel(
+    val fileId: Long,
     val name: String,
     val sizeBytes: Long,
 )

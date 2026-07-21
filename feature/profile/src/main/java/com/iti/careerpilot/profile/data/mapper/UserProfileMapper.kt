@@ -1,15 +1,16 @@
-package com.iti.onboarding.data.mapper
+package com.iti.careerpilot.profile.data.mapper
 
 import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.core.datastore.models.AccountInfo
 import com.iti.core.datastore.models.AvatarInfo
 import com.iti.core.datastore.models.CareerInfo
+import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
 
-fun UserProfileDto.toDomain(): UserProfile {
-    return UserProfile(
-        id = id?.toInt() ?: 0,
+fun UserProfileDto.toDomain(current: UserProfile): UserProfile =
+    UserProfile(
+        id = id?.toInt() ?: current.id,
         account = AccountInfo(
             username = username.orEmpty(),
             email = email.orEmpty(),
@@ -37,10 +38,14 @@ fun UserProfileDto.toDomain(): UserProfile {
         ),
         avatar = AvatarInfo(
             avatarUrl = avatarUrl.orEmpty(),
+            avatarLocalUri = current.avatar.avatarLocalUri,
+            avatarSizeBytes = current.avatar.avatarSizeBytes,
         ),
-        cv = com.iti.core.datastore.models.CvInfo(
+        cv = CvInfo(
             cvUrl = cvUrl.orEmpty(),
+            cvLocalUri = current.cv.cvLocalUri,
+            cvFileName = current.cv.cvFileName,
+            cvSizeBytes = current.cv.cvSizeBytes,
         ),
         onboardingCompleted = onboardingCompleted,
     )
-}
