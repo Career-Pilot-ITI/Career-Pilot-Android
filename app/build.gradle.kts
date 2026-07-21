@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.androidx.navigation3)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.animated.navigation.bar)
 
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))
