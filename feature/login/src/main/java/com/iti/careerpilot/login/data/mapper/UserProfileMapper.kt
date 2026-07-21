@@ -29,7 +29,7 @@ fun OtpAuthResponse.toUserProfile(): UserProfile =
             experienceLevel = user.profile?.experienceLevel.orEmpty(),
             currentJobTitle = user.profile?.currentJobTitle.orEmpty(),
             yearsOfExperience = user.profile?.yearsOfExperience ?: 0,
-            skills = user.profile?.skills?.filterNotNull() ?: emptyList(),
+            skills = user.profile?.skills?.mapNotNull { it.skillName } ?: emptyList(),
             targetCompanies = user.profile?.targetCompanies?.filterNotNull() ?: emptyList(),
             educationLevel = user.profile?.educationLevel.orEmpty(),
             trackName = user.profile?.trackName.orEmpty()
@@ -39,5 +39,6 @@ fun OtpAuthResponse.toUserProfile(): UserProfile =
         ),
         cv = CvInfo(
             cvUrl = user.profile?.cvUrl.orEmpty()
-        )
+        ),
+        onboardingCompleted = user.profile?.onboardingCompleted,
     )

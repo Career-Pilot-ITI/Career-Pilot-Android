@@ -56,7 +56,7 @@ class ProfileInfoViewModel @Inject constructor(
             getUserProfileUseCase().collect { profile ->
                 val url = profile.avatar.avatarUrl
                 if (url.isNotBlank()) {
-                    _state.update { it.updateData { data -> data.copy(avatarUrl = url, avatarFileId = profile.id.toLong()) } }
+                    _state.update { it.updateData { data -> data.copy(avatarUrl = url) } }
                 }
             }
         }

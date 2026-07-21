@@ -50,7 +50,7 @@ class ChoosingTracksViewModel @Inject constructor(
 
             ChoosingTracksIntent.OnNavigateNext -> {
                 viewModelScope.launch {
-                    val result = updateProfileTrackUseCase(_state.value.selectedTrack?.id ?: 0)
+                    val result = updateProfileTrackUseCase(_state.value.selectedTrack?.id ?: 0L)
                     when (result) {
                         is CareerPilotResult.Success -> {
                             _effects.emit(ChoosingTracksEffects.NavigateNext)

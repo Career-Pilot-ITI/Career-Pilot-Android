@@ -9,6 +9,9 @@ import com.iti.careerpilot.profile.presentation.state.ProfileState
 import com.iti.core.datastore.UserTokensRepo
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
+import com.iti.common.result.onError
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
@@ -44,6 +47,10 @@ class ProfileViewModel @Inject constructor(
     private val _events = Channel<ProfileEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
+    init {
+        refreshProfile()
+    }
+
     fun onAction(action: ProfileAction) {
         when (action) {
             is ProfileAction.OnEditProfileClick -> sendEvent(ProfileEvent.NavigateToEditProfile(action.section))
@@ -61,6 +68,15 @@ class ProfileViewModel @Inject constructor(
             }
 
             is ProfileAction.OnCVClick -> sendEvent(ProfileEvent.OpenCV(action.cvLocalUriOrUrl))
+        }
+    }
+
+    private fun refreshProfile() {
+        viewModelScope.launch {
+            profileRepo.refreshProfile()
+                .onError { error ->
+                    CareerPilotSnackbarController.show(error.toUIText())
+                }
         }
     }
 

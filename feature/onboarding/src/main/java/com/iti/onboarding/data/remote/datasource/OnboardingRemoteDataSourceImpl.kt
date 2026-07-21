@@ -2,7 +2,7 @@ package com.iti.onboarding.data.remote.datasource
 
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
-import com.iti.careerpilot.core.network.model.UserResponseDto
+import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.onboarding.data.remote.dto.TracksResponseDto
 import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
 import io.ktor.client.HttpClient
@@ -51,8 +51,8 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
         }.body()
     }
 
-    override suspend fun updateProfile(request: UpdateProfileRequestDto): UserResponseDto {
-        return httpClient.patch(Endpoints.UPDATE_PROFILE) {
+    override suspend fun updateProfile(request: UpdateProfileRequestDto): UserProfileDto {
+        return httpClient.patch(Endpoints.PROFILE) {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
