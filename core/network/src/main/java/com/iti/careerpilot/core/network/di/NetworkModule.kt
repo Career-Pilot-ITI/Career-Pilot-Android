@@ -29,6 +29,7 @@ import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -115,6 +116,8 @@ object NetworkModule {
                                 datastore.clear()
                                 null
                             }
+                        } catch (cancellation: CancellationException) {
+                            throw cancellation
                         } catch (e: Exception) {
                             Log.e("KtorClient", "Error refreshing tokens", e)
                             datastore.clear()
