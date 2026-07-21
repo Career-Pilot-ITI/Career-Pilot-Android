@@ -6,13 +6,12 @@ import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
 import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
+import com.iti.careerpilot.whisper.domain.WhisperEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -21,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
-    private val sessionRepo: SessionRepo
+    private val sessionRepo: SessionRepo,
+    private val whisperEngine: WhisperEngine
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false

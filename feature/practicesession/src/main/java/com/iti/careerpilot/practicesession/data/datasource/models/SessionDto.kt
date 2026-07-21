@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SessionDto(
     @SerialName("sessionId")
-    val sessionId: Int?,
+    val sessionId: Long?,
 
     @SerialName("trackName")
     val trackName: String?,
@@ -27,10 +27,10 @@ data class SessionDto(
 @Serializable
 data class CurrentQuestionDto(
     @SerialName("id")
-    val id: Int?,
+    val id: Long?,
 
     @SerialName("sessionId")
-    val sessionId: Int?,
+    val sessionId: Long?,
 
     @SerialName("questionText")
     val questionText: String?,

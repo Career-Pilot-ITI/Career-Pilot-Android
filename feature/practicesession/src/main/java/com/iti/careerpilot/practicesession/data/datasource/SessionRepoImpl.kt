@@ -28,9 +28,6 @@ class SessionRepoImpl @Inject constructor(
             .map {
                 it.toDomain()
             }
-            .onSuccess {
-                //todo save in local data base
-            }
     }
 
 

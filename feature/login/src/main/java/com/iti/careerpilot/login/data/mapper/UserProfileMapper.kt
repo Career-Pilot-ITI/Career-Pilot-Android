@@ -10,7 +10,7 @@ import com.iti.core.datastore.models.UserProfile
 
 fun OtpAuthResponse.toUserProfile(): UserProfile =
     UserProfile(
-        id = user.id.toInt(),
+        id = user.id,
         account = AccountInfo(
             username = user.profile?.username.orEmpty(),
             email = user.profile?.email.orEmpty(),
