@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,7 +33,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.common.media.pdfpicker.rememberPdfPickerLauncher
 import com.iti.common.snackbar.CareerPilotSnackbarController
-import com.iti.common.snackbar.SnackbarController
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
@@ -41,7 +41,6 @@ import com.iti.onboarding.presentation.screen.cv.state.UploadCvUiState
 import com.iti.onboarding.presentation.screen.cv.view.components.UploadCvCard
 import com.iti.onboarding.presentation.screen.cv.view.components.UploadCvHeader
 import com.iti.onboarding.presentation.screen.cv.viewmodel.UploadCvViewModel
-import com.iti.onboarding.presentation.screen.track.view.components.ActionButton
 
 
 @Composable
@@ -83,7 +82,7 @@ fun UploadCvScreen(
     UploadCvScreenContent(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier.safeContentPadding(),
+        modifier = modifier.padding(24.dp),
     )
 }
 
@@ -162,6 +161,6 @@ fun UploadCvScreenContent(
             }
         }
 
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(120.dp))
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
