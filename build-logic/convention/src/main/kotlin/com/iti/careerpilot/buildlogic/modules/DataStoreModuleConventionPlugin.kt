@@ -1,6 +1,7 @@
 package com.iti.careerpilot.buildlogic.modules
 
 import com.android.build.api.dsl.LibraryExtension
+import com.iti.careerpilot.buildlogic.configureCareerPilotFlavors
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -32,6 +33,7 @@ class DataStoreModuleConventionPlugin : Plugin<Project> {
             buildFeatures {
                 buildConfig = false
             }
+            configureCareerPilotFlavors()
             packaging {
                 resources.excludes += setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",

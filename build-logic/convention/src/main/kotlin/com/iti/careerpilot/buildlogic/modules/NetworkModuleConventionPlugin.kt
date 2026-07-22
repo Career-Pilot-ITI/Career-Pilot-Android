@@ -1,6 +1,7 @@
 package com.iti.careerpilot.buildlogic.modules
 
 import com.android.build.api.dsl.LibraryExtension
+import com.iti.careerpilot.buildlogic.configureCareerPilotFlavors
 import java.util.Properties
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
@@ -41,6 +42,7 @@ class NetworkModuleConventionPlugin : Plugin<Project> {
             testOptions {
                 unitTests.isIncludeAndroidResources = true
             }
+            configureCareerPilotFlavors()
             packaging {
                 resources.excludes += setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",

@@ -1,6 +1,7 @@
 package com.iti.careerpilot.buildlogic.modules
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.iti.careerpilot.buildlogic.configureCareerPilotFlavors
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -50,6 +51,8 @@ class AppModuleConventionPlugin : Plugin<Project> {
                     }
                 }
             }
+
+            configureCareerPilotFlavors()
 
             testOptions {
                 unitTests.isIncludeAndroidResources = true

@@ -13,5 +13,6 @@ import javax.inject.Singleton
 internal abstract class ProdLoginDataModule {
 
     @Binds
+    @Singleton
     abstract fun bindAuthApiService(impl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
 }
