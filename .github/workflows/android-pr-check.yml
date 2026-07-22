@@ -65,3 +65,21 @@ jobs:
           name: android-apk-${{ matrix.flavor }}-debug
           path: app/build/outputs/apk/${{ matrix.flavor }}/debug/
           if-no-files-found: error
+
+  # This job acts as a gatekeeper with a fixed name for Branch Protection rules.
+  # It will only pass if all matrix flavors in the 'build' job pass.
+  check:
+    name: Build, Test & Lint
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check build status
+        run: |
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "All flavors built and tested successfully."
+            exit 0
+          else
+            echo "One or more flavors failed. Check the 'build' job for details."
+            exit 1
+          fi
