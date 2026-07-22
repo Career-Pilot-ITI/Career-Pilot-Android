@@ -17,6 +17,7 @@ enum class NetworkError : IError {
     INVALID_COUPON,
     ADDRESS_ERROR,
     UNKNOWN,
+    FAKE_SERVER_ERROR
 }
 
 enum class StorageError : IError {

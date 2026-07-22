@@ -46,7 +46,7 @@ internal fun LibraryExtension.configureCareerPilotLibrary() {
     }
 
     buildFeatures {
-        buildConfig = false
+        buildConfig = true
     }
 
     packaging {
