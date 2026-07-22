@@ -65,6 +65,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.module.model.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.modules.ModelModuleConventionPlugin"
         }
+        register("careerPilotModuleWhisper") {
+            id = libs.plugins.careerpilot.module.whisper.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.WhisperModuleConventionPlugin"
+        }
         register("careerPilotFeatureLogin") {
             id = libs.plugins.careerpilot.feature.login.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.LoginFeatureConventionPlugin"
@@ -83,7 +87,7 @@ gradlePlugin {
         }
         register("careerPilotFeaturePracticeSession") {
             id = libs.plugins.careerpilot.feature.practice.session.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.PracticeSessionConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.features.PracticeSessionConventionPlugin"
         }
     }
 }

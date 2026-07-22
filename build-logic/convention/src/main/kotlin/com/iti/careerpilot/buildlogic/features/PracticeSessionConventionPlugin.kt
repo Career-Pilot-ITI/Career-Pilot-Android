@@ -10,8 +10,9 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import kotlin.collections.plusAssign
 
-class LoginFeatureConventionPlugin : Plugin<Project> {
+class PracticeSessionConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.library")
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
@@ -20,7 +21,7 @@ class LoginFeatureConventionPlugin : Plugin<Project> {
         pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
 
         extensions.configure<LibraryExtension> {
-            namespace = "com.iti.careerpilot.login"
+            namespace = "com.iti.careerpilot.profile"
             compileSdk {
                 version = release(37)
             }
@@ -86,9 +87,8 @@ class LoginFeatureConventionPlugin : Plugin<Project> {
         add("implementation", "androidx-hilt-navigation-compose")
         add("implementation", "androidx-material3-android")
         add("implementation", "kotlinx-coroutines-android")
-        add("implementation", "komposecountrycodepicker")
-        add("implementation", "androidx-compose-material-icons-core")
-        add("implementation", "libphonenumber")
+        add("implementation", "coil-compose")
+        add("implementation", "coil-network-ktor3")
 
         add("testImplementation", "junit")
         add("testImplementation", "kotlinx-coroutines-test")

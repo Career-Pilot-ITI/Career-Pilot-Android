@@ -80,9 +80,6 @@ class ProfileFeatureConventionPlugin : Plugin<Project> {
         add("implementation", "hilt-android")
         add("ksp", "hilt-compiler")
         add("implementation", "kotlinx-serialization-json")
-        libs.findBundle("ktor").get().get().forEach { dependency ->
-            dependencies.add("implementation", dependency)
-        }
 
         add("implementation", "androidx-lifecycle-runtime-compose")
         add("implementation", "androidx-lifecycle-viewmodel-compose")

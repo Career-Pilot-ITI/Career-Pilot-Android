@@ -69,7 +69,7 @@ class NetworkModuleConventionPlugin : Plugin<Project> {
         add("ksp", "hilt-compiler")
         add("implementation", "kotlinx-serialization-json")
         libs.findBundle("ktor").get().get().forEach { dependency ->
-            dependencies.add("implementation", dependency)
+            dependencies.add("api", dependency)
         }
         add("implementation", "kotlinx-coroutines-core")
 
