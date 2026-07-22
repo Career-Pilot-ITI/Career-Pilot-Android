@@ -64,9 +64,7 @@ class LoginViewModel @Inject constructor(
             val result = validatePhoneNumber(current.phoneNumber, current.regionCode)
         ) {
             is CareerPilotResult.Error -> {
-                viewModelScope.launch {
-                    CareerPilotSnackbarController.show(result.error.toUIText())
-                }
+                CareerPilotSnackbarController.show(result.error.toUIText())
                 return
             }
 
@@ -83,9 +81,7 @@ class LoginViewModel @Inject constructor(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    viewModelScope.launch {
-                        CareerPilotSnackbarController.show(error.toUIText())
-                    }
+                    CareerPilotSnackbarController.show(error.toUIText())
                     if (error == NetworkError.TOO_MANY_REQUESTS) startCooldown()
                 }
         }
