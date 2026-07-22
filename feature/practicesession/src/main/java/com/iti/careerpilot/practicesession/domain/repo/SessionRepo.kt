@@ -22,16 +22,16 @@ interface SessionRepo {
     ): CareerPilotResult<AudioAttachment, NetworkError>
 
     suspend fun submitAnswer(
-        sessionId: Int,
+        sessionId: Long,
         request: AnswerRequest
     ): CareerPilotResult<AnswerResponse, NetworkError>
 
     suspend fun getSessionFeedback(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<SessionResult, NetworkError>
 
     suspend fun getSessionState(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<Session, NetworkError>
 
 }

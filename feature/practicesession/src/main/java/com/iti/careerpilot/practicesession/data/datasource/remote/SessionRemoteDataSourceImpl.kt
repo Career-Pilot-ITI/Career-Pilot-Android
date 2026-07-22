@@ -72,7 +72,7 @@ class SessionRemoteDataSourceImpl @Inject constructor(
      * [SessionRemoteDataSource.getSessionFeedback]
      */
     override suspend fun submitAnswer(
-        sessionId: Int,
+        sessionId: Long,
         request: AnswerRequestDto
     ): CareerPilotResult<AnswerResponseDto, NetworkError> {
         return safeCall {
@@ -83,7 +83,7 @@ class SessionRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getSessionFeedback(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<SessionResultDto, NetworkError> {
         return safeCall {
             httpClient.get(Endpoints.GET_SESSION_FEEDBACK(sessionId))
@@ -91,7 +91,7 @@ class SessionRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getSessionState(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<OldSessionDto, NetworkError> {
         return safeCall {
             httpClient.get(Endpoints.GET_SESSION_STATE(sessionId))

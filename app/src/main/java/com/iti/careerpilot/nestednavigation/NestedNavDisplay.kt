@@ -30,7 +30,7 @@ fun NestedNavDisplay(
     navigateBack: () -> Unit,
     openPaywall: () -> Unit,
     logout: () -> Unit,
-    openSessionDetails: (Int) -> Unit,
+    openSessionDetails: (Long, Long?) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
 ) {

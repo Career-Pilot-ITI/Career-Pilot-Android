@@ -45,7 +45,7 @@ class SessionRepoImpl @Inject constructor(
     }
 
     override suspend fun submitAnswer(
-        sessionId: Int,
+        sessionId: Long,
         request: AnswerRequest
     ): CareerPilotResult<AnswerResponse, NetworkError> {
         return remoteDataSource.submitAnswer(
@@ -58,7 +58,7 @@ class SessionRepoImpl @Inject constructor(
     }
 
     override suspend fun getSessionFeedback(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<SessionResult, NetworkError> {
         return remoteDataSource.getSessionFeedback(sessionId)
             .map {
@@ -67,7 +67,7 @@ class SessionRepoImpl @Inject constructor(
     }
 
     override suspend fun getSessionState(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<Session, NetworkError> {
         return remoteDataSource.getSessionState(sessionId)
             .map {

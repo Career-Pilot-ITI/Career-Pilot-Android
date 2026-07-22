@@ -23,16 +23,16 @@ interface SessionRemoteDataSource {
     ): CareerPilotResult<FileUploadResponse, NetworkError>
 
     suspend fun submitAnswer(
-        sessionId: Int,
+        sessionId: Long,
         request: AnswerRequestDto
     ): CareerPilotResult<AnswerResponseDto, NetworkError>
 
     suspend fun getSessionFeedback(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<SessionResultDto, NetworkError>
 
     suspend fun getSessionState(
-        sessionId: Int
+        sessionId: Long
     ): CareerPilotResult<OldSessionDto, NetworkError>
 
 }

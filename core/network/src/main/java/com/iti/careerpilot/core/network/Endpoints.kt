@@ -10,7 +10,7 @@ object Endpoints {
     const val SEND_OTP = "$BASE_URL/api/v1/otp/send"
     const val VERIFY_OTP = "$BASE_URL/api/v1/otp/verify"
     const val INTERVIEW_SESSIONS = "$BASE_URL/api/v1/interviews/sessions"
-    fun SUBMIT_ANSWER(sessionId: Int) = "$INTERVIEW_SESSIONS/$sessionId/answer"
-    fun GET_SESSION_FEEDBACK(sessionId: Int) = "$INTERVIEW_SESSIONS/$sessionId/feedback"
-    fun GET_SESSION_STATE(sessionId: Int) = "$INTERVIEW_SESSIONS/$sessionId/state"
+    fun SUBMIT_ANSWER(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/answer"
+    fun GET_SESSION_FEEDBACK(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/feedback"
+    fun GET_SESSION_STATE(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/state"
 }

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateSessionRequestDto(
     @SerialName("trackId")
-    val trackId: Int?,
+    val trackId: Long?,
 
     @SerialName("questionCount")
     val questionCount: Int?,

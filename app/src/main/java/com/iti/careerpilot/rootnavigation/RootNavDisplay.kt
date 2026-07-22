@@ -172,10 +172,11 @@ fun RootNavDisplay(
                                 )
                             }
                         },
-                        openSessionDetails = { id ->
+                        openSessionDetails = { trackId, sessionId ->
                             rootBackStack.navigateSingleTop(
                                 Route.SessionDetails(
-                                    trackId = id,
+                                    trackId = trackId,
+                                    sessionId = sessionId,
                                 ),
                             )
                         },
@@ -203,7 +204,11 @@ fun RootNavDisplay(
                 }
                 entry<Route.SessionDetails> {
                     PracticeSessionRoot(
-                        sessionId = it.trackId,
+                        trackId = it.trackId,
+                        sessionId = it.sessionId,
+                        onNavigateToResult = {
+                            //todo make results screen
+                        },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.SessionDetails>()
                         }

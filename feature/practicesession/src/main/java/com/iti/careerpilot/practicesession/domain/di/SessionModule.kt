@@ -27,10 +27,4 @@ abstract class SessionModule {
     abstract fun provideSessionRemoteDataSource(
         sessionRemoteDataSourceImpl: SessionRemoteDataSourceImpl
     ): SessionRemoteDataSource
-
-    @Provides
-    @Singleton
-    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
-        return ExoPlayer.Builder(context).build()
-    }
 }

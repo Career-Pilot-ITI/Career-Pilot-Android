@@ -3,11 +3,11 @@ package com.iti.careerpilot.practicesession.presentation.action
 sealed interface PracticeSessionAction {
 
     data class CreateNewPracticeSession(
-        val trackId: String,
+        val trackId: Long,
     ) : PracticeSessionAction
 
-    data class StartPracticeSession(
-        val sessionId: String,
+    data class RestartPracticeSession(
+        val sessionId: Long,
     ) : PracticeSessionAction
 
     data class ShowOrHidePermissionDialog(
