@@ -13,13 +13,9 @@ enum class FlavorDimension {
 @Suppress("EnumEntryName")
 enum class CareerPilotFlavor(
     val dimension: FlavorDimension,
-    val applicationIdSuffix: String? = null,
 ) {
     prod(FlavorDimension.contentType),
-    fake(
-        dimension = FlavorDimension.contentType,
-        applicationIdSuffix = ".fake",
-    ),
+    fake(FlavorDimension.contentType)
 }
 
 internal fun ApplicationExtension.configureCareerPilotFlavors() {
@@ -28,7 +24,6 @@ internal fun ApplicationExtension.configureCareerPilotFlavors() {
         CareerPilotFlavor.entries.forEach { flavor ->
             create(flavor.name) {
                 dimension = flavor.dimension.name
-                flavor.applicationIdSuffix?.let { applicationIdSuffix = it }
                 buildConfigField(
                     type = "String",
                     name = FLAVOR_NAME_FIELD,
