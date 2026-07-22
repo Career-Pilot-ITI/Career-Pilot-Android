@@ -15,9 +15,13 @@ permissions:
 
 jobs:
   build:
-    name: Build, Test & Lint
+    name: Build, Test & Lint (${{ matrix.flavor }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      matrix:
+        flavor: [prod, fake]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,17 +40,20 @@ jobs:
 
       - name: Build, test and lint
         run: |
+          FLAVOR_CAPITALIZED=$(echo "${{ matrix.flavor }}" | awk '{print toupper(substr($0,1,1))tolower(substr($0,2))}')
           ./gradlew \
             -Pcareerpilot.baseUrl="${{ secrets.CAREERPILOT_BASE_URL }}" \
-            assembleDebug \
-            testDebugUnitTest \
-            lintDebug
+            "assemble${FLAVOR_CAPITALIZED}Debug" \
+            "test${FLAVOR_CAPITALIZED}DebugUnitTest" \
+            "lint${FLAVOR_CAPITALIZED}Debug" \
+            --stacktrace \
+            --info
 
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
+          name: build-reports-${{ matrix.flavor }}
           path: |
             **/build/reports/
             **/build/test-results/
@@ -55,6 +62,6 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk-debug
-          path: app/build/outputs/apk/debug/
+          name: android-apk-${{ matrix.flavor }}-debug
+          path: app/build/outputs/apk/${{ matrix.flavor }}/debug/
           if-no-files-found: error
