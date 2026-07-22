@@ -24,11 +24,6 @@ abstract class EditProfileModule {
     ): EditProfileLocalDataSource
 
     @Binds
-    abstract fun bindEditProfileRemoteDataSource(
-        editProfileRemoteDataSourceImpl: EditProfileRemoteDataSourceImpl
-    ): EditProfileRemoteDataSource
-
-    @Binds
     abstract fun bindEditProfileRepo(
         profileRepoImpl: EditProfileRepoImpl
     ): EditProfileRepo

@@ -1,5 +1,6 @@
 <resources>
     <!-- Common errors -->
+    <string name="fake_error_unknown">Fake error. Please try again.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
     <string name="error_no_internet">No internet connection. Check your connection and try again.</string>
     <string name="error_network">A network error occurred. Please try again.</string>

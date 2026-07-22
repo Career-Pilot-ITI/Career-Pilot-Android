@@ -2,8 +2,6 @@ package com.iti.careerpilot.login.di
 
 import com.iti.careerpilot.login.data.remote.AuthRemoteDataSource
 import com.iti.careerpilot.login.data.remote.AuthRemoteDataSourceImpl
-import com.iti.careerpilot.login.data.repository.AuthRepositoryImpl
-import com.iti.careerpilot.login.domain.repository.AuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,9 +10,8 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class LoginDataModule {
+internal abstract class ProdLoginDataModule {
 
     @Binds
-    @Singleton
-    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
+    abstract fun bindAuthApiService(impl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
 }

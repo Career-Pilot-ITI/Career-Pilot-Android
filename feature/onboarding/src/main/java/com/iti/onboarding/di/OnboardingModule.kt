@@ -18,12 +18,6 @@ abstract class OnboardingModule {
 
     @Binds
     @Singleton
-    abstract fun bindOnboardingRemoteDataSource(
-        impl: OnboardingRemoteDataSourceImpl,
-    ): OnboardingRemoteDataSource
-
-    @Binds
-    @Singleton
     abstract fun bindOnboardingRepository(
         impl: OnboardingRepositoryImpl,
     ): OnboardingRepository

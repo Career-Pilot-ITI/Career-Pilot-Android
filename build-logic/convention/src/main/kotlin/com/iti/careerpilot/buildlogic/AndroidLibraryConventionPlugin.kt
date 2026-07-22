@@ -13,6 +13,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             configureCareerPilotLibrary()
         }
         configureCareerPilotKotlinAndroid()
+        configureFlavors()
 
         addLibrary("implementation", "androidx-core-ktx")
         addLibrary("implementation", "immutable-collections")
