@@ -1,5 +1,6 @@
 <resources>
     <!-- Common errors -->
+    <string name="fake_error_unknown">خطأ غير حقيقى، حاول مرة اخرى</string>
     <string name="error_unknown">حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</string>
     <string name="error_no_internet">لا يوجد اتصال بالإنترنت. تحقق من الاتصال ثم حاول مرة أخرى.</string>
     <string name="error_network">حدث خطأ في الاتصال بالشبكة. يرجى المحاولة مرة أخرى.</string>

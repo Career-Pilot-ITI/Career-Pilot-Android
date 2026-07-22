@@ -13,6 +13,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             configureCareerPilotApplication()
         }
         configureCareerPilotKotlinAndroid()
+        configureFlavors()
 
         addLibrary("implementation", "androidx-core-ktx")
         addLibrary("implementation", "androidx-lifecycle-runtime-ktx")

@@ -21,11 +21,6 @@ abstract class ProfileModule {
     ): ProfileLocalDataSource
 
     @Binds
-    abstract fun bindProfileRemoteDataSource(
-        profileRemoteDataSourceImpl: ProfileRemoteDataSourceImpl,
-    ): ProfileRemoteDataSource
-
-    @Binds
     abstract fun bindProfileRepo(
         profileRepoImpl: ProfileRepoImpl
     ): ProfileRepo

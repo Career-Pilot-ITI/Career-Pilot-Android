@@ -16,9 +16,5 @@ internal abstract class LoginDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindAuthApiService(impl: AuthRemoteDataSourceImpl): AuthRemoteDataSource
-
-    @Binds
-    @Singleton
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 }
