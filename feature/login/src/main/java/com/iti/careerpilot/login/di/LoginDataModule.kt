@@ -1,7 +1,5 @@
 package com.iti.careerpilot.login.di
 
-import com.iti.careerpilot.login.data.remote.AuthRemoteDataSource
-import com.iti.careerpilot.login.data.remote.AuthRemoteDataSourceImpl
 import com.iti.careerpilot.login.data.repository.AuthRepositoryImpl
 import com.iti.careerpilot.login.domain.repository.AuthRepository
 import dagger.Binds

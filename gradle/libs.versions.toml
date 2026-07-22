@@ -13,11 +13,9 @@ kotlin = "2.4.10"
 composeBom = "2026.06.01"
 #
 lottieCompose = "6.7.1"
-kotlinxDatetime = "0.8.0"
 hilt = "2.60.1"
 hiltAndroidx = "1.4.0"
 room = "2.8.4"
-workManager = "2.11.2"
 datastore = "1.2.1"
 coil = "3.5.0"
 material3Android = "1.5.0-alpha24"
@@ -26,8 +24,6 @@ kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.10"
 ktor = "3.5.1"
 nav3 = "1.1.4"
-appcompat = "1.7.1"
-material = "1.14.0"
 coroutines = "1.11.0"
 extendedIcons = "1.7.8"
 immutableCollections = "0.5.1"
@@ -60,18 +56,11 @@ lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "
 komposecountrycodepicker = { module = "io.github.joelkanyi:komposecountrycodepicker", version.ref = "komposecountrycodepicker" }
 # phone number validation
 libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
-#kotlinx datetime
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-#work manager
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 # hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 #hilt view model
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltAndroidx" }
-#hilt work
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltAndroidx" }
-androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltAndroidx" }
 #coil
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
@@ -101,8 +90,6 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 #nav3
 androidx-navigation3 = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 #image utils
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
@@ -140,26 +127,17 @@ dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hi
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 # CareerPilot convention plugins supplied by the included build-logic build
-careerpilot-android-application = { id = "careerpilot.android.application" }
-careerpilot-android-library = { id = "careerpilot.android.library" }
-careerpilot-android-compose = { id = "careerpilot.android.compose" }
-careerpilot-android-hilt = { id = "careerpilot.android.hilt" }
-careerpilot-kotlin-jvm = { id = "careerpilot.kotlin.jvm" }
-careerpilot-kotlin-serialization = { id = "careerpilot.kotlin.serialization" }
-careerpilot-android-room = { id = "careerpilot.android.room" }
-careerpilot-android-datastore = { id = "careerpilot.android.datastore" }
-careerpilot-android-ktor = { id = "careerpilot.android.ktor" }
-careerpilot-android-workmanager = { id = "careerpilot.android.workmanager" }
+careerpilot-module-app = { id = "careerpilot.module.app" }
+careerpilot-module-common = { id = "careerpilot.module.common" }
+careerpilot-module-designsystem = { id = "careerpilot.module.designsystem" }
 careerpilot-module-network = { id = "careerpilot.module.network" }
 careerpilot-module-database = { id = "careerpilot.module.database" }
 careerpilot-module-datastore = { id = "careerpilot.module.datastore" }
-careerpilot-module-models = { id = "careerpilot.module.models" }
-careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
-careerpilot-feature-data = { id = "careerpilot.feature.data" }
-careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
+careerpilot-module-model = { id = "careerpilot.module.model" }
+careerpilot-feature-login = { id = "careerpilot.feature.login" }
+careerpilot-feature-onboarding = { id = "careerpilot.feature.onboarding" }
 careerpilot-feature-profile = { id = "careerpilot.feature.profile" }
-careerpilot-testing = { id = "careerpilot.testing" }
-feature-onboarding = { id = "feature.onboarding" }
+careerpilot-feature-editprofile = { id = "careerpilot.feature.editprofile" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-client-auth", "ktor-serialization-kotlinx-json"]

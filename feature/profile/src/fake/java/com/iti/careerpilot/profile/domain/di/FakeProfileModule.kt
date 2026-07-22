@@ -13,6 +13,7 @@ import javax.inject.Singleton
 abstract class FakeProfileModule {
 
     @Binds
+    @Singleton
     abstract fun bindProfileRemoteDataSource(
         impl: FakeProfileRemoteDataSource,
     ): ProfileRemoteDataSource

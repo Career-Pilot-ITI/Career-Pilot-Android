@@ -13,6 +13,7 @@ import javax.inject.Singleton
 abstract class ProdEditProfileModule {
 
     @Binds
+    @Singleton
     abstract fun bindEditProfileRemoteDataSource(
         impl: EditProfileRemoteDataSourceImpl
     ): EditProfileRemoteDataSource
