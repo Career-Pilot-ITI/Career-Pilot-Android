@@ -114,6 +114,15 @@ class AudioPlayerImpl @Inject constructor(
         exoPlayer.stop()
     }
 
+    override fun seekTo(positionMs: Long) {
+        exoPlayer.seekTo(positionMs)
+        _activeTrack.update {
+            it.copy(
+                durationPlayed = positionMs.milliseconds
+            )
+        }
+    }
+
     private fun trackDuration() {
         durationJob?.cancel()
         durationJob = applicationScope.launch(Dispatchers.Main.immediate) {

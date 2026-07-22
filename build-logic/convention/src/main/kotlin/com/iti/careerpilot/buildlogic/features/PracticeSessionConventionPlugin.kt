@@ -89,6 +89,7 @@ class PracticeSessionConventionPlugin : Plugin<Project> {
         add("implementation", "kotlinx-coroutines-android")
         add("implementation", "coil-compose")
         add("implementation", "coil-network-ktor3")
+        add("implementation", "lottie-compose")
 
         add("testImplementation", "junit")
         add("testImplementation", "kotlinx-coroutines-test")

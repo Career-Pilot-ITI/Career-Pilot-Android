@@ -22,7 +22,12 @@ sealed interface PracticeSessionAction {
     data object PauseRecordingAnswer: PracticeSessionAction
     data object ResumeRecordingAnswer: PracticeSessionAction
     data object FinishRecordingAnswerAndStartTranscription: PracticeSessionAction
+
     data object PlayCurrentRecordedAnswer: PracticeSessionAction
+    data class SeekAudioTo(val positionMs: Long): PracticeSessionAction
+
     data object SubmitFinalAnswerToCurrentQuestion: PracticeSessionAction
     data object DiscardCurrentAnswerAndMakeNewOne: PracticeSessionAction
+    data object SkipCurrentQuestion: PracticeSessionAction
+    data object ToggleQuestionCard: PracticeSessionAction
 }

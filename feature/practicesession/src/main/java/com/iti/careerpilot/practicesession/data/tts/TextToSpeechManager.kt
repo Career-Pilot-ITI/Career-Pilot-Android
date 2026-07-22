@@ -2,6 +2,7 @@ package com.iti.careerpilot.practicesession.data.tts
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
 import java.util.UUID
@@ -29,6 +30,10 @@ class TextToSpeechManager @Inject constructor(
             }
             isInitialized = true
         }
+    }
+
+    fun setOnUtteranceProgressListener(listener: UtteranceProgressListener) {
+        textToSpeech?.setOnUtteranceProgressListener(listener)
     }
 
     fun speak(

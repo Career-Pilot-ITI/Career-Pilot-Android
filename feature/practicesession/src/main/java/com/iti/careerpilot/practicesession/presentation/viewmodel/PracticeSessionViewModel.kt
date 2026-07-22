@@ -30,6 +30,11 @@ import kotlin.time.Duration.Companion.minutes
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import com.iti.careerpilot.practicesession.domain.models.Session
 import com.iti.common.error.NetworkError
@@ -50,6 +55,7 @@ class PracticeSessionViewModel @Inject constructor(
     private var autoStopTriggered = false
 
     private var sessionStartedAtMs: Long? = null
+    private var timerJob: Job? = null
 
     private val _state = MutableStateFlow(PracticeSessionState())
     val state = _state
@@ -90,12 +96,47 @@ class PracticeSessionViewModel @Inject constructor(
                 }
             }
         }
+        setupTtsListener()
+    }
+
+    private fun setupTtsListener() {
+        textToSpeechManager.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                _state.update { it.copy(isReadingQuestion = true) }
+            }
+
+            override fun onDone(utteranceId: String?) {
+                _state.update { it.copy(isReadingQuestion = false) }
+            }
+
+            override fun onError(utteranceId: String?) {
+                _state.update { it.copy(isReadingQuestion = false) }
+            }
+        })
+    }
+
+    private fun startSessionTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                _state.update {
+                    it.copy(totalSessionDuration = it.totalSessionDuration + 1.seconds)
+                }
+            }
+        }
     }
 
     private fun observePlayer() {
         viewModelScope.launch {
             audioPlayer.activeTrack.collect { track ->
-                _state.update { it.copy(isPlayingAudio = track.isPlaying) }
+                _state.update {
+                    it.copy(
+                        isPlayingAudio = track.isPlaying,
+                        playbackPositionMs = track.durationPlayed.inWholeMilliseconds,
+                        playbackDurationMs = track.totalDuration.inWholeMilliseconds
+                    )
+                }
             }
         }
     }
@@ -115,9 +156,13 @@ class PracticeSessionViewModel @Inject constructor(
             }
 
             PracticeSessionAction.ListenToAIReadingCurrentQuestion -> readQuestion()
-            PracticeSessionAction.PauseListeningToCurrentQuestion -> textToSpeechManager.stop()
+            PracticeSessionAction.PauseListeningToCurrentQuestion -> {
+                textToSpeechManager.stop()
+                _state.update { it.copy(isReadingQuestion = false) }
+            }
             PracticeSessionAction.StopListeningToCurrentQuestionAndStartAnswering -> {
                 textToSpeechManager.stop()
+                _state.update { it.copy(isReadingQuestion = false) }
                 onAction(PracticeSessionAction.StartRecordingAnswer)
             }
 
@@ -142,13 +187,30 @@ class PracticeSessionViewModel @Inject constructor(
                     }
                 }
             }
+            is PracticeSessionAction.SeekAudioTo -> {
+                audioPlayer.seekTo(action.positionMs)
+            }
             PracticeSessionAction.ResumeRecordingAnswer -> voiceRecorder.resume()
             PracticeSessionAction.StartRecordingAnswer -> {
-                if (sessionStartedAtMs == null) sessionStartedAtMs = System.currentTimeMillis()
+                if (sessionStartedAtMs == null) {
+                    sessionStartedAtMs = System.currentTimeMillis()
+                    startSessionTimer()
+                }
                 voiceRecorder.start()
             }
 
             PracticeSessionAction.SubmitFinalAnswerToCurrentQuestion -> submitAnswer()
+
+            PracticeSessionAction.SkipCurrentQuestion -> {
+                val sessionId = _state.value.sessionId
+                if (sessionId != 0L) {
+                    loadSession { sessionRepo.getSessionState(sessionId) }
+                }
+            }
+
+            PracticeSessionAction.ToggleQuestionCard -> {
+                _state.update { it.copy(showQuestionCard = !it.showQuestionCard) }
+            }
         }
     }
 
@@ -171,6 +233,7 @@ class PracticeSessionViewModel @Inject constructor(
                             sessionId = result.data.sessionId
                         )
                         if (resetAnswerState) {
+                            readQuestion()
                             base.copy(
                                 recordedAudioPath = null,
                                 transcription = null,

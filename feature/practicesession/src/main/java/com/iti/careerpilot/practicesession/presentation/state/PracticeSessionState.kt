@@ -17,9 +17,14 @@ data class PracticeSessionState(
     val recordingDuration: Duration = Duration.ZERO,
     val isTranscribing: Boolean = false,
     val isUploading: Boolean = false,
+    val isLoadingNextQuestion: Boolean = false,
     val uploadProgress: Int = 0,
+    val playbackDurationMs: Long = 0,
+    val playbackPositionMs: Long = 0,
     val transcription: String? = null,
     val error: String? = null,
     val isFinished: Boolean = false,
-    val isPlayingAudio: Boolean = false
+    val isPlayingAudio: Boolean = false,
+    val totalSessionDuration: Duration = Duration.ZERO,
+    val showQuestionCard: Boolean = true
 )
