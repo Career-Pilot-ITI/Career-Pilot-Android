@@ -30,7 +30,7 @@ fun WavyBorder(amplitudes: List<Float>) {
         targetValue = 2 * PI.toFloat(),
         animationSpec = infiniteRepeatable(
             animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "phase"
     )

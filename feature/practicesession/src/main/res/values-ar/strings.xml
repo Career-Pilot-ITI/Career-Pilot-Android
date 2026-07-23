@@ -36,4 +36,10 @@
     <string name="session_status_icon">حالة الجلسة</string>
     <string name="loading_question">جارٍ تحميل السؤال…</string>
     <string name="question_number">السؤال %1$s</string>
+
+    <string name="session_settings">إعدادات الجلسة</string>
+    <string name="auto_read_question">قراءة السؤال تلقائيًا</string>
+    <string name="automatically_speak_the_question_when_it_s_shown">قراءة السؤال بصوت عالٍ تلقائيًا عند عرضه</string>
+    <string name="auto_send_answer">إرسال الإجابة تلقائيًا</string>
+    <string name="automatically_send_the_answer_when_you_stop_recording">إرسال الإجابة تلقائيًا عند إيقاف التسجيل</string>
 </resources>

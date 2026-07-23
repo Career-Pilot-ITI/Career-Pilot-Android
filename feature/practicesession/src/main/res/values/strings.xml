@@ -35,4 +35,10 @@
     <string name="session_status_icon">Session status</string>
     <string name="loading_question">Loading question…</string>
     <string name="question_number">Question %1$s</string>
+    <string name="session_settings">Session Settings</string>
+    <string name="auto_read_question">Auto read question</string>
+    <string name="automatically_speak_the_question_when_it_s_shown">Automatically speak the question when it\'s shown</string>
+    <string name="auto_send_answer">Auto send answer</string>
+    <string name="automatically_send_the_answer_when_you_stop_recording">Automatically send the answer when you stop recording</string>
+
 </resources>

@@ -27,5 +27,9 @@ data class PracticeSessionState(
     val isPlayingAudio: Boolean = false,
     val playbackState: AudioPlaybackState = AudioPlaybackState.STOPPED,
     val totalSessionDuration: Duration = Duration.ZERO,
-    val showQuestionCard: Boolean = true
+    val showQuestionCard: Boolean = true,
+    val showDiscardConfirm: Boolean = false,
+    val showLeaveConfirm: Boolean = false,
+    val showSettingsBottomSheet: Boolean = false,
+    val autoReadQuestion: Boolean = true,
 )

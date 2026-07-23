@@ -14,6 +14,22 @@ sealed interface PracticeSessionAction {
         val show: Boolean
     ) : PracticeSessionAction
 
+    data class ShowOrHideDiscardConfirmDialog(
+        val show: Boolean
+    ) : PracticeSessionAction
+
+    data class ShowOrHideSettingsBottomSheet(
+        val show: Boolean
+    ) : PracticeSessionAction
+
+    data class ShowOrHideLeaveConfirmDialog(
+        val show: Boolean
+    ) : PracticeSessionAction
+
+    data class ToggleAutoReadQuestion(
+        val enabled: Boolean
+    ) : PracticeSessionAction
+
     data object ListenToAIReadingCurrentQuestion: PracticeSessionAction
     data object PauseListeningToCurrentQuestion: PracticeSessionAction
     data object StopListeningToCurrentQuestionAndStartAnswering: PracticeSessionAction
@@ -28,6 +44,5 @@ sealed interface PracticeSessionAction {
 
     data object SubmitAnswerToCurrentQuestion: PracticeSessionAction
     data object DiscardCurrentAnswer: PracticeSessionAction
-    data object SkipCurrentQuestion: PracticeSessionAction
     data object ToggleQuestionCard: PracticeSessionAction
 }

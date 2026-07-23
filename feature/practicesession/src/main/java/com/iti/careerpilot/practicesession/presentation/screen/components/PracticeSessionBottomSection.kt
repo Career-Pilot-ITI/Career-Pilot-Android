@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.NextPlan
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
@@ -22,6 +21,7 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -65,7 +65,7 @@ fun PracticeSessionBottomSection(
                     isPlayingAudio = isPlayingAudio,
                     playbackDurationMs = playbackDurationMs,
                     playbackPositionMs = playbackPositionMs,
-                    onDiscard = { onAction(PracticeSessionAction.DiscardCurrentAnswer) },
+                    onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
                     onTogglePlay = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) },
                     onSeek = { ms -> onAction(PracticeSessionAction.SeekAudioTo(ms)) },
                     onSubmit = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) }
@@ -73,10 +73,9 @@ fun PracticeSessionBottomSection(
             } else {
                 ActionBottomBar(
                     isRecording = isRecording,
-                    hasRecordedAudio = recordedAudioPath != null,
                     amplitudes = amplitudes,
                     showQuestionCard = showQuestionCard,
-                    onSkip = { onAction(PracticeSessionAction.SkipCurrentQuestion) },
+                    onOpenSettings = { onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(true)) },
                     onStartRecording = { onAction(PracticeSessionAction.StartRecordingAnswer) },
                     onStopRecording = { onAction(PracticeSessionAction.StopRecordingAnswer) },
                     onShowPermissionDialog = { onAction(PracticeSessionAction.ShowOrHidePermissionDialog(true)) },
@@ -168,10 +167,9 @@ private fun AudioReviewRow(
 @Composable
 private fun ActionBottomBar(
     isRecording: Boolean,
-    hasRecordedAudio: Boolean,
     amplitudes: List<Float>,
     showQuestionCard: Boolean,
-    onSkip: () -> Unit,
+    onOpenSettings: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
     onShowPermissionDialog: () -> Unit,
@@ -189,24 +187,21 @@ private fun ActionBottomBar(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            if (!isRecording && !hasRecordedAudio) {
-                IconButton(onClick = onSkip) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.NextPlan,
-                        contentDescription = stringResource(R.string.skip_question),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+            IconButton(
+                onClick = onToggleQuestionCard,
+            ) {
+                Icon(
+                    imageVector = if (showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
+                    contentDescription = stringResource(R.string.toggle_question_card),
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
-
         Box(
             modifier = Modifier.weight(2f),
             contentAlignment = Alignment.Center
         ) {
-            if (isRecording) {
-                WavyBorder(amplitudes = amplitudes)
-            }
+            WavyBorder(amplitudes = amplitudes)
             LargeGradientIconButton(
                 icon = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
                 contentDescription = if (isRecording) {
@@ -226,7 +221,6 @@ private fun ActionBottomBar(
                     }
                 },
                 size = 80.dp,
-                isOutlined = true
             )
         }
 
@@ -234,12 +228,10 @@ private fun ActionBottomBar(
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            IconButton(
-                onClick = onToggleQuestionCard,
-            ) {
+            IconButton(onClick = onOpenSettings) {
                 Icon(
-                    imageVector = if (showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
-                    contentDescription = stringResource(R.string.toggle_question_card),
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.session_settings),
                     modifier = Modifier.size(28.dp)
                 )
             }

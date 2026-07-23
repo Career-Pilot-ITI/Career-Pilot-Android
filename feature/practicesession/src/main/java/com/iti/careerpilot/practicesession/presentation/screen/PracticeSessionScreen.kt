@@ -22,9 +22,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,6 +39,7 @@ import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAc
 import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.screen.components.CenterStage
 import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionBottomSection
+import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionSettingsBottomSheet
 import com.iti.careerpilot.practicesession.presentation.screen.components.ProcessingDialog
 import com.iti.careerpilot.practicesession.presentation.screen.components.QuestionCard
 import com.iti.careerpilot.practicesession.presentation.screen.util.formatDuration
@@ -65,7 +63,6 @@ fun PracticeSessionRoot(
             }
         }
     }
-    var showDiscardConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (sessionId != null && sessionId != 0L) {
@@ -79,36 +76,56 @@ fun PracticeSessionRoot(
     PracticeSessionScreen(
         state = state,
         onBack = {
-            //todo show confirmation to leave
-            onBack()
+            viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(true))
         },
-        onAction = { action ->
-            when (action) {
-                is PracticeSessionAction.DiscardCurrentAnswer -> {
-                    showDiscardConfirm = true
-                }
-
-                else -> viewModel.onAction(action)
-            }
-        }
+        onAction = viewModel::onAction
     )
 
-    if (showDiscardConfirm) {
+    if (state.showSettingsBottomSheet) {
+        PracticeSessionSettingsBottomSheet(
+            autoReadQuestion = state.autoReadQuestion,
+            onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
+            onDismiss = { viewModel.onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(false)) }
+        )
+    }
+
+    if (state.showLeaveConfirm) {
         AlertDialog(
             onDismissRequest = {
-                showDiscardConfirm = false
+                viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(false))
+            },
+            title = { Text(stringResource(R.string.leave_confirmation_title)) },
+            text = { Text(stringResource(R.string.leave_confirmation_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onBack()
+                }) { Text(stringResource(R.string.leave)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(false))
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (state.showDiscardConfirm) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(false))
             },
             title = { Text(stringResource(R.string.discard_recording_title)) },
             text = { Text(stringResource(R.string.discard_recording_message)) },
             confirmButton = {
                 TextButton(onClick = {
-                    showDiscardConfirm = false
                     viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer)
                 }) { Text(stringResource(R.string.discard)) }
             },
             dismissButton = {
                 TextButton(onClick = {
-                    showDiscardConfirm = false
+                    viewModel.onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(false))
                 }) {
                     Text(stringResource(R.string.cancel))
                 }

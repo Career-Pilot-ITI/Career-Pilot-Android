@@ -160,6 +160,10 @@ class PracticeSessionViewModel @Inject constructor(
 
             is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
+            is ShowOrHideDiscardConfirmDialog -> toggleDiscardConfirmDialog(action.show)
+
+            is ShowOrHideLeaveConfirmDialog -> toggleLeaveConfirmDialog(action.show)
+
             ListenToAIReadingCurrentQuestion -> readQuestion()
 
             PauseListeningToCurrentQuestion -> stopReadingQuestion()
@@ -185,10 +189,21 @@ class PracticeSessionViewModel @Inject constructor(
 
             SubmitAnswerToCurrentQuestion -> submitAnswer()
 
-            SkipCurrentQuestion -> skipCurrentQuestion()
-
             ToggleQuestionCard -> toggleQuestionTextCard()
+
+            is ShowOrHideSettingsBottomSheet -> toggleSettingsBottomSheet(action.show)
+
+            is ToggleAutoReadQuestion -> toggleAutoReadQuestion(action.enabled)
+
         }
+    }
+
+    private fun toggleSettingsBottomSheet(show: Boolean) {
+        _state.update { it.copy(showSettingsBottomSheet = show) }
+    }
+
+    private fun toggleAutoReadQuestion(enabled: Boolean) {
+        _state.update { it.copy(autoReadQuestion = enabled) }
     }
 
     private fun stopRecording() {
@@ -197,10 +212,6 @@ class PracticeSessionViewModel @Inject constructor(
 
     private fun toggleQuestionTextCard() {
         _state.update { it.copy(showQuestionCard = !it.showQuestionCard) }
-    }
-
-    private fun skipCurrentQuestion() {
-        //todo get next question
     }
 
     private fun resumeRecorder() {
@@ -237,12 +248,14 @@ class PracticeSessionViewModel @Inject constructor(
                 recordedAudioPath = null,
                 transcription = null,
                 recordingDuration = Duration.ZERO,
-                amplitudes = emptyList()
+                amplitudes = emptyList(),
+                showDiscardConfirm = false
             )
         }
     }
 
     private fun startRecordingAnswer() {
+        stopReadingQuestion()
         if (sessionStartedAtMs == null) {
             sessionStartedAtMs = System.currentTimeMillis()
             startSessionTimer()
@@ -257,6 +270,14 @@ class PracticeSessionViewModel @Inject constructor(
 
     private fun togglePermissionDialog(show: Boolean) {
         _state.update { it.copy(showPermissionDialog = show) }
+    }
+
+    private fun toggleDiscardConfirmDialog(show: Boolean) {
+        _state.update { it.copy(showDiscardConfirm = show) }
+    }
+
+    private fun toggleLeaveConfirmDialog(show: Boolean) {
+        _state.update { it.copy(showLeaveConfirm = show) }
     }
 
     private fun restartOldSession(sessionId: Long) {
@@ -308,7 +329,15 @@ class PracticeSessionViewModel @Inject constructor(
                 amplitudes = emptyList()
             )
         }
-        readQuestion()
+        if (_state.value.autoReadQuestion) {
+            readQuestion()
+        } else {
+            _state.update {
+                it.copy(
+                    showQuestionCard = true
+                )
+            }
+        }
     }
 
     private suspend fun handleSessionLoadError(error: NetworkError) {
@@ -434,7 +463,15 @@ class PracticeSessionViewModel @Inject constructor(
                     amplitudes = emptyList()
                 )
             }
-            readQuestion()
+            if (_state.value.autoReadQuestion) {
+                readQuestion()
+            } else {
+                _state.update {
+                    it.copy(
+                        showQuestionCard = true
+                    )
+                }
+            }
         }
     }
 
