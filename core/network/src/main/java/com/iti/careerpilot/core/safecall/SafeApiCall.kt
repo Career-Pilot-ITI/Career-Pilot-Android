@@ -11,6 +11,9 @@ import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
+
 const val TAG = "CareerPilot: SafeRestCall"
 
 suspend inline fun <reified T> safeApiCall(
@@ -22,6 +25,10 @@ suspend inline fun <reified T> safeApiCall(
         return CareerPilotResult.Error(NetworkError.TIME_OUT)
     } catch (_: UnresolvedAddressException) {
         return CareerPilotResult.Error(NetworkError.NO_INTERNET)
+    } catch (e: ClientRequestException) {
+        return responseToCareerPilotResult(e.response)
+    } catch (e: ServerResponseException) {
+        return responseToCareerPilotResult(e.response)
     } catch (e: Exception) {
         currentCoroutineContext().ensureActive()
         Log.e(TAG, "safeCall: ", e)
@@ -43,6 +50,10 @@ suspend inline fun <reified T> responseToCareerPilotResult(
             }
         }
 
+        400 -> CareerPilotResult.Error(NetworkError.BAD_REQUEST)
+        401 -> CareerPilotResult.Error(NetworkError.UNAUTHORIZED)
+        403 -> CareerPilotResult.Error(NetworkError.UNAUTHORIZED)
+        404 -> CareerPilotResult.Error(NetworkError.NOT_FOUND)
         408 -> CareerPilotResult.Error(NetworkError.TIME_OUT)
         429 -> CareerPilotResult.Error(NetworkError.TOO_MANY_REQUESTS)
         in 500..599 -> CareerPilotResult.Error(NetworkError.SERVER)
