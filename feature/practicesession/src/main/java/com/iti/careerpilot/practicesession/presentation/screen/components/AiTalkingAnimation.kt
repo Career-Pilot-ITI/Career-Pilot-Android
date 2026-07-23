@@ -32,8 +32,8 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.iti.careerpilot.practicesession.R
 
-private val FabSize = 80.dp
-private val FabGlowSize = 120.dp
+private val FabSize = 112.dp
+private val FabGlowSize = 176.dp
 private val FabGradientColors = listOf(
     Color(0xFF6D5DF6), // indigo
     Color(0xFF9D5CF9), // violet
@@ -42,12 +42,11 @@ private val FabGradientColors = listOf(
 
 @Composable
 fun AiTalkingAnimation(
+    isPulsing: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isPulsing: Boolean = false,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "ai_fab")
-    
     val ringRotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -56,15 +55,11 @@ fun AiTalkingAnimation(
         ),
         label = "ring_rotation"
     )
-
-    val targetAlpha = if (isPulsing) 0.85f else 0.65f
-    val duration = if (isPulsing) 1000 else 1800
-
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.35f,
-        targetValue = targetAlpha,
+        targetValue = 0.65f,
         animationSpec = infiniteRepeatable(
-            animation = tween(duration, easing = FastOutSlowInEasing),
+            animation = tween(1800, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "glow_alpha"

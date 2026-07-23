@@ -204,6 +204,7 @@ fun PracticeSessionScreen(
                         onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) }
                     )
                 }
+
                 AnimatedVisibility(visible = state.isRecording) {
                     Card(
                         modifier = Modifier.padding(bottom = 8.dp),
@@ -246,32 +247,26 @@ fun PracticeSessionScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
         ) {
-            if (state.isLoadingSession && state.currentSession == null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CenterStage(
-                            isRecording = state.isRecording,
-                            amplitudes = state.amplitudes,
-                            isReadingQuestion = state.isReadingQuestion,
-                            hasRecordedAudio = state.recordedAudioPath != null,
-                            onToggleListening = {
-                                if (state.isReadingQuestion) {
-                                    onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
-                                } else {
-                                    onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
-                                }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CenterStage(
+                        isRecording = state.isRecording,
+                        amplitudes = state.amplitudes,
+                        isReadingQuestion = state.isReadingQuestion,
+                        hasRecordedAudio = state.recordedAudioPath != null,
+                        onToggleListening = {
+                            if (state.isReadingQuestion) {
+                                onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
+                            } else {
+                                onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }

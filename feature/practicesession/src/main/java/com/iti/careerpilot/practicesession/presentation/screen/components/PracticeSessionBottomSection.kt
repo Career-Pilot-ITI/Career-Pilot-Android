@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -201,7 +202,10 @@ private fun ActionBottomBar(
             modifier = Modifier.weight(2f),
             contentAlignment = Alignment.Center
         ) {
-            WavyBorder(amplitudes = amplitudes)
+            AmplitudeRings(
+                amplitudes = amplitudes,
+                isRecording = isRecording,
+            )
             LargeGradientIconButton(
                 icon = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
                 contentDescription = if (isRecording) {

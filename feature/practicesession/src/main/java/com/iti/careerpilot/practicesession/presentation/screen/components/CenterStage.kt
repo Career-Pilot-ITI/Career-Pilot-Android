@@ -26,25 +26,21 @@ fun CenterStage(
     onToggleListening: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.size(260.dp), contentAlignment = Alignment.Center) {
-        if (isRecording) {
-            AmplitudeRings(
-                amplitudes = amplitudes,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+    Box(
+        modifier = modifier.size(260.dp),
+        contentAlignment = Alignment.Center
+    ) {
         AiTalkingAnimation(
             isPulsing = isReadingQuestion,
             onClick = onToggleListening
         )
-        val icon = when {
-            isRecording -> Icons.Default.Mic
-            hasRecordedAudio -> Icons.Default.GraphicEq
-            isReadingQuestion -> Icons.AutoMirrored.Filled.VolumeUp
-            else -> Icons.Default.RecordVoiceOver
-        }
         Icon(
-            imageVector = icon,
+            imageVector = when {
+                isRecording -> Icons.Default.Mic
+                hasRecordedAudio -> Icons.Default.GraphicEq
+                isReadingQuestion -> Icons.AutoMirrored.Filled.VolumeUp
+                else -> Icons.Default.RecordVoiceOver
+            },
             contentDescription = stringResource(R.string.session_status_icon),
             tint = Color.White,
             modifier = Modifier.size(42.dp)

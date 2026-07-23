@@ -1,18 +1,26 @@
 package com.iti.careerpilot.practicesession.presentation.screen.components
 
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
 import kotlin.math.cos
@@ -23,54 +31,74 @@ import kotlin.math.sin
  * of the recent amplitude history, rotating at different speeds/directions.
  */
 @Composable
-fun AmplitudeRings(amplitudes: List<Float>, modifier: Modifier = Modifier) {
-    val infinite = rememberInfiniteTransition(label = "rings")
-    val rotation1 by infinite.animateFloat(
-        0f, 360f, infiniteRepeatable(tween(14000, easing = LinearEasing)), label = "rot1"
-    )
-    val rotation2 by infinite.animateFloat(
-        360f, 0f, infiniteRepeatable(tween(10000, easing = LinearEasing)), label = "rot2"
-    )
-    val rotation3 by infinite.animateFloat(
-        0f, 360f, infiniteRepeatable(tween(18000, easing = LinearEasing)), label = "rot3"
+fun AmplitudeRings(
+    amplitudes: List<Float>,
+    isRecording: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "wavy_border")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2 * PI.toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "phase"
     )
 
-    val recent = amplitudes.takeLast(48).ifEmpty { List(48) { 0.05f } }
-    val ringA = recent.filterIndexed { i, _ -> i % 3 == 0 }.ifEmpty { listOf(0.05f) }
-    val ringB = recent.filterIndexed { i, _ -> i % 3 == 1 }.ifEmpty { listOf(0.05f) }
-    val ringC = recent.filterIndexed { i, _ -> i % 3 == 2 }.ifEmpty { listOf(0.05f) }
+    val recentAmps = amplitudes.takeLast(10).ifEmpty { listOf(0.1f) }
+    val rawAvgAmp = recentAmps.average().toFloat().coerceIn(0.1f, 1f)
 
-    val barColor = MaterialTheme.colorScheme.primary
-    Canvas(modifier = modifier) {
-        val ringConfigs = listOf(
-            Triple(ringA, size.minDimension * 0.30f, rotation1),
-            Triple(ringB, size.minDimension * 0.38f, rotation2),
-            Triple(ringC, size.minDimension * 0.46f, rotation3)
-        )
-        ringConfigs.forEach { (values, radius, rot) ->
-            val count = values.size
-            rotate(rot) {
-                for (i in 0 until count) {
-                    val angle = (2 * PI * i / count).toFloat()
-                    val amp = values[i].coerceIn(0.05f, 1f)
-                    val barLen = 5.dp.toPx() + amp * 16.dp.toPx()
-                    val start = Offset(
-                        center.x + cos(angle) * radius,
-                        center.y + sin(angle) * radius
-                    )
-                    val end = Offset(
-                        center.x + cos(angle) * (radius + barLen),
-                        center.y + sin(angle) * (radius + barLen)
-                    )
-                    drawLine(
-                        color = barColor.copy(alpha = 0.5f + amp * 0.5f),
-                        start = start,
-                        end = end,
-                        strokeWidth = 3.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                }
+    val targetAmp = if (isRecording) rawAvgAmp else 0f
+    val avgAmp by animateFloatAsState(targetValue = targetAmp, animationSpec = tween(400))
+    val effectivePhase = if (isRecording) phase else 0f
+
+
+    val rings = listOf(
+        Ring(0, MaterialTheme.colorScheme.primary, 2.dp.toPxLocal()),
+        Ring(8, MaterialTheme.colorScheme.tertiary, 1.5.dp.toPxLocal()),
+        Ring(16, MaterialTheme.colorScheme.secondary, 1.5.dp.toPxLocal()),
+    )
+
+    Canvas(modifier = modifier.size(100.dp)) {
+        val center = Offset(size.width / 2, size.height / 2)
+        val points = 100
+
+        rings.forEach { ring ->
+            val baseRadius = size.width / 2 - 5.dp.toPx() - ring.radiusOffset.dp.toPx()
+            val path = Path()
+
+            for (i in 0 until points) {
+                val angle = (i.toFloat() / points) * 2 * PI.toFloat()
+                val wave1 = sin(angle * 6 + effectivePhase) * 6.dp.toPx()
+                val wave2 = sin(angle * 14 - effectivePhase * 1.2f) * 4.dp.toPx()
+                val wave3 = cos(angle * 8 + effectivePhase * 0.8f) * 3.dp.toPx()
+                val noise = wave1 + wave2 + wave3
+                val r = baseRadius + noise * avgAmp
+                val x = center.x + r * cos(angle)
+                val y = center.y + r * sin(angle)
+                if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
             }
+            path.close()
+
+            drawPath(
+                path = path,
+                color = ring.color,
+                style = Stroke(width = ring.strokeWidth, cap = StrokeCap.Round)
+            )
         }
     }
+}
+
+data class Ring(
+    val radiusOffset: Int,
+    val color: Color,
+    val strokeWidth: Float
+)
+
+@Composable
+private fun Dp.toPxLocal(): Float {
+    val density = LocalDensity.current
+    return with(density) { toPx() }
 }
