@@ -28,6 +28,7 @@ class VoiceRecorderImpl @Inject constructor(
 
     companion object {
         private const val MAX_AMPLITUDE_VALUE = 26_000L
+        const val TEMP_DIRECTORY = "voice_recordings"
         const val RECORDING_FILE_EXTENSION = "mp4"
         const val TEMP_FILE_PREFIX = "temp_recording"
     }
@@ -125,12 +126,23 @@ class VoiceRecorderImpl @Inject constructor(
         }
     }
 
+    private fun getTempDirectory(): File =
+        File(context.cacheDir, TEMP_DIRECTORY).apply {
+            if (!exists()) {
+                mkdirs()
+            }
+        }
+
     private fun generateTempFile(): File {
         val id = UUID.randomUUID().toString()
         return File(
-            context.cacheDir,
-            "${TEMP_FILE_PREFIX}_$id.${RECORDING_FILE_EXTENSION}"
+            getTempDirectory(),
+            "${TEMP_FILE_PREFIX}_$id.$RECORDING_FILE_EXTENSION"
         )
+    }
+
+    private fun deleteAllTempFiles() {
+        getTempDirectory().listFiles()?.forEach(File::delete)
     }
 
     private fun resetSession() {
@@ -199,5 +211,6 @@ class VoiceRecorderImpl @Inject constructor(
     override fun cancel() {
         stop()
         resetSession()
+        deleteAllTempFiles()
     }
 }
