@@ -6,7 +6,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -54,11 +53,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -151,7 +148,7 @@ fun PracticeSessionRoot(
         onAction = { action ->
             when (action) {
                 is PracticeSessionAction.SkipCurrentQuestion -> showSkipConfirm = true
-                is PracticeSessionAction.DiscardCurrentAnswerAndMakeNewOne -> {
+                is PracticeSessionAction.DiscardCurrentAnswer -> {
                     isLeaving = false
                     showDiscardConfirm = true
                 }
@@ -190,7 +187,7 @@ fun PracticeSessionRoot(
             confirmButton = {
                 TextButton(onClick = {
                     showDiscardConfirm = false
-                    viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswerAndMakeNewOne)
+                    viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer)
                     if (isLeaving) onBack()
                     isLeaving = false
                 }) { Text("Discard") }
@@ -423,7 +420,7 @@ private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessi
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(
                 modifier = Modifier.align(Alignment.TopStart),
-                onClick = { onAction(PracticeSessionAction.DiscardCurrentAnswerAndMakeNewOne) },
+                onClick = { onAction(PracticeSessionAction.DiscardCurrentAnswer) },
                 enabled = !busy
             ) {
                 Icon(

@@ -27,7 +27,7 @@ sealed interface PracticeSessionAction {
     data class SeekAudioTo(val positionMs: Long): PracticeSessionAction
 
     data object SubmitFinalAnswerToCurrentQuestion: PracticeSessionAction
-    data object DiscardCurrentAnswerAndMakeNewOne: PracticeSessionAction
+    data object DiscardCurrentAnswer: PracticeSessionAction
     data object SkipCurrentQuestion: PracticeSessionAction
     data object ToggleQuestionCard: PracticeSessionAction
 }

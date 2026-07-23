@@ -41,6 +41,7 @@ import com.iti.common.error.NetworkError
 import com.iti.common.util.toUIText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
@@ -119,7 +120,7 @@ class PracticeSessionViewModel @Inject constructor(
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
-                delay(1000)
+                delay(1000.milliseconds)
                 _state.update {
                     it.copy(totalSessionDuration = it.totalSessionDuration + 1.seconds)
                 }
@@ -143,74 +144,119 @@ class PracticeSessionViewModel @Inject constructor(
 
     fun onAction(action: PracticeSessionAction) {
         when (action) {
-            is PracticeSessionAction.CreateNewPracticeSession -> loadSession { sessionRepo.createNewSession(
-                CreateSessionRequest(trackId = action.trackId, questionCount = 5, durationMinutes = 15)
-            ) }
+            is PracticeSessionAction.CreateNewPracticeSession -> createNewSession(action)
 
-            is PracticeSessionAction.RestartPracticeSession -> loadSession(resetAnswerState = false) {
-                sessionRepo.getSessionState(action.sessionId)
-            }
+            is PracticeSessionAction.RestartPracticeSession -> restartOldSession(action)
 
-            is PracticeSessionAction.ShowOrHidePermissionDialog -> {
-                _state.update { it.copy(showPermissionDialog = action.show) }
-            }
+            is PracticeSessionAction.ShowOrHidePermissionDialog -> togglePermissionDialog(action)
 
             PracticeSessionAction.ListenToAIReadingCurrentQuestion -> readQuestion()
-            PracticeSessionAction.PauseListeningToCurrentQuestion -> {
-                textToSpeechManager.stop()
-                _state.update { it.copy(isReadingQuestion = false) }
-            }
+
+            PracticeSessionAction.PauseListeningToCurrentQuestion -> stopReadingQuestion()
+
             PracticeSessionAction.StopListeningToCurrentQuestionAndStartAnswering -> {
-                textToSpeechManager.stop()
-                _state.update { it.copy(isReadingQuestion = false) }
-                onAction(PracticeSessionAction.StartRecordingAnswer)
+                stopReadingQuestion()
+                startRecordingAnswer()
             }
 
-            PracticeSessionAction.DiscardCurrentAnswerAndMakeNewOne -> {
-                voiceRecorder.cancel()
-                _state.update {
-                    it.copy(
-                        recordedAudioPath = null,
-                        transcription = null,
-                        recordingDuration = kotlin.time.Duration.ZERO,
-                        amplitudes = emptyList()
-                    )
-                }
-            }
+            PracticeSessionAction.DiscardCurrentAnswer -> discardRecordedAnswer()
+
             PracticeSessionAction.FinishRecordingAnswerAndStartTranscription -> voiceRecorder.stop()
-            PracticeSessionAction.PauseRecordingAnswer -> voiceRecorder.pause()
-            PracticeSessionAction.PlayCurrentRecordedAnswer -> {
-                val path = _state.value.recordedAudioPath
-                if (path != null) {
-                    audioPlayer.play(path) {
-                        _state.update { it.copy(isPlayingAudio = false) }
-                    }
-                }
-            }
-            is PracticeSessionAction.SeekAudioTo -> {
-                audioPlayer.seekTo(action.positionMs)
-            }
-            PracticeSessionAction.ResumeRecordingAnswer -> voiceRecorder.resume()
-            PracticeSessionAction.StartRecordingAnswer -> {
-                if (sessionStartedAtMs == null) {
-                    sessionStartedAtMs = System.currentTimeMillis()
-                    startSessionTimer()
-                }
-                voiceRecorder.start()
-            }
+
+            PracticeSessionAction.PauseRecordingAnswer -> pauseRecorder()
+
+            PracticeSessionAction.PlayCurrentRecordedAnswer -> playRecordedAnswer()
+
+            is PracticeSessionAction.SeekAudioTo -> seekMediaPlayer(action)
+
+            PracticeSessionAction.ResumeRecordingAnswer -> resumeRecorder()
+
+            PracticeSessionAction.StartRecordingAnswer -> startRecordingAnswer()
 
             PracticeSessionAction.SubmitFinalAnswerToCurrentQuestion -> submitAnswer()
 
-            PracticeSessionAction.SkipCurrentQuestion -> {
-                val sessionId = _state.value.sessionId
-                if (sessionId != 0L) {
-                    loadSession { sessionRepo.getSessionState(sessionId) }
-                }
-            }
+            PracticeSessionAction.SkipCurrentQuestion -> skipCurrentQuestion()
 
-            PracticeSessionAction.ToggleQuestionCard -> {
-                _state.update { it.copy(showQuestionCard = !it.showQuestionCard) }
+            PracticeSessionAction.ToggleQuestionCard -> toggleQuestionTextCard()
+        }
+    }
+
+    private fun toggleQuestionTextCard() {
+        _state.update { it.copy(showQuestionCard = !it.showQuestionCard) }
+    }
+
+    private fun skipCurrentQuestion() {
+        val sessionId = _state.value.sessionId
+        if (sessionId != 0L) {
+            loadSession { sessionRepo.getSessionState(sessionId) }
+        }
+    }
+
+    private fun resumeRecorder() {
+        voiceRecorder.resume()
+    }
+
+    private fun pauseRecorder() {
+        voiceRecorder.pause()
+    }
+
+    private fun seekMediaPlayer(action: PracticeSessionAction.SeekAudioTo) {
+        audioPlayer.seekTo(action.positionMs)
+    }
+
+    private fun playRecordedAnswer() {
+        val path = _state.value.recordedAudioPath
+        if (path != null) {
+            audioPlayer.play(path) {
+                _state.update { it.copy(isPlayingAudio = false) }
             }
+        }
+    }
+
+    private fun discardRecordedAnswer() {
+        voiceRecorder.cancel()
+        _state.update {
+            it.copy(
+                recordedAudioPath = null,
+                transcription = null,
+                recordingDuration = Duration.ZERO,
+                amplitudes = emptyList()
+            )
+        }
+    }
+
+    private fun startRecordingAnswer() {
+        if (sessionStartedAtMs == null) {
+            sessionStartedAtMs = System.currentTimeMillis()
+            startSessionTimer()
+        }
+        voiceRecorder.start()
+    }
+
+    private fun stopReadingQuestion() {
+        textToSpeechManager.stop()
+        _state.update { it.copy(isReadingQuestion = false) }
+    }
+
+    private fun togglePermissionDialog(action: PracticeSessionAction.ShowOrHidePermissionDialog) {
+        _state.update { it.copy(showPermissionDialog = action.show) }
+    }
+
+    private fun restartOldSession(action: PracticeSessionAction.RestartPracticeSession) {
+        loadSession(resetAnswerState = false) {
+            sessionRepo.getSessionState(action.sessionId)
+        }
+    }
+
+    private fun createNewSession(action: PracticeSessionAction.CreateNewPracticeSession) {
+        loadSession {
+            sessionRepo.createNewSession(
+                CreateSessionRequest(
+                    trackId = action.trackId,
+                    questionCount = 5,
+                    durationMinutes = 15
+                )
+            )
         }
     }
 
@@ -237,7 +283,7 @@ class PracticeSessionViewModel @Inject constructor(
                             base.copy(
                                 recordedAudioPath = null,
                                 transcription = null,
-                                recordingDuration = kotlin.time.Duration.ZERO,
+                                recordingDuration = Duration.ZERO,
                                 amplitudes = emptyList()
                             )
                         } else base
