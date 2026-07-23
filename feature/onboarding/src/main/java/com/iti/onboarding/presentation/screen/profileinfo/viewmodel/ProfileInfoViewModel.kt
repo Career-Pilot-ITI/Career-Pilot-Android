@@ -126,7 +126,7 @@ class ProfileInfoViewModel @Inject constructor(
             }
 
             is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) }.copy(hasSuccessfullySubmitted = false) }
-            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false, isEmailInvalid = false) }
             is ProfileInfoIntent.OnTitleChanged -> _state.update { it.updateData { data -> data.copy(title = intent.title) }.copy(hasSuccessfullySubmitted = false) }
             is ProfileInfoIntent.OnExperienceChanged -> _state.update { it.updateData { data -> data.copy(experience = intent.experience) }.copy(hasSuccessfullySubmitted = false) }
             is ProfileInfoIntent.OnSkillsChanged -> _state.update { it.updateData { data -> data.copy(skills = intent.skills.toPersistentList()) }.copy(hasSuccessfullySubmitted = false) }
@@ -260,9 +260,16 @@ class ProfileInfoViewModel @Inject constructor(
                 _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 return@launch
             }
-            _state.update { it.copy(isSubmitting = true) }
-            
             val currentData = _state.value.data
+            val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(currentData.email).matches()
+            if (!isEmailValid) {
+                _state.update { it.copy(isEmailInvalid = true) }
+                CareerPilotSnackbarController.show(UIText.StringResource(R.string.profile_info_email_invalid))
+                return@launch
+            }
+            
+            _state.update { it.copy(isSubmitting = true, isEmailInvalid = false) }
+            
             val yearsOfExperience = currentData.experience.toIntOrNull()
             
             val request = UpdateProfileRequestDto(
