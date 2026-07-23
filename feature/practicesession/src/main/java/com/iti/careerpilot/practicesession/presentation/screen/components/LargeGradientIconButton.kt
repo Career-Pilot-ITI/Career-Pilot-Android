@@ -28,6 +28,9 @@ fun LargeGradientIconButton(
             .clickable(enabled = enabled, onClickLabel = contentDescription, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        GradientIcon(icon = icon, modifier = Modifier.size(size * 0.5f))
+        GradientIcon(
+            icon = icon,
+            modifier = Modifier.size(size * 0.5f)
+        )
     }
 }
