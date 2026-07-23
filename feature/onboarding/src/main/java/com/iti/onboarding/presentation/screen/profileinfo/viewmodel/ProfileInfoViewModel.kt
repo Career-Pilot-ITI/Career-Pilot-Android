@@ -248,9 +248,7 @@ class ProfileInfoViewModel @Inject constructor(
                 if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
                 onSuccess(response)
             }?.onError { error ->
-                viewModelScope.launch {
-                    CareerPilotSnackbarController.show(error.toUIText())
-                }
+                CareerPilotSnackbarController.show(error.toUIText())
             }
             onFinish()
         }
@@ -289,9 +287,7 @@ class ProfileInfoViewModel @Inject constructor(
                     _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 }
                 .onError { error ->
-                    viewModelScope.launch {
-                        CareerPilotSnackbarController.show(error.toUIText())
-                    }
+                    CareerPilotSnackbarController.show(error.toUIText())
                 }
                 
             _state.update { it.copy(isSubmitting = false) }
