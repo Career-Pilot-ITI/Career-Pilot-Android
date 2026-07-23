@@ -160,37 +160,39 @@ fun OnboardingPagerScreen(
                     )
                 )
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .windowInsetsPadding(WindowInsets.ime)
                 .padding(top = Dimens.SpaceXXXL)
         ) {
-            val currentPage = pagerState.currentPage
+            val settledPage = pagerState.settledPage
+            val isScrollInProgress = pagerState.isScrollInProgress
 
-            val buttonText = when (currentPage) {
+            val buttonText = when (settledPage) {
                 PAGE_UPLOAD_CV -> stringResource(R.string.analyze_my_cv)
                 PAGE_PROFILE_INFO -> stringResource(R.string.next_button_label)
                 PAGE_CHOOSING_TRACKS -> stringResource(R.string.next_button_label)
                 else -> ""
             }
 
-            val isButtonEnabled = when (currentPage) {
+            val isButtonEnabled = when (settledPage) {
                 PAGE_UPLOAD_CV -> cvState.isFormValid
                 PAGE_PROFILE_INFO -> profileState.isFormValid
                 PAGE_CHOOSING_TRACKS -> tracksState.isFormValid
                 else -> false
             }
 
-            val isSubmitting = when (currentPage) {
+            val isSubmitting = when (settledPage) {
                 PAGE_UPLOAD_CV -> cvState.isSubmitting
                 PAGE_PROFILE_INFO -> profileState.isSubmitting
-                PAGE_CHOOSING_TRACKS -> false
+                PAGE_CHOOSING_TRACKS -> tracksState.isSubmitting
                 else -> false
             }
 
             val onClick = {
-                when (currentPage) {
-                    PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
-                    PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
-                    PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
+                if (!isScrollInProgress) {
+                    when (settledPage) {
+                        PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
+                        PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
+                        PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
+                    }
                 }
             }
 

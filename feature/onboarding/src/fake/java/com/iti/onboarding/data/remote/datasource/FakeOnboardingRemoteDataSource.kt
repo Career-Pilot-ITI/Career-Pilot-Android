@@ -26,11 +26,14 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
 
     override suspend fun updateProfile(request: UpdateProfileRequestDto): UserProfileDto {
         fakeDelay()
-        if (shouldFail()) throw Exception("Fake network error")
         return UserProfileDto(
             id = 1L,
             displayName = request.displayName,
-            onboardingCompleted = true
+            email = request.email,
+            targetRole = request.targetRole,
+            yearsOfExperience = request.yearsOfExperience,
+            skills = request.skills?.map { com.iti.careerpilot.core.network.model.SkillDto(skillName = it) },
+            onboardingCompleted = request.onboardingCompleted ?: true
         )
     }
 

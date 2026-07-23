@@ -53,13 +53,23 @@ class ChoosingTracksViewModel @Inject constructor(
             }
 
             ChoosingTracksIntent.OnNavigateNext -> {
+                if (_state.value.isSubmitting) return
                 viewModelScope.launch {
-                    val trackId = _state.value.selectedTrack?.id ?: 0L
-                    val trackResult = updateProfileTrackUseCase(trackId)
-                    if (trackResult is CareerPilotResult.Success) {
-                        val completeResult = completeOnboardingUseCase(cvFileId = null)
-                        if (completeResult is CareerPilotResult.Success) {
-                            _effects.emit(ChoosingTracksEffects.NavigateNext)
+                    _state.update { it.copy(isSubmitting = true) }
+                    try {
+                        val trackId = _state.value.selectedTrack?.id ?: 0L
+                        val trackResult = updateProfileTrackUseCase(trackId)
+                        if (trackResult is CareerPilotResult.Success) {
+                            val completeResult = completeOnboardingUseCase(cvFileId = null)
+                            if (completeResult is CareerPilotResult.Success) {
+                                _effects.emit(ChoosingTracksEffects.NavigateNext)
+                            } else {
+                                _effects.emit(
+                                    ChoosingTracksEffects.ShowError(
+                                        UIText.StringResource(com.iti.common.R.string.error_unknown)
+                                    )
+                                )
+                            }
                         } else {
                             _effects.emit(
                                 ChoosingTracksEffects.ShowError(
@@ -67,12 +77,8 @@ class ChoosingTracksViewModel @Inject constructor(
                                 )
                             )
                         }
-                    } else {
-                        _effects.emit(
-                            ChoosingTracksEffects.ShowError(
-                                UIText.StringResource(com.iti.common.R.string.error_unknown)
-                            )
-                        )
+                    } finally {
+                        _state.update { it.copy(isSubmitting = false) }
                     }
                 }
             }
