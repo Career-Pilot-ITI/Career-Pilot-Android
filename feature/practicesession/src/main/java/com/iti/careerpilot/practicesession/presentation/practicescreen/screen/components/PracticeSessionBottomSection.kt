@@ -22,36 +22,30 @@ fun PracticeSessionBottomSection(
     onAction: (PracticeSessionAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 3.dp,
-        shadowElevation = 8.dp,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    Column(
+        modifier = modifier.padding(bottom = 8.dp)
     ) {
-        Column(modifier = Modifier.padding(bottom = 8.dp)) {
-            if (recordedAudioPath != null && !isRecording) {
-                AudioReviewRow(
-                    isPlayingAudio = isPlayingAudio,
-                    playbackDurationMs = playbackDurationMs,
-                    playbackPositionMs = playbackPositionMs,
-                    onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
-                    onTogglePlay = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) },
-                    onSeek = { ms -> onAction(PracticeSessionAction.SeekAudioTo(ms)) },
-                    onSubmit = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) }
-                )
-            } else {
-                ActionBottomBar(
-                    isRecording = isRecording,
-                    amplitudes = amplitudes,
-                    showQuestionCard = showQuestionCard,
-                    onOpenSettings = { onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(true)) },
-                    onStartRecording = { onAction(PracticeSessionAction.StartRecordingAnswer) },
-                    onStopRecording = { onAction(PracticeSessionAction.StopRecordingAnswer) },
-                    onShowPermissionDialog = { onAction(PracticeSessionAction.ShowOrHidePermissionDialog(true)) },
-                    onToggleQuestionCard = { onAction(PracticeSessionAction.ToggleQuestionCard) }
-                )
-            }
+        if (recordedAudioPath != null && !isRecording) {
+            AudioReviewRow(
+                isPlayingAudio = isPlayingAudio,
+                playbackDurationMs = playbackDurationMs,
+                playbackPositionMs = playbackPositionMs,
+                onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
+                onTogglePlay = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) },
+                onSeek = { ms -> onAction(PracticeSessionAction.SeekAudioTo(ms)) },
+                onSubmit = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) }
+            )
+        } else {
+            ActionBottomBar(
+                isRecording = isRecording,
+                amplitudes = amplitudes,
+                showQuestionCard = showQuestionCard,
+                onOpenSettings = { onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(true)) },
+                onStartRecording = { onAction(PracticeSessionAction.StartRecordingAnswer) },
+                onStopRecording = { onAction(PracticeSessionAction.StopRecordingAnswer) },
+                onShowPermissionDialog = { onAction(PracticeSessionAction.ShowOrHidePermissionDialog(true)) },
+                onToggleQuestionCard = { onAction(PracticeSessionAction.ToggleQuestionCard) }
+            )
         }
     }
 }
