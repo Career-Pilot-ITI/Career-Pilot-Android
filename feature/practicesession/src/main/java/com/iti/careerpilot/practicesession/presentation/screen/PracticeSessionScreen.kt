@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
@@ -23,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +48,7 @@ import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.screen.components.CenterStage
+import com.iti.careerpilot.practicesession.presentation.screen.components.ConfirmationDialog
 import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionBottomSection
 import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionSettingsBottomSheet
 import com.iti.careerpilot.practicesession.presentation.screen.components.ProcessingDialog
@@ -57,6 +59,7 @@ import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionSta
 import com.iti.careerpilot.practicesession.presentation.viewmodel.PracticeSessionViewModel
 import com.iti.common.util.UIText
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PracticeSessionRoot(
@@ -79,7 +82,7 @@ fun PracticeSessionRoot(
 
     LaunchedEffect(errorMessage) {
         if (errorMessage != null) {
-            delay(3000L)
+            delay(3000L.milliseconds)
             errorMessage = null
         }
     }
@@ -121,51 +124,45 @@ fun PracticeSessionRoot(
         PracticeSessionSettingsBottomSheet(
             autoReadQuestion = state.autoReadQuestion,
             onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
-            onDismiss = { viewModel.onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(false)) }
+            onDismiss = {
+                viewModel.onAction(
+                    PracticeSessionAction.ShowOrHideSettingsBottomSheet(
+                        false
+                    )
+                )
+            }
         )
     }
 
     if (state.showLeaveConfirm) {
-        AlertDialog(
-            onDismissRequest = {
+        ConfirmationDialog(
+            title = stringResource(R.string.leave_confirmation_title),
+            text = stringResource(R.string.leave_confirmation_message),
+            icon = Icons.AutoMirrored.Filled.Logout,
+            onDismiss = {
                 viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(false))
             },
-            title = { Text(stringResource(R.string.leave_confirmation_title)) },
-            text = { Text(stringResource(R.string.leave_confirmation_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    onBack()
-                }) { Text(stringResource(R.string.leave)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(false))
-                }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onConfirm = { onBack() },
+            cancel = stringResource(R.string.cancel),
+            confirm = stringResource(R.string.leave)
         )
     }
 
     if (state.showDiscardConfirm) {
-        AlertDialog(
-            onDismissRequest = {
-                viewModel.onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(false))
+        ConfirmationDialog(
+            title = stringResource(R.string.discard_recording_title),
+            text = stringResource(R.string.discard_recording_message),
+            icon = Icons.Default.DeleteForever,
+            onDismiss = {
+                viewModel.onAction(
+                    PracticeSessionAction.ShowOrHideDiscardConfirmDialog(
+                        false
+                    )
+                )
             },
-            title = { Text(stringResource(R.string.discard_recording_title)) },
-            text = { Text(stringResource(R.string.discard_recording_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer)
-                }) { Text(stringResource(R.string.discard)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(false))
-                }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            onConfirm = { viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer) },
+            cancel = stringResource(R.string.cancel),
+            confirm = stringResource(R.string.discard)
         )
     }
 
