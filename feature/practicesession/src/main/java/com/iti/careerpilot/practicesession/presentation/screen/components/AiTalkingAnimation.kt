@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen
+package com.iti.careerpilot.practicesession.presentation.screen.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
