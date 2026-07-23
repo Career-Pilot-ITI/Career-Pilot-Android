@@ -56,5 +56,14 @@ class WhisperModuleConventionPlugin : Plugin<Project> {
         add("implementation", "androidx-core-ktx")
         add("implementation", "hilt-android")
         add("ksp", "hilt-compiler")
+
+        add("testImplementation", "junit")
+        add("testImplementation", "kotlinx-coroutines-test")
+        add("testImplementation", "hilt-android-testing")
+        add("androidTestImplementation", "androidx-junit")
+        add("androidTestImplementation", "androidx-espresso-core")
+        add("androidTestImplementation", "hilt-android-testing")
+        add("kspTest", "hilt-compiler")
+        add("kspAndroidTest", "hilt-compiler")
     }
 }
