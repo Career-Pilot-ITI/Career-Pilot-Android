@@ -12,6 +12,7 @@ import com.iti.common.result.onSuccess
 import com.iti.onboarding.data.local.datasource.OnboardingLocalDataSource
 import com.iti.onboarding.data.mapper.toDomain
 import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSource
+import com.iti.core.datastore.models.UserProfile
 import com.iti.onboarding.domain.model.Track
 import com.iti.onboarding.domain.model.UploadedFile
 import com.iti.onboarding.domain.repository.OnboardingRepository
@@ -109,13 +110,11 @@ class OnboardingRepositoryImpl @Inject constructor(
     override suspend fun analyzeCv(
         uri: Uri,
         onProgress: (Int) -> Unit
-    ): CareerPilotResult<UserProfileDto, NetworkError> {
+    ): CareerPilotResult<UserProfile, NetworkError> {
         val file = localDataSource.uriToCacheFile(uri)
-        Log.d("ANALYZE_CV", "Starting analyzeCv for file: ${file?.name}, path: ${file?.absolutePath}")
         return file?.let {
             val result = safeNetworkCall {
                 val response = remoteDataSource.analyzeCv(file, onProgress)
-                Log.d("ANALYZE_CV", "ANALYZE CV SUCCESS! Response DTO from backend: $response")
                 val localCvUri = localDataSource.moveCVToInternalStorage(file)
                 updateLocalProfile(response)
                 localDataSource.updateUserProfile { current ->
@@ -127,19 +126,19 @@ class OnboardingRepositoryImpl @Inject constructor(
                         )
                     )
                 }
-                response
+                response.toDomain()
             }
 
             if (result is CareerPilotResult.Error) {
-                Log.e("ANALYZE_CV", "ANALYZE CV FAILED! Error: ${result.error}. Triggering uploadCv fallback...")
                 val uploadResult = uploadCv(uri, onProgress)
                 if (uploadResult is CareerPilotResult.Success) {
                     val uploaded = uploadResult.data
-                    Log.d("ANALYZE_CV", "uploadCv fallback response: $uploaded")
                     return CareerPilotResult.Success(
-                        UserProfileDto(
-                            id = uploaded.id,
-                            cvUrl = uploaded.url
+                        UserProfile(
+                            id = uploaded.id.toInt(),
+                            cv = com.iti.core.datastore.models.CvInfo(
+                                cvUrl = uploaded.url
+                            )
                         )
                     )
                 }

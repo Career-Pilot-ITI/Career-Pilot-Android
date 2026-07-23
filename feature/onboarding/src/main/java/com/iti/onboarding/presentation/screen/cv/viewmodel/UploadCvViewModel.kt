@@ -66,7 +66,7 @@ class UploadCvViewModel @Inject constructor(
             val startTime = System.currentTimeMillis()
             var realProgress = 0
             var isDone = false
-            var analyzeResult: CareerPilotResult<com.iti.careerpilot.core.network.model.UserProfileDto, com.iti.common.error.NetworkError>? = null
+            var analyzeResult: CareerPilotResult<com.iti.core.datastore.models.UserProfile, com.iti.common.error.NetworkError>? = null
 
             _state.update { it.copy(stage = CvUploadStage.UPLOADING, uploadProgress = 0f) }
 
@@ -96,7 +96,7 @@ class UploadCvViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         selectedFile = SelectedCvUiModel(
-                            fileId = response.id ?: 0L,
+                            fileId = response.id.toLong(),
                             name = fileName,
                             sizeBytes = 0L,
                         ),

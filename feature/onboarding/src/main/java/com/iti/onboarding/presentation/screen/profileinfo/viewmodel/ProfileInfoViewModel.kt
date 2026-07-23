@@ -38,6 +38,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 import com.iti.common.snackbar.CareerPilotSnackbarController
 
+private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$")
+
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
     private val imageCaptureUriProvider: ImageCaptureUriProvider,
@@ -261,7 +263,7 @@ class ProfileInfoViewModel @Inject constructor(
                 return@launch
             }
             val currentData = _state.value.data
-            val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(currentData.email).matches()
+            val isEmailValid = EMAIL_REGEX.matches(currentData.email)
             if (!isEmailValid) {
                 _state.update { it.copy(isEmailInvalid = true) }
                 CareerPilotSnackbarController.show(UIText.StringResource(R.string.profile_info_email_invalid))
