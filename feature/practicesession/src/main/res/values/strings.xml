@@ -8,4 +8,31 @@
     <string name="leave_confirmation_title">Are you sure you want to leave?</string>
     <string name="leave_confirmation_message">the current answer will be discarded but you will be able to continue the interview session later.</string>
     <string name="leave">Leave</string>
+
+    <!-- Skip question confirmation -->
+    <string name="skip_question_title">Skip Question?</string>
+    <string name="skip_question_message">Are you sure you want to skip this question? You won\'t be able to answer it later in this session.</string>
+    <string name="skip">Skip</string>
+    <string name="skip_question">Skip question</string>
+
+    <!-- Discard recording confirmation -->
+    <string name="discard_recording_title">Discard Recording?</string>
+    <string name="discard_recording_message">This will permanently delete your current recording.</string>
+    <string name="discard">Discard</string>
+    <string name="delete_recording">Delete recording</string>
+
+    <!-- Playback / recording controls -->
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="submit_answer">Submit answer</string>
+    <string name="stop_recording">Stop recording</string>
+    <string name="start_recording">Start recording</string>
+    <string name="playback_position_value">%1$s of %2$s</string>
+
+    <!-- Session screen chrome -->
+    <string name="toggle_question_card">Toggle question card</string>
+    <string name="session_status_icon">Session status</string>
+    <string name="loading_question">Loading question…</string>
+    <string name="question_number">Question %1$s</string>
 </resources>

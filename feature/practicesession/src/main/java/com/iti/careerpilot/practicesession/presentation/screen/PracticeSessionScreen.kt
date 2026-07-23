@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -14,8 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NextPlan
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.Delete
@@ -48,11 +47,14 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.WavyProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +65,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -71,12 +72,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -154,13 +155,13 @@ fun PracticeSessionRoot(
     if (showSkipConfirm) {
         AlertDialog(
             onDismissRequest = { showSkipConfirm = false },
-            title = { Text("Skip Question?") },
-            text = { Text("Are you sure you want to skip this question? You won't be able to answer it later in this session.") },
+            title = { Text(stringResource(R.string.skip_question_title)) },
+            text = { Text(stringResource(R.string.skip_question_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showSkipConfirm = false
                     viewModel.onAction(PracticeSessionAction.SkipCurrentQuestion)
-                }) { Text("Skip") }
+                }) { Text(stringResource(R.string.skip)) }
             },
             dismissButton = {
                 TextButton(onClick = { showSkipConfirm = false }) {
@@ -176,15 +177,15 @@ fun PracticeSessionRoot(
                 showDiscardConfirm = false
                 isLeaving = false
             },
-            title = { Text("Discard Recording?") },
-            text = { Text("This will permanently delete your current recording.") },
+            title = { Text(stringResource(R.string.discard_recording_title)) },
+            text = { Text(stringResource(R.string.discard_recording_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDiscardConfirm = false
                     viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer)
                     if (isLeaving) onBack()
                     isLeaving = false
-                }) { Text("Discard") }
+                }) { Text(stringResource(R.string.discard)) }
             },
             dismissButton = {
                 TextButton(onClick = {
@@ -277,7 +278,7 @@ fun PracticeSessionScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CenterStage(state = state)
+                        CenterStage(state = state, onAction = onAction)
                         Spacer(Modifier.height(16.dp))
                         AnimatedVisibility(visible = state.isRecording) {
                             Text(
@@ -294,12 +295,12 @@ fun PracticeSessionScreen(
 
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// Center stage: siri-like orb + rotating amplitude rings
-// ─────────────────────────────────────────────────────────────────────────
-
 @Composable
-fun CenterStage(state: PracticeSessionState, modifier: Modifier = Modifier) {
+fun CenterStage(
+    state: PracticeSessionState,
+    onAction: (PracticeSessionAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(modifier = modifier.size(260.dp), contentAlignment = Alignment.Center) {
         if (state.isRecording) {
             AmplitudeRings(
@@ -310,7 +311,12 @@ fun CenterStage(state: PracticeSessionState, modifier: Modifier = Modifier) {
         AiTalkingAnimation(
             isPulsing = state.isReadingQuestion,
             onClick = {
-                // todo start and stop the animation and the text to speech
+                // Tap the orb to toggle hearing the current question read aloud.
+                if (state.isReadingQuestion) {
+                    onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
+                } else {
+                    onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
+                }
             }
         )
         val icon = when {
@@ -321,7 +327,7 @@ fun CenterStage(state: PracticeSessionState, modifier: Modifier = Modifier) {
         }
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.session_status_icon),
             tint = Color.White,
             modifier = Modifier.size(42.dp)
         )
@@ -352,7 +358,6 @@ private fun AmplitudeRings(amplitudes: List<Float>, modifier: Modifier = Modifie
     val ringC = recent.filterIndexed { i, _ -> i % 3 == 2 }.ifEmpty { listOf(0.05f) }
 
     val barColor = MaterialTheme.colorScheme.primary
-
     Canvas(modifier = modifier) {
         val ringConfigs = listOf(
             Triple(ringA, size.minDimension * 0.30f, rotation1),
@@ -421,7 +426,7 @@ private fun AudioReviewRow(
             ) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "Delete recording",
+                    contentDescription = stringResource(R.string.delete_recording),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -433,7 +438,11 @@ private fun AudioReviewRow(
             FilledTonalIconButton(onClick = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) }) {
                 Icon(
                     imageVector = if (state.isPlayingAudio) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (state.isPlayingAudio) "Pause" else "Play"
+                    contentDescription = if (state.isPlayingAudio) {
+                        stringResource(R.string.pause)
+                    } else {
+                        stringResource(R.string.play)
+                    }
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -469,6 +478,7 @@ private fun AudioReviewRow(
             Spacer(Modifier.width(12.dp))
             LargeGradientIconButton(
                 icon = Icons.AutoMirrored.Rounded.Send,
+                contentDescription = stringResource(R.string.submit_answer),
                 onClick = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) },
                 size = 56.dp
             )
@@ -489,10 +499,20 @@ private fun ActionBottomBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        //todo add skip button
-        Spacer(
-            Modifier.weight(1f)
-        )
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!state.isRecording && state.recordedAudioPath == null) {
+                IconButton(onClick = { onAction(PracticeSessionAction.SkipCurrentQuestion) }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.NextPlan,
+                        contentDescription = stringResource(R.string.skip_question),
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        }
 
         Box(
             modifier = Modifier.weight(2f),
@@ -503,6 +523,11 @@ private fun ActionBottomBar(
             }
             LargeGradientIconButton(
                 icon = if (state.isRecording) Icons.Default.Stop else Icons.Default.Mic,
+                contentDescription = if (state.isRecording) {
+                    stringResource(R.string.stop_recording)
+                } else {
+                    stringResource(R.string.start_recording)
+                },
                 onClick = {
                     if (state.isRecording) {
                         onAction(PracticeSessionAction.StopRecordingAnswer)
@@ -528,7 +553,7 @@ private fun ActionBottomBar(
             ) {
                 Icon(
                     imageVector = if (state.showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
-                    contentDescription = "Toggle question card",
+                    contentDescription = stringResource(R.string.toggle_question_card),
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -540,8 +565,9 @@ private fun ActionBottomBar(
 fun LargeGradientIconButton(
     icon: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String? = null,
     enabled: Boolean = true,
-    size: androidx.compose.ui.unit.Dp = 72.dp,
+    size: Dp = 72.dp,
     isOutlined: Boolean = false
 ) {
     val gradientBrush = Brush.linearGradient(
@@ -560,7 +586,7 @@ fun LargeGradientIconButton(
                 if (isOutlined) Modifier.background(Color.Transparent)
                 else Modifier.background(gradientBrush)
             )
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(enabled = enabled, onClickLabel = contentDescription, onClick = onClick)
             .then(
                 if (isOutlined) Modifier
                     .background(Color.Transparent)
@@ -606,6 +632,11 @@ fun WavyBorder(amplitudes: List<Float>) {
     val recentAmps = amplitudes.takeLast(10).ifEmpty { listOf(0.1f) }
     val avgAmp = recentAmps.average().toFloat().coerceIn(0.1f, 1f)
 
+    val gradientColors = listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.tertiary,
+        MaterialTheme.colorScheme.secondary
+    )
     Canvas(modifier = Modifier.size(100.dp)) {
         val center = Offset(size.width / 2, size.height / 2)
         val baseRadius = size.width / 2 - 5.dp.toPx()
@@ -631,13 +662,7 @@ fun WavyBorder(amplitudes: List<Float>) {
 
         drawPath(
             path = path,
-            brush = Brush.linearGradient(
-                colors = listOf(
-                    Color(0xFF6D5DF6),
-                    Color(0xFF9D5CF9),
-                    Color(0xFF3ED6C6)
-                )
-            ),
+            brush = Brush.linearGradient(colors = gradientColors),
             style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
         )
     }
@@ -653,10 +678,7 @@ fun ProcessingDialog() {
             usePlatformDefaultWidth = false
         )
     ) {
-        CareerPilotCard(
-            useShadow = false,
-            modifier = Modifier
-        ) {
+        CareerPilotCard(useShadow = false) {
             Box(modifier = Modifier.padding(20.dp)) {
                 LoadingWave()
             }
@@ -665,83 +687,37 @@ fun ProcessingDialog() {
 }
 
 @Composable
-private fun animateColorAsStateCompat(target: Color) =
-    animateColorAsState(targetValue = target, label = "color")
-
-@Composable
 private fun WavySeekSlider(
     progress: Float,
     isPlaying: Boolean,
     onSeek: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val infinite = rememberInfiniteTransition(label = "wavy_seek")
-    val phase by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = (2 * PI).toFloat(),
-        animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing)),
-        label = "wave_phase"
-    )
-    var dragProgress by remember { mutableStateOf<Float?>(null) }
-    val shownProgress = dragProgress ?: progress
+    var dragValue by remember { mutableStateOf<Float?>(null) }
+    val sliderValue = dragValue ?: progress
+    val interactionSource = remember { MutableInteractionSource() }
 
-    val trackColor = MaterialTheme.colorScheme.primary
-    val trackBg = MaterialTheme.colorScheme.surfaceVariant
-
-    Canvas(
+    Slider(
+        value = sliderValue,
+        onValueChange = { dragValue = it.coerceIn(0f, 1f) },
+        onValueChangeFinished = {
+            dragValue?.let(onSeek)
+            dragValue = null
+        },
+        valueRange = 0f..1f,
+        interactionSource = interactionSource,
         modifier = modifier
-            .fillMaxWidth()
-            .height(28.dp)
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        dragProgress = (offset.x / size.width).coerceIn(0f, 1f)
-                    },
-                    onDrag = { change, _ ->
-                        dragProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-                    },
-                    onDragEnd = {
-                        dragProgress?.let(onSeek)
-                        dragProgress = null
-                    }
-                )
-            }
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    onSeek((offset.x / size.width).coerceIn(0f, 1f))
+            .fillMaxWidth(),
+        track = { sliderState ->
+            LinearWavyProgressIndicator(
+                progress = { sliderState.value },
+                modifier = Modifier.fillMaxWidth(),
+                amplitude = { p ->
+                    if (isPlaying) WavyProgressIndicatorDefaults.indicatorAmplitude(p) else 0f
                 }
-            }
-    ) {
-        val midY = size.height / 2
-        val width = size.width
-
-        drawLine(
-            color = trackBg,
-            start = Offset(0f, midY),
-            end = Offset(width, midY),
-            strokeWidth = 4.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-
-        val filledWidth = width * shownProgress
-        val amplitude = if (isPlaying) 6.dp.toPx() else 0f
-        val steps = 60
-        val path = Path()
-        for (i in 0..steps) {
-            val x = filledWidth * i / steps
-            val y = midY + sin(phase + i * 0.55f) * amplitude
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-        drawPath(
-            path = path, color = trackColor, style = Stroke(
-                width = 4.dp.toPx(),
-                cap = StrokeCap.Round
             )
-        )
-
-        val thumbY = midY + sin(phase + steps * 0.55f) * amplitude
-        drawCircle(color = trackColor, radius = 7.dp.toPx(), center = Offset(filledWidth, thumbY))
-    }
+        }
+    )
 }
 
 private fun formatDuration(millis: Long): String {
@@ -773,22 +749,22 @@ fun QuestionCard(state: PracticeSessionState, onAction: (PracticeSessionAction) 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Question ${question?.questionOrder ?: ""}",
+                    text = stringResource(R.string.question_number, question?.questionOrder ?: ""),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Row {
                     IconButton(onClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) }) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = "Play")
+                        Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.play))
                     }
                     IconButton(onClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) }) {
-                        Icon(Icons.Default.Stop, contentDescription = "Stop")
+                        Icon(Icons.Default.Stop, contentDescription = stringResource(R.string.stop))
                     }
                 }
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                text = question?.questionText ?: "Loading question...",
+                text = question?.questionText ?: stringResource(R.string.loading_question),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center

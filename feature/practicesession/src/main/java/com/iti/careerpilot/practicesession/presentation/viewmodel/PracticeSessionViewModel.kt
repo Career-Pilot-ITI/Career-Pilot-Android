@@ -221,8 +221,7 @@ class PracticeSessionViewModel @Inject constructor(
             AudioPlaybackState.PLAYING -> audioPlayer.pause()
             AudioPlaybackState.PAUSED -> audioPlayer.resume()
             AudioPlaybackState.STOPPED -> {
-                val path = currentState.recordedAudioPath
-                if (path != null) {
+                currentState.recordedAudioPath?.let { path ->
                     audioPlayer.play(path) {
                         //todo add on complete if needed
                     }
