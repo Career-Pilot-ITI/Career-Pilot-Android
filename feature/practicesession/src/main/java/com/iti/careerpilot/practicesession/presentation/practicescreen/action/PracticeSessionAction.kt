@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.action
+package com.iti.careerpilot.practicesession.presentation.practicescreen.action
 
 sealed interface PracticeSessionAction {
 

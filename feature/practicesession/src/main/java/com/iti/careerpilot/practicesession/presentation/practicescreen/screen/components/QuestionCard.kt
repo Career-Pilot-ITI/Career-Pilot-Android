@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen.components
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -63,20 +63,20 @@ fun QuestionCard(
                 )
                 if (isReadingQuestion) {
                     IconButton(
-                        onClick = onPlayClick
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                            contentDescription = stringResource(R.string.play)
-                        )
-                    }
-                } else {
-                    IconButton(
                         onClick = onStopClick
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_stop),
                             contentDescription = stringResource(R.string.stop)
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = onPlayClick
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
+                            contentDescription = stringResource(R.string.play)
                         )
                     }
                 }

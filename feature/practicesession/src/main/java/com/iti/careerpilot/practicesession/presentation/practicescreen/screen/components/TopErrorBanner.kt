@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen.components
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

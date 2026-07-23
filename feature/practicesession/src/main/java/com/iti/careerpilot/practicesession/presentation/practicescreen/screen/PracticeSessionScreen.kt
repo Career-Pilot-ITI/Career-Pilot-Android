@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
 import androidx.activity.compose.BackHandler
@@ -42,18 +42,18 @@ import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.practicesession.R
-import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
-import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
-import com.iti.careerpilot.practicesession.presentation.screen.components.CenterStage
-import com.iti.careerpilot.practicesession.presentation.screen.components.ConfirmationDialog
-import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionBottomSection
-import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionSettingsBottomSheet
-import com.iti.careerpilot.practicesession.presentation.screen.components.ProcessingDialog
-import com.iti.careerpilot.practicesession.presentation.screen.components.QuestionCard
-import com.iti.careerpilot.practicesession.presentation.screen.components.TopErrorNotification
-import com.iti.careerpilot.practicesession.presentation.screen.util.formatDuration
-import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
-import com.iti.careerpilot.practicesession.presentation.viewmodel.PracticeSessionViewModel
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CenterStage
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ConfirmationDialog
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.PracticeSessionBottomSection
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.PracticeSessionSettingsBottomSheet
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ProcessingDialog
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.QuestionCard
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.TopErrorNotification
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
+import com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel.PracticeSessionViewModel
 import com.iti.common.util.UIText
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds

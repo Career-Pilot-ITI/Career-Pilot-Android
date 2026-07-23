@@ -25,7 +25,8 @@ import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
-import com.iti.careerpilot.practicesession.presentation.screen.PracticeSessionRoot
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
+import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.CancellationException
@@ -206,11 +207,21 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
-                        onNavigateToResult = {
-                            //todo make results screen
+                        onNavigateToResult = { sessionId ->
+                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                            rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
                         },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                        }
+                    )
+                }
+
+                entry<Route.PracticeResult> {
+                    ResultRoot(
+                        sessionId = it.sessionId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }
                     )
                 }

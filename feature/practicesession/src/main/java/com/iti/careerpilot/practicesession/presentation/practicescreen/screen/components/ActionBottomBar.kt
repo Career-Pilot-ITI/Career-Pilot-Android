@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen.components
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -68,8 +68,8 @@ fun ActionBottomBar(
             )
             LargeGradientIconButton(
                 icon = ImageVector.vectorResource(
-                    if (isRecording) R.drawable.ic_mic
-                    else R.drawable.ic_stop
+                    if (isRecording) R.drawable.ic_stop
+                    else R.drawable.ic_mic
                 ),
                 contentDescription = if (isRecording) {
                     stringResource(R.string.stop_recording)

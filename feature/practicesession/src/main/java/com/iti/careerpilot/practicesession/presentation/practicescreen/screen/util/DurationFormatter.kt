@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen.util
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util
 
 fun formatDuration(millis: Long): String {
     val totalSeconds = (millis / 1000).coerceAtLeast(0)

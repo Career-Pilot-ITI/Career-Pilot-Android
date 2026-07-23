@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.event
+package com.iti.careerpilot.practicesession.presentation.practicescreen.event
 
 import com.iti.common.util.UIText
 

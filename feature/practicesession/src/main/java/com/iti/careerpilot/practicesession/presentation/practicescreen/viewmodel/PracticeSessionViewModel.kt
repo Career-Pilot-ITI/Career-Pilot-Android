@@ -1,14 +1,14 @@
-package com.iti.careerpilot.practicesession.presentation.viewmodel
+package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
-import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction.*
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction.*
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
 import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
-import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
-import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
+import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
 import com.iti.careerpilot.whisper.domain.WhisperEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -29,9 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
 import java.io.File
 import kotlin.time.Duration.Companion.minutes
-import android.media.MediaCodec
-import android.media.MediaExtractor
-import android.media.MediaFormat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -40,7 +37,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.models.Session
-import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.common.error.NetworkError
 import com.iti.common.error.TranscriptionError
 import com.iti.common.result.onError

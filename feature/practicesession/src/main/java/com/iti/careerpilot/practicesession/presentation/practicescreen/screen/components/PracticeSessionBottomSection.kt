@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.screen.components
+package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -8,7 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 
 @Composable
 fun PracticeSessionBottomSection(

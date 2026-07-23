@@ -1,4 +1,4 @@
-package com.iti.careerpilot.practicesession.presentation.state
+package com.iti.careerpilot.practicesession.presentation.practicescreen.state
 
 import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
