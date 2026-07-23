@@ -1,6 +1,7 @@
 package com.iti.common.snackbar
 
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import com.iti.common.snackbar.model.CareerPilotSnackbarRequest
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.common.util.UIText
@@ -10,18 +11,16 @@ import kotlinx.coroutines.flow.Flow
 interface SnackbarController {
     val requests: Flow<CareerPilotSnackbarRequest>
 
-    fun show(
+    suspend fun show(
         message: UIText,
         type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
         duration: SnackbarDuration = type.defaultDuration(),
-        onAction: (() -> Unit)? = null,
-    )
+    ): SnackbarResult
 
-    fun show(
+    suspend fun show(
         message: UIText,
         actionLabel: UIText,
         type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
         duration: SnackbarDuration = type.defaultDuration(),
-        onAction: () -> Unit,
-    )
+    ): SnackbarResult
 }
