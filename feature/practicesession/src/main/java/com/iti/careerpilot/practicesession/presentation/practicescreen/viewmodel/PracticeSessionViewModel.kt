@@ -329,12 +329,14 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun restartOldSession(sessionId: Long) {
+        if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.restartOldSession(sessionId)
         }
     }
 
     private fun createNewSession(trackId: Long) {
+        if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.createNewSession(
                 CreateSessionRequest(
