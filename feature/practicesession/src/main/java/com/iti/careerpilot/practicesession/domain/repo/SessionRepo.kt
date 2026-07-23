@@ -30,7 +30,7 @@ interface SessionRepo {
         sessionId: Long
     ): CareerPilotResult<SessionResult, NetworkError>
 
-    suspend fun getSessionState(
+    suspend fun restartOldSession(
         sessionId: Long
     ): CareerPilotResult<Session, NetworkError>
 

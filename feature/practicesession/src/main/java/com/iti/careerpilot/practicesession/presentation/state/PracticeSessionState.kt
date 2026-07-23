@@ -1,12 +1,13 @@
 package com.iti.careerpilot.practicesession.presentation.state
 
 import androidx.compose.runtime.Immutable
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.models.Session
 import kotlin.time.Duration
 
 @Immutable
 data class PracticeSessionState(
-    val isLoading: Boolean = false,
+    val isLoadingSession: Boolean = false,
     val sessionId: Long = 0L,
     val showPermissionDialog: Boolean = false,
     val currentSession: Session? = null,
@@ -15,9 +16,8 @@ data class PracticeSessionState(
     val recordedAudioPath: String? = null,
     val amplitudes: List<Float> = emptyList(),
     val recordingDuration: Duration = Duration.ZERO,
-    val isTranscribing: Boolean = false,
-    val isUploading: Boolean = false,
-    val isLoadingNextQuestion: Boolean = false,
+    val isUploadingAndTranscribingAudio: Boolean = false,
+    val isSendingAnswer: Boolean = false,
     val uploadProgress: Int = 0,
     val playbackDurationMs: Long = 0,
     val playbackPositionMs: Long = 0,
@@ -25,6 +25,7 @@ data class PracticeSessionState(
     val error: String? = null,
     val isFinished: Boolean = false,
     val isPlayingAudio: Boolean = false,
+    val playbackState: AudioPlaybackState = AudioPlaybackState.STOPPED,
     val totalSessionDuration: Duration = Duration.ZERO,
     val showQuestionCard: Boolean = true
 )

@@ -3,7 +3,7 @@ package com.iti.careerpilot.practicesession.domain.models
 data class AnswerRequest(
     val transcript: String,
     val sessionElapsedSeconds: Int,
-    val durationMs: Int,
+    val durationMs: Long,
     val audioUrl: String,
     val words: List<Word>
 )

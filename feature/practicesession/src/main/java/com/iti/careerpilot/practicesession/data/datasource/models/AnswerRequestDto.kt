@@ -10,7 +10,7 @@ data class AnswerRequestDto(
     @SerialName("sessionElapsedSeconds")
     val sessionElapsedSeconds: Int?,
     @SerialName("durationMs")
-    val durationMs: Int?,
+    val durationMs: Long?,
     @SerialName("audioUrl")
     val audioUrl: String?,
     @SerialName("words")

@@ -3,7 +3,7 @@ package com.iti.careerpilot.practicesession.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
-import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction.*
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
 import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
 import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
+import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
+import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
 import com.iti.common.result.CareerPilotResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.async
@@ -36,8 +38,13 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.models.Session
+import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
 import com.iti.common.error.NetworkError
+import com.iti.common.error.TranscriptionError
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -90,7 +97,7 @@ class PracticeSessionViewModel @Inject constructor(
 
                 if (details.isRecording && details.duration >= 2.minutes && !autoStopTriggered) {
                     autoStopTriggered = true
-                    onAction(PracticeSessionAction.FinishRecordingAnswerAndStartTranscription)
+                    onAction(StopRecordingAnswer)
                 }
                 if (!details.isRecording) {
                     autoStopTriggered = false
@@ -101,19 +108,21 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun setupTtsListener() {
-        textToSpeechManager.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {
-                _state.update { it.copy(isReadingQuestion = true) }
-            }
+        textToSpeechManager.setOnUtteranceProgressListener(
+            object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {
+                    _state.update { it.copy(isReadingQuestion = true) }
+                }
 
-            override fun onDone(utteranceId: String?) {
-                _state.update { it.copy(isReadingQuestion = false) }
-            }
+                override fun onDone(utteranceId: String?) {
+                    _state.update { it.copy(isReadingQuestion = false) }
+                }
 
-            override fun onError(utteranceId: String?) {
-                _state.update { it.copy(isReadingQuestion = false) }
+                override fun onError(utteranceId: String?) {
+                    _state.update { it.copy(isReadingQuestion = false) }
+                }
             }
-        })
+        )
     }
 
     private fun startSessionTimer() {
@@ -134,6 +143,7 @@ class PracticeSessionViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPlayingAudio = track.isPlaying,
+                        playbackState = track.playbackState,
                         playbackPositionMs = track.durationPlayed.inWholeMilliseconds,
                         playbackDurationMs = track.totalDuration.inWholeMilliseconds
                     )
@@ -144,41 +154,45 @@ class PracticeSessionViewModel @Inject constructor(
 
     fun onAction(action: PracticeSessionAction) {
         when (action) {
-            is PracticeSessionAction.CreateNewPracticeSession -> createNewSession(action)
+            is CreateNewPracticeSession -> createNewSession(action.trackId)
 
-            is PracticeSessionAction.RestartPracticeSession -> restartOldSession(action)
+            is RestartPracticeSession -> restartOldSession(action.sessionId)
 
-            is PracticeSessionAction.ShowOrHidePermissionDialog -> togglePermissionDialog(action)
+            is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
-            PracticeSessionAction.ListenToAIReadingCurrentQuestion -> readQuestion()
+            ListenToAIReadingCurrentQuestion -> readQuestion()
 
-            PracticeSessionAction.PauseListeningToCurrentQuestion -> stopReadingQuestion()
+            PauseListeningToCurrentQuestion -> stopReadingQuestion()
 
-            PracticeSessionAction.StopListeningToCurrentQuestionAndStartAnswering -> {
+            StopListeningToCurrentQuestionAndStartAnswering -> {
                 stopReadingQuestion()
                 startRecordingAnswer()
             }
 
-            PracticeSessionAction.DiscardCurrentAnswer -> discardRecordedAnswer()
+            DiscardCurrentAnswer -> discardRecordedAnswer()
 
-            PracticeSessionAction.FinishRecordingAnswerAndStartTranscription -> voiceRecorder.stop()
+            StartRecordingAnswer -> startRecordingAnswer()
 
-            PracticeSessionAction.PauseRecordingAnswer -> pauseRecorder()
+            ResumeRecordingAnswer -> resumeRecorder()
 
-            PracticeSessionAction.PlayCurrentRecordedAnswer -> playRecordedAnswer()
+            PauseRecordingAnswer -> pauseRecorder()
 
-            is PracticeSessionAction.SeekAudioTo -> seekMediaPlayer(action)
+            StopRecordingAnswer -> stopRecording()
 
-            PracticeSessionAction.ResumeRecordingAnswer -> resumeRecorder()
+            TogglePlayingCurrentRecordedAnswer -> togglePlayRecordedAnswer()
 
-            PracticeSessionAction.StartRecordingAnswer -> startRecordingAnswer()
+            is SeekAudioTo -> seekMediaPlayer(action.positionMs)
 
-            PracticeSessionAction.SubmitFinalAnswerToCurrentQuestion -> submitAnswer()
+            SubmitAnswerToCurrentQuestion -> submitAnswer()
 
-            PracticeSessionAction.SkipCurrentQuestion -> skipCurrentQuestion()
+            SkipCurrentQuestion -> skipCurrentQuestion()
 
-            PracticeSessionAction.ToggleQuestionCard -> toggleQuestionTextCard()
+            ToggleQuestionCard -> toggleQuestionTextCard()
         }
+    }
+
+    private fun stopRecording() {
+        voiceRecorder.stop()
     }
 
     private fun toggleQuestionTextCard() {
@@ -186,10 +200,7 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun skipCurrentQuestion() {
-        val sessionId = _state.value.sessionId
-        if (sessionId != 0L) {
-            loadSession { sessionRepo.getSessionState(sessionId) }
-        }
+        //todo get next question
     }
 
     private fun resumeRecorder() {
@@ -200,15 +211,22 @@ class PracticeSessionViewModel @Inject constructor(
         voiceRecorder.pause()
     }
 
-    private fun seekMediaPlayer(action: PracticeSessionAction.SeekAudioTo) {
-        audioPlayer.seekTo(action.positionMs)
+    private fun seekMediaPlayer(positionMs: Long) {
+        audioPlayer.seekTo(positionMs)
     }
 
-    private fun playRecordedAnswer() {
-        val path = _state.value.recordedAudioPath
-        if (path != null) {
-            audioPlayer.play(path) {
-                _state.update { it.copy(isPlayingAudio = false) }
+    private fun togglePlayRecordedAnswer() {
+        val currentState = _state.value
+        when (currentState.playbackState) {
+            AudioPlaybackState.PLAYING -> audioPlayer.pause()
+            AudioPlaybackState.PAUSED -> audioPlayer.resume()
+            AudioPlaybackState.STOPPED -> {
+                val path = currentState.recordedAudioPath
+                if (path != null) {
+                    audioPlayer.play(path) {
+                        //todo add on complete if needed
+                    }
+                }
             }
         }
     }
@@ -238,21 +256,21 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update { it.copy(isReadingQuestion = false) }
     }
 
-    private fun togglePermissionDialog(action: PracticeSessionAction.ShowOrHidePermissionDialog) {
-        _state.update { it.copy(showPermissionDialog = action.show) }
+    private fun togglePermissionDialog(show: Boolean) {
+        _state.update { it.copy(showPermissionDialog = show) }
     }
 
-    private fun restartOldSession(action: PracticeSessionAction.RestartPracticeSession) {
-        loadSession(resetAnswerState = false) {
-            sessionRepo.getSessionState(action.sessionId)
+    private fun restartOldSession(sessionId: Long) {
+        loadSession {
+            sessionRepo.restartOldSession(sessionId)
         }
     }
 
-    private fun createNewSession(action: PracticeSessionAction.CreateNewPracticeSession) {
+    private fun createNewSession(trackId: Long) {
         loadSession {
             sessionRepo.createNewSession(
                 CreateSessionRequest(
-                    trackId = action.trackId,
+                    trackId = trackId,
                     questionCount = 5,
                     durationMinutes = 15
                 )
@@ -265,36 +283,38 @@ class PracticeSessionViewModel @Inject constructor(
      * these were previously two near-identical copies of the same success/error handling.
      */
     private fun loadSession(
-        resetAnswerState: Boolean = true,
         request: suspend () -> CareerPilotResult<Session, NetworkError>
     ) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            when (val result = request()) {
-                is CareerPilotResult.Success -> {
-                    _state.update {
-                        val base = it.copy(
-                            isLoading = false,
-                            currentSession = result.data,
-                            sessionId = result.data.sessionId
-                        )
-                        if (resetAnswerState) {
-                            readQuestion()
-                            base.copy(
-                                recordedAudioPath = null,
-                                transcription = null,
-                                recordingDuration = Duration.ZERO,
-                                amplitudes = emptyList()
-                            )
-                        } else base
-                    }
+            _state.update { it.copy(isLoadingSession = true) }
+            request()
+                .onSuccess { session ->
+                    handleSessionLoadSuccess(session)
                 }
-                is CareerPilotResult.Error -> {
-                    _state.update { it.copy(isLoading = false) }
-                    _event.send(PracticeSessionEvent.ShowError(result.error.toUIText()))
+                .onError {
+                    handleSessionLoadError(it)
                 }
-            }
         }
+    }
+
+    private fun handleSessionLoadSuccess(session: Session) {
+        _state.update {
+            it.copy(
+                isLoadingSession = false,
+                currentSession = session,
+                sessionId = session.sessionId,
+                recordedAudioPath = null,
+                transcription = null,
+                recordingDuration = Duration.ZERO,
+                amplitudes = emptyList()
+            )
+        }
+        readQuestion()
+    }
+
+    private suspend fun handleSessionLoadError(error: NetworkError) {
+        _state.update { it.copy(isLoadingSession = false) }
+        _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
     }
 
     private fun readQuestion() {
@@ -310,82 +330,122 @@ class PracticeSessionViewModel @Inject constructor(
         val sessionId = session.sessionId
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, isUploading = true, isTranscribing = true) }
-
-            val audioFile = File(audioPath)
-
-            val uploadDeferred = async {
-                sessionRepo.uploadAudio(audioFile) { progress ->
-                    _state.update { it.copy(uploadProgress = progress) }
-                }
+            _state.update {
+                it.copy(
+                    isUploadingAndTranscribingAudio = true
+                )
             }
 
-            val transcribeDeferred = async {
-                withContext(Dispatchers.Default) {
-                    val pcmData = decodeAudio(audioPath)
-                    if (pcmData != null) {
-                        whisperEngine.transcribe(pcmData)
-                    } else {
-                        Result.failure(IllegalStateException("Failed to decode recorded audio"))
-                    }
-                }
-            }
+            val uploadDeferred = async { uploadAudio(audioPath) }
+            val transcribeDeferred = async { transcribeAudio(audioPath) }
 
             val uploadResult = uploadDeferred.await()
             val transcriptionResult = transcribeDeferred.await()
 
-            _state.update { it.copy(isUploading = false, isTranscribing = false) }
-
-            if (uploadResult is CareerPilotResult.Success && transcriptionResult.isSuccess) {
-                val transcript = transcriptionResult.getOrNull().orEmpty()
-                val audioUrl = uploadResult.data.url
-                val elapsedSeconds = sessionStartedAtMs?.let {
-                    ((System.currentTimeMillis() - it) / 1000).toInt()
-                } ?: 0
-
-                val answerResult = sessionRepo.submitAnswer(
-                    sessionId = sessionId,
-                    request = AnswerRequest(
-                        transcript = transcript,
-                        audioUrl = audioUrl,
-                        durationMs = _state.value.recordingDuration.inWholeMilliseconds.toInt(),
-                        sessionElapsedSeconds = elapsedSeconds,
-                        words = emptyList() // TODO
-                    )
-                )
-
-                when (answerResult) {
-                    is CareerPilotResult.Success -> {
-                        val answerResponse = answerResult.data
-                        _state.update { it.copy(transcription = transcript) }
-                        if (answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true)) {
-                            _state.update { it.copy(isFinished = true, isLoading = false) }
-                            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
-                        } else if (answerResponse.nextQuestion != null) {
-                            loadSession { sessionRepo.getSessionState(sessionId) }
-                        } else {
-                            _state.update { it.copy(isLoading = false) }
+            transcriptionResult
+                .onSuccess { transcript ->
+                    _state.update { it.copy(transcription = transcript) }
+                    uploadResult
+                        .onSuccess { audioAttachment ->
+                            uploadAnswer(sessionId, audioAttachment.url, transcript)
                         }
-                    }
-                    is CareerPilotResult.Error -> {
-                        _state.update { it.copy(isLoading = false) }
-                        _event.send(PracticeSessionEvent.ShowError(answerResult.error.toUIText()))
-                    }
+                        .onError { error ->
+                            _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                            _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
+                        }
+                }
+                .onFailure { _ ->
+                    _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                    _event.send(PracticeSessionEvent.ShowError(TranscriptionError.UNKNOWN.toUIText()))
+                }
+        }
+    }
+
+    private suspend fun uploadAudio(audioPath: String): CareerPilotResult<AudioAttachment, NetworkError> =
+        sessionRepo.uploadAudio(File(audioPath)) { progress ->
+            _state.update { it.copy(uploadProgress = progress) }
+        }
+
+    private suspend fun transcribeAudio(audioPath: String): Result<String> =
+        withContext(Dispatchers.Default) {
+            val pcmData = decodeAudio(audioPath)
+            if (pcmData != null) {
+                whisperEngine.transcribe(pcmData).onSuccess {
+                    Log.d("CareerPilot", "transcription success: $it")
                 }
             } else {
-                _state.update { it.copy(isLoading = false) }
-                val message = when {
-                    uploadResult is CareerPilotResult.Error -> uploadResult.error.toUIText()
-                    transcriptionResult.isFailure -> NetworkError.UNKNOWN.toUIText()
-                    else -> NetworkError.UNKNOWN.toUIText()
-                }
-                _event.send(PracticeSessionEvent.ShowError(message))
+                Result.failure(IllegalStateException("Failed to decode recorded audio"))
             }
+        }
+
+    private suspend fun uploadAnswer(
+        sessionId: Long,
+        audioUrl: String,
+        transcript: String
+    ) {
+        stopReadingQuestion()
+        stopRecording()
+        _state.update {
+            it.copy(
+                isUploadingAndTranscribingAudio = false,
+                isSendingAnswer = true
+            )
+        }
+        val elapsedSeconds = sessionStartedAtMs?.let {
+            ((System.currentTimeMillis() - it) / 1000).toInt()
+        } ?: 0
+
+        sessionRepo.submitAnswer(
+            sessionId = sessionId,
+            request = AnswerRequest(
+                transcript = transcript,
+                audioUrl = audioUrl,
+                durationMs = _state.value.recordingDuration.inWholeMilliseconds,
+                sessionElapsedSeconds = elapsedSeconds,
+                words = emptyList()
+            )
+        ).onSuccess { response ->
+            handleAnswerSubmissionSuccess(
+                sessionId,
+                response
+            )
+        }.onError {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false
+                )
+            }
+            _event.send(PracticeSessionEvent.ShowError(it.toUIText()))
+        }
+    }
+
+    private suspend fun handleAnswerSubmissionSuccess(
+        sessionId: Long,
+        answerResponse: AnswerResponse
+    ) {
+        if (answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true)) {
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
+            return
+        }
+        answerResponse.nextQuestion?.let {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    currentSession = it.currentSession?.copy(
+                        currentQuestion = answerResponse.nextQuestion
+                    ),
+                    recordedAudioPath = null,
+                    transcription = null,
+                    recordingDuration = Duration.ZERO,
+                    amplitudes = emptyList()
+                )
+            }
+            readQuestion()
         }
     }
 
     /**
-     * Runs on Dispatchers.Default (see caller). Decodes the recorded file to PCM float
+     * Decodes the recorded file to PCM float
      * samples for the on-device Whisper model.
      */
     private fun decodeAudio(filePath: String): FloatArray? {
@@ -393,7 +453,8 @@ class PracticeSessionViewModel @Inject constructor(
         try {
             extractor.setDataSource(filePath)
             val trackIndex = (0 until extractor.trackCount).firstOrNull {
-                extractor.getTrackFormat(it).getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true
+                extractor.getTrackFormat(it).getString(MediaFormat.KEY_MIME)
+                    ?.startsWith("audio/") == true
             } ?: return null
 
             extractor.selectTrack(trackIndex)
@@ -419,7 +480,13 @@ class PracticeSessionViewModel @Inject constructor(
                     val inputBuffer = codec.getInputBuffer(inputIndex)!!
                     val sampleSize = extractor.readSampleData(inputBuffer, 0)
                     if (sampleSize < 0) {
-                        codec.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM)
+                        codec.queueInputBuffer(
+                            inputIndex,
+                            0,
+                            0,
+                            0,
+                            MediaCodec.BUFFER_FLAG_END_OF_STREAM
+                        )
                         isEOS = true
                     } else {
                         codec.queueInputBuffer(inputIndex, 0, sampleSize, extractor.sampleTime, 0)

@@ -66,7 +66,7 @@ class SessionRepoImpl @Inject constructor(
             }
     }
 
-    override suspend fun getSessionState(
+    override suspend fun restartOldSession(
         sessionId: Long
     ): CareerPilotResult<Session, NetworkError> {
         return remoteDataSource.getSessionState(sessionId)

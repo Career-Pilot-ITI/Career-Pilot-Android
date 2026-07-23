@@ -6,6 +6,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.audio.models.AudioTrack
 import com.iti.common.dispatcher.di.ApplicationScope
 import kotlinx.coroutines.CoroutineScope
@@ -44,9 +45,6 @@ class AudioPlayerImpl @Inject constructor(
 
         exoPlayer.addListener(
             object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    super.onPlayerError(error)
-                }
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     super.onPlaybackStateChanged(playbackState)
@@ -58,6 +56,7 @@ class AudioPlayerImpl @Inject constructor(
                                     durationPlayed = Duration.ZERO,
                                     isPlaying = true,
                                     filePath = filePath,
+                                    playbackState = AudioPlaybackState.PLAYING
                                 )
                             }
                             trackDuration()
@@ -81,7 +80,8 @@ class AudioPlayerImpl @Inject constructor(
         }
         _activeTrack.update {
             it.copy(
-                isPlaying = false
+                isPlaying = false,
+                playbackState = AudioPlaybackState.PAUSED
             )
         }
         durationJob?.cancel()
@@ -94,7 +94,8 @@ class AudioPlayerImpl @Inject constructor(
         }
         _activeTrack.update {
             it.copy(
-                isPlaying = true
+                isPlaying = true,
+                playbackState = AudioPlaybackState.PLAYING
             )
         }
         exoPlayer.play()
@@ -108,6 +109,7 @@ class AudioPlayerImpl @Inject constructor(
                 durationPlayed = Duration.ZERO,
                 totalDuration = Duration.ZERO,
                 filePath = "",
+                playbackState = AudioPlaybackState.STOPPED
             )
         }
         durationJob?.cancel()
@@ -133,7 +135,7 @@ class AudioPlayerImpl @Inject constructor(
                         durationPlayed = exoPlayer.currentPosition.milliseconds
                     )
                 }
-                delay(10L)
+                delay(10L.milliseconds)
             } while (activeTrack.value.isPlaying && exoPlayer.isPlaying)
         }
     }

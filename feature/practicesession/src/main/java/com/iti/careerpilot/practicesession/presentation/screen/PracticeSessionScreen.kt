@@ -3,7 +3,6 @@ package com.iti.careerpilot.practicesession.presentation.screen
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -12,11 +11,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,13 +27,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.rounded.Send
-import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.GraphicEq
@@ -56,7 +48,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -95,6 +86,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
+import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.LoadingWave
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.event.PracticeSessionEvent
@@ -104,7 +98,6 @@ import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.random.Random
 
 @Composable
 fun PracticeSessionRoot(
@@ -152,6 +145,7 @@ fun PracticeSessionRoot(
                     isLeaving = false
                     showDiscardConfirm = true
                 }
+
                 else -> viewModel.onAction(action)
             }
         }
@@ -178,7 +172,7 @@ fun PracticeSessionRoot(
 
     if (showDiscardConfirm) {
         AlertDialog(
-            onDismissRequest = { 
+            onDismissRequest = {
                 showDiscardConfirm = false
                 isLeaving = false
             },
@@ -193,7 +187,7 @@ fun PracticeSessionRoot(
                 }) { Text("Discard") }
             },
             dismissButton = {
-                TextButton(onClick = { 
+                TextButton(onClick = {
                     showDiscardConfirm = false
                     isLeaving = false
                 }) {
@@ -218,6 +212,14 @@ fun PracticeSessionRoot(
             neededPermissions = arrayOf(Manifest.permission.RECORD_AUDIO)
         )
     }
+    if (state.isLoadingSession) {
+        LoadingDialog()
+    }
+    if (state.isUploadingAndTranscribingAudio ||
+        state.isSendingAnswer
+    ) {
+        ProcessingDialog()
+    }
 }
 
 @Composable
@@ -227,15 +229,6 @@ fun PracticeSessionScreen(
     onAction: (PracticeSessionAction) -> Unit,
 ) {
     BackHandler { onBack() }
-
-    val processingPhase = remember(state.isUploading, state.isTranscribing, state.isLoadingNextQuestion) {
-        when {
-            state.isUploading -> ProcessingPhase.UPLOADING
-            state.isTranscribing -> ProcessingPhase.TRANSCRIBING
-            state.isLoadingNextQuestion -> ProcessingPhase.LOADING_NEXT
-            else -> null
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -272,7 +265,7 @@ fun PracticeSessionScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
         ) {
-            if (state.isLoading && state.currentSession == null) {
+            if (state.isLoadingSession && state.currentSession == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
@@ -299,7 +292,6 @@ fun PracticeSessionScreen(
         }
     }
 
-    ProcessingOverlay(phase = processingPhase, uploadProgress = state.uploadProgress)
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -396,7 +388,10 @@ private fun AmplitudeRings(amplitudes: List<Float>, modifier: Modifier = Modifie
 }
 
 @Composable
-fun PracticeSessionBottomSection(state: PracticeSessionState, onAction: (PracticeSessionAction) -> Unit) {
+fun PracticeSessionBottomSection(
+    state: PracticeSessionState,
+    onAction: (PracticeSessionAction) -> Unit
+) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 3.dp,
@@ -414,14 +409,15 @@ fun PracticeSessionBottomSection(state: PracticeSessionState, onAction: (Practic
 }
 
 @Composable
-private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessionAction) -> Unit) {
-    val busy = state.isUploading || state.isTranscribing || state.isLoadingNextQuestion
+private fun AudioReviewRow(
+    state: PracticeSessionState,
+    onAction: (PracticeSessionAction) -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(
                 modifier = Modifier.align(Alignment.TopStart),
                 onClick = { onAction(PracticeSessionAction.DiscardCurrentAnswer) },
-                enabled = !busy
             ) {
                 Icon(
                     Icons.Default.Delete,
@@ -434,7 +430,7 @@ private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessi
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FilledTonalIconButton(onClick = { onAction(PracticeSessionAction.PlayCurrentRecordedAnswer) }) {
+            FilledTonalIconButton(onClick = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) }) {
                 Icon(
                     imageVector = if (state.isPlayingAudio) Icons.Default.Pause else Icons.Default.PlayArrow,
                     contentDescription = if (state.isPlayingAudio) "Pause" else "Play"
@@ -454,7 +450,10 @@ private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessi
                     }
                 )
                 Spacer(Modifier.height(2.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
                         text = formatDuration(state.playbackPositionMs),
                         style = MaterialTheme.typography.labelSmall,
@@ -470,8 +469,7 @@ private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessi
             Spacer(Modifier.width(12.dp))
             LargeGradientIconButton(
                 icon = Icons.AutoMirrored.Rounded.Send,
-                onClick = { onAction(PracticeSessionAction.SubmitFinalAnswerToCurrentQuestion) },
-                enabled = !busy,
+                onClick = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) },
                 size = 56.dp
             )
         }
@@ -479,10 +477,11 @@ private fun AudioReviewRow(state: PracticeSessionState, onAction: (PracticeSessi
 }
 
 @Composable
-private fun ActionBottomBar(state: PracticeSessionState, onAction: (PracticeSessionAction) -> Unit) {
+private fun ActionBottomBar(
+    state: PracticeSessionState,
+    onAction: (PracticeSessionAction) -> Unit
+) {
     val context = LocalContext.current
-    val busy = state.isUploading || state.isTranscribing || state.isLoadingNextQuestion
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -490,55 +489,49 @@ private fun ActionBottomBar(state: PracticeSessionState, onAction: (PracticeSess
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Skip Button
-        IconButton(
-            onClick = { onAction(PracticeSessionAction.SkipCurrentQuestion) },
-            enabled = !busy && !state.isRecording
+        //todo add skip button
+        Spacer(
+            Modifier.weight(1f)
+        )
+
+        Box(
+            modifier = Modifier.weight(2f),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Default.SkipNext,
-                contentDescription = "Skip question",
-                modifier = Modifier.size(28.dp)
-            )
-        }
-
-        // Center Mic/Stop Button
-        val icon = if (state.isRecording) Icons.Default.Stop else Icons.Default.Mic
-        val onClick = {
-            if (state.isRecording) {
-                onAction(PracticeSessionAction.FinishRecordingAnswerAndStartTranscription)
-            } else {
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.RECORD_AUDIO
-                ) == PackageManager.PERMISSION_GRANTED
-                if (hasPermission) onAction(PracticeSessionAction.StartRecordingAnswer)
-                else onAction(PracticeSessionAction.ShowOrHidePermissionDialog(true))
-            }
-        }
-
-        Box(contentAlignment = Alignment.Center) {
             if (state.isRecording) {
                 WavyBorder(amplitudes = state.amplitudes)
             }
             LargeGradientIconButton(
-                icon = icon,
-                onClick = onClick,
-                enabled = !busy,
+                icon = if (state.isRecording) Icons.Default.Stop else Icons.Default.Mic,
+                onClick = {
+                    if (state.isRecording) {
+                        onAction(PracticeSessionAction.StopRecordingAnswer)
+                    } else {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.RECORD_AUDIO
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (hasPermission) onAction(PracticeSessionAction.StartRecordingAnswer)
+                        else onAction(PracticeSessionAction.ShowOrHidePermissionDialog(true))
+                    }
+                },
                 size = 80.dp,
                 isOutlined = true
             )
         }
 
-        // Toggle Question Card
-        IconButton(
-            onClick = { onAction(PracticeSessionAction.ToggleQuestionCard) },
-            enabled = !busy && !state.isRecording
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = if (state.showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
-                contentDescription = "Toggle question card",
-                modifier = Modifier.size(28.dp)
-            )
+            IconButton(
+                onClick = { onAction(PracticeSessionAction.ToggleQuestionCard) },
+            ) {
+                Icon(
+                    imageVector = if (state.showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
+                    contentDescription = "Toggle question card",
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
     }
 }
@@ -569,7 +562,10 @@ fun LargeGradientIconButton(
             )
             .clickable(enabled = enabled, onClick = onClick)
             .then(
-                if (isOutlined) Modifier.background(Color.Transparent).padding(2.dp).background(MaterialTheme.colorScheme.surface, CircleShape)
+                if (isOutlined) Modifier
+                    .background(Color.Transparent)
+                    .padding(2.dp)
+                    .background(MaterialTheme.colorScheme.surface, CircleShape)
                 else Modifier
             ),
         contentAlignment = Alignment.Center
@@ -614,17 +610,17 @@ fun WavyBorder(amplitudes: List<Float>) {
         val center = Offset(size.width / 2, size.height / 2)
         val baseRadius = size.width / 2 - 5.dp.toPx()
         val path = Path()
-        
+
         val points = 100
-        val random = Random(42) // Fixed seed for some consistency but random-looking
+
         for (i in 0 until points) {
             val angle = (i.toFloat() / points) * 2 * PI.toFloat()
-            
+
             // Combine multiple sine waves with different frequencies and phases for a "random" organic feel
             val wave1 = sin(angle * 6 + phase) * 6.dp.toPx()
             val wave2 = sin(angle * 14 - phase * 1.2f) * 4.dp.toPx()
             val wave3 = cos(angle * 8 + phase * 0.8f) * 3.dp.toPx()
-            
+
             val noise = wave1 + wave2 + wave3
             val r = baseRadius + noise * avgAmp
             val x = center.x + r * cos(angle)
@@ -647,107 +643,23 @@ fun WavyBorder(amplitudes: List<Float>) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// Processing overlay dialog (uploading -> transcribing -> loading next)
-// ─────────────────────────────────────────────────────────────────────────
-
-private enum class ProcessingPhase(val label: String, val icon: ImageVector) {
-    UPLOADING("Uploading your answer...", Icons.Default.CloudUpload),
-    TRANSCRIBING("Transcribing your response...", Icons.Default.Description),
-    LOADING_NEXT("Getting your next question...", Icons.Default.RecordVoiceOver)
-}
-
 @Composable
-private fun ProcessingOverlay(phase: ProcessingPhase?, uploadProgress: Int) {
-    if (phase == null) return
-
+fun ProcessingDialog() {
     Dialog(
-        onDismissRequest = { /* not dismissable while processing */ },
+        onDismissRequest = {},
         properties = DialogProperties(
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
             usePlatformDefaultWidth = false
         )
     ) {
-        Box(
+        CareerPilotCard(
+            useShadow = false,
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.55f)),
-            contentAlignment = Alignment.Center
         ) {
-            ElevatedCard(shape = RoundedCornerShape(28.dp)) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 32.dp, vertical = 28.dp)
-                        .widthIn(min = 220.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    AnimatedContent(
-                        targetState = phase,
-                        transitionSpec = {
-                            (fadeIn() + scaleIn(initialScale = 0.85f)) togetherWith
-                                    (fadeOut() + scaleOut(targetScale = 1.15f))
-                        },
-                        label = "phase_icon"
-                    ) { p ->
-                        Icon(
-                            imageVector = p.icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    AnimatedContent(targetState = phase, label = "phase_text") { p ->
-                        Text(
-                            text = p.label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    if (phase == ProcessingPhase.UPLOADING) {
-                        LinearWavyProgressIndicator(
-                            progress = { uploadProgress / 100f },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "$uploadProgress%",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-
-                    Spacer(Modifier.height(18.dp))
-                    StepDots(current = phase)
-                }
+            Box(modifier = Modifier.padding(20.dp)) {
+                LoadingWave()
             }
-        }
-    }
-}
-
-@Composable
-private fun StepDots(current: ProcessingPhase) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ProcessingPhase.entries.forEach { step ->
-            val active = step.ordinal <= current.ordinal
-            val color by animateColorAsStateCompat(
-                target = if (active) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceVariant
-            )
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(color)
-            )
         }
     }
 }
@@ -782,8 +694,12 @@ private fun WavySeekSlider(
             .height(28.dp)
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragStart = { offset -> dragProgress = (offset.x / size.width).coerceIn(0f, 1f) },
-                    onDrag = { change, _ -> dragProgress = (change.position.x / size.width).coerceIn(0f, 1f) },
+                    onDragStart = { offset ->
+                        dragProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                    },
+                    onDrag = { change, _ ->
+                        dragProgress = (change.position.x / size.width).coerceIn(0f, 1f)
+                    },
                     onDragEnd = {
                         dragProgress?.let(onSeek)
                         dragProgress = null
@@ -816,10 +732,11 @@ private fun WavySeekSlider(
             val y = midY + sin(phase + i * 0.55f) * amplitude
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }
-        drawPath(path = path, color = trackColor, style = Stroke(
-            width = 4.dp.toPx(),
-            cap = StrokeCap.Round
-        )
+        drawPath(
+            path = path, color = trackColor, style = Stroke(
+                width = 4.dp.toPx(),
+                cap = StrokeCap.Round
+            )
         )
 
         val thumbY = midY + sin(phase + steps * 0.55f) * amplitude
