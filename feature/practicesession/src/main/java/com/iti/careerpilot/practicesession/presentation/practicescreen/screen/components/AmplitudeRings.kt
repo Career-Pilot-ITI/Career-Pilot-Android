@@ -25,10 +25,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * Three rings of bars orbiting the orb, each ring reading a different slice
- * of the recent amplitude history, rotating at different speeds/directions.
- */
+
 @Composable
 fun AmplitudeRings(
     amplitudes: List<Float>,

@@ -42,4 +42,26 @@
     <string name="automatically_speak_the_question_when_it_s_shown">قراءة السؤال بصوت عالٍ تلقائيًا عند عرضه</string>
     <string name="auto_send_answer">إرسال الإجابة تلقائيًا</string>
     <string name="automatically_send_the_answer_when_you_stop_recording">إرسال الإجابة تلقائيًا عند إيقاف التسجيل</string>
+    <string name="dismiss">تجاهل</string>
+
+    <!-- Result Screen -->
+    <string name="session_results">نتائج الجلسة</string>
+    <string name="overall_score">الدرجة الكلية</string>
+    <string name="clarity">الوضوح</string>
+    <string name="confidence">الثقة</string>
+    <string name="pacing">السرعة</string>
+    <string name="filler_words">الكلمات الحشوية</string>
+    <string name="content_relevance">صلة المحتوى</string>
+    <string name="coaching_tips">نصائح التدريب</string>
+    <string name="excellent_performance">أداء ممتاز!</string>
+    <string name="good_performance">أداء جيد!</string>
+    <string name="keep_practicing">استمر في الممارسة!</string>
+    <string name="score_out_of_100">%1$d/100</string>
+    <string name="view_details">عرض التفاصيل</string>
+    <string name="performance_breakdown">تفاصيل الأداء</string>
+    <string name="question_details">تفاصيل السؤال</string>
+    <string name="your_transcript">النص الخاص بك</string>
+    <string name="analysis">التحليل</string>
+    <string name="no_results_found">لم يتم العثور على نتائج</string>
+    <string name="no_transcript_available">لا يوجد نص متاح</string>
 </resources>

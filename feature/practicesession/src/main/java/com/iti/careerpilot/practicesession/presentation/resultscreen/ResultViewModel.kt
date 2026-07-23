@@ -41,10 +41,13 @@ class ResultViewModel @Inject constructor(
 
     fun onAction(action: ResultAction) {
         when (action) {
-            is ResultAction.UpdateSessionId -> _state.update {
-                it.copy(
-                    sessionId = action.sessionId
-                )
+            is ResultAction.UpdateSessionId -> {
+                _state.update {
+                    it.copy(
+                        sessionId = action.sessionId
+                    )
+                }
+                loadResult()
             }
 
             ResultAction.RefreshResult -> loadResult()
@@ -64,7 +67,8 @@ class ResultViewModel @Inject constructor(
                     .onSuccess { sessionResult ->
                         _state.update {
                             it.copy(
-                                sessionResult = sessionResult
+                                sessionResult = sessionResult,
+                                isLoading = false
                             )
                         }
                     }
