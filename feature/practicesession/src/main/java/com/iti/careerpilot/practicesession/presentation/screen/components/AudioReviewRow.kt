@@ -22,7 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.screen.util.formatDuration
@@ -97,7 +99,7 @@ fun AudioReviewRow(
             }
             Spacer(Modifier.width(12.dp))
             LargeGradientIconButton(
-                icon = Icons.AutoMirrored.Rounded.Send,
+                icon = ImageVector.vectorResource(R.drawable.ic_send),
                 contentDescription = stringResource(R.string.submit_answer),
                 onClick = onSubmit,
                 size = 56.dp

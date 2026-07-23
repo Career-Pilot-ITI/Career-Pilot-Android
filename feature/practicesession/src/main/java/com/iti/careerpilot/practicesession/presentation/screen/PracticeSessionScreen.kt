@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
@@ -138,7 +135,7 @@ fun PracticeSessionRoot(
         ConfirmationDialog(
             title = stringResource(R.string.leave_confirmation_title),
             text = stringResource(R.string.leave_confirmation_message),
-            icon = Icons.AutoMirrored.Filled.Logout,
+            icon = ImageVector.vectorResource(R.drawable.ic_logout),
             onDismiss = {
                 viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(false))
             },
@@ -152,7 +149,7 @@ fun PracticeSessionRoot(
         ConfirmationDialog(
             title = stringResource(R.string.discard_recording_title),
             text = stringResource(R.string.discard_recording_message),
-            icon = Icons.Default.DeleteForever,
+            icon = ImageVector.vectorResource(R.drawable.ic_delete),
             onDismiss = {
                 viewModel.onAction(
                     PracticeSessionAction.ShowOrHideDiscardConfirmDialog(
@@ -228,6 +225,7 @@ fun PracticeSessionScreen(
                     QuestionCard(
                         questionOrder = state.currentSession?.currentQuestion?.questionOrder,
                         questionText = state.currentSession?.currentQuestion?.questionText,
+                        isReadingQuestion = state.isReadingQuestion,
                         onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
                         onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) }
                     )

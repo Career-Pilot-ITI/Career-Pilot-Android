@@ -8,19 +8,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.iti.careerpilot.practicesession.R
@@ -53,7 +49,10 @@ fun ActionBottomBar(
                 onClick = onToggleQuestionCard,
             ) {
                 Icon(
-                    imageVector = if (showQuestionCard) Icons.Default.Description else Icons.Default.GraphicEq,
+                    imageVector = ImageVector.vectorResource(
+                        if (showQuestionCard) R.drawable.ic_expand_down
+                        else R.drawable.ic_expand_up
+                    ),
                     contentDescription = stringResource(R.string.toggle_question_card),
                     modifier = Modifier.size(28.dp)
                 )
@@ -68,7 +67,10 @@ fun ActionBottomBar(
                 isRecording = isRecording,
             )
             LargeGradientIconButton(
-                icon = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
+                icon = ImageVector.vectorResource(
+                    if (isRecording) R.drawable.ic_mic
+                    else R.drawable.ic_stop
+                ),
                 contentDescription = if (isRecording) {
                     stringResource(R.string.stop_recording)
                 } else {
@@ -95,7 +97,7 @@ fun ActionBottomBar(
         ) {
             IconButton(onClick = onOpenSettings) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_more),
                     contentDescription = stringResource(R.string.session_settings),
                     modifier = Modifier.size(28.dp)
                 )

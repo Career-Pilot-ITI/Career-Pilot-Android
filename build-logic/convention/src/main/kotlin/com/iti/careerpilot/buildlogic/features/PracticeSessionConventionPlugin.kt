@@ -21,7 +21,7 @@ class PracticeSessionConventionPlugin : Plugin<Project> {
         pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
 
         extensions.configure<LibraryExtension> {
-            namespace = "com.iti.careerpilot.profile"
+            namespace = "com.iti.careerpilot.practicesession"
             compileSdk {
                 version = release(37)
             }
