@@ -54,9 +54,37 @@ class ProfileInfoViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             getUserProfileUseCase().collect { profile ->
-                val url = profile.avatar.avatarUrl
-                if (url.isNotBlank()) {
-                    _state.update { it.updateData { data -> data.copy(avatarUrl = url) } }
+                _state.update { currentState ->
+                    val cvSkills = profile.career.skills
+                    val mergedSkills = if (cvSkills.isNotEmpty()) {
+                        (currentState.data.skills + cvSkills).distinct().toPersistentList()
+                    } else {
+                        currentState.data.skills
+                    }
+
+                    val mergedAllSkills = if (cvSkills.isNotEmpty()) {
+                        (currentState.allSkills + cvSkills).distinct().toPersistentList()
+                    } else {
+                        currentState.allSkills
+                    }
+
+                    val targetTitle = profile.career.targetRole.ifBlank { profile.career.currentJobTitle }
+
+                    currentState.copy(
+                        allSkills = mergedAllSkills,
+                        data = currentState.data.copy(
+                            avatarUrl = profile.avatar.avatarUrl.takeIf { it.isNotBlank() } ?: currentState.data.avatarUrl,
+                            name = profile.personal.displayName.ifBlank { currentState.data.name },
+                            email = profile.account.email.ifBlank { currentState.data.email },
+                            title = targetTitle.ifBlank { currentState.data.title },
+                            experience = if (profile.career.yearsOfExperience > 0) {
+                                profile.career.yearsOfExperience.toString()
+                            } else {
+                                currentState.data.experience
+                            },
+                            skills = mergedSkills
+                        )
+                    )
                 }
             }
         }

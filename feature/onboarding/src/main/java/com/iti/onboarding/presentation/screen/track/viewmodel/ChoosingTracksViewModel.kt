@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
+import com.iti.onboarding.domain.usecase.CompleteOnboardingUseCase
 import com.iti.onboarding.domain.usecase.GetTracksUseCase
+import com.iti.onboarding.domain.usecase.GetUserProfileUseCase
 import com.iti.onboarding.domain.usecase.UpdateProfileTrackUseCase
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksEffects
 import com.iti.onboarding.presentation.screen.track.state.ChoosingTracksIntent
@@ -24,6 +26,8 @@ import javax.inject.Inject
 class ChoosingTracksViewModel @Inject constructor(
     private val getTracksUseCase: GetTracksUseCase,
     private val updateProfileTrackUseCase: UpdateProfileTrackUseCase,
+    private val completeOnboardingUseCase: CompleteOnboardingUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChoosingTracksUiState())
@@ -50,18 +54,25 @@ class ChoosingTracksViewModel @Inject constructor(
 
             ChoosingTracksIntent.OnNavigateNext -> {
                 viewModelScope.launch {
-                    val result = updateProfileTrackUseCase(_state.value.selectedTrack?.id ?: 0L)
-                    when (result) {
-                        is CareerPilotResult.Success -> {
+                    val trackId = _state.value.selectedTrack?.id ?: 0L
+                    val trackResult = updateProfileTrackUseCase(trackId)
+                    if (trackResult is CareerPilotResult.Success) {
+                        val completeResult = completeOnboardingUseCase(cvFileId = null)
+                        if (completeResult is CareerPilotResult.Success) {
                             _effects.emit(ChoosingTracksEffects.NavigateNext)
-                        }
-                        else -> {
+                        } else {
                             _effects.emit(
                                 ChoosingTracksEffects.ShowError(
                                     UIText.StringResource(com.iti.common.R.string.error_unknown)
                                 )
                             )
                         }
+                    } else {
+                        _effects.emit(
+                            ChoosingTracksEffects.ShowError(
+                                UIText.StringResource(com.iti.common.R.string.error_unknown)
+                            )
+                        )
                     }
                 }
             }
@@ -97,12 +108,17 @@ class ChoosingTracksViewModel @Inject constructor(
                 }
 
                 is CareerPilotResult.Success -> {
+                    val profileTrackName = getUserProfileUseCase().value.career.trackName
                     _state.update { state ->
+                        val initialSelected = state.selectedTrack?.let { selected ->
+                            result.data.firstOrNull { it.id == selected.id }
+                        } ?: if (profileTrackName.isNotBlank()) {
+                            result.data.firstOrNull { it.name.equals(profileTrackName, ignoreCase = true) }
+                        } else null
+
                         state.copy(
                             tracks = result.data.toImmutableList(),
-                            selectedTrack = state.selectedTrack?.let { selected ->
-                                result.data.firstOrNull { it.id == selected.id }
-                            },
+                            selectedTrack = initialSelected,
                             isLoading = false,
                             isRefreshing = false,
                         )

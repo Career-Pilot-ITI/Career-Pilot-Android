@@ -25,6 +25,11 @@ interface OnboardingRepository {
         onProgress: (Int) -> Unit
     ): CareerPilotResult<UploadedFile, NetworkError>
 
+    suspend fun analyzeCv(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<UserProfileDto, NetworkError>
+
     suspend fun updateProfileTrack(trackId: Long): CareerPilotResult<Unit, NetworkError>
 
     suspend fun completeOnboarding(cvFileId: Long?): CareerPilotResult<Unit, NetworkError>

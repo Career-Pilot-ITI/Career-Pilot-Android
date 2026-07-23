@@ -57,4 +57,22 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
             createdAt = "2023-10-01T00:00:00Z"
         )
     }
+
+    override suspend fun analyzeCv(file: File, onProgress: (Int) -> Unit): UserProfileDto {
+        fakeDelay()
+        if (shouldFail()) throw Exception("Fake network error")
+        onProgress(100)
+        return UserProfileDto(
+            id = 1L,
+            displayName = "Fake User",
+            email = "fake@example.com",
+            currentJobTitle = "Android Developer",
+            yearsOfExperience = 3,
+            skills = listOf(
+                com.iti.careerpilot.core.network.model.SkillDto(skillName = "Kotlin"),
+                com.iti.careerpilot.core.network.model.SkillDto(skillName = "Android")
+            ),
+            trackName = "Android"
+        )
+    }
 }
