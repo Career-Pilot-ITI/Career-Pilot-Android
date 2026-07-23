@@ -45,14 +45,8 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Home Screen")
-        Text(text = "Coins: ${state.coinBalance}")
-        val formattedTier = when (state.subscriptionTier.uppercase()) {
-            "PRO" -> "Pro"
-            "MAX" -> "Max"
-            "PLUS" -> "Plus"
-            else -> "Free"
-        }
-        Text(text = "Tier: $formattedTier")
+        Text(text = state.formattedCoinBalance)
+        Text(text = "Tier: ${state.formattedSubscriptionTier}")
         
         Button(
             onClick = { openPaywall(false) }
