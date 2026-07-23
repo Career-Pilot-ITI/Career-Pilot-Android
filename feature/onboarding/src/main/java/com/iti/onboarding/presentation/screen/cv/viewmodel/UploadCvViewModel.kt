@@ -92,7 +92,7 @@ class UploadCvViewModel @Inject constructor(
             val elapsed = System.currentTimeMillis() - startTime
             analyzeResult?.onSuccess { response ->
                 if (elapsed < 1000) delay((1000 - elapsed).milliseconds)
-                val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "CV File"
+                val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: ""
                 _state.update {
                     it.copy(
                         selectedFile = SelectedCvUiModel(
