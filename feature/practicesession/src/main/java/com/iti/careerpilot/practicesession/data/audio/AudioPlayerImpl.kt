@@ -53,7 +53,8 @@ class AudioPlayerImpl @Inject constructor(
 
                 Player.STATE_ENDED -> {
                     onCompleteCallback?.invoke()
-                    stop()
+                    pause()
+                    seekTo(0L)
                 }
 
                 else -> {}

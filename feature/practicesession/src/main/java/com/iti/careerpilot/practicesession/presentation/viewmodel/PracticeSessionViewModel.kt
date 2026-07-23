@@ -361,7 +361,9 @@ class PracticeSessionViewModel @Inject constructor(
     private fun readQuestion() {
         val question = _state.value.currentSession?.currentQuestion?.questionText
         if (!question.isNullOrBlank()) {
-            voiceRecorder.stop()
+            if (_state.value.isRecording) {
+                voiceRecorder.stop()
+            }
             audioPlayer.pause()
             textToSpeechManager.speak(question)
         }
