@@ -35,17 +35,6 @@ fun localizedSessionDate(completedAt: Instant): String {
     }
 }
 
-@Composable
-fun localizedCompletionDate(completedAt: Instant): String {
-    val locale = LocalConfiguration.current.locales[0]
-    return remember(completedAt, locale) {
-        DateTimeFormatter
-            .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-            .withLocale(locale)
-            .format(completedAt.atZone(ZoneId.systemDefault()))
-    }
-}
-
 fun formatQuestionDuration(
     durationSeconds: Int,
     locale: Locale,

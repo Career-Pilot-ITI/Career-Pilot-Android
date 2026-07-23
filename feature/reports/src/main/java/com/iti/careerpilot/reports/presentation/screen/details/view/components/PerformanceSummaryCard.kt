@@ -18,7 +18,6 @@ import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.ScoreRing
 import com.iti.careerpilot.reports.R
-import com.iti.careerpilot.reports.presentation.screen.components.localizedCompletionDate
 import com.iti.careerpilot.reports.presentation.screen.components.performanceTierLabel
 import com.iti.careerpilot.reports.presentation.screen.details.uimodels.ReportDetailsUiModel
 
@@ -52,11 +51,6 @@ fun PerformanceSummaryCard(
                 },
             )
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = localizedCompletionDate(report.completedAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CareerPilotPalette.white.copy(alpha = 0.68f),
-                )
                 Text(
                     text = stringResource(R.string.reports_overall_score),
                     modifier = Modifier.padding(top = Dimens.SpaceS),
