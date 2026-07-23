@@ -4,5 +4,5 @@ plugins {
 
 
 dependencies {
-    implementation(files("libs/sherpa-onnx-1.13.4.aar"))
+    implementation(libs.sherpa.onnx)
 }
