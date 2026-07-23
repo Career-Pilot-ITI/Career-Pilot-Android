@@ -368,13 +368,8 @@ class PracticeSessionViewModel @Inject constructor(
 
     private suspend fun transcribeAudio(audioPath: String): Result<String> =
         withContext(Dispatchers.Default) {
-            val pcmData = decodeAudio(audioPath)
-            if (pcmData != null) {
-                whisperEngine.transcribe(pcmData).onSuccess {
-                    Log.d("CareerPilot", "transcription success: $it")
-                }
-            } else {
-                Result.failure(IllegalStateException("Failed to decode recorded audio"))
+            whisperEngine.transcribe(audioPath).onSuccess {
+                Log.d("CareerPilot", "transcription success: $it")
             }
         }
 
@@ -441,78 +436,6 @@ class PracticeSessionViewModel @Inject constructor(
                 )
             }
             readQuestion()
-        }
-    }
-
-    /**
-     * Decodes the recorded file to PCM float
-     * samples for the on-device Whisper model.
-     */
-    private fun decodeAudio(filePath: String): FloatArray? {
-        val extractor = MediaExtractor()
-        try {
-            extractor.setDataSource(filePath)
-            val trackIndex = (0 until extractor.trackCount).firstOrNull {
-                extractor.getTrackFormat(it).getString(MediaFormat.KEY_MIME)
-                    ?.startsWith("audio/") == true
-            } ?: return null
-
-            extractor.selectTrack(trackIndex)
-            val format = extractor.getTrackFormat(trackIndex)
-            val codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME)!!)
-            codec.configure(format, null, null, 0)
-            codec.start()
-
-            val info = MediaCodec.BufferInfo()
-            var buffer = FloatArray(1 shl 16)
-            var count = 0
-            fun append(samples: ShortArray) {
-                if (count + samples.size > buffer.size) {
-                    buffer = buffer.copyOf(maxOf(buffer.size * 2, count + samples.size))
-                }
-                for (s in samples) buffer[count++] = s / 32768f
-            }
-
-            var isEOS = false
-            while (!isEOS) {
-                val inputIndex = codec.dequeueInputBuffer(10_000)
-                if (inputIndex >= 0) {
-                    val inputBuffer = codec.getInputBuffer(inputIndex)!!
-                    val sampleSize = extractor.readSampleData(inputBuffer, 0)
-                    if (sampleSize < 0) {
-                        codec.queueInputBuffer(
-                            inputIndex,
-                            0,
-                            0,
-                            0,
-                            MediaCodec.BUFFER_FLAG_END_OF_STREAM
-                        )
-                        isEOS = true
-                    } else {
-                        codec.queueInputBuffer(inputIndex, 0, sampleSize, extractor.sampleTime, 0)
-                        extractor.advance()
-                    }
-                }
-
-                var outputIndex = codec.dequeueOutputBuffer(info, 10_000)
-                while (outputIndex >= 0) {
-                    val outputBuffer = codec.getOutputBuffer(outputIndex)!!
-                    val samples = ShortArray(info.size / 2)
-                    outputBuffer.asShortBuffer().get(samples)
-                    append(samples)
-                    codec.releaseOutputBuffer(outputIndex, false)
-                    outputIndex = codec.dequeueOutputBuffer(info, 10_000)
-                }
-            }
-            codec.stop()
-            codec.release()
-            extractor.release()
-            return buffer.copyOf(count)
-        } catch (e: Exception) {
-            Log.e("PracticeSessionVM", "Failed to decode audio at $filePath", e)
-            return null
-        } finally {
-            extractor.release()
         }
     }
 

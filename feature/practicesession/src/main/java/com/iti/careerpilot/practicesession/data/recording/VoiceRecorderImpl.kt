@@ -61,7 +61,8 @@ class VoiceRecorderImpl @Inject constructor(
                 setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
                 setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                 setAudioEncodingBitRate(128 * 1000)
-                setAudioSamplingRate(44100)
+                setAudioSamplingRate(16000)
+                setAudioChannels(1)
                 setOutputFile(tempFile.path)
 
                 prepare()
