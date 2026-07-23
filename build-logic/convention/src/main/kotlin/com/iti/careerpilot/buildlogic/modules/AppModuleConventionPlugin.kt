@@ -64,6 +64,8 @@ class AppModuleConventionPlugin : Plugin<Project> {
                     "META-INF/LICENSE*",
                     "META-INF/NOTICE*",
                 )
+                jniLibs.pickFirsts.add("**/libonnxruntime.so")
+                jniLibs.pickFirsts.add("**/libsherpa-onnx-jni.so")
             }
         }
 

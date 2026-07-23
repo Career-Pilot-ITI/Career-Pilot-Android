@@ -39,6 +39,8 @@ class WhisperModuleConventionPlugin : Plugin<Project> {
                     "META-INF/LICENSE*",
                     "META-INF/NOTICE*",
                 )
+                jniLibs.pickFirsts.add("**/libonnxruntime.so")
+                jniLibs.pickFirsts.add("**/libsherpa-onnx-jni.so")
             }
         }
 
@@ -56,6 +58,7 @@ class WhisperModuleConventionPlugin : Plugin<Project> {
         add("implementation", "androidx-core-ktx")
         add("implementation", "hilt-android")
         add("ksp", "hilt-compiler")
+        add("implementation", "sherpa-onnx")
 
         add("testImplementation", "junit")
         add("testImplementation", "kotlinx-coroutines-test")
