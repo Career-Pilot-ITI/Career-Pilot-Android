@@ -11,15 +11,21 @@ import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
 
-fun UserProfileDto.toDomain(): UserProfile {
+fun UserProfileDto.toDomain(current: UserProfile? = null): UserProfile {
+    val effectiveTier = if (current?.account?.subscriptionTier?.equals("FREE", ignoreCase = true) == true &&
+        (subscriptionTier.equals("PLUS", ignoreCase = true) || subscriptionTier.equals("PRO", ignoreCase = true))) {
+        "FREE"
+    } else {
+        subscriptionTier.orEmpty()
+    }
     return UserProfile(
-        id = id?.toInt() ?: 0,
+        id = id?.toInt() ?: current?.id ?: 0,
         account = AccountInfo(
             username = username.orEmpty(),
             email = email.orEmpty(),
             timezone = timezone.orEmpty(),
             termsAccepted = termsAccepted ?: false,
-            subscriptionTier = subscriptionTier.orEmpty(),
+            subscriptionTier = effectiveTier,
             coinBalance = coinBalance ?: 0,
         ),
         personal = PersonalInfo(
