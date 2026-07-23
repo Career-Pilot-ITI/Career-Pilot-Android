@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,7 +33,6 @@ import com.iti.careerpilot.practicesession.R
 @Composable
 fun ActionBottomBar(
     isRecording: Boolean,
-    amplitudes: List<Float>,
     showQuestionCard: Boolean,
     onOpenSettings: () -> Unit,
     onStartRecording: () -> Unit,
@@ -104,10 +102,6 @@ fun ActionBottomBar(
                 .border(1.dp, extendedColors.actionBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            AmplitudeRings(
-                amplitudes = amplitudes,
-                isRecording = isRecording,
-            )
             LargeGradientIconButton(
                 icon = ImageVector.vectorResource(
                     if (isRecording) R.drawable.ic_stop

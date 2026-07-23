@@ -17,7 +17,6 @@ fun PracticeSessionBottomSection(
     isPlayingAudio: Boolean,
     playbackDurationMs: Long,
     playbackPositionMs: Long,
-    amplitudes: List<Float>,
     showQuestionCard: Boolean,
     onAction: (PracticeSessionAction) -> Unit,
     modifier: Modifier = Modifier,
@@ -38,7 +37,6 @@ fun PracticeSessionBottomSection(
         } else {
             ActionBottomBar(
                 isRecording = isRecording,
-                amplitudes = amplitudes,
                 showQuestionCard = showQuestionCard,
                 onOpenSettings = { onAction(PracticeSessionAction.ShowOrHideSettingsBottomSheet(true)) },
                 onStartRecording = { onAction(PracticeSessionAction.StartRecordingAnswer) },

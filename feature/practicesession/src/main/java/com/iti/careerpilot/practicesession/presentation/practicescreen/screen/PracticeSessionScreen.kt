@@ -5,17 +5,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,6 +45,8 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.co
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.PracticeSessionSettingsBottomSheet
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ProcessingDialog
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.QuestionCard
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.RecordingDurationCard
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.RecordingWave
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.TopErrorNotification
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
@@ -237,26 +232,18 @@ fun PracticeSessionScreen(
                 }
 
                 AnimatedVisibility(visible = state.isRecording) {
-                    Card(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        shape = MaterialTheme.shapes.medium,
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = formatDuration(state.recordingDuration.inWholeMilliseconds),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .background(color = Color.Red, shape = CircleShape)
-                            )
-                        }
+                        RecordingWave(
+                            amplitudes = state.amplitudes,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        RecordingDurationCard(
+                            durationMs = state.recordingDuration.inWholeMilliseconds,
+                            isRecording = state.isRecording
+                        )
                     }
                 }
                 PracticeSessionBottomSection(
@@ -265,7 +252,6 @@ fun PracticeSessionScreen(
                     isPlayingAudio = state.isPlayingAudio,
                     playbackDurationMs = state.playbackDurationMs,
                     playbackPositionMs = state.playbackPositionMs,
-                    amplitudes = state.amplitudes,
                     showQuestionCard = state.showQuestionCard,
                     onAction = onAction
                 )
