@@ -2,6 +2,8 @@ package com.iti.careerpilot.rootnavigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,16 +21,17 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
-import com.iti.careerpilot.features.paywall.PaywallRoot
 import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
+import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
+import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.CancellationException
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -55,22 +58,26 @@ fun RootNavDisplay(
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
-        CareerPilotSnackbarController.requests.collectLatest { request ->
-            snackbarHostState.currentSnackbarData?.dismiss()
+        CareerPilotSnackbarController.requests.collect { request ->
+            try {
+                val event = request.event
+                val materialResult = snackbarHostState.showSnackbar(
+                    message = event.message.asString(context),
+                    withDismissAction =
+                        event.type ==
+                                CareerPilotSnackbarType.DISMISSIBLE,
+                    duration = event.duration,
+                    actionLabel =
+                        event.actionLabel?.asString(context),
+                )
 
-            val event = request.event
-            val result = snackbarHostState.showSnackbar(
-                message = event.message.asString(context),
-                withDismissAction =
-                    event.type ==
-                            CareerPilotSnackbarType.DISMISSIBLE,
-                duration = event.duration,
-                actionLabel =
-                    event.actionLabel?.asString(context),
-            )
+                request.complete(materialResult)
+            } catch (cancellation: CancellationException) {
+                request.complete(
+                    SnackbarResult.Dismissed,
+                )
 
-            if (result == SnackbarResult.ActionPerformed) {
-                request.performAction()
+                throw cancellation
             }
         }
     }
@@ -92,30 +99,22 @@ fun RootNavDisplay(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             transitionSpec = {
-                slideIntoContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Left,
-                    animationSpec = tween(350),
-                ) togetherWith slideOutOfContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Left,
-                    animationSpec = tween(350),
-                )
+                (slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing))) togetherWith (slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeOut(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing)))
             },
             popTransitionSpec = {
-                slideIntoContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Right,
-                    animationSpec = tween(350),
-                ) togetherWith slideOutOfContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Right,
-                    animationSpec = tween(350),
-                )
+                (slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing))) togetherWith (slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeOut(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing)))
             },
             entryProvider = entryProvider {
                 entry<Route.Splash> {
@@ -183,9 +182,9 @@ fun RootNavDisplay(
                         openEditProfile = { section ->
                             rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
                         },
-                        openPaywall = {
+                        openPaywall = { showGetCoins ->
                             rootBackStack.navigateSingleTop(
-                                Route.Paywall,
+                                Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
                     )
@@ -216,7 +215,12 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.Paywall> {
-                    PaywallRoot()
+                    PaymentNavDisplay(
+                        startRoute = if (it.showGetCoins) PaymentRoute.GetCoins else PaymentRoute.ChoosePlan,
+                        onNavigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.Paywall>()
+                        }
+                    )
                 }
             },
         )
