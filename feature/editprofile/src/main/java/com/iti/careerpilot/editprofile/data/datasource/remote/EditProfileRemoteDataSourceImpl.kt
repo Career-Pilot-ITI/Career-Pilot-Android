@@ -4,7 +4,7 @@ import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.safecall.safeApiCall
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
-import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileResponseDto
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
 import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
@@ -25,9 +25,9 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun updateProfile(
         request: UpdateProfileRequestDto
-    ): CareerPilotResult<UpdateProfileResponseDto, NetworkError> {
-        return safeApiCall<UpdateProfileResponseDto> {
-            httpClient.patch(Endpoints.UPDATE_PROFILE) {
+    ): CareerPilotResult<UserProfileDto, NetworkError> {
+        return safeApiCall<UserProfileDto> {
+            httpClient.patch(Endpoints.PROFILE) {
                 setBody(request)
             }
         }
@@ -48,7 +48,7 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                             append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                         }
                     )
-                    append("type", "AVATAR")
+                    append("type", "avatars")
                 }
             ) {
                 onUpload { bytesSentTotal, contentLength ->
@@ -77,7 +77,7 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                             append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                         }
                     )
-                    append("type", "RESUME")
+                    append("type", "cvs")
                 }
             ) {
                 onUpload { bytesSentTotal, contentLength ->

@@ -36,13 +36,13 @@ import kotlinx.coroutines.CancellationException
 fun RootNavDisplay(
     startRoute: Route,
     isOnline: Boolean,
-    isLoggedIn: Boolean,
+    isLoggedIn: Boolean?,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
 
     LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn && rootBackStack.lastOrNull() != Route.Login && rootBackStack.lastOrNull() != Route.Splash) {
+        if (isLoggedIn == false && rootBackStack.lastOrNull() != Route.Login && rootBackStack.lastOrNull() != Route.Splash) {
             rootBackStack.apply {
                 clear()
                 add(Route.Login)

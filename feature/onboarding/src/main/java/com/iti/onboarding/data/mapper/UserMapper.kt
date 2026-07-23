@@ -1,36 +1,46 @@
 package com.iti.onboarding.data.mapper
 
-import com.iti.careerpilot.core.network.model.UserResponseDto
+import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.core.datastore.models.AccountInfo
 import com.iti.core.datastore.models.AvatarInfo
 import com.iti.core.datastore.models.CareerInfo
 import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
 
-fun UserResponseDto.toDomain(): UserProfile {
+fun UserProfileDto.toDomain(): UserProfile {
     return UserProfile(
-        id = id.toInt(),
+        id = id?.toInt() ?: 0,
         account = AccountInfo(
-            username = profile?.username.orEmpty(),
-            email = email ?: profile?.email.orEmpty(),
-            timezone = profile?.timezone.orEmpty(),
+            username = username.orEmpty(),
+            email = email.orEmpty(),
+            timezone = timezone.orEmpty(),
+            termsAccepted = termsAccepted ?: false,
+            subscriptionTier = subscriptionTier.orEmpty(),
+            coinBalance = coinBalance ?: 0,
         ),
         personal = PersonalInfo(
             phoneNumber = phoneNumber.orEmpty(),
-            displayName = profile?.displayName.orEmpty(),
+            displayName = displayName.orEmpty(),
+            gender = gender.orEmpty(),
+            dateOfBirth = dateOfBirth.orEmpty(),
         ),
         career = CareerInfo(
-            targetRole = profile?.targetRole.orEmpty(),
-            industry = profile?.industry.orEmpty(),
-            experienceLevel = profile?.experienceLevel.orEmpty(),
-            currentJobTitle = profile?.currentJobTitle.orEmpty(),
-            yearsOfExperience = profile?.yearsOfExperience ?: 0,
-            skills = profile?.skills ?: emptyList(),
-            targetCompanies = profile?.targetCompanies ?: emptyList(),
-            educationLevel = profile?.educationLevel.orEmpty(),
+            targetRole = targetRole.orEmpty(),
+            industry = industry.orEmpty(),
+            experienceLevel = experienceLevel.orEmpty(),
+            currentJobTitle = currentJobTitle.orEmpty(),
+            yearsOfExperience = yearsOfExperience ?: 0,
+            skills = skills?.mapNotNull { it.skillName } ?: emptyList(),
+            targetCompanies = targetCompanies ?: emptyList(),
+            educationLevel = educationLevel.orEmpty(),
+            trackName = trackName.orEmpty(),
         ),
         avatar = AvatarInfo(
-            avatarUrl = profile?.avatarUrl.orEmpty(),
-        )
+            avatarUrl = avatarUrl.orEmpty(),
+        ),
+        cv = com.iti.core.datastore.models.CvInfo(
+            cvUrl = cvUrl.orEmpty(),
+        ),
+        onboardingCompleted = onboardingCompleted,
     )
 }

@@ -37,91 +37,53 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        register("careerPilotAndroidApplication") {
-            id = libs.plugins.careerpilot.android.application.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidApplicationConventionPlugin"
+        register("careerPilotModuleApp") {
+            id = libs.plugins.careerpilot.module.app.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.AppModuleConventionPlugin"
         }
-        register("careerPilotAndroidLibrary") {
-            id = libs.plugins.careerpilot.android.library.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidLibraryConventionPlugin"
+        register("careerPilotModuleCommon") {
+            id = libs.plugins.careerpilot.module.common.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.CommonModuleConventionPlugin"
         }
-        register("careerPilotAndroidCompose") {
-            id = libs.plugins.careerpilot.android.compose.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidComposeConventionPlugin"
-        }
-        register("careerPilotAndroidHilt") {
-            id = libs.plugins.careerpilot.android.hilt.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidHiltConventionPlugin"
-        }
-        register("careerPilotKotlinJvm") {
-            id = libs.plugins.careerpilot.kotlin.jvm.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.KotlinJvmConventionPlugin"
-        }
-        register("careerPilotKotlinSerialization") {
-            id = libs.plugins.careerpilot.kotlin.serialization.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.KotlinSerializationConventionPlugin"
-        }
-        register("careerPilotAndroidRoom") {
-            id = libs.plugins.careerpilot.android.room.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidRoomConventionPlugin"
-        }
-        register("careerPilotAndroidDataStore") {
-            id = libs.plugins.careerpilot.android.datastore.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidDataStoreConventionPlugin"
-        }
-        register("careerPilotAndroidKtor") {
-            id = libs.plugins.careerpilot.android.ktor.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidKtorConventionPlugin"
-        }
-        register("careerPilotAndroidWorkManager") {
-            id = libs.plugins.careerpilot.android.workmanager.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.AndroidWorkManagerConventionPlugin"
+        register("careerPilotModuleDesignSystem") {
+            id = libs.plugins.careerpilot.module.designsystem.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.DesignSystemModuleConventionPlugin"
         }
         register("careerPilotModuleNetwork") {
             id = libs.plugins.careerpilot.module.network.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.NetworkModuleConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.NetworkModuleConventionPlugin"
         }
         register("careerPilotModuleDatabase") {
             id = libs.plugins.careerpilot.module.database.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.DatabaseModuleConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.DatabaseModuleConventionPlugin"
         }
         register("careerPilotModuleDataStore") {
             id = libs.plugins.careerpilot.module.datastore.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.DataStoreModuleConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.DataStoreModuleConventionPlugin"
         }
-        register("careerPilotModuleModels") {
-            id = libs.plugins.careerpilot.module.models.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.ModelsModuleConventionPlugin"
+        register("careerPilotModuleModel") {
+            id = libs.plugins.careerpilot.module.model.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.modules.ModelModuleConventionPlugin"
         }
-        register("careerPilotFeatureDomain") {
-            id = libs.plugins.careerpilot.feature.domain.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.FeatureDomainConventionPlugin"
+        register("careerPilotFeatureLogin") {
+            id = libs.plugins.careerpilot.feature.login.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.LoginFeatureConventionPlugin"
         }
-        register("careerPilotFeatureData") {
-            id = libs.plugins.careerpilot.feature.data.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.FeatureDataConventionPlugin"
-        }
-        register("careerPilotFeaturePresentation") {
-            id = libs.plugins.careerpilot.feature.presentation.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.FeaturePresentationConventionPlugin"
+        register("careerPilotFeatureOnboarding") {
+            id = libs.plugins.careerpilot.feature.onboarding.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.OnboardingFeatureConventionPlugin"
         }
         register("careerPilotFeatureProfile") {
             id = libs.plugins.careerpilot.feature.profile.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.ProfileConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.features.ProfileFeatureConventionPlugin"
+        }
+        register("careerPilotFeatureEditProfile") {
+            id = libs.plugins.careerpilot.feature.editprofile.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.EditProfileFeatureConventionPlugin"
         }
         register("careerPilotFeatureReports") {
             id = libs.plugins.careerpilot.feature.reports.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.ReportsFeatureConvention"
-        }
-        register("careerPilotTesting") {
-            id = libs.plugins.careerpilot.testing.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.TestingConventionPlugin"
-        }
-
-        // Features
-        register("onboardingFeature") {
-            id = "feature.onboarding"
-            implementationClass = "com.iti.careerpilot.buildlogic.OnboardingConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.features.ReportsFeatureConvention"
         }
     }
 }

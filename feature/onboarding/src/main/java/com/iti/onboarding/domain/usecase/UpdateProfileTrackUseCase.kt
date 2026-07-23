@@ -9,6 +9,6 @@ class UpdateProfileTrackUseCase  @Inject constructor(
     private val repository: OnboardingRepository,
 ) {
     suspend operator fun invoke(
-        trackId: Int
+        trackId: Long
     ): CareerPilotResult<Unit, NetworkError> = repository.updateProfileTrack(trackId)
 }

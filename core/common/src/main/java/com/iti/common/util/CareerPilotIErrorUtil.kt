@@ -54,6 +54,9 @@ fun NetworkError.toUIText(): UIText {
 
             NetworkError.UNKNOWN ->
                 R.string.error_unknown
+
+            NetworkError.FAKE_SERVER_ERROR ->
+                R.string.fake_error_unknown
         }
     )
 }

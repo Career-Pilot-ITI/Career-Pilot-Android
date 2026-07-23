@@ -2,7 +2,7 @@ package com.iti.onboarding.domain.repository
 
 import android.net.Uri
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
-import com.iti.careerpilot.core.network.model.UserResponseDto
+import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
@@ -18,12 +18,14 @@ interface OnboardingRepository {
     ): CareerPilotResult<UploadedFile, NetworkError>
 
     suspend fun saveAvatarUrl(file: UploadedFile)
-    suspend fun updateProfile(request: UpdateProfileRequestDto): CareerPilotResult<UserResponseDto, NetworkError>
+    suspend fun updateProfile(request: UpdateProfileRequestDto): CareerPilotResult<UserProfileDto, NetworkError>
     suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError>
     suspend fun uploadCv(
         uri: Uri,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<UploadedFile, NetworkError>
 
-    suspend fun updateProfileTrack(trackId: Int): CareerPilotResult<Unit, NetworkError>
+    suspend fun updateProfileTrack(trackId: Long): CareerPilotResult<Unit, NetworkError>
+
+    suspend fun completeOnboarding(cvFileId: Long?): CareerPilotResult<Unit, NetworkError>
 }

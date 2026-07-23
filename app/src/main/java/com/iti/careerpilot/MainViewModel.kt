@@ -15,7 +15,7 @@ class MainViewModel @Inject constructor(
     userTokensRepo: UserTokensRepo
 ) : ViewModel() {
 
-    val isLoggedIn: StateFlow<Boolean?> = userTokensRepo.tokens
+    val isLoggedIn: StateFlow<Boolean?> = userTokensRepo.tokenUpdates
         .map { it.accessToken?.isNotBlank() }
         .stateIn(
             scope = viewModelScope,
