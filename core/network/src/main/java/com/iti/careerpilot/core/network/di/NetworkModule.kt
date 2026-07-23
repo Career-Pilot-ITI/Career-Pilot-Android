@@ -29,10 +29,6 @@ import io.ktor.client.plugins.DefaultRequest
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import javax.inject.Singleton
-import kotlinx.coroutines.runBlocking
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,57 +51,17 @@ object NetworkModule {
             engine {
                 addInterceptor { chain ->
                     val request = chain.request()
-                    var response = chain.proceed(request)
+                    val response = chain.proceed(request)
 
                     val path = request.url.encodedPath
                     val isSkipAuth = path.contains("otp", ignoreCase = true) ||
                             path.contains("refresh", ignoreCase = true)
 
                     if (response.code == 403 && !isSkipAuth) {
-                        val newTokens = runBlocking {
-                            val currentTokens = datastore.readTokens()
-                            val refreshToken = currentTokens.refreshToken
-                            if (refreshToken.isNullOrBlank()) return@runBlocking null
-
-                            try {
-                                val mediaType = "application/json; charset=utf-8".toMediaType()
-                                val jsonBody = "{\"refreshToken\":\"$refreshToken\"}"
-                                val refreshRequest = Request.Builder()
-                                    .url(Endpoints.REFRESH_TOKEN)
-                                    .post(jsonBody.toRequestBody(mediaType))
-                                    .build()
-
-                                val refreshClient = okhttp3.OkHttpClient()
-                                refreshClient.newCall(refreshRequest).execute().use { refreshResponse ->
-                                    if (refreshResponse.isSuccessful) {
-                                        val responseBodyStr = refreshResponse.body.string()
-                                        val tokensDto = json.decodeFromString<AuthTokensDto>(responseBodyStr)
-                                        datastore.setAccessToken(tokensDto.accessToken)
-                                        datastore.setRefreshToken(tokensDto.refreshToken)
-                                        BearerTokens(tokensDto.accessToken, tokensDto.refreshToken)
-                                    } else {
-                                        datastore.clear()
-                                        null
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("KtorClient", "Error refreshing tokens on 403", e)
-                                datastore.clear()
-                                null
-                            }
-                        }
-
-                        if (newTokens != null) {
-                            response.close()
-                            val newTokenStr = newTokens.accessToken
-                            val retriedRequest = request.newBuilder()
-                                .header(HttpHeaders.Authorization, "Bearer $newTokenStr")
-                                .build()
-                            response = chain.proceed(retriedRequest)
-                        }
+                        response.newBuilder().code(401).message("Unauthorized").build()
+                    } else {
+                        response
                     }
-
-                    response
                 }
             }
 
