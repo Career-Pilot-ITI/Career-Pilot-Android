@@ -13,7 +13,6 @@ import javax.inject.Singleton
 abstract class ProdOnboardingModule {
 
     @Binds
-    @Singleton
     abstract fun bindOnboardingRemoteDataSource(
         impl: OnboardingRemoteDataSourceImpl,
     ): OnboardingRemoteDataSource
