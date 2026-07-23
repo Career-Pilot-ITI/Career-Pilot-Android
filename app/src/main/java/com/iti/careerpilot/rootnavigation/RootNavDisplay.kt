@@ -72,9 +72,7 @@ fun RootNavDisplay(
                     event.actionLabel?.asString(context),
             )
 
-            if (result == SnackbarResult.ActionPerformed) {
-                request.performAction()
-            }
+            request.complete(result)
         }
     }
 
