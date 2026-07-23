@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -237,8 +238,9 @@ fun PracticeSessionScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     ) {
                         RecordingWave(
-                            amplitudes = state.amplitudes,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            volumeBars = state.volumeBars,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
                         )
                         RecordingDurationCard(
                             durationMs = state.recordingDuration.inWholeMilliseconds,
@@ -278,7 +280,6 @@ fun PracticeSessionScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CenterStage(
                             isRecording = state.isRecording,
-                            amplitudes = state.amplitudes,
                             isReadingQuestion = state.isReadingQuestion,
                             hasRecordedAudio = state.recordedAudioPath != null,
                             onToggleListening = {

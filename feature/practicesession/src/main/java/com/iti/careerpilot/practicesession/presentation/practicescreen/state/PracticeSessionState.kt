@@ -15,6 +15,7 @@ data class PracticeSessionState(
     val isReadingQuestion: Boolean = false,
     val recordedAudioPath: String? = null,
     val amplitudes: List<Float> = emptyList(),
+    val volumeBars: List<VolumeBar> = emptyList(),
     val recordingDuration: Duration = Duration.ZERO,
     val isUploadingAndTranscribingAudio: Boolean = false,
     val isSendingAnswer: Boolean = false,

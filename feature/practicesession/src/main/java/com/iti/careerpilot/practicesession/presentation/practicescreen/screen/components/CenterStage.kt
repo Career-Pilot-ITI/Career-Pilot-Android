@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CenterStage(
     isRecording: Boolean,
-    amplitudes: List<Float>, // active recording amplitudes
     isReadingQuestion: Boolean,
     hasRecordedAudio: Boolean,
     onToggleListening: () -> Unit,

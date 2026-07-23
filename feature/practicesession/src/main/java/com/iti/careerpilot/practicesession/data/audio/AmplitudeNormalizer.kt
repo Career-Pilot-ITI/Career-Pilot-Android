@@ -31,22 +31,23 @@ class AmplitudeNormalizer @Inject constructor() {
 
         val barsCount = (trackWidth / (barWidth + spacing)).roundToInt()
         val resampled = resampleAmplitudes(sourceAmplitudes, barsCount)
-        val remapped = remapAmplitudes(resampled)
-
-        return remapped
+        return remapAmplitudes(resampled)
     }
 
-    private fun remapAmplitudes(amplitudes: List<Float>): List<Float> {
+    fun remapAmplitudes(amplitudes: List<Float>): List<Float> {
         val outputRange = maxOutput - minOutput
         val scaleFactor = maxOutput - amplitudeMinOutputThreshold
         return amplitudes.map { amplitude ->
-            if (amplitude <= amplitudeMinOutputThreshold) {
-                minOutput
-            } else {
-                val amplitudeRange = amplitude - amplitudeMinOutputThreshold
+            remapSingle(amplitude, outputRange, scaleFactor)
+        }
+    }
 
-                minOutput + (amplitudeRange * outputRange / scaleFactor)
-            }
+    private fun remapSingle(amplitude: Float, outputRange: Float, scaleFactor: Float): Float {
+        return if (amplitude <= amplitudeMinOutputThreshold) {
+            minOutput
+        } else {
+            val amplitudeRange = amplitude - amplitudeMinOutputThreshold
+            minOutput + (amplitudeRange * outputRange / scaleFactor)
         }
     }
 

@@ -37,7 +37,9 @@ import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.models.Session
+import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
 import com.iti.common.error.NetworkError
 import com.iti.common.error.TranscriptionError
 import com.iti.common.result.onError
@@ -45,10 +47,13 @@ import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.abs
+import kotlin.math.sin
 import kotlin.time.Duration.Companion.milliseconds
 
 const val QUESTION_COUNT = 15
 const val SESSION_DURATION = 30
+const val WAVE_BAR_COUNT = 32
 
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
@@ -57,6 +62,7 @@ class PracticeSessionViewModel @Inject constructor(
     private val audioPlayer: AudioPlayer,
     private val whisperEngine: WhisperEngine,
     private val textToSpeechManager: TextToSpeechManager,
+    private val amplitudeNormalizer: AmplitudeNormalizer,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -64,8 +70,13 @@ class PracticeSessionViewModel @Inject constructor(
 
     private var sessionStartedAtMs: Long? = null
     private var timerJob: Job? = null
+    private var volumeBarIdCounter = 0L
+    private var lastWaveUpdateMs = 0L
+    private val waveUpdateIntervalMs = 120L
 
-    private val _state = MutableStateFlow(PracticeSessionState())
+    private val _state = MutableStateFlow(PracticeSessionState(
+        volumeBars = createInitialVolumeBars()
+    ))
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
@@ -77,8 +88,17 @@ class PracticeSessionViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = PracticeSessionState()
+            initialValue = PracticeSessionState(
+                volumeBars = createInitialVolumeBars()
+            )
         )
+
+    private fun createInitialVolumeBars(): List<VolumeBar> {
+        return List(WAVE_BAR_COUNT) { index ->
+            val fraction = (0.12f + 0.1f * abs(sin(index * 0.8f))).coerceIn(0.12f, 0.25f)
+            VolumeBar(fraction, volumeBarIdCounter++)
+        }
+    }
 
     private val _event = Channel<PracticeSessionEvent>()
     val event: Flow<PracticeSessionEvent> = _event.receiveAsFlow()
@@ -90,10 +110,24 @@ class PracticeSessionViewModel @Inject constructor(
                 val isRecordingNow = details.isRecording
 
                 _state.update {
+                    val normalizedAmps = amplitudeNormalizer.remapAmplitudes(details.amplitudes)
+                    val currentBars = it.volumeBars.toMutableList()
+                    val currentTime = System.currentTimeMillis()
+                    
+                    if (normalizedAmps.isNotEmpty() && (currentTime - lastWaveUpdateMs >= waveUpdateIntervalMs)) {
+                        val newAmp = normalizedAmps.last().coerceIn(0.12f, 1f)
+                        currentBars.add(VolumeBar(newAmp, volumeBarIdCounter++))
+                        if (currentBars.size > WAVE_BAR_COUNT) {
+                            currentBars.removeAt(0)
+                        }
+                        lastWaveUpdateMs = currentTime
+                    }
+
                     it.copy(
                         isRecording = details.isRecording,
                         recordedAudioPath = details.filePath,
-                        amplitudes = details.amplitudes,
+                        amplitudes = normalizedAmps,
+                        volumeBars = currentBars,
                         recordingDuration = details.duration
                     )
                 }
@@ -262,6 +296,7 @@ class PracticeSessionViewModel @Inject constructor(
                 transcription = null,
                 recordingDuration = Duration.ZERO,
                 amplitudes = emptyList(),
+                volumeBars = createInitialVolumeBars(),
                 showDiscardConfirm = false
             )
         }
@@ -339,7 +374,8 @@ class PracticeSessionViewModel @Inject constructor(
                 recordedAudioPath = null,
                 transcription = null,
                 recordingDuration = Duration.ZERO,
-                amplitudes = emptyList()
+                amplitudes = emptyList(),
+                volumeBars = createInitialVolumeBars()
             )
         }
         if (_state.value.autoReadQuestion) {
@@ -479,7 +515,8 @@ class PracticeSessionViewModel @Inject constructor(
                     recordedAudioPath = null,
                     transcription = null,
                     recordingDuration = Duration.ZERO,
-                    amplitudes = emptyList()
+                    amplitudes = emptyList(),
+                    volumeBars = createInitialVolumeBars()
                 )
             }
             if (_state.value.autoReadQuestion) {
