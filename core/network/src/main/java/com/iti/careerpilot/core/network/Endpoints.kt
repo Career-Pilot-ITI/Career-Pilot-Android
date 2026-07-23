@@ -3,10 +3,26 @@ package com.iti.careerpilot.core.network
 object Endpoints {
     const val BASE_URL = BuildConfig.BASE_URL
 
-    const val UPLOAD_FILE = "$BASE_URL/api/v1/files/upload"
-    const val PROFILE = "$BASE_URL/api/v1/profile"
-    const val GET_TRACKS = "$BASE_URL/api/v1/tracks"
-    const val REFRESH_TOKEN = "$BASE_URL/api/v1/auth/refresh"
-    const val SEND_OTP = "$BASE_URL/api/v1/otp/send"
-    const val VERIFY_OTP = "$BASE_URL/api/v1/otp/verify"
+    const val UPLOAD_FILE = "${BASE_URL}api/v1/files/upload"
+    const val PROFILE = "${BASE_URL}api/v1/profile"
+    const val GET_TRACKS = "${BASE_URL}api/v1/tracks"
+    const val REFRESH_TOKEN = "${BASE_URL}api/v1/auth/refresh"
+    const val SEND_OTP = "${BASE_URL}api/v1/otp/send"
+    const val VERIFY_OTP = "${BASE_URL}api/v1/otp/verify"
+
+    // Wallet
+    const val WALLET_BALANCE = "${BASE_URL}api/v1/wallet/balance"
+    const val WALLET_TOP_UP = "${BASE_URL}api/v1/wallet/top-up"
+
+    // Payments
+    const val PAYMENT_INITIATE = "${BASE_URL}api/v1/payments/initiate"
+    const val PAYMENT_HISTORY = "${BASE_URL}api/v1/payments/history"
+
+    // Subscriptions
+    const val SUBSCRIPTION_CURRENT = "${BASE_URL}api/v1/subscriptions/current"
+    const val SUBSCRIPTION_UPGRADE = "${BASE_URL}api/v1/subscriptions/upgrade"
+    const val SUBSCRIPTION_DOWNGRADE = "${BASE_URL}api/v1/subscriptions/downgrade"
+    const val SUBSCRIPTION_CANCEL = "${BASE_URL}api/v1/subscriptions/cancel"
 }
+
+
