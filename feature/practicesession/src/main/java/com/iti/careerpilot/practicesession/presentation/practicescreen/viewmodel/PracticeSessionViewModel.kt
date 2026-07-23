@@ -47,6 +47,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
+const val QUESTION_COUNT = 15
+const val SESSION_DURATION = 30
+
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
     private val sessionRepo: SessionRepo,
@@ -301,8 +304,8 @@ class PracticeSessionViewModel @Inject constructor(
             sessionRepo.createNewSession(
                 CreateSessionRequest(
                     trackId = trackId,
-                    questionCount = 5,
-                    durationMinutes = 15
+                    questionCount = QUESTION_COUNT,
+                    durationMinutes = SESSION_DURATION
                 )
             )
         }

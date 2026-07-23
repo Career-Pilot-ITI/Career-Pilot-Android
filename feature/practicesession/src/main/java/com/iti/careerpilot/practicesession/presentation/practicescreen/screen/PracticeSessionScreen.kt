@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +45,7 @@ import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.AmbientStageBackdrop
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CenterStage
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ConfirmationDialog
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.PracticeSessionBottomSection
@@ -213,7 +215,10 @@ fun PracticeSessionScreen(
                         text = formatDuration(state.totalSessionDuration.inWholeMilliseconds),
                         style = MaterialTheme.typography.titleLarge
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         },
         bottomBar = {
@@ -267,32 +272,38 @@ fun PracticeSessionScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
         ) {
-            Box(
+            AmbientStageBackdrop()
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp),
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CenterStage(
-                        isRecording = state.isRecording,
-                        amplitudes = state.amplitudes,
-                        isReadingQuestion = state.isReadingQuestion,
-                        hasRecordedAudio = state.recordedAudioPath != null,
-                        onToggleListening = {
-                            if (state.isReadingQuestion) {
-                                onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
-                            } else {
-                                onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CenterStage(
+                            isRecording = state.isRecording,
+                            amplitudes = state.amplitudes,
+                            isReadingQuestion = state.isReadingQuestion,
+                            hasRecordedAudio = state.recordedAudioPath != null,
+                            onToggleListening = {
+                                if (state.isReadingQuestion) {
+                                    onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
+                                } else {
+                                    onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
