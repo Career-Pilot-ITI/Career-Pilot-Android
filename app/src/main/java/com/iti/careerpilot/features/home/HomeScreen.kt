@@ -5,19 +5,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun HomeRoot(
-    openPaywall: () -> Unit,
+    openPaywall: (Boolean) -> Unit,
     openSessionDetails: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -33,7 +32,7 @@ fun HomeRoot(
 
 @Composable
 fun HomeScreen(
-    openPaywall: () -> Unit,
+    openPaywall: (Boolean) -> Unit,
     openSessionDetails: (String) -> Unit,
     state: HomeState,
     onAction: (HomeAction) -> Unit,
@@ -46,10 +45,24 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Home Screen")
+        Text(text = "Coins: ${state.coinBalance}")
+        val formattedTier = when (state.subscriptionTier.uppercase()) {
+            "PRO" -> "Pro"
+            "MAX" -> "Max"
+            "PLUS" -> "Plus"
+            else -> "Free"
+        }
+        Text(text = "Tier: $formattedTier")
+        
         Button(
-            onClick = openPaywall
+            onClick = { openPaywall(false) }
         ) {
-            Text(text = "open Paywall")
+            Text(text = "Open Paywall")
+        }
+        Button(
+            onClick = { openPaywall(true) }
+        ) {
+            Text(text = "Test Get Coins")
         }
         Button(
             onClick = { openSessionDetails("132") }
