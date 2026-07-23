@@ -28,7 +28,7 @@ import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -55,26 +55,22 @@ fun RootNavDisplay(
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
-        CareerPilotSnackbarController.requests.collect { request ->
-            try {
-                val event = request.event
-                val materialResult = snackbarHostState.showSnackbar(
-                    message = event.message.asString(context),
-                    withDismissAction =
-                        event.type ==
-                                CareerPilotSnackbarType.DISMISSIBLE,
-                    duration = event.duration,
-                    actionLabel =
-                        event.actionLabel?.asString(context),
-                )
+        CareerPilotSnackbarController.requests.collectLatest { request ->
+            snackbarHostState.currentSnackbarData?.dismiss()
 
-                request.complete(materialResult)
-            } catch (cancellation: CancellationException) {
-                request.complete(
-                    SnackbarResult.Dismissed,
-                )
+            val event = request.event
+            val result = snackbarHostState.showSnackbar(
+                message = event.message.asString(context),
+                withDismissAction =
+                    event.type ==
+                            CareerPilotSnackbarType.DISMISSIBLE,
+                duration = event.duration,
+                actionLabel =
+                    event.actionLabel?.asString(context),
+            )
 
-                throw cancellation
+            if (result == SnackbarResult.ActionPerformed) {
+                request.performAction()
             }
         }
     }
