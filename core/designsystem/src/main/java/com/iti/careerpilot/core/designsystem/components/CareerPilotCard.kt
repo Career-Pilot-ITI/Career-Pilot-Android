@@ -20,14 +20,15 @@ import com.iti.careerpilot.core.designsystem.softShadow
 fun CareerPilotCard(
     modifier: Modifier = Modifier,
     useShadow: Boolean = true,
-    elevation: Dp = 16.dp,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
+    elevation: androidx.compose.ui.unit.Dp = 16.dp,
     content: @Composable () -> Unit
 ) {
     Card(
         modifier = if (useShadow) modifier.softShadow(elevation) else modifier,
         shape = CareerPilotShapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         elevation = CardDefaults.cardElevation(0.dp),
