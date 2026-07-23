@@ -79,7 +79,7 @@ gradlePlugin {
         }
         register("careerPilotFeatureHome") {
             id = libs.plugins.careerpilot.feature.home.get().pluginId
-            implementationClass = "com.iti.careerpilot.buildlogic.HomeConventionPlugin"
+            implementationClass = "com.iti.careerpilot.buildlogic.features.HomeFeatureConventionPlugin"
         }
         register("careerPilotFeatureEditProfile") {
             id = libs.plugins.careerpilot.feature.editprofile.get().pluginId
