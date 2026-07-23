@@ -31,10 +31,76 @@ class AudioPlayerImpl @Inject constructor(
     override val activeTrack = _activeTrack.asStateFlow()
 
     private var durationJob: Job? = null
+    private var onCompleteCallback: (() -> Unit)? = null
+
+    private val playerListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    _activeTrack.update {
+                        it.copy(
+                            totalDuration = exoPlayer.duration.milliseconds,
+                            durationPlayed = exoPlayer.currentPosition.milliseconds,
+                            isPlaying = exoPlayer.playWhenReady,
+                            playbackState = if (exoPlayer.playWhenReady) AudioPlaybackState.PLAYING else AudioPlaybackState.PAUSED
+                        )
+                    }
+                    if (exoPlayer.playWhenReady) {
+                        trackDuration()
+                    }
+                }
+
+                Player.STATE_ENDED -> {
+                    onCompleteCallback?.invoke()
+                    stop()
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    init {
+        exoPlayer.addListener(playerListener)
+    }
+
+    override fun prepare(filePath: String) {
+        if (activeTrack.value.filePath == filePath && exoPlayer.playbackState != Player.STATE_IDLE) {
+            return
+        }
+
+        exoPlayer.stop()
+        durationJob?.cancel()
+
+        val mediaItem = MediaItem.fromUri(
+            File(filePath).toUri()
+        )
+
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+        exoPlayer.playWhenReady = false
+
+        _activeTrack.update {
+            it.copy(
+                isPlaying = false,
+                playbackState = AudioPlaybackState.PAUSED,
+                filePath = filePath
+            )
+        }
+    }
 
     override fun play(filePath: String, onComplete: () -> Unit) {
+        onCompleteCallback = onComplete
 
-        stop()
+        if (activeTrack.value.filePath == filePath && exoPlayer.playbackState != Player.STATE_IDLE) {
+            resume()
+            return
+        }
+
+        exoPlayer.stop()
+        durationJob?.cancel()
+
         val mediaItem = MediaItem.fromUri(
             File(filePath).toUri()
         )
@@ -43,45 +109,20 @@ class AudioPlayerImpl @Inject constructor(
         exoPlayer.prepare()
         exoPlayer.play()
 
-        exoPlayer.addListener(
-            object : Player.Listener {
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    super.onPlaybackStateChanged(playbackState)
-                    when (playbackState) {
-                        Player.STATE_READY -> {
-                            _activeTrack.update {
-                                AudioTrack(
-                                    totalDuration = exoPlayer.duration.milliseconds,
-                                    durationPlayed = Duration.ZERO,
-                                    isPlaying = true,
-                                    filePath = filePath,
-                                    playbackState = AudioPlaybackState.PLAYING
-                                )
-                            }
-                            trackDuration()
-                        }
-
-                        Player.STATE_ENDED -> {
-                            onComplete()
-                            stop()
-                        }
-
-                        else -> {}
-                    }
-                }
-            }
-        )
+        _activeTrack.update {
+            it.copy(
+                isPlaying = true,
+                playbackState = AudioPlaybackState.PLAYING,
+                filePath = filePath
+            )
+        }
     }
 
     override fun pause() {
-        if (!activeTrack.value.isPlaying) {
-            return
-        }
         _activeTrack.update {
             it.copy(
                 isPlaying = false,
-                playbackState = AudioPlaybackState.PAUSED
+                playbackState = if (it.playbackState == AudioPlaybackState.STOPPED) AudioPlaybackState.STOPPED else AudioPlaybackState.PAUSED
             )
         }
         durationJob?.cancel()

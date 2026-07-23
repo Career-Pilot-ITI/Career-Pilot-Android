@@ -86,6 +86,9 @@ class PracticeSessionViewModel @Inject constructor(
     private fun observeRecorder() {
         viewModelScope.launch {
             voiceRecorder.recordingDetails.collect { details ->
+                val wasRecording = _state.value.isRecording
+                val isRecordingNow = details.isRecording
+
                 _state.update {
                     it.copy(
                         isRecording = details.isRecording,
@@ -93,6 +96,10 @@ class PracticeSessionViewModel @Inject constructor(
                         amplitudes = details.amplitudes,
                         recordingDuration = details.duration
                     )
+                }
+
+                if (wasRecording && !isRecordingNow && !details.filePath.isNullOrBlank()) {
+                    audioPlayer.prepare(details.filePath)
                 }
 
                 if (details.isRecording && details.duration >= 2.minutes && !autoStopTriggered) {
@@ -223,6 +230,7 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun seekMediaPlayer(positionMs: Long) {
+        stopReadingQuestion()
         audioPlayer.seekTo(positionMs)
     }
 
@@ -230,9 +238,14 @@ class PracticeSessionViewModel @Inject constructor(
         val currentState = _state.value
         when (currentState.playbackState) {
             AudioPlaybackState.PLAYING -> audioPlayer.pause()
-            AudioPlaybackState.PAUSED -> audioPlayer.resume()
+            AudioPlaybackState.PAUSED -> {
+                stopReadingQuestion()
+                audioPlayer.resume()
+            }
+
             AudioPlaybackState.STOPPED -> {
                 currentState.recordedAudioPath?.let { path ->
+                    stopReadingQuestion()
                     audioPlayer.play(path) {
                         //todo add on complete if needed
                     }
@@ -348,6 +361,8 @@ class PracticeSessionViewModel @Inject constructor(
     private fun readQuestion() {
         val question = _state.value.currentSession?.currentQuestion?.questionText
         if (!question.isNullOrBlank()) {
+            voiceRecorder.stop()
+            audioPlayer.pause()
             textToSpeechManager.speak(question)
         }
     }
@@ -356,6 +371,10 @@ class PracticeSessionViewModel @Inject constructor(
         val audioPath = _state.value.recordedAudioPath ?: return
         val session = _state.value.currentSession ?: return
         val sessionId = session.sessionId
+
+        stopReadingQuestion()
+        voiceRecorder.stop()
+        audioPlayer.stop()
 
         viewModelScope.launch {
             _state.update {
@@ -406,8 +425,6 @@ class PracticeSessionViewModel @Inject constructor(
         audioUrl: String,
         transcript: String
     ) {
-        stopReadingQuestion()
-        stopRecording()
         _state.update {
             it.copy(
                 isUploadingAndTranscribingAudio = false,
