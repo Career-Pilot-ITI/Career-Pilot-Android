@@ -8,7 +8,6 @@ android {
 
 dependencies {
     implementation(libs.media3.exoplayer)
-    implementation(libs.extended.icons)
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))
     implementation(project(":core:network"))
