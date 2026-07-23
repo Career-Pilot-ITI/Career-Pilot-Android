@@ -3,6 +3,8 @@ package com.iti.careerpilot.practicesession.presentation.screen
 import android.Manifest
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +27,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,10 +51,12 @@ import com.iti.careerpilot.practicesession.presentation.screen.components.Practi
 import com.iti.careerpilot.practicesession.presentation.screen.components.PracticeSessionSettingsBottomSheet
 import com.iti.careerpilot.practicesession.presentation.screen.components.ProcessingDialog
 import com.iti.careerpilot.practicesession.presentation.screen.components.QuestionCard
+import com.iti.careerpilot.practicesession.presentation.screen.components.TopErrorNotification
 import com.iti.careerpilot.practicesession.presentation.screen.util.formatDuration
 import com.iti.careerpilot.practicesession.presentation.state.PracticeSessionState
 import com.iti.careerpilot.practicesession.presentation.viewmodel.PracticeSessionViewModel
-import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.UIText
+import kotlinx.coroutines.delay
 
 @Composable
 fun PracticeSessionRoot(
@@ -59,12 +66,21 @@ fun PracticeSessionRoot(
     onNavigateToResult: (Long) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
+    var errorMessage by remember { mutableStateOf<UIText?>(null) }
+
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
             is PracticeSessionEvent.ShowError -> {
-                CareerPilotSnackbarController.show(message = newEvent.message)
+                errorMessage = newEvent.message
             }
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null) {
+            delay(3000L)
+            errorMessage = null
         }
     }
 
@@ -77,13 +93,29 @@ fun PracticeSessionRoot(
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    PracticeSessionScreen(
-        state = state,
-        onBack = {
-            viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(true))
-        },
-        onAction = viewModel::onAction
-    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        PracticeSessionScreen(
+            state = state,
+            onBack = {
+                viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(true))
+            },
+            onAction = viewModel::onAction
+        )
+
+        AnimatedVisibility(
+            visible = errorMessage != null,
+            enter = slideInVertically(initialOffsetY = { -it }),
+            exit = slideOutVertically(targetOffsetY = { -it }),
+            modifier = Modifier.align(Alignment.TopCenter)
+        ) {
+            errorMessage?.let {
+                TopErrorNotification(
+                    message = it,
+                    onDismiss = { errorMessage = null }
+                )
+            }
+        }
+    }
 
     if (state.showSettingsBottomSheet) {
         PracticeSessionSettingsBottomSheet(
