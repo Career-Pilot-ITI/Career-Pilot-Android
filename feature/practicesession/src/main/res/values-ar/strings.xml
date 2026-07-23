@@ -6,7 +6,7 @@
     <string name="please_allow_microphone_permission_to_continue">يرجى السماح بإذن الميكروفون للمتابعة.</string>
     <string name="cancel">إلغاء</string>
     <string name="allow">سماح</string>
-    <string name="leave_confirmation_title">هل أنت متأكد أنك تريد المغادرة؟</string>
+    <string name="leave_confirmation_title">مغادرة الجلسة؟</string>
     <string name="leave_confirmation_message">سيتم تجاهل الإجابة الحالية، ولكن ستتمكن من متابعة جلسة المقابلة لاحقًا.</string>
     <string name="leave">مغادرة</string>
 

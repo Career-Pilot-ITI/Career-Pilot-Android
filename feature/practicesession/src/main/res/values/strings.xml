@@ -5,7 +5,7 @@
     <string name="please_allow_microphone_permission_to_continue">Please allow microphone permission to continue.</string>
     <string name="cancel">Cancel</string>
     <string name="allow">Allow</string>
-    <string name="leave_confirmation_title">Are you sure you want to leave?</string>
+    <string name="leave_confirmation_title">Leave Session?</string>
     <string name="leave_confirmation_message">the current answer will be discarded but you will be able to continue the interview session later.</string>
     <string name="leave">Leave</string>
 
