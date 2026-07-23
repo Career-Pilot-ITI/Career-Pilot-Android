@@ -2,6 +2,10 @@ plugins {
     alias(libs.plugins.careerpilot.feature.profile)
 }
 
+android {
+    namespace = "com.iti.careerpilot.profile"
+}
+
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))
