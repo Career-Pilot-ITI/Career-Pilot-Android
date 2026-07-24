@@ -1,0 +1,50 @@
+package com.iti.careerpilot.home.data.datasource.remote
+
+import com.iti.careerpilot.core.network.Endpoints
+import com.iti.careerpilot.core.network.util.safeCall
+import com.iti.careerpilot.home.data.datasource.remote.dto.ApiEnvelopeDto
+import com.iti.careerpilot.home.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.home.data.datasource.remote.dto.StartSessionRequestDto
+import com.iti.careerpilot.home.data.datasource.remote.dto.StartSessionResponseDto
+import com.iti.careerpilot.home.data.datasource.remote.dto.TrackDto
+import com.iti.common.error.NetworkError
+import com.iti.common.result.CareerPilotResult
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import javax.inject.Inject
+
+class InterviewRemoteDataSourceImpl @Inject constructor(
+    private val httpClient: HttpClient,
+) : InterviewRemoteDataSource {
+
+    override suspend fun getInterviewSessions(): CareerPilotResult<List<InterviewSessionDto>, NetworkError> =
+        safeCall<ApiEnvelopeDto<List<InterviewSessionDto>>> {
+            httpClient.get(Endpoints.INTERVIEW_SESSIONS)
+        }.unwrap { it ?: emptyList() }
+
+    override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> =
+        safeCall {
+            httpClient.get(Endpoints.GET_TRACKS)
+        }
+
+    override suspend fun startSession(
+        request: StartSessionRequestDto,
+    ): CareerPilotResult<StartSessionResponseDto, NetworkError> =
+        safeCall<ApiEnvelopeDto<StartSessionResponseDto>> {
+            httpClient.post(Endpoints.INTERVIEW_SESSIONS) {
+                setBody(request)
+            }
+        }.unwrap { it }
+
+    private inline fun <T, R> CareerPilotResult<ApiEnvelopeDto<T>, NetworkError>.unwrap(
+        transform: (T?) -> R?,
+    ): CareerPilotResult<R, NetworkError> = when (this) {
+        is CareerPilotResult.Error -> this
+        is CareerPilotResult.Success ->
+            transform(data.data)
+                ?.let { CareerPilotResult.Success(it) }
+                ?: CareerPilotResult.Error(NetworkError.EMPTY_RESULT)
+    }
+}
