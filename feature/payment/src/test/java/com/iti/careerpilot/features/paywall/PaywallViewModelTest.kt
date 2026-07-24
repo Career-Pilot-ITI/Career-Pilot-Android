@@ -337,4 +337,27 @@ class PaywallViewModelTest {
         assertTrue(effects.any { it is PaywallEffect.NavigateBack })
         job.cancel()
     }
+
+    @Test
+    fun `ConfirmUpgradeRequested on downgrade to paid plan executes payment checkout`() = runTest {
+        val userRepo = FakeUserProfileRepo()
+        userRepo.updateUserProfile { current -> current.copy(account = current.account.copy(subscriptionTier = "PRO")) }
+
+        val viewModel = makeViewModel(userRepo = userRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.onIntent(PaywallIntent.SelectPlan("plus"))
+        testScheduler.advanceUntilIdle()
+
+        val effects = mutableListOf<PaywallEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effectFlow.toList(effects)
+        }
+
+        viewModel.onIntent(PaywallIntent.ConfirmUpgradeRequested)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(effects.any { it is PaywallEffect.NavigateToWebView })
+        job.cancel()
+    }
 }

@@ -94,11 +94,13 @@ class PaywallViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             mutableState.update { it.copy(isLoadingSubscription = true) }
             userSyncManager.syncSubscriptionTier()
-            val currentTier = mutableState.value.currentSubscriptionTier
+            val currentProfile = userProfileRepo.readUserProfile()
+            val currentTier = currentProfile.account.subscriptionTier
             val mappedPlanId = SubscriptionTier.normalizeTierId(currentTier)
             mutableState.update { currentState ->
                 currentState.copy(
                     isLoadingSubscription = false,
+                    currentSubscriptionTier = currentTier,
                     selectedPlanId = if (!hasUserSelectedPlan) mappedPlanId else currentState.selectedPlanId
                 )
             }
@@ -129,7 +131,7 @@ class PaywallViewModel @Inject constructor(
             PaywallIntent.CheckoutRequested,
             PaywallIntent.ConfirmUpgradeRequested -> {
                 val selectedPlan = mutableState.value.selectedPlan
-                if (selectedPlan != null && (selectedPlan.id.equals("free", ignoreCase = true) || mutableState.value.isDowngrade)) {
+                if (selectedPlan != null && selectedPlan.id.equals("free", ignoreCase = true)) {
                     handleDowngradeRequested()
                 } else {
                     handleUpgradeRequested()
@@ -199,17 +201,30 @@ class PaywallViewModel @Inject constructor(
         val targetTier = selectedPlan.id.uppercase()
         viewModelScope.launch(ioDispatcher) {
             mutableState.update { it.copy(isCheckoutInProgress = true) }
-            userProfileRepo.updateUserProfile { profile ->
-                profile.copy(
-                    account = profile.account.copy(
-                        subscriptionTier = targetTier
-                    )
-                )
+            when (val result = downgradeSubscriptionUseCase(targetTier)) {
+                is CareerPilotResult.Success -> {
+                    userProfileRepo.updateUserProfile { profile ->
+                        profile.copy(
+                            account = profile.account.copy(
+                                subscriptionTier = targetTier
+                            )
+                        )
+                    }
+                    hasUserSelectedPlan = false
+                    mutableState.update { currentState ->
+                        currentState.copy(
+                            isCheckoutInProgress = false,
+                            currentSubscriptionTier = targetTier,
+                            selectedPlanId = SubscriptionTier.normalizeTierId(targetTier)
+                        )
+                    }
+                    _effectChannel.send(PaywallEffect.NavigateBack)
+                }
+                is CareerPilotResult.Error -> {
+                    mutableState.update { it.copy(isCheckoutInProgress = false) }
+                    _effectChannel.send(PaywallEffect.ShowSnackbar(result.error.toUIText()))
+                }
             }
-            downgradeSubscriptionUseCase(targetTier)
-            runCatching { userSyncManager.syncSubscriptionTier() }
-            mutableState.update { it.copy(isCheckoutInProgress = false) }
-            _effectChannel.send(PaywallEffect.NavigateBack)
         }
     }
 

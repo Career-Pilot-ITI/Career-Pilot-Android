@@ -17,11 +17,13 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
+import com.iti.core.datastore.repo.UserProfileRepo
 import java.nio.channels.UnresolvedAddressException
 import javax.inject.Inject
 
 class PaymentRepositoryImpl @Inject constructor(
     private val remoteDataSource: PaymentRemoteDataSource,
+    private val userProfileRepo: UserProfileRepo,
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : PaymentRepository {
 
@@ -68,10 +70,28 @@ class PaymentRepositoryImpl @Inject constructor(
             ).toDomain()
         }
 
-    override suspend fun getCurrentSubscription(): CareerPilotResult<SubscriptionInfo, NetworkError> =
-        safeNetworkCall {
-            remoteDataSource.getCurrentSubscription().toDomain()
+    override suspend fun getCurrentSubscription(): CareerPilotResult<SubscriptionInfo, NetworkError> {
+        return when (val result = safeNetworkCall { remoteDataSource.getCurrentSubscription().toDomain() }) {
+            is CareerPilotResult.Success -> result
+            is CareerPilotResult.Error -> {
+                val cachedProfile = userProfileRepo.readUserProfile()
+                if (cachedProfile.account.subscriptionTier.isNotBlank()) {
+                    CareerPilotResult.Success(
+                        SubscriptionInfo(
+                            tier = cachedProfile.account.subscriptionTier,
+                            isActive = true,
+                            startedAt = null,
+                            renewalDate = null,
+                            cancelledAt = null,
+                            pendingTier = null
+                        )
+                    )
+                } else {
+                    result
+                }
+            }
         }
+    }
 
     override suspend fun upgradeSubscription(
         tier: String,

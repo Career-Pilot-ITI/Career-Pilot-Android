@@ -31,11 +31,11 @@ class UserSyncManager @Inject constructor(
     suspend fun syncSubscriptionTier() {
         try {
             val subscriptionResponse = paymentApi.getCurrentSubscription()
-            val effectiveTier = subscriptionResponse.pendingTier ?: subscriptionResponse.tier
+            val currentTier = subscriptionResponse.tier
             userProfileRepo.updateUserProfile { profile ->
                 profile.copy(
                     account = profile.account.copy(
-                        subscriptionTier = effectiveTier
+                        subscriptionTier = currentTier
                     )
                 )
             }
