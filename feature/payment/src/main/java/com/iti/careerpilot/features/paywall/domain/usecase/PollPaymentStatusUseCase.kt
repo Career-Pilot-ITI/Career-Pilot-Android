@@ -16,22 +16,17 @@ class PollPaymentStatusUseCase @Inject constructor(
     suspend operator fun invoke(
         baselineBalance: Int,
         baselineTier: String,
-        getCurrentBalance: () -> Int,
-        getCurrentTier: () -> String,
+        getCurrentBalance: suspend () -> Int,
+        getCurrentTier: suspend () -> String,
         maxAttempts: Int = 4,
         delayMs: Long = 1500L
     ): PollResult {
         var attempts = 0
-        var hasSuccessfulSync = false
 
         while (attempts < maxAttempts) {
-            val syncResult = runCatching {
+            runCatching {
                 userSyncManager.syncWalletBalance()
                 userSyncManager.syncSubscriptionTier()
-            }
-
-            if (syncResult.isSuccess) {
-                hasSuccessfulSync = true
             }
 
             val currentBalance = getCurrentBalance()
@@ -45,10 +40,6 @@ class PollPaymentStatusUseCase @Inject constructor(
             attempts++
         }
 
-        return if (hasSuccessfulSync) {
-            PollResult.Success
-        } else {
-            PollResult.Failed(PaymentFailureReason.VERIFICATION_TIMEOUT)
-        }
+        return PollResult.Failed(PaymentFailureReason.VERIFICATION_TIMEOUT)
     }
 }

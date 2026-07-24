@@ -14,6 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
+import androidx.compose.runtime.LaunchedEffect
+
 @Composable
 fun HomeRoot(
     openPaywall: (Boolean) -> Unit,
@@ -21,6 +23,10 @@ fun HomeRoot(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.syncFromServer()
+    }
 
     HomeScreen(
         openPaywall = openPaywall,

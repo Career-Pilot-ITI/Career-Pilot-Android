@@ -360,4 +360,25 @@ class PaywallViewModelTest {
         assertTrue(effects.any { it is PaywallEffect.NavigateToWebView })
         job.cancel()
     }
+
+    @Test
+    fun `TryAgainClicked re-initiates checkout for selected plan`() = runTest {
+        val viewModel = makeViewModel()
+        testScheduler.advanceUntilIdle()
+
+        viewModel.onIntent(PaywallIntent.SelectPlan("plus"))
+        viewModel.onIntent(PaywallIntent.ConfirmUpgradeRequested)
+        testScheduler.advanceUntilIdle()
+
+        val effects = mutableListOf<PaywallEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effectFlow.toList(effects)
+        }
+
+        viewModel.onIntent(PaywallIntent.TryAgainClicked)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(effects.any { it is PaywallEffect.NavigateToWebView })
+        job.cancel()
+    }
 }

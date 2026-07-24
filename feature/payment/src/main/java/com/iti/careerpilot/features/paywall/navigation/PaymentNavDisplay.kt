@@ -18,6 +18,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -30,7 +32,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
-import com.iti.careerpilot.features.paywall.presentation.view.screens.CheckoutScreen
 import com.iti.careerpilot.features.paywall.presentation.view.screens.GetCoinsContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.MonthlyLimitContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentFailedContent
@@ -39,6 +40,7 @@ import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentSuc
 import com.iti.careerpilot.features.paywall.presentation.view.screens.SubscriptionPlansContent
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallEffect
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallViewModel
+import com.iti.careerpilot.features.paywall.util.CustomTabManager
 
 @Composable
 fun PaymentNavDisplay(
@@ -50,13 +52,21 @@ fun PaymentNavDisplay(
     val viewModel: PaywallViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val context = LocalContext.current
+    val primaryColor = MaterialTheme.colorScheme.primary.toArgb()
 
     LaunchedEffect(viewModel.effectFlow, lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effectFlow.collect { effect ->
                 when (effect) {
-                    is PaywallEffect.NavigateToWebView ->
-                        paymentBackStack.add(PaymentRoute.Checkout(effect.checkoutUrl))
+                    is PaywallEffect.NavigateToWebView -> {
+                        CustomTabManager.launch(
+                            context = context,
+                            url = effect.checkoutUrl,
+                            toolbarColor = primaryColor
+                        )
+                        paymentBackStack.add(PaymentRoute.PaymentProcessing)
+                    }
                     PaywallEffect.NavigateToChoosePlan ->
                         paymentBackStack.add(PaymentRoute.ChoosePlan)
                     PaywallEffect.NavigateToGetCoins ->
@@ -170,24 +180,6 @@ fun PaymentNavDisplay(
                     PaymentFailedContent(
                         state = state,
                         onIntent = viewModel::onIntent
-                    )
-                }
-                entry<PaymentRoute.Checkout> {
-                    CheckoutScreen(
-                        checkoutUrl = it.url,
-                        onPaymentSuccess = {
-                            paymentBackStack.apply {
-                                removeLastOrNull()
-                                add(PaymentRoute.PaymentProcessing)
-                            }
-                        },
-                        onPaymentFailed = {
-                            paymentBackStack.apply {
-                                removeLastOrNull()
-                                add(PaymentRoute.PaymentFailed)
-                            }
-                        },
-                        onNavigateBack = safePopBackStack
                     )
                 }
             }

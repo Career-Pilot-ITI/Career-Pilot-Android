@@ -150,9 +150,17 @@ class PaywallViewModel @Inject constructor(
             PaywallIntent.NavigateBackRequested -> emitEffect(PaywallEffect.NavigateBack)
             PaywallIntent.StartPractisingClicked -> emitEffect(PaywallEffect.NavigateToHome)
             PaywallIntent.TryAgainClicked,
-            PaywallIntent.ChangePaymentMethodClicked -> emitEffect(PaywallEffect.NavigateToCheckout)
+            PaywallIntent.ChangePaymentMethodClicked -> handleTryAgainRequested()
             PaywallIntent.TestCoinsClicked -> emitEffect(PaywallEffect.NavigateToGetCoins)
             PaywallIntent.PollPaymentStatus -> pollPaymentStatus()
+        }
+    }
+
+    private fun handleTryAgainRequested() {
+        when (mutableState.value.checkoutItemType) {
+            CheckoutItemType.COIN_PACK -> handleBuyCoinsRequested()
+            CheckoutItemType.SUBSCRIPTION -> handleUpgradeRequested()
+            else -> emitEffect(PaywallEffect.NavigateToChoosePlan)
         }
     }
 
@@ -254,8 +262,8 @@ class PaywallViewModel @Inject constructor(
                 val result = pollPaymentStatusUseCase(
                     baselineBalance = baselineBalance,
                     baselineTier = baselineTier,
-                    getCurrentBalance = { mutableState.value.coinBalance },
-                    getCurrentTier = { mutableState.value.currentSubscriptionTier }
+                    getCurrentBalance = { userProfileRepo.readUserProfile().account.coinBalance },
+                    getCurrentTier = { userProfileRepo.readUserProfile().account.subscriptionTier }
                 )
 
                 when (result) {

@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.browser)
     
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

@@ -33,8 +33,10 @@ extendedIcons = "1.7.8"
 immutableCollections = "0.5.1"
 composeMaterial3 = "1.6.2"
 exifinterface = "1.4.2"
+browser = "1.9.0"
 
 [libraries]
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 animated-navigation-bar = { module = "com.exyte:animated-navigation-bar", version.ref = "animatedNavigationBar" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

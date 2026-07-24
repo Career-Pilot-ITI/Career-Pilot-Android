@@ -5,12 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.features.paywall.data.remote.UserSyncManager
 import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,26 +19,15 @@ class HomeViewModel @Inject constructor(
     private val userSyncManager: UserSyncManager
 ) : ViewModel() {
 
-    private var hasLoadedInitialData = false
-
-    private val _state = MutableStateFlow(HomeState())
-    val state = _state
+    val state: StateFlow<HomeState> = userProfileRepo.userProfile
+        .map { profile ->
+            HomeState(
+                coinBalance = profile.account.coinBalance,
+                subscriptionTier = profile.account.subscriptionTier
+            )
+        }
         .onStart {
-            if (!hasLoadedInitialData) {
-                // Observe the DataStore as single source of truth
-                userProfileRepo.userProfile.onEach { profile ->
-                    _state.value = _state.value.copy(
-                        coinBalance = profile.account.coinBalance,
-                        subscriptionTier = profile.account.subscriptionTier
-                    )
-                }.launchIn(viewModelScope)
-
-                // Fetch fresh data from the server so the home screen always
-                // reflects the latest balance/tier (e.g. after a payment).
-                syncFromServer()
-
-                hasLoadedInitialData = true
-            }
+            syncFromServer()
         }
         .stateIn(
             scope = viewModelScope,
@@ -47,21 +35,18 @@ class HomeViewModel @Inject constructor(
             initialValue = HomeState()
         )
 
-    private fun syncFromServer() {
+    fun syncFromServer() {
         viewModelScope.launch {
             try {
                 userSyncManager.syncWalletBalance()
                 userSyncManager.syncSubscriptionTier()
             } catch (e: Exception) {
-                // Non-fatal: the DataStore will still emit whatever was cached
+                // Non-fatal: DataStore will still emit cached data
             }
         }
     }
 
     fun onAction(action: HomeAction) {
-        when (action) {
-            else -> TODO("Handle actions")
-        }
+        // Handle actions
     }
-
 }

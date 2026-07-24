@@ -8,9 +8,6 @@ sealed interface PaymentRoute : NavKey {
     data object ChoosePlan : PaymentRoute
 
     @Serializable
-    data class Checkout(val url: String) : PaymentRoute
-
-    @Serializable
     data object GetCoins : PaymentRoute
     @Serializable
     data object MonthlyLimit : PaymentRoute
