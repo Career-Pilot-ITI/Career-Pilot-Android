@@ -19,4 +19,9 @@ interface OnboardingRemoteDataSource {
         file: File,
         onProgress: (Int) -> Unit
     ): UploadFileResponseDto
+
+    suspend fun analyzeCv(
+        file: File,
+        onProgress: (Int) -> Unit
+    ): UserProfileDto
 }

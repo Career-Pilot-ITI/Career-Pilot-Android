@@ -11,6 +11,7 @@ data class ChoosingTracksUiState(
     val selectedTrack: Track? = null,
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
+    val isSubmitting: Boolean = false,
 ) {
     val isFormValid: Boolean
         get() = selectedTrack != null
