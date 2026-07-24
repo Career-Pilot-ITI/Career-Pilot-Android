@@ -17,12 +17,11 @@ import java.time.ZoneId
 import kotlinx.serialization.SerializationException
 
 internal fun InterviewSessionDto.toHistoryDomainOrNull(): InterviewSessionSummary? {
-    if (!status.equals(COMPLETED_STATUS, ignoreCase = true)) return null
     val score = overallScore ?: return null
     validateScore(score)
     val durationMinutes = ((durationSeconds ?: 0).coerceAtLeast(0) + 59) / 60
     return InterviewSessionSummary(
-        id = id.toString(),
+        id = id,
         score = score,
         category = trackName.orEmpty(),
         completedAt = parseBackendTimestamp(completedAt ?: createdAt),
@@ -45,7 +44,7 @@ internal fun FeedbackReportDto.toDomain(
     metricValues.forEach(::validateScore)
     val nonBlankTips = coachingTips.filter(String::isNotBlank)
     return ReportDetails(
-        sessionId = sessionId.toString(),
+        sessionId = sessionId,
         completedAt = parseBackendTimestamp(
             session.completedAt ?: generatedAt ?: createdAt,
         ),
@@ -60,20 +59,20 @@ internal fun FeedbackReportDto.toDomain(
             content = contentRelevanceScore,
         ),
         coachingSuggestions = nonBlankTips.mapIndexed { index, tip ->
-                CoachingSuggestion(
-                    id = "$sessionId-suggestion-${index + 1}",
-                    ordinal = index + 1,
-                    description = tip,
-                    impact = impactFor(index = index, count = nonBlankTips.size),
-                )
-            },
+            CoachingSuggestion(
+                id = "$sessionId-suggestion-${index + 1}",
+                ordinal = index + 1,
+                description = tip,
+                impact = impactFor(index = index, count = nonBlankTips.size),
+            )
+        },
     )
 }
 
 internal fun List<SessionQuestionDto>.toDomain(
     sessionId: Long,
 ): QuestionBreakdown = QuestionBreakdown(
-    sessionId = sessionId.toString(),
+    sessionId = sessionId,
     questions = sortedBy(SessionQuestionDto::questionOrder).map { question ->
         val transcript = question.userTranscript.orEmpty()
         val fillerWords = findFillerWords(transcript)
@@ -137,7 +136,6 @@ private fun validateScore(value: Int) {
     }
 }
 
-private const val COMPLETED_STATUS = "COMPLETED"
 private const val MILLIS_PER_SECOND = 1_000L
 private const val IMPACT_GROUP_COUNT = 3
 private const val STRONG_SCORE = 80

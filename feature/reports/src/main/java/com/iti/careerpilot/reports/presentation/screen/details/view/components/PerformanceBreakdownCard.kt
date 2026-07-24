@@ -16,11 +16,10 @@ import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.reports.R
 import com.iti.careerpilot.reports.presentation.screen.details.uimodels.PerformanceMetricUiModel
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun PerformanceBreakdownCard(
-    metrics: ImmutableList<PerformanceMetricUiModel>,
+    metrics: List<PerformanceMetricUiModel>,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth(), elevation = 2.dp) {

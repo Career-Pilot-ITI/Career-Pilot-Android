@@ -10,10 +10,10 @@ interface ReportsRepository {
     suspend fun getSessionHistory(): CareerPilotResult<List<InterviewSessionSummary>, NetworkError>
 
     suspend fun getReportDetails(
-        sessionId: String,
+        sessionId: Long,
     ): CareerPilotResult<ReportDetails, NetworkError>
 
     suspend fun getQuestionBreakdown(
-        sessionId: String,
+        sessionId: Long,
     ): CareerPilotResult<QuestionBreakdown, NetworkError>
 }
