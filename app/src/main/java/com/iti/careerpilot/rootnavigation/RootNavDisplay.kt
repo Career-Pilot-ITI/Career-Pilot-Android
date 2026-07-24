@@ -175,7 +175,7 @@ fun RootNavDisplay(
                         },
                         openSessionDetails = { trackId, sessionId ->
                             rootBackStack.navigateSingleTop(
-                                Route.SessionDetails(
+                                Route.PracticeSession(
                                     trackId = trackId,
                                     sessionId = sessionId,
                                 ),
@@ -203,16 +203,17 @@ fun RootNavDisplay(
                         }
                     )
                 }
-                entry<Route.SessionDetails> {
+
+                entry<Route.PracticeSession> {
                     PracticeSessionRoot(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
                         onNavigateToResult = { sessionId ->
-                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
                         },
                         onBack = {
-                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                         }
                     )
                 }

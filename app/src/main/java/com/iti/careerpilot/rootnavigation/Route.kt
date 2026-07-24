@@ -31,7 +31,10 @@ sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class SessionDetails(
+    data class SessionDetails(val id: String) : Route
+
+    @Serializable
+    data class PracticeSession(
         val trackId: Long,
         val sessionId: Long? = null,
     ) : Route
