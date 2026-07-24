@@ -23,6 +23,18 @@ object Endpoints {
     const val SUBSCRIPTION_UPGRADE = "${BASE_URL}api/v1/subscriptions/upgrade"
     const val SUBSCRIPTION_DOWNGRADE = "${BASE_URL}api/v1/subscriptions/downgrade"
     const val SUBSCRIPTION_CANCEL = "${BASE_URL}api/v1/subscriptions/cancel"
+
+    const val ANALYZE_CV = "$BASE_URL/api/v1/profile/cv/analyze"
+
+    const val INTERVIEW_SESSIONS = "$BASE_URL/api/v1/interviews/sessions"
+
+    fun interviewSession(sessionId: Long): String = "$INTERVIEW_SESSIONS/$sessionId"
+
+    fun interviewSessionFeedback(sessionId: Long): String =
+        "${interviewSession(sessionId)}/feedback"
+
+    fun interviewSessionQuestions(sessionId: Long): String =
+        "${interviewSession(sessionId)}/questions"
 }
 
 

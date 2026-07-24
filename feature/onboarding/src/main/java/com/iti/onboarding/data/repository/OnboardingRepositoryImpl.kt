@@ -12,12 +12,14 @@ import com.iti.common.result.onSuccess
 import com.iti.onboarding.data.local.datasource.OnboardingLocalDataSource
 import com.iti.onboarding.data.mapper.toDomain
 import com.iti.onboarding.data.remote.datasource.OnboardingRemoteDataSource
+import com.iti.core.datastore.models.UserProfile
 import com.iti.onboarding.domain.model.Track
 import com.iti.onboarding.domain.model.UploadedFile
 import com.iti.onboarding.domain.repository.OnboardingRepository
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.StateFlow
@@ -105,6 +107,47 @@ class OnboardingRepositoryImpl @Inject constructor(
         } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
     }
 
+    override suspend fun analyzeCv(
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ): CareerPilotResult<UserProfile, NetworkError> {
+        val file = localDataSource.uriToCacheFile(uri)
+        return file?.let {
+            val result = safeNetworkCall {
+                val response = remoteDataSource.analyzeCv(file, onProgress)
+                val localCvUri = localDataSource.moveCVToInternalStorage(file)
+                updateLocalProfile(response)
+                localDataSource.updateUserProfile { current ->
+                    current.copy(
+                        cv = current.cv.copy(
+                            cvLocalUri = localCvUri,
+                            cvFileName = file.name,
+                            cvSizeBytes = file.length()
+                        )
+                    )
+                }
+                response.toDomain()
+            }
+
+            if (result is CareerPilotResult.Error) {
+                val uploadResult = uploadCv(uri, onProgress)
+                if (uploadResult is CareerPilotResult.Success) {
+                    val uploaded = uploadResult.data
+                    return CareerPilotResult.Success(
+                        UserProfile(
+                            id = uploaded.id.toInt(),
+                            cv = com.iti.core.datastore.models.CvInfo(
+                                cvUrl = uploaded.url
+                            )
+                        )
+                    )
+                }
+            }
+
+            result
+        } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+
     override suspend fun updateProfileTrack(
         trackId: Long,
     ): CareerPilotResult<Unit, NetworkError> =
@@ -133,18 +176,39 @@ class OnboardingRepositoryImpl @Inject constructor(
     private suspend fun updateLocalProfile(response: UserProfileDto) {
         localDataSource.updateUserProfile { current ->
             val newProfile = response.toDomain()
-            newProfile.copy(
-                avatar = newProfile.avatar.copy(
-                    avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl },
-                    avatarLocalUri = current.avatar.avatarLocalUri,
-                    avatarSizeBytes = current.avatar.avatarSizeBytes,
+            current.copy(
+                account = current.account.copy(
+                    username = newProfile.account.username.ifBlank { current.account.username },
+                    email = newProfile.account.email.ifBlank { current.account.email },
+                    timezone = newProfile.account.timezone.ifBlank { current.account.timezone },
+                    termsAccepted = newProfile.account.termsAccepted,
+                    subscriptionTier = newProfile.account.subscriptionTier.ifBlank { current.account.subscriptionTier },
+                    coinBalance = if (newProfile.account.coinBalance > 0) newProfile.account.coinBalance else current.account.coinBalance
                 ),
-                cv = newProfile.cv.copy(
-                    cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl },
-                    cvLocalUri = current.cv.cvLocalUri,
-                    cvFileName = current.cv.cvFileName,
-                    cvSizeBytes = current.cv.cvSizeBytes,
+                personal = current.personal.copy(
+                    phoneNumber = newProfile.personal.phoneNumber.ifBlank { current.personal.phoneNumber },
+                    displayName = newProfile.personal.displayName.ifBlank { current.personal.displayName },
+                    gender = newProfile.personal.gender.ifBlank { current.personal.gender },
+                    dateOfBirth = newProfile.personal.dateOfBirth.ifBlank { current.personal.dateOfBirth }
                 ),
+                career = current.career.copy(
+                    targetRole = newProfile.career.targetRole.ifBlank { current.career.targetRole },
+                    industry = newProfile.career.industry.ifBlank { current.career.industry },
+                    experienceLevel = newProfile.career.experienceLevel.ifBlank { current.career.experienceLevel },
+                    currentJobTitle = newProfile.career.currentJobTitle.ifBlank { current.career.currentJobTitle },
+                    yearsOfExperience = if (newProfile.career.yearsOfExperience > 0) newProfile.career.yearsOfExperience else current.career.yearsOfExperience,
+                    skills = if (newProfile.career.skills.isNotEmpty()) (current.career.skills + newProfile.career.skills).distinct() else current.career.skills,
+                    targetCompanies = if (newProfile.career.targetCompanies.isNotEmpty()) newProfile.career.targetCompanies else current.career.targetCompanies,
+                    educationLevel = newProfile.career.educationLevel.ifBlank { current.career.educationLevel },
+                    trackName = newProfile.career.trackName.ifBlank { current.career.trackName }
+                ),
+                avatar = current.avatar.copy(
+                    avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl }
+                ),
+                cv = current.cv.copy(
+                    cvUrl = newProfile.cv.cvUrl.ifBlank { current.cv.cvUrl }
+                ),
+                onboardingCompleted = newProfile.onboardingCompleted ?: current.onboardingCompleted
             )
         }
     }
@@ -162,8 +226,14 @@ class OnboardingRepositoryImpl @Inject constructor(
             } catch (exception: ClientRequestException) {
                 logClientRequestException(exception)
 
+                val error = when (exception.response.status) {
+                    HttpStatusCode.Unauthorized -> NetworkError.UNAUTHORIZED
+                    HttpStatusCode.Forbidden -> NetworkError.FORBIDDEN
+                    else -> NetworkError.BAD_REQUEST
+                }
+
                 CareerPilotResult.Error(
-                    error = NetworkError.BAD_REQUEST,
+                    error = error,
                 )
             } catch (_: ServerResponseException) {
                 CareerPilotResult.Error(

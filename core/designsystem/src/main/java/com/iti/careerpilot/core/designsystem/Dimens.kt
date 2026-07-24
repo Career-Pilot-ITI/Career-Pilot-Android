@@ -16,6 +16,18 @@ object Dimens {
     val BottomNavHeight = 64.dp
     val CardPadding = 16.dp
 
+    val IconSizeS = 16.dp
+    val IconSizeM = 24.dp
+    val IconSizeL = 32.dp
+    val MinimumTouchTarget = 48.dp
+    val ScoreBadgeSize = 48.dp
+    val ScoreRingSize = 88.dp
+    val QuestionMetricHeight = 80.dp
+    val RadarChartSize = 152.dp
+    val RadarChartContainerSize = 236.dp
+    val RadarGridStrokeWidth = 1.dp
+    val RadarDataStrokeWidth = 2.dp
+
     // Border widths
     val BorderThin = 1.dp
     val BorderThick = 1.5.dp

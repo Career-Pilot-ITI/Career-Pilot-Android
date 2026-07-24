@@ -26,13 +26,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.iti.onboarding.R
 
+import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
+
 @Composable
 fun ProfileInfoForm(
     name: String,
     onNameChanged: (String) -> Unit,
     email: String,
     onEmailChanged: (String) -> Unit,
-    isEmailValid: Boolean,
+    isEmailInvalid: Boolean,
     title: String,
     onTitleChanged: (String) -> Unit,
     experience: String,
@@ -72,8 +74,8 @@ fun ProfileInfoForm(
                     imeAction = ImeAction.Next
                 ),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                isError = email.isNotEmpty() && !isEmailValid,
-                errorMessage = if (email.isNotEmpty() && !isEmailValid) stringResource(R.string.profile_info_email_invalid) else null
+                isError = isEmailInvalid,
+                errorMessage = if (isEmailInvalid) stringResource(R.string.profile_info_email_invalid) else null
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
             
@@ -95,14 +97,7 @@ fun ProfileInfoForm(
                 icon = Icons.Default.Assessment,
                 label = stringResource(R.string.profile_info_experience_level_label),
                 value = experience,
-                options = listOf(
-                    "Entry-level",
-                    "Junior",
-                    "Mid-level",
-                    "Senior",
-                    "Lead",
-                    "Executive"
-                ),
+                options = ExperienceLevel.entries.map { stringResource(it.labelRes) },
                 onValueChange = onExperienceChanged,
                 placeholder = stringResource(R.string.profile_info_experience_level_placeholder)
             )

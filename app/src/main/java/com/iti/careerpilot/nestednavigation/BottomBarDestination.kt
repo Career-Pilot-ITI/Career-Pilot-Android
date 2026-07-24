@@ -16,7 +16,7 @@ enum class BottomBarDestination(
     Reports(
         title = R.string.reports,
         icon = R.drawable.ic_reports,
-        route = Route.NestedNav.Reports
+        route = Route.NestedNav.SessionHistory
     ),
     Profile(
         title = R.string.profile,
