@@ -130,7 +130,9 @@ fun OnboardingPagerScreen(
                         onSkip = {
                             scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
                         }
-                    )PAGE_PROFILE_INFO -> ProfileInfoScreen(
+                    )
+
+                PAGE_PROFILE_INFO -> ProfileInfoScreen(
                     viewModel = profileViewModel,
                     onNavigateNext = {
                         scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
@@ -164,46 +166,55 @@ fun OnboardingPagerScreen(
             val settledPage = pagerState.settledPage
             val isScrollInProgress = pagerState.isScrollInProgress
 
-            val buttonText = when (settledPage) {
-                PAGE_UPLOAD_CV -> stringResource(R.string.analyze_my_cv)
-                PAGE_PROFILE_INFO -> stringResource(R.string.next_button_label)
-                PAGE_CHOOSING_TRACKS -> stringResource(R.string.next_button_label)
-                else -> ""
+            val pageButtonConfig = when (settledPage) {
+                PAGE_UPLOAD_CV -> PageButtonConfig(
+                    textRes = R.string.analyze_my_cv,
+                    isEnabled = cvState.isFormValid,
+                    isSubmitting = cvState.isSubmitting,
+                    onClick = { cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick) },
+                )
+                PAGE_PROFILE_INFO -> PageButtonConfig(
+                    textRes = R.string.next_button_label,
+                    isEnabled = profileState.isFormValid,
+                    isSubmitting = profileState.isSubmitting,
+                    onClick = { profileViewModel.onIntent(ProfileInfoIntent.OnSubmit) },
+                )
+                PAGE_CHOOSING_TRACKS -> PageButtonConfig(
+                    textRes = R.string.next_button_label,
+                    isEnabled = tracksState.isFormValid,
+                    isSubmitting = tracksState.isSubmitting,
+                    onClick = { tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext) },
+                )
+                else -> PageButtonConfig(
+                    textRes = 0,
+                    isEnabled = false,
+                    isSubmitting = false,
+                    onClick = {},
+                )
             }
 
-            val isButtonEnabled = when (settledPage) {
-                PAGE_UPLOAD_CV -> cvState.isFormValid
-                PAGE_PROFILE_INFO -> profileState.isFormValid
-                PAGE_CHOOSING_TRACKS -> tracksState.isFormValid
-                else -> false
+            if (pageButtonConfig.textRes != 0) {
+                CareerPilotButton(
+                    text = stringResource(pageButtonConfig.textRes),
+                    enabled = pageButtonConfig.isEnabled && !pageButtonConfig.isSubmitting,
+                    onClick = {
+                        if (!isScrollInProgress) {
+                            pageButtonConfig.onClick()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-
-            val isSubmitting = when (settledPage) {
-                PAGE_UPLOAD_CV -> cvState.isSubmitting
-                PAGE_PROFILE_INFO -> profileState.isSubmitting
-                PAGE_CHOOSING_TRACKS -> tracksState.isSubmitting
-                else -> false
-            }
-
-            val onClick = {
-                if (!isScrollInProgress) {
-                    when (settledPage) {
-                        PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
-                        PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
-                        PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
-                    }
-                }
-            }
-
-            CareerPilotButton(
-                text = buttonText,
-                enabled = isButtonEnabled && !isSubmitting,
-                onClick = onClick,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
+
+private data class PageButtonConfig(
+    val textRes: Int,
+    val isEnabled: Boolean,
+    val isSubmitting: Boolean,
+    val onClick: () -> Unit,
+)
 
 @Composable
 private fun PagerHeader(currentPage: Int) {

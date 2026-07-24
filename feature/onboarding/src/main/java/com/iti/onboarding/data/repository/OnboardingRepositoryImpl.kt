@@ -113,7 +113,7 @@ class OnboardingRepositoryImpl @Inject constructor(
     ): CareerPilotResult<UserProfile, NetworkError> {
         val file = localDataSource.uriToCacheFile(uri)
         return file?.let {
-            val result = safeNetworkCall {
+            safeNetworkCall {
                 val response = remoteDataSource.analyzeCv(file, onProgress)
                 val localCvUri = localDataSource.moveCVToInternalStorage(file)
                 updateLocalProfile(response)
@@ -128,23 +128,6 @@ class OnboardingRepositoryImpl @Inject constructor(
                 }
                 response.toDomain()
             }
-
-            if (result is CareerPilotResult.Error) {
-                val uploadResult = uploadCv(uri, onProgress)
-                if (uploadResult is CareerPilotResult.Success) {
-                    val uploaded = uploadResult.data
-                    return CareerPilotResult.Success(
-                        UserProfile(
-                            id = uploaded.id.toInt(),
-                            cv = com.iti.core.datastore.models.CvInfo(
-                                cvUrl = uploaded.url
-                            )
-                        )
-                    )
-                }
-            }
-
-            result
         } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
     }
 

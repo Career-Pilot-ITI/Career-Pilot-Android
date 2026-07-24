@@ -99,7 +99,7 @@ fun ProfileInfoForm(
                 icon = Icons.Default.Assessment,
                 label = stringResource(R.string.profile_info_experience_level_label),
                 value = experience,
-                options = ExperienceLevel.entries.map { stringResource(it.labelRes) },
+                options = ExperienceLevel.entries.map { stringResource(it.labelRes) }.toImmutableList(),
                 onValueChange = onExperienceChanged,
                 placeholder = stringResource(R.string.profile_info_experience_level_placeholder)
             )
