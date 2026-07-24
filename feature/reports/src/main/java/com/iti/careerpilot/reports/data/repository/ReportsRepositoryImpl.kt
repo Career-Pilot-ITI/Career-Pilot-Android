@@ -28,35 +28,24 @@ class ReportsRepositoryImpl @Inject constructor(
         }
 
     override suspend fun getReportDetails(
-        sessionId: String,
-    ): CareerPilotResult<ReportDetails, NetworkError> {
-        val id = sessionId.toLongOrNull()
-            ?: return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        return withContext(ioDispatcher) {
-            when (val sessionResult = remoteDataSource.getSession(id)) {
-                is CareerPilotResult.Error -> CareerPilotResult.Error(sessionResult.error)
-                is CareerPilotResult.Success -> {
-                    if (!sessionResult.data.status.equals(COMPLETED_STATUS, ignoreCase = true)) {
-                        CareerPilotResult.Error(NetworkError.CONFLICT)
-                    } else {
-                        mapRemoteResult({ remoteDataSource.getFeedback(id) }) { feedback ->
-                            feedback.toDomain(sessionResult.data)
-                        }
-                    }
+        sessionId: Long,
+    ): CareerPilotResult<ReportDetails, NetworkError> = withContext(ioDispatcher) {
+        when (val sessionResult = remoteDataSource.getSession(sessionId)) {
+            is CareerPilotResult.Error -> CareerPilotResult.Error(sessionResult.error)
+            is CareerPilotResult.Success -> {
+                mapRemoteResult({ remoteDataSource.getFeedback(sessionId) }) { feedback ->
+                    feedback.toDomain(sessionResult.data)
                 }
             }
         }
     }
 
     override suspend fun getQuestionBreakdown(
-        sessionId: String,
-    ): CareerPilotResult<QuestionBreakdown, NetworkError> {
-        val id = sessionId.toLongOrNull()
-            ?: return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        return mapRemoteResult({ remoteDataSource.getQuestions(id) }) { questions ->
-            questions.toDomain(id)
+        sessionId: Long,
+    ): CareerPilotResult<QuestionBreakdown, NetworkError> =
+        mapRemoteResult({ remoteDataSource.getQuestions(sessionId) }) { questions ->
+            questions.toDomain(sessionId)
         }
-    }
 
     private suspend fun <Remote, Domain> mapRemoteResult(
         call: suspend () -> CareerPilotResult<Remote, NetworkError>,
@@ -74,9 +63,5 @@ class ReportsRepositoryImpl @Inject constructor(
                 CareerPilotResult.Error(NetworkError.UNKNOWN)
             }
         }
-    }
-
-    private companion object {
-        const val COMPLETED_STATUS = "COMPLETED"
     }
 }

@@ -7,6 +7,6 @@ class GetQuestionBreakdownUseCase @Inject constructor(
     private val repository: ReportsRepository,
 ) {
     suspend operator fun invoke(
-        sessionId: String,
+        sessionId: Long,
     ) = repository.getQuestionBreakdown(sessionId)
 }

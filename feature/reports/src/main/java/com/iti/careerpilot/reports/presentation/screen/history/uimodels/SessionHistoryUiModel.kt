@@ -3,18 +3,16 @@ package com.iti.careerpilot.reports.presentation.screen.history.uimodels
 import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
 import java.time.Instant
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
 data class SessionHistoryUiModel(
-    val sessions: PersistentList<SessionSummaryUiModel>,
+    val sessions: List<SessionSummaryUiModel>,
     val averageScore: Int,
 )
 
 @Immutable
 data class SessionSummaryUiModel(
-    val id: String,
+    val id: Long,
     val score: Int,
     val category: String,
     val completedAt: Instant,
@@ -33,6 +31,6 @@ fun List<InterviewSessionSummary>.toUiModel(): SessionHistoryUiModel =
                 durationMinutes = session.durationMinutes,
                 questionCount = session.questionCount,
             )
-        }.toPersistentList(),
+        },
         averageScore = if (isEmpty()) 0 else sumOf(InterviewSessionSummary::score) / size,
     )

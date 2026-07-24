@@ -30,7 +30,7 @@ sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class SessionDetails(val id: String) : Route
+    data class SessionDetails(val id: Long) : Route
 
     @Serializable
     data class PracticeSession(
@@ -44,7 +44,7 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data class QuestionBreakdown(val sessionId: String) : Route
+    data class QuestionBreakdown(val sessionId: Long) : Route
 
     @Serializable
     data object Settings : Route

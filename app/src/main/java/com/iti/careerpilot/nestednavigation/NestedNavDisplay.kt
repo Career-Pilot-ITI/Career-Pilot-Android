@@ -32,7 +32,7 @@ fun NestedNavDisplay(
     openPaywall: () -> Unit,
     logout: () -> Unit,
     openPracticeSession: (Long, Long?) -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Long) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
 ) {
