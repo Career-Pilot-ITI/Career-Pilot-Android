@@ -23,24 +23,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.reports.R
+import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownAction
+import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownEvent
+import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownState
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.component.CoachFeedbackCard
-import com.iti.careerpilot.reports.presentation.screen.breakdown.viewmodel.QuestionBreakdownViewModel
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.component.QuestionMetricsRow
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.component.QuestionPromptCard
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.component.QuestionSelector
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.component.TranscriptCard
-import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownAction
-import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownEvent
-import com.iti.careerpilot.reports.presentation.screen.breakdown.contract.QuestionBreakdownState
-import com.iti.careerpilot.reports.presentation.screen.components.ReportsEmptyContent
+import com.iti.careerpilot.reports.presentation.screen.breakdown.viewmodel.QuestionBreakdownViewModel
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsAnimatedContent
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsContentPhase
+import com.iti.careerpilot.reports.presentation.screen.components.ReportsEmptyContent
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsErrorContent
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsLoadingContent
 
 @Composable
 fun QuestionBreakdownRoot(
-    sessionId: String,
+    sessionId: Long,
     navigateBack: () -> Unit,
     viewModel: QuestionBreakdownViewModel = hiltViewModel(),
 ) {
@@ -82,72 +82,75 @@ fun QuestionBreakdownScreen(
             )
         },
     ) { innerPadding ->
-        val content = state.content
-        val selectedQuestion = state.selectedQuestion
-        val phase = when {
-            state.error != null && content == null -> ReportsContentPhase.ERROR
-            content == null -> ReportsContentPhase.LOADING
-            content.questions.isEmpty() || selectedQuestion == null -> ReportsContentPhase.EMPTY
-            else -> ReportsContentPhase.CONTENT
-        }
         ReportsAnimatedContent(
-            phase = phase,
+            targetState = state,
+            contentKey = QuestionBreakdownState::phase,
             modifier = Modifier.fillMaxSize(),
-        ) { targetPhase ->
-            when (targetPhase) {
+        ) { animatedState ->
+            when (animatedState.phase) {
                 ReportsContentPhase.LOADING -> ReportsLoadingContent(
                     messageRes = R.string.reports_loading_questions,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                ReportsContentPhase.ERROR -> ReportsErrorContent(
-                    error = requireNotNull(state.error),
-                    isOnline = state.isOnline,
-                    onRetry = { onAction(QuestionBreakdownAction.Retry) },
+                ReportsContentPhase.ERROR -> {
+                    val error = animatedState.error
+                    if (error != null) {
+                        ReportsErrorContent(
+                            error = error,
+                            isOnline = animatedState.isOnline,
+                            onRetry = { onAction(QuestionBreakdownAction.Retry) },
+                            modifier = Modifier.padding(innerPadding),
+                        )
+                    } else {
+                        ReportsLoadingContent(
+                            messageRes = R.string.reports_loading_questions,
+                            modifier = Modifier.padding(innerPadding),
+                        )
+                    }
+                }
+
+                ReportsContentPhase.EMPTY -> ReportsEmptyContent(
+                    titleRes = R.string.reports_empty_questions_title,
+                    messageRes = R.string.reports_empty_questions_message,
                     modifier = Modifier.padding(innerPadding),
                 )
 
-                ReportsContentPhase.EMPTY -> {
-                    ReportsEmptyContent(
-                        titleRes = R.string.reports_empty_questions_title,
-                        messageRes = R.string.reports_empty_questions_message,
-                        modifier = Modifier.padding(innerPadding),
-                    )
-                }
-
                 ReportsContentPhase.CONTENT -> {
-                    val breakdown = requireNotNull(content)
-                    val question = requireNotNull(selectedQuestion)
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentPadding = PaddingValues(Dimens.SpaceXL),
-                        verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
-                    ) {
-                        item(key = "question-selector", contentType = "selector") {
-                            QuestionSelector(
-                                questions = breakdown.questions,
-                                selectedQuestionId = state.selectedQuestionId,
-                                onQuestionSelected = { questionId ->
-                                    onAction(QuestionBreakdownAction.QuestionSelected(questionId))
-                                },
-                            )
-                        }
-                        item(key = "question-${question.id}", contentType = "question") {
-                            QuestionPromptCard(question)
-                        }
-                        item(key = "metrics-${question.id}", contentType = "metrics") {
-                            QuestionMetricsRow(question)
-                        }
-                        item(key = "feedback-${question.id}", contentType = "feedback") {
-                            CoachFeedbackCard(question.coachFeedback)
-                        }
-                        item(key = "transcript-${question.id}", contentType = "transcript") {
-                            TranscriptCard(
-                                transcript = question.transcript,
-                                fillerWords = question.fillerWords,
-                            )
+                    val breakdown = animatedState.content
+                    val question = animatedState.selectedQuestion
+                    if (breakdown != null && question != null) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            contentPadding = PaddingValues(Dimens.SpaceXL),
+                            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
+                        ) {
+                            item(key = "question-selector", contentType = "selector") {
+                                QuestionSelector(
+                                    questions = breakdown.questions,
+                                    selectedQuestionId = animatedState.selectedQuestionId,
+                                    onQuestionSelected = { questionId ->
+                                        onAction(QuestionBreakdownAction.QuestionSelected(questionId))
+                                    },
+                                )
+                            }
+                            item(key = "question-${question.id}", contentType = "question") {
+                                QuestionPromptCard(question)
+                            }
+                            item(key = "metrics-${question.id}", contentType = "metrics") {
+                                QuestionMetricsRow(question)
+                            }
+                            item(key = "feedback-${question.id}", contentType = "feedback") {
+                                CoachFeedbackCard(question.coachFeedback)
+                            }
+                            item(key = "transcript-${question.id}", contentType = "transcript") {
+                                TranscriptCard(
+                                    transcript = question.transcript,
+                                    fillerWords = question.fillerWords,
+                                )
+                            }
                         }
                     }
                 }

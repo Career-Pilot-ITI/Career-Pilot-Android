@@ -15,12 +15,11 @@ import androidx.compose.ui.text.font.FontStyle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.reports.R
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun TranscriptCard(
     transcript: String,
-    fillerWords: ImmutableList<String>,
+    fillerWords: List<String>,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {

@@ -5,19 +5,16 @@ import com.iti.careerpilot.reports.domain.model.CoachingImpact
 import com.iti.careerpilot.reports.domain.model.PerformanceTier
 import com.iti.careerpilot.reports.domain.model.ReportDetails
 import java.time.Instant
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
 data class ReportDetailsUiModel(
-    val sessionId: String,
+    val sessionId: Long,
     val completedAt: Instant,
     val overallScore: Int,
     val performanceTier: PerformanceTier,
     val topPercent: Int?,
-    val metrics: PersistentList<PerformanceMetricUiModel>,
-    val coachingSuggestions: PersistentList<CoachingSuggestionUiModel>,
+    val metrics: List<PerformanceMetricUiModel>,
+    val coachingSuggestions: List<CoachingSuggestionUiModel>,
 )
 
 @Immutable
@@ -48,7 +45,7 @@ fun ReportDetails.toUiModel(): ReportDetailsUiModel = ReportDetailsUiModel(
     overallScore = overallScore,
     performanceTier = performanceTier,
     topPercent = topPercent,
-    metrics = persistentListOf(
+    metrics = listOf(
         PerformanceMetricUiModel(PerformanceMetricType.CLARITY, metrics.clarity),
         PerformanceMetricUiModel(PerformanceMetricType.CONFIDENCE, metrics.confidence),
         PerformanceMetricUiModel(PerformanceMetricType.PACING, metrics.pacing),
@@ -62,5 +59,5 @@ fun ReportDetails.toUiModel(): ReportDetailsUiModel = ReportDetailsUiModel(
             description = suggestion.description,
             impact = suggestion.impact,
         )
-    }.toPersistentList(),
+    },
 )

@@ -3,7 +3,7 @@ package com.iti.careerpilot.reports.domain.model
 import java.time.Instant
 
 data class ReportDetails(
-    val sessionId: String,
+    val sessionId: Long,
     val completedAt: Instant,
     val overallScore: Int,
     val performanceTier: PerformanceTier,

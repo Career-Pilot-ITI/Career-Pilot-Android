@@ -2,13 +2,11 @@ package com.iti.careerpilot.reports.presentation.screen.breakdown.uimodels
 
 import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
-import kotlinx.collections.immutable.PersistentList
-import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
 data class QuestionBreakdownUiModel(
-    val sessionId: String,
-    val questions: PersistentList<QuestionUiModel>,
+    val sessionId: Long,
+    val questions: List<QuestionUiModel>,
 )
 
 @Immutable
@@ -21,7 +19,7 @@ data class QuestionUiModel(
     val durationSeconds: Int,
     val coachFeedback: String,
     val transcript: String,
-    val fillerWords: PersistentList<String>,
+    val fillerWords: List<String>,
 )
 
 fun QuestionBreakdown.toUiModel(): QuestionBreakdownUiModel = QuestionBreakdownUiModel(
@@ -36,7 +34,7 @@ fun QuestionBreakdown.toUiModel(): QuestionBreakdownUiModel = QuestionBreakdownU
             durationSeconds = question.durationSeconds,
             coachFeedback = question.coachFeedback,
             transcript = question.transcript,
-            fillerWords = question.fillerWords.toPersistentList(),
+            fillerWords = question.fillerWords,
         )
-    }.toPersistentList(),
+    },
 )

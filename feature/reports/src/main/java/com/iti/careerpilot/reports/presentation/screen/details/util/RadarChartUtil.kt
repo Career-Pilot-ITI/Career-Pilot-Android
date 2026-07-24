@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import com.iti.careerpilot.reports.presentation.screen.details.uimodels.PerformanceMetricType
 import com.iti.careerpilot.reports.presentation.screen.details.uimodels.PerformanceMetricUiModel
-import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -18,7 +17,7 @@ fun FloatArray.mapInPlace(transform: (Float) -> Float): FloatArray = apply {
     indices.forEach { index -> this[index] = transform(this[index]) }
 }
 
-fun ImmutableList<PerformanceMetricUiModel>.scoreFor(type: PerformanceMetricType): Int =
+fun List<PerformanceMetricUiModel>.scoreFor(type: PerformanceMetricType): Int =
     firstOrNull { it.type == type }?.score ?: 0
 
 fun DrawScope.drawRadarPolygon(
