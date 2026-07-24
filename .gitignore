@@ -19,6 +19,11 @@ local.properties
 
 # AI Agent and Scratch files
 /.agents/
+.kotlin/
+.superpowers/
+docs/
+implementation_plan.md
+walkthrough.md
 diff.txt
 log.txt
 skills-lock.json
@@ -26,3 +31,4 @@ test_epoch.kts
 /core/whisper/src/main/assets/models/tiny.en-decoder.int8.onnx
 /core/whisper/src/main/assets/models/tiny.en-encoder.int8.onnx
 /core/whisper/src/main/assets/models/tiny.en-tokens.txt
+

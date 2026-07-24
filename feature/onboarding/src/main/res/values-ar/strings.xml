@@ -45,4 +45,13 @@
     <string name="profile_info_add_skill_cancel">إلغاء</string>
     <string name="profile_info_email_invalid">يرجى إدخال عنوان بريد إلكتروني صحيح</string>
     <string name="pager_header">%1$d من %2$d</string>
+
+    <!-- Experience Levels -->
+    <string name="experience_entry_level">مبتدئ</string>
+    <string name="experience_junior">مبتدئ (جونيور)</string>
+    <string name="experience_mid_level">متوسط</string>
+    <string name="experience_senior">متقدم (سينيور)</string>
+    <string name="experience_lead">قائد فريق</string>
+    <string name="experience_executive">تنفيذي</string>
+    <string name="cv_default_filename">ملف السيرة الذاتية</string>
 </resources>

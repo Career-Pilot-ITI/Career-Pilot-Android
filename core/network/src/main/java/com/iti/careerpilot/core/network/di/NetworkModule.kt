@@ -49,6 +49,23 @@ object NetworkModule {
     @Singleton
     fun provideHttpClient(json: Json, datastore: UserTokensRepo): HttpClient {
         return HttpClient(OkHttp) {
+            engine {
+                addInterceptor { chain ->
+                    val request = chain.request()
+                    val response = chain.proceed(request)
+
+                    val path = request.url.encodedPath
+                    val isSkipAuth = path.contains("otp", ignoreCase = true) ||
+                            path.contains("refresh", ignoreCase = true)
+
+                    if (response.code == 403 && !isSkipAuth) {
+                        response.newBuilder().code(401).message("Unauthorized").build()
+                    } else {
+                        response
+                    }
+                }
+            }
+
             expectSuccess = true
 
             install(ContentNegotiation) {
@@ -86,16 +103,18 @@ object NetworkModule {
                         !skipAuth
                     }
                     loadTokens {
-                        val accessToken = datastore.accessToken
-                        val refreshToken = datastore.refreshToken
-                        if (!accessToken.isNullOrBlank() && !refreshToken.isNullOrBlank()) {
-                            BearerTokens(accessToken, refreshToken)
+                        val tokens = datastore.readTokens()
+                        val access = tokens.accessToken
+                        val refresh = tokens.refreshToken
+                        if (!access.isNullOrBlank() && !refresh.isNullOrBlank()) {
+                            BearerTokens(access, refresh)
                         } else {
                             null
                         }
                     }
                     refreshTokens {
-                        val refreshToken = oldTokens?.refreshToken ?: datastore.refreshToken
+                        val userTokens = datastore.readTokens()
+                        val refreshToken = oldTokens?.refreshToken ?: userTokens.refreshToken
 
                         if (refreshToken.isNullOrBlank()) {
                             return@refreshTokens null
@@ -129,4 +148,5 @@ object NetworkModule {
         }
     }
 }
+
 

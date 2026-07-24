@@ -11,7 +11,8 @@ class ImageCaptureUriProvider @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     fun createImageCaptureUri(): Uri {
-        val file = File(context.cacheDir, "avatar_capture_${System.currentTimeMillis()}.jpg")
+        val imagesDir = File(context.cacheDir, "images").apply { if (!exists()) mkdirs() }
+        val file = File(imagesDir, "avatar_capture_${System.currentTimeMillis()}.jpg")
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 }

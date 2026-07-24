@@ -113,7 +113,6 @@ fun ProfileScreenContent(
     }
 
     val focusManager = LocalFocusManager.current
-    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
 
     val defaultSkills = stringArrayResource(id = R.array.profile_info_default_skills).toList()
 
@@ -154,7 +153,7 @@ fun ProfileScreenContent(
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
                 email = data.email,
                 onEmailChanged = { onIntent(ProfileInfoIntent.OnEmailChanged(it)) },
-                isEmailValid = isEmailValid,
+                isEmailInvalid = state.isEmailInvalid,
                 title = data.title,
                 onTitleChanged = { onIntent(ProfileInfoIntent.OnTitleChanged(it)) },
                 experience = data.experience,
