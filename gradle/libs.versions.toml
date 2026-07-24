@@ -146,6 +146,7 @@ careerpilot-feature-profile = { id = "careerpilot.feature.profile" }
 careerpilot-feature-editprofile = { id = "careerpilot.feature.editprofile" }
 careerpilot-feature-practice-session = { id = "careerpilot.feature.practicesession" }
 careerpilot-module-whisper = { id = "careerpilot.module.whisper" }
+careerpilot-feature-reports = { id = "careerpilot.feature.reports" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-client-auth", "ktor-serialization-kotlinx-json"]

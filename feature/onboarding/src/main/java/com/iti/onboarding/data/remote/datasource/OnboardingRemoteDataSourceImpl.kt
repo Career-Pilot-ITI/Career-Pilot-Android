@@ -17,6 +17,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import android.util.Log
 import java.io.File
 import javax.inject.Inject
 
@@ -53,7 +54,6 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun updateProfile(request: UpdateProfileRequestDto): UserProfileDto {
         return httpClient.patch(Endpoints.PROFILE) {
-            contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
     }
@@ -90,5 +90,40 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
                 onProgress(progress)
             }
         }.body()
+    }
+
+    override suspend fun analyzeCv(
+        file: File,
+        onProgress: (Int) -> Unit
+    ): UserProfileDto {
+        val contentTypeStr = when (file.extension.lowercase()) {
+            "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "doc" -> "application/msword"
+            else -> "application/pdf"
+        }
+        Log.d("ANALYZE_CV", "Submitting binary data to ${Endpoints.ANALYZE_CV} with filename=${file.name}, size=${file.length()} bytes")
+        val responseDto: UserProfileDto = httpClient.submitFormWithBinaryData(
+            url = Endpoints.ANALYZE_CV,
+            formData = formData {
+                append(
+                    "file",
+                    file.readBytes(),
+                    Headers.build {
+                        append(HttpHeaders.ContentType, contentTypeStr)
+                        append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+                    }
+                )
+            }
+        ) {
+            onUpload { bytesSentTotal, contentLength ->
+                val total = contentLength ?: 0L
+                val progress = if (total > 0) {
+                    ((bytesSentTotal.toDouble() / total.toDouble()) * 100).toInt()
+                } else 0
+                onProgress(progress)
+            }
+        }.body()
+        Log.d("ANALYZE_CV", "Received UserProfileDto from ${Endpoints.ANALYZE_CV}: $responseDto")
+        return responseDto
     }
 }

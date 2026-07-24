@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="reports_session_history">Session History</string>
+    <string name="reports_average_score">Avg score %1$d</string>
+    <string name="reports_summary_separator">%1$s · %2$s</string>
+    <string name="reports_today">Today</string>
+    <string name="reports_yesterday">Yesterday</string>
+    <string name="reports_overall_score">Overall Score</string>
+    <string name="reports_performance_strong">Strong Performance</string>
+    <string name="reports_performance_good">Good Performance</string>
+    <string name="reports_performance_needs_improvement">Needs Improvement</string>
+    <string name="reports_top_percent">Top %1$d%% of users this week</string>
+    <string name="reports_performance_breakdown">Performance Breakdown</string>
+    <string name="reports_metric_clarity">Clarity</string>
+    <string name="reports_metric_confidence">Confidence</string>
+    <string name="reports_metric_pacing">Pacing</string>
+    <string name="reports_metric_filler_words">Filler Words</string>
+    <string name="reports_metric_content">Content</string>
+    <string name="reports_view_question_breakdown">View per-question breakdown</string>
+    <string name="reports_coaching_suggestions">Coaching Suggestions</string>
+    <string name="reports_suggestion_number">Suggestion %1$d</string>
+    <string name="reports_impact_high">High impact</string>
+    <string name="reports_impact_medium">Medium</string>
+    <string name="reports_impact_low">Low</string>
+    <string name="reports_question_breakdown">Question Breakdown</string>
+    <string name="reports_question_number">Q%1$d</string>
+    <string name="reports_question_label">Question %1$d</string>
+    <string name="reports_score">Score</string>
+    <string name="reports_duration">Duration</string>
+    <string name="reports_coach_feedback">Coach Feedback</string>
+    <string name="reports_transcript_snippet">Transcript Snippet</string>
+    <string name="reports_empty_history_title">No interview reports yet</string>
+    <string name="reports_empty_history_message">Complete an interview practice session to see its report here.</string>
+    <string name="reports_empty_questions_title">No question reports available</string>
+    <string name="reports_empty_questions_message">This interview does not contain a per-question breakdown.</string>
+    <string name="reports_report_not_found">This interview report could not be found.</string>
+    <string name="reports_loading_history">Loading session history</string>
+    <string name="reports_loading_details">Loading performance report</string>
+    <string name="reports_loading_questions">Loading question breakdown</string>
+    <string name="reports_error_title">Unable to load report</string>
+    <string name="reports_retry">Retry</string>
+    <string name="reports_back">Back</string>
+    <string name="reports_open_session">Open report for %1$s with score %2$d</string>
+    <string name="reports_score_out_of_100" tools:ignore="PluralsCandidate">%1$d out of 100</string>
+    <string name="reports_radar_summary">Clarity %1$d, Confidence %2$d, Pacing %3$d, Filler Words %4$d, Content %5$d</string>
+    <string name="reports_question_selected" tools:ignore="PluralsCandidate">Question %1$d selected</string>
+
+    <plurals name="reports_sessions">
+        <item quantity="one">%d session</item>
+        <item quantity="other">%d sessions</item>
+    </plurals>
+    <plurals name="reports_questions">
+        <item quantity="one">%d question</item>
+        <item quantity="other">%d questions</item>
+    </plurals>
+    <plurals name="reports_minutes">
+        <item quantity="one">%d min</item>
+        <item quantity="other">%d min</item>
+    </plurals>
+    <plurals name="reports_filler_words_count">
+        <item quantity="one">%d filler word</item>
+        <item quantity="other">%d filler words</item>
+    </plurals>
+</resources>

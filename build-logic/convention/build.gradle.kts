@@ -89,6 +89,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.practice.session.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.PracticeSessionConventionPlugin"
         }
+        register("careerPilotFeatureReports") {
+            id = libs.plugins.careerpilot.feature.reports.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.ReportsFeatureConvention"
+        }
     }
 }
 

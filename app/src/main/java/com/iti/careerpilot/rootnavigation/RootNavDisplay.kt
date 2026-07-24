@@ -27,9 +27,11 @@ import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
+import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
+import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -56,26 +58,22 @@ fun RootNavDisplay(
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
-        CareerPilotSnackbarController.requests.collect { request ->
-            try {
-                val event = request.event
-                val materialResult = snackbarHostState.showSnackbar(
-                    message = event.message.asString(context),
-                    withDismissAction =
-                        event.type ==
-                                CareerPilotSnackbarType.DISMISSIBLE,
-                    duration = event.duration,
-                    actionLabel =
-                        event.actionLabel?.asString(context),
-                )
+        CareerPilotSnackbarController.requests.collectLatest { request ->
+            snackbarHostState.currentSnackbarData?.dismiss()
 
-                request.complete(materialResult)
-            } catch (cancellation: CancellationException) {
-                request.complete(
-                    SnackbarResult.Dismissed,
-                )
+            val event = request.event
+            val result = snackbarHostState.showSnackbar(
+                message = event.message.asString(context),
+                withDismissAction =
+                    event.type ==
+                            CareerPilotSnackbarType.DISMISSIBLE,
+                duration = event.duration,
+                actionLabel =
+                    event.actionLabel?.asString(context),
+            )
 
-                throw cancellation
+            if (result == SnackbarResult.ActionPerformed) {
+                request.performAction()
             }
         }
     }
@@ -224,6 +222,28 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }
+                    )
+                }
+                entry<Route.SessionDetails> {
+                    ReportDetailsRoot(
+                        sessionId = it.id,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                        },
+                        openQuestionBreakdown = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.QuestionBreakdown(sessionId),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.QuestionBreakdown> {
+                    QuestionBreakdownRoot(
+                        sessionId = it.sessionId,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.QuestionBreakdown>()
+                        },
                     )
                 }
 
