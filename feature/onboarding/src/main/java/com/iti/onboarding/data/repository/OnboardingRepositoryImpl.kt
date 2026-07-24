@@ -135,7 +135,7 @@ class OnboardingRepositoryImpl @Inject constructor(
                     val uploaded = uploadResult.data
                     return CareerPilotResult.Success(
                         UserProfile(
-                            id = uploaded.id.toInt(),
+                            id = uploaded.id,
                             cv = com.iti.core.datastore.models.CvInfo(
                                 cvUrl = uploaded.url
                             )

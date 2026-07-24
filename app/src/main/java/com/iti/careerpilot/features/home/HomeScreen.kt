@@ -11,21 +11,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun HomeRoot(
     openPaywall: () -> Unit,
-    openSessionDetails: (Long, Long?) -> Unit,
+    openPracticeSession: (Long, Long?) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     HomeScreen(
         openPaywall = openPaywall,
-        openSessionDetails = openSessionDetails,
+        openSessionDetails = openPracticeSession,
         state = state,
         onAction = viewModel::onAction
     )
@@ -54,7 +53,7 @@ fun HomeScreen(
         Button(
             onClick = { openSessionDetails(1, null) }
         ) {
-            Text(text = "Open Session Details")
+            Text(text = "Open Practice Session")
         }
     }
 }

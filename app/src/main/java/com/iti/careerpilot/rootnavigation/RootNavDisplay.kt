@@ -171,7 +171,12 @@ fun RootNavDisplay(
                                 )
                             }
                         },
-                        openSessionDetails = { trackId, sessionId ->
+                        openSessionDetails = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.SessionDetails(sessionId),
+                            )
+                        },
+                        openPracticeSession = { trackId, sessionId ->
                             rootBackStack.navigateSingleTop(
                                 Route.PracticeSession(
                                     trackId = trackId,
