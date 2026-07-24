@@ -22,8 +22,7 @@ sealed interface Route : NavKey {
         data object Home : Route
 
         @Serializable
-        data object Reports : Route
-
+        data object SessionHistory : Route
 
         @Serializable
         data object Profile : Route
@@ -32,6 +31,9 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class SessionDetails(val id: String) : Route
+
+    @Serializable
+    data class QuestionBreakdown(val sessionId: String) : Route
 
     @Serializable
     data object Settings : Route

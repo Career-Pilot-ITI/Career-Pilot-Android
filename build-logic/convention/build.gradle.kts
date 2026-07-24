@@ -81,6 +81,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.editprofile.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.EditProfileFeatureConventionPlugin"
         }
+        register("careerPilotFeatureReports") {
+            id = libs.plugins.careerpilot.feature.reports.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.ReportsFeatureConvention"
+        }
     }
 }
 
