@@ -150,7 +150,7 @@ fun ProfileScreenContent(
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
                 email = data.email,
                 onEmailChanged = { onIntent(ProfileInfoIntent.OnEmailChanged(it)) },
-                isEmailValid = state.isEmailValid,
+                isEmailInvalid = state.isEmailInvalid,
                 title = data.title,
                 onTitleChanged = { onIntent(ProfileInfoIntent.OnTitleChanged(it)) },
                 experience = data.experience,

@@ -8,21 +8,22 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.common.model.ProfileEditSection
-import com.iti.careerpilot.features.reports.ReportsRoot
 import com.iti.careerpilot.features.home.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
+import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
+import com.iti.common.model.ProfileEditSection
 
 @Composable
 fun NestedNavDisplay(
@@ -40,10 +41,12 @@ fun NestedNavDisplay(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            ShortNavigationBar {
+            CareerPilotBottomNavBar(
+                selectedIndex = nestedBackStack.selectedBottomNavBarIndex()
+            ) {
                 BottomBarDestination.entries.forEach { destination ->
-                    val isSelected = nestedBackStack.lastOrNull() == destination.route
-                    BottomNavigationButton(
+                    BottomNavBarItem(
+                        modifier = Modifier.fillMaxSize(),
                         onClick = {
                             nestedBackStack.apply {
                                 clear()
@@ -53,10 +56,9 @@ fun NestedNavDisplay(
                                 navigateSingleTop(destination.route)
                             }
                         },
-                        icon = if (isSelected) destination.selectedIcon else destination.icon,
-                        modifier = Modifier,
-                        selected = isSelected,
-                        label = destination.title
+                        isSelected = destination.route == nestedBackStack.lastOrNull(),
+                        icon = destination.icon,
+                        label = stringResource(destination.title),
                     )
                 }
             }
@@ -88,8 +90,10 @@ fun NestedNavDisplay(
                         openPaywall = openPaywall
                     )
                 }
-                entry<Route.NestedNav.Reports> {
-                    ReportsRoot()
+                entry<Route.NestedNav.SessionHistory> {
+                    SessionHistoryRoot(
+                        openSessionDetails = openSessionDetails,
+                    )
                 }
                 entry<Route.NestedNav.Profile> {
                     ProfileRoot(
@@ -101,4 +105,20 @@ fun NestedNavDisplay(
             }
         )
     }
+}
+
+private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
+    return this.lastOrNull()?.let {
+        when (it) {
+            Route.NestedNav.Home -> {
+                0
+            }
+            Route.NestedNav.SessionHistory -> {
+                1
+            }
+            else -> {
+                2
+            }
+        }
+    } ?: 0
 }

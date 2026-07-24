@@ -61,28 +61,28 @@ import com.iti.onboarding.presentation.screen.track.view.ChoosingTracksScreen
 import com.iti.onboarding.presentation.screen.track.viewmodel.ChoosingTracksViewModel
 import kotlinx.coroutines.launch
 
-private const val PAGE_PROFILE_INFO = 0
-private const val PAGE_CHOOSING_TRACKS = 1
-private const val PAGE_UPLOAD_CV = 2
+private const val PAGE_UPLOAD_CV = 0
+private const val PAGE_PROFILE_INFO = 1
+private const val PAGE_CHOOSING_TRACKS = 2
 private const val ONBOARDING_PAGE_COUNT = 3
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnboardingPagerScreen(
     onOnboardingFinished: () -> Unit,
+    cvViewModel: UploadCvViewModel = hiltViewModel(),
     profileViewModel: ProfileInfoViewModel = hiltViewModel(),
     tracksViewModel: ChoosingTracksViewModel = hiltViewModel(),
-    cvViewModel: UploadCvViewModel = hiltViewModel(),
 ) {
     val pagerState = rememberPagerState(
-        initialPage = PAGE_PROFILE_INFO,
+        initialPage = PAGE_UPLOAD_CV,
         pageCount = { ONBOARDING_PAGE_COUNT }
     )
     val scope = rememberCoroutineScope()
 
+    val cvState by cvViewModel.state.collectAsStateWithLifecycle()
     val profileState by profileViewModel.state.collectAsStateWithLifecycle()
     val tracksState by tracksViewModel.state.collectAsStateWithLifecycle()
-    val cvState by cvViewModel.state.collectAsStateWithLifecycle()
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val scrollConnection = remember(isRtl) {
@@ -122,7 +122,15 @@ fun OnboardingPagerScreen(
             userScrollEnabled = false,
         ) { page ->
             when (page) {
-                PAGE_PROFILE_INFO -> ProfileInfoScreen(
+                PAGE_UPLOAD_CV -> UploadCvScreen(
+                        viewModel = cvViewModel,
+                        onNavigateNext = {
+                            scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
+                        },
+                        onSkip = {
+                            scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
+                        }
+                    )PAGE_PROFILE_INFO -> ProfileInfoScreen(
                     viewModel = profileViewModel,
                     onNavigateNext = {
                         scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
@@ -131,15 +139,7 @@ fun OnboardingPagerScreen(
 
                 PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
                     viewModel = tracksViewModel,
-                    onNavigateNext = {
-                        scope.launch { pagerState.animateScrollToPage(PAGE_UPLOAD_CV) }
-                    }
-                )
-
-                PAGE_UPLOAD_CV -> UploadCvScreen(
-                    viewModel = cvViewModel,
-                    onNavigateNext = onOnboardingFinished,
-                    onSkip = onOnboardingFinished
+                    onNavigateNext =  onOnboardingFinished
                 )
             }
         }
@@ -158,39 +158,40 @@ fun OnboardingPagerScreen(
                         ),
                     ),
                 )
-                .padding(
-                    horizontal = Dimens.SpaceXXL,
-                    vertical = Dimens.SpaceXXL,
-                ),
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(top = Dimens.SpaceXXXL)
         ) {
-            val currentPage = pagerState.currentPage
+            val settledPage = pagerState.settledPage
+            val isScrollInProgress = pagerState.isScrollInProgress
 
-            val buttonText = when (currentPage) {
+            val buttonText = when (settledPage) {
+                PAGE_UPLOAD_CV -> stringResource(R.string.analyze_my_cv)
                 PAGE_PROFILE_INFO -> stringResource(R.string.next_button_label)
                 PAGE_CHOOSING_TRACKS -> stringResource(R.string.next_button_label)
-                PAGE_UPLOAD_CV -> stringResource(R.string.analyze_my_cv)
                 else -> ""
             }
 
-            val isButtonEnabled = when (currentPage) {
+            val isButtonEnabled = when (settledPage) {
+                PAGE_UPLOAD_CV -> cvState.isFormValid
                 PAGE_PROFILE_INFO -> profileState.isFormValid
                 PAGE_CHOOSING_TRACKS -> tracksState.isFormValid
-                PAGE_UPLOAD_CV -> cvState.isFormValid
                 else -> false
             }
 
-            val isSubmitting = when (currentPage) {
-                PAGE_PROFILE_INFO -> profileState.isSubmitting
-                PAGE_CHOOSING_TRACKS -> false
+            val isSubmitting = when (settledPage) {
                 PAGE_UPLOAD_CV -> cvState.isSubmitting
+                PAGE_PROFILE_INFO -> profileState.isSubmitting
+                PAGE_CHOOSING_TRACKS -> tracksState.isSubmitting
                 else -> false
             }
 
             val onClick = {
-                when (currentPage) {
-                    PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
-                    PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
-                    PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
+                if (!isScrollInProgress) {
+                    when (settledPage) {
+                        PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
+                        PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
+                        PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
+                    }
                 }
             }
 

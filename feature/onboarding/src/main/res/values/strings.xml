@@ -46,6 +46,15 @@
     <string name="profile_info_email_invalid">Please enter a valid email address</string>
     <string name="pager_header">%1$d of %2$d</string>
 
+    <!-- Experience Levels -->
+    <string name="experience_entry_level">Entry-level</string>
+    <string name="experience_junior">Junior</string>
+    <string name="experience_mid_level">Mid-level</string>
+    <string name="experience_senior">Senior</string>
+    <string name="experience_lead">Lead</string>
+    <string name="experience_executive">Executive</string>
+    <string name="cv_default_filename">CV File</string>
+
     <string-array name="profile_info_default_skills">
         <item>React</item>
         <item>Node.js</item>

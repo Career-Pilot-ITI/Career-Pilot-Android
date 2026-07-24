@@ -36,6 +36,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
+import com.iti.common.snackbar.CareerPilotSnackbarController
+
+private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$")
+
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
     private val imageCaptureUriProvider: ImageCaptureUriProvider,
@@ -52,9 +56,37 @@ class ProfileInfoViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             getUserProfileUseCase().collect { profile ->
-                val url = profile.avatar.avatarUrl
-                if (url.isNotBlank()) {
-                    _state.update { it.updateData { data -> data.copy(avatarUrl = url) } }
+                _state.update { currentState ->
+                    val cvSkills = profile.career.skills
+                    val mergedSkills = if (cvSkills.isNotEmpty()) {
+                        (currentState.data.skills + cvSkills).distinct().toPersistentList()
+                    } else {
+                        currentState.data.skills
+                    }
+
+                    val mergedAllSkills = if (cvSkills.isNotEmpty()) {
+                        (currentState.allSkills + cvSkills).distinct().toPersistentList()
+                    } else {
+                        currentState.allSkills
+                    }
+
+                    val targetTitle = profile.career.targetRole.ifBlank { profile.career.currentJobTitle }
+
+                    currentState.copy(
+                        allSkills = mergedAllSkills,
+                        data = currentState.data.copy(
+                            avatarUrl = profile.avatar.avatarUrl.takeIf { it.isNotBlank() } ?: currentState.data.avatarUrl,
+                            name = profile.personal.displayName.ifBlank { currentState.data.name },
+                            email = profile.account.email.ifBlank { currentState.data.email },
+                            title = targetTitle.ifBlank { currentState.data.title },
+                            experience = if (profile.career.yearsOfExperience > 0) {
+                                profile.career.yearsOfExperience.toString()
+                            } else {
+                                currentState.data.experience
+                            },
+                            skills = mergedSkills
+                        )
+                    )
                 }
             }
         }
@@ -176,68 +208,55 @@ class ProfileInfoViewModel @Inject constructor(
             }
         }
 
-        uploadAvatar(uri)
-    }
-
-    private fun handleCameraPermissionDenied() {
-        setImageSourceSheetVisible(false)
-        emitEffect(ProfileInfoEffect.OpenAppSettings)
-    }
-
-    private fun retryPhotoUpload() {
-        _state.value.data.selectedImageUri
-            ?.let(Uri::parse)
-            ?.let(::uploadAvatar)
-    }
-
-    private fun confirmAddSkill() {
-        val skill = _state.value.newSkillText.trim()
-
-        if (skill.isBlank()) {
-            closeAddSkillDialog()
-            return
-        }
-
-        _state.update { currentState ->
-            currentState.copy(
-                allSkills = currentState.allSkills.addIfAbsent(skill),
-                data = currentState.data.copy(
-                    skills = currentState.data.skills.addIfAbsent(skill),
-                ),
-                newSkillText = "",
-                showAddSkillDialog = false,
-                hasSuccessfullySubmitted = false,
-            )
-        }
-    }
-
-    private fun ImmutableList<String>.addIfAbsent(
-        skill: String,
-    ): ImmutableList<String> {
-        return if (skill in this) {
-            this
-        } else {
-            (this + skill).toImmutableList()
-        }
-    }
-
-    private fun closeAddSkillDialog() {
-        _state.update {
-            it.copy(
-                newSkillText = "",
-                showAddSkillDialog = false,
-            )
-        }
-    }
-
-    private fun initializeDefaultSkills(defaultSkills: List<String>) {
-        _state.update { currentState ->
-            if (currentState.allSkills.isEmpty()) {
-                currentState.copy(
-                    allSkills = defaultSkills.toPersistentList(),
-                )
-            } else {
-                currentState
+            is ProfileInfoIntent.OnNameChanged -> _state.update { it.updateData { data -> data.copy(name = intent.name) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnEmailChanged -> _state.update { it.updateData { data -> data.copy(email = intent.email) }.copy(hasSuccessfullySubmitted = false, isEmailInvalid = false) }
+            is ProfileInfoIntent.OnTitleChanged -> _state.update { it.updateData { data -> data.copy(title = intent.title) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnExperienceChanged -> _state.update { it.updateData { data -> data.copy(experience = intent.experience) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnSkillsChanged -> _state.update { it.updateData { data -> data.copy(skills = intent.skills.toPersistentList()) }.copy(hasSuccessfullySubmitted = false) }
+            is ProfileInfoIntent.OnSubmit -> {
+                submitProfile()
+            }
+            is ProfileInfoIntent.OnDismissSheet -> {
+                _state.update { it.copy(isImageSourceSheetVisible = false) }
+            }
+            is ProfileInfoIntent.OnOpenAppSettings ->
+                viewModelScope.launch { _effect.emit(ProfileInfoEffect.OpenAppSettings) }
+            is ProfileInfoIntent.OnShowAddSkillDialogChanged -> {
+                _state.update { it.copy(showAddSkillDialog = intent.show) }
+            }
+            is ProfileInfoIntent.OnNewSkillTextChanged -> {
+                _state.update { it.copy(newSkillText = intent.text) }
+            }
+            is ProfileInfoIntent.OnConfirmAddSkill -> {
+                val skill = _state.value.newSkillText.trim()
+                if (skill.isNotEmpty()) {
+                    _state.update { currentState ->
+                        val newAllSkills = if (!currentState.allSkills.contains(skill)) {
+                            (currentState.allSkills + skill).toPersistentList()
+                        } else currentState.allSkills
+                        
+                        val newDataSkills = if (!currentState.data.skills.contains(skill)) {
+                            (currentState.data.skills + skill).toPersistentList()
+                        } else currentState.data.skills
+                        
+                        currentState.copy(
+                            allSkills = newAllSkills,
+                            data = currentState.data.copy(skills = newDataSkills),
+                            newSkillText = "",
+                            showAddSkillDialog = false,
+                            hasSuccessfullySubmitted = false
+                        )
+                    }
+                } else {
+                    _state.update { it.copy(newSkillText = "", showAddSkillDialog = false) }
+                }
+            }
+            is ProfileInfoIntent.OnInitDefaultSkills -> {
+                _state.update { currentState ->
+                    if (currentState.allSkills.isEmpty()) {
+                        currentState.copy(allSkills = intent.defaultSkills.toPersistentList())
+                    } else currentState
+                }
             }
         }
     }
@@ -310,9 +329,7 @@ class ProfileInfoViewModel @Inject constructor(
                 if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
                 onSuccess(response)
             }?.onError { error ->
-                viewModelScope.launch {
-                    CareerPilotSnackbarController.show(error.toUIText())
-                }
+                CareerPilotSnackbarController.show(error.toUIText())
             }
             onFinish()
         }
@@ -324,9 +341,16 @@ class ProfileInfoViewModel @Inject constructor(
                 _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 return@launch
             }
-            _state.update { it.copy(isSubmitting = true) }
-
             val currentData = _state.value.data
+            val isEmailValid = EMAIL_REGEX.matches(currentData.email)
+            if (!isEmailValid) {
+                _state.update { it.copy(isEmailInvalid = true) }
+                CareerPilotSnackbarController.show(UIText.StringResource(R.string.profile_info_email_invalid))
+                return@launch
+            }
+
+            _state.update { it.copy(isSubmitting = true, isEmailInvalid = false) }
+
             val yearsOfExperience = currentData.experience.toIntOrNull()
 
             val request = UpdateProfileRequestDto(
@@ -344,9 +368,7 @@ class ProfileInfoViewModel @Inject constructor(
                     _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 }
                 .onError { error ->
-                    viewModelScope.launch {
-                        CareerPilotSnackbarController.show(error.toUIText())
-                    }
+                    CareerPilotSnackbarController.show(error.toUIText())
                 }
 
             _state.update { it.copy(isSubmitting = false) }

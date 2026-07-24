@@ -20,15 +20,16 @@ import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.PaywallRoot
-import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
+import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -55,26 +56,22 @@ fun RootNavDisplay(
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
-        CareerPilotSnackbarController.requests.collect { request ->
-            try {
-                val event = request.event
-                val materialResult = snackbarHostState.showSnackbar(
-                    message = event.message.asString(context),
-                    withDismissAction =
-                        event.type ==
-                                CareerPilotSnackbarType.DISMISSIBLE,
-                    duration = event.duration,
-                    actionLabel =
-                        event.actionLabel?.asString(context),
-                )
+        CareerPilotSnackbarController.requests.collectLatest { request ->
+            snackbarHostState.currentSnackbarData?.dismiss()
 
-                request.complete(materialResult)
-            } catch (cancellation: CancellationException) {
-                request.complete(
-                    SnackbarResult.Dismissed,
-                )
+            val event = request.event
+            val result = snackbarHostState.showSnackbar(
+                message = event.message.asString(context),
+                withDismissAction =
+                    event.type ==
+                            CareerPilotSnackbarType.DISMISSIBLE,
+                duration = event.duration,
+                actionLabel =
+                    event.actionLabel?.asString(context),
+            )
 
-                throw cancellation
+            if (result == SnackbarResult.ActionPerformed) {
+                request.performAction()
             }
         }
     }
@@ -202,8 +199,25 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.SessionDetails> {
-                    SessionDetailsRoot(
+                    ReportDetailsRoot(
                         sessionId = it.id,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                        },
+                        openQuestionBreakdown = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.QuestionBreakdown(sessionId),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.QuestionBreakdown> {
+                    QuestionBreakdownRoot(
+                        sessionId = it.sessionId,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.QuestionBreakdown>()
+                        },
                     )
                 }
 

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="reports_session_history">سجل الجلسات</string>
+    <string name="reports_average_score">متوسط النتيجة %1$d</string>
+    <string name="reports_summary_separator">%1$s · %2$s</string>
+    <string name="reports_today">اليوم</string>
+    <string name="reports_yesterday">أمس</string>
+    <string name="reports_overall_score">النتيجة الإجمالية</string>
+    <string name="reports_performance_strong">أداء قوي</string>
+    <string name="reports_performance_good">أداء جيد</string>
+    <string name="reports_performance_needs_improvement">يحتاج إلى تحسين</string>
+    <string name="reports_top_percent">ضمن أفضل %1$d%% من المستخدمين هذا الأسبوع</string>
+    <string name="reports_performance_breakdown">تحليل الأداء</string>
+    <string name="reports_metric_clarity">الوضوح</string>
+    <string name="reports_metric_confidence">الثقة</string>
+    <string name="reports_metric_pacing">إيقاع التحدث</string>
+    <string name="reports_metric_filler_words">الكلمات الحشوية</string>
+    <string name="reports_metric_content">المحتوى</string>
+    <string name="reports_view_question_breakdown">عرض تحليل كل سؤال</string>
+    <string name="reports_coaching_suggestions">نصائح التدريب</string>
+    <string name="reports_suggestion_number">الاقتراح %1$d</string>
+    <string name="reports_impact_high">تأثير مرتفع</string>
+    <string name="reports_impact_medium">متوسط</string>
+    <string name="reports_impact_low">منخفض</string>
+    <string name="reports_question_breakdown">تحليل الأسئلة</string>
+    <string name="reports_question_number">س%1$d</string>
+    <string name="reports_question_label">السؤال %1$d</string>
+    <string name="reports_score">النتيجة</string>
+    <string name="reports_duration">المدة</string>
+    <string name="reports_coach_feedback">ملاحظات المدرب</string>
+    <string name="reports_transcript_snippet">مقتطف من النص</string>
+    <string name="reports_empty_history_title">لا توجد تقارير مقابلات بعد</string>
+    <string name="reports_empty_history_message">أكمل جلسة تدريب على المقابلة لعرض تقريرها هنا.</string>
+    <string name="reports_empty_questions_title">لا تتوفر تقارير للأسئلة</string>
+    <string name="reports_empty_questions_message">لا تحتوي هذه المقابلة على تحليل لكل سؤال.</string>
+    <string name="reports_report_not_found">تعذر العثور على تقرير المقابلة.</string>
+    <string name="reports_loading_history">جارٍ تحميل سجل الجلسات</string>
+    <string name="reports_loading_details">جارٍ تحميل تقرير الأداء</string>
+    <string name="reports_loading_questions">جارٍ تحميل تحليل الأسئلة</string>
+    <string name="reports_error_title">تعذر تحميل التقرير</string>
+    <string name="reports_retry">إعادة المحاولة</string>
+    <string name="reports_back">رجوع</string>
+    <string name="reports_open_session">فتح تقرير %1$s بنتيجة %2$d</string>
+    <string name="reports_score_out_of_100" tools:ignore="PluralsCandidate">%1$d من 100</string>
+    <string name="reports_radar_summary">الوضوح %1$d، الثقة %2$d، إيقاع التحدث %3$d، الكلمات الحشوية %4$d، المحتوى %5$d</string>
+    <string name="reports_question_selected" tools:ignore="PluralsCandidate">تم تحديد السؤال %1$d</string>
+
+    <plurals name="reports_sessions">
+        <item quantity="zero">لا جلسات</item>
+        <item quantity="one">جلسة واحدة</item>
+        <item quantity="two">جلستان</item>
+        <item quantity="few">%d جلسات</item>
+        <item quantity="many">%d جلسة</item>
+        <item quantity="other">%d جلسة</item>
+    </plurals>
+    <plurals name="reports_questions">
+        <item quantity="zero">لا أسئلة</item>
+        <item quantity="one">سؤال واحد</item>
+        <item quantity="two">سؤالان</item>
+        <item quantity="few">%d أسئلة</item>
+        <item quantity="many">%d سؤالًا</item>
+        <item quantity="other">%d سؤال</item>
+    </plurals>
+    <plurals name="reports_minutes">
+        <item quantity="zero">٠ دقيقة</item>
+        <item quantity="one">دقيقة واحدة</item>
+        <item quantity="two">دقيقتان</item>
+        <item quantity="few">%d دقائق</item>
+        <item quantity="many">%d دقيقة</item>
+        <item quantity="other">%d دقيقة</item>
+    </plurals>
+    <plurals name="reports_filler_words_count">
+        <item quantity="zero">لا كلمات حشوية</item>
+        <item quantity="one">كلمة حشوية واحدة</item>
+        <item quantity="two">كلمتان حشويتان</item>
+        <item quantity="few">%d كلمات حشوية</item>
+        <item quantity="many">%d كلمة حشوية</item>
+        <item quantity="other">%d كلمة حشوية</item>
+    </plurals>
+</resources>
