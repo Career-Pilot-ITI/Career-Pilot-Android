@@ -8,7 +8,6 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import com.iti.onboarding.domain.usecase.AnalyzeCvUseCase
-import com.iti.onboarding.domain.usecase.UploadCvUseCase
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
@@ -29,8 +28,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
-    private val analyzeCv: AnalyzeCvUseCase,
-    private val uploadCv: UploadCvUseCase,
+    private val analyzeCv: AnalyzeCvUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UploadCvUiState())
