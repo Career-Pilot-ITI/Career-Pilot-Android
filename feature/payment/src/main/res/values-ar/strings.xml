@@ -91,6 +91,7 @@
     <string name="paywall_failed_subtitle_timeout">ربما تمت معالجة دفعتك، لكننا لم نتمكن من التحقق منها بعد.</string>
     <string name="paywall_error_verification_timeout">تمت معالجة دفعتك، لكننا لم نتمكن من تأكيدها بعد. يرجى الانتظار لحظة والتحقق من رصيد حسابك، أو الاتصال بالدعم إذا استمرت المشكلة.</string>
     <string name="paywall_try_again">حاول مرة أخرى</string>
+    <string name="paywall_go_home">الرئيسية</string>
     <string name="paywall_change_payment_method">تغيير طريقة الدفع</string>
     <string name="paywall_credit_debit_card">بطاقة ائتمان / خصم</string>
     <string name="paywall_touch_id_face_id">بصمة الإصبع أو الوجه</string>

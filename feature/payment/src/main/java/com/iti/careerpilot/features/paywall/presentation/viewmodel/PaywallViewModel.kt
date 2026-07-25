@@ -258,12 +258,20 @@ class PaywallViewModel @Inject constructor(
             try {
                 val baselineBalance = mutableState.value.preCheckoutBalance ?: mutableState.value.coinBalance
                 val baselineTier = mutableState.value.preCheckoutTier ?: mutableState.value.currentSubscriptionTier
+                val selectedPlan = mutableState.value.selectedPlan
+                val targetTier = if (mutableState.value.checkoutItemType == CheckoutItemType.SUBSCRIPTION) selectedPlan?.id else null
+                val pack = mutableState.value.coinPacks.find { it.id == mutableState.value.selectedCoinPackId }
+                val expectedCoinDelta = if (mutableState.value.checkoutItemType == CheckoutItemType.COIN_PACK) pack?.coins ?: 0 else 0
+                val merchantOrderId = mutableState.value.merchantOrderId
 
                 val result = pollPaymentStatusUseCase(
                     baselineBalance = baselineBalance,
                     baselineTier = baselineTier,
                     getCurrentBalance = { userProfileRepo.readUserProfile().account.coinBalance },
-                    getCurrentTier = { userProfileRepo.readUserProfile().account.subscriptionTier }
+                    getCurrentTier = { userProfileRepo.readUserProfile().account.subscriptionTier },
+                    merchantOrderId = merchantOrderId,
+                    targetTier = targetTier,
+                    expectedCoinDelta = expectedCoinDelta
                 )
 
                 when (result) {

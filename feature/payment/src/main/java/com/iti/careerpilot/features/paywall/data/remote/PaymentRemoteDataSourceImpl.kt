@@ -7,6 +7,7 @@ import com.iti.careerpilot.features.paywall.data.remote.dto.DowngradeSubscriptio
 import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentInitiateRequestDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.SubscriptionResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.TopUpRequestDto
+import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.UpgradeSubscriptionRequestDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -64,5 +65,11 @@ class PaymentRemoteDataSourceImpl @Inject constructor(
         httpClient.post(Endpoints.SUBSCRIPTION_CANCEL) {
             contentType(ContentType.Application.Json)
         }
+    }
+
+    override suspend fun getPaymentHistory(): PaymentHistoryPageDto {
+        return httpClient.get("${Endpoints.PAYMENT_HISTORY}?page=0&size=5") {
+            contentType(ContentType.Application.Json)
+        }.body()
     }
 }

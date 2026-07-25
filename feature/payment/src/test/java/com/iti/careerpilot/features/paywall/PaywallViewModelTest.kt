@@ -8,6 +8,7 @@ import com.iti.careerpilot.features.paywall.data.remote.dto.DowngradeSubscriptio
 import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentInitiateRequestDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.SubscriptionResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.TopUpRequestDto
+import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.UpgradeSubscriptionRequestDto
 import com.iti.careerpilot.features.paywall.domain.repository.PaymentRepository
 import com.iti.careerpilot.features.paywall.domain.usecase.DowngradeSubscriptionUseCase
@@ -116,6 +117,7 @@ class PaywallViewModelTest {
         override suspend fun upgradeSubscription(request: UpgradeSubscriptionRequestDto) = CheckoutResponseDto(checkoutUrl = "url", merchantOrderId = "id")
         override suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto) {}
         override suspend fun cancelSubscription() {}
+        override suspend fun getPaymentHistory() = PaymentHistoryPageDto()
     }
 
     private fun errorApi() = object : PaymentRemoteDataSource {
@@ -126,6 +128,7 @@ class PaywallViewModelTest {
         override suspend fun upgradeSubscription(request: UpgradeSubscriptionRequestDto): CheckoutResponseDto { throw Exception() }
         override suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto) { throw Exception() }
         override suspend fun cancelSubscription() { throw Exception() }
+        override suspend fun getPaymentHistory(): PaymentHistoryPageDto { throw Exception() }
     }
 
     private fun makeViewModel(

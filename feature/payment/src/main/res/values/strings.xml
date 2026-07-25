@@ -96,6 +96,7 @@
     <string name="paywall_failed_subtitle_timeout">Your payment may have gone through, but we couldn\u2019t verify it yet.</string>
     <string name="paywall_error_verification_timeout">Your payment was processed, but we couldn\u2019t confirm it yet. Please wait a moment and check your account balance, or contact support if the issue persists.</string>
     <string name="paywall_try_again">Try Again</string>
+    <string name="paywall_go_home">Go Home</string>
     <string name="paywall_change_payment_method">Change payment method</string>
     <string name="paywall_credit_debit_card">Credit / Debit Card</string>
     <string name="paywall_touch_id_face_id">Touch ID or Face ID</string>

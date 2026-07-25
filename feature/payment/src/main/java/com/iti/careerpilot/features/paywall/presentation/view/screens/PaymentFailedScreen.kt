@@ -112,6 +112,15 @@ fun PaymentFailedContent(
             variant = ButtonVariant.PRIMARY,
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(Dimens.SpaceS))
+
+        CareerPilotButton(
+            text = stringResource(R.string.paywall_go_home),
+            onClick = { onIntent(PaywallIntent.StartPractisingClicked) },
+            variant = ButtonVariant.GHOST,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

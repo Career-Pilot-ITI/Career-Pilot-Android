@@ -7,6 +7,7 @@ import com.iti.careerpilot.features.paywall.data.remote.dto.DowngradeSubscriptio
 import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentInitiateRequestDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.SubscriptionResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.TopUpRequestDto
+import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.UpgradeSubscriptionRequestDto
 import com.iti.common.util.fakeDelay
 import com.iti.common.util.shouldFail
@@ -80,5 +81,10 @@ class FakePaymentRemoteDataSource @Inject constructor() : PaymentRemoteDataSourc
         fakeDelay()
         if (shouldFail()) throw Exception("Fake network error")
         isSubscriptionActive = false
+    }
+
+    override suspend fun getPaymentHistory(): PaymentHistoryPageDto {
+        fakeDelay()
+        return PaymentHistoryPageDto()
     }
 }

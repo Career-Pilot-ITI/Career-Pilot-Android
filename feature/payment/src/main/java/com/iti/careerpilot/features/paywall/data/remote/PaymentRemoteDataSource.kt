@@ -8,6 +8,8 @@ import com.iti.careerpilot.features.paywall.data.remote.dto.SubscriptionResponse
 import com.iti.careerpilot.features.paywall.data.remote.dto.TopUpRequestDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.UpgradeSubscriptionRequestDto
 
+import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
+
 interface PaymentRemoteDataSource {
     suspend fun getWalletBalance(): CoinBalanceResponseDto
     suspend fun topUpWallet(request: TopUpRequestDto): CheckoutResponseDto
@@ -16,4 +18,5 @@ interface PaymentRemoteDataSource {
     suspend fun upgradeSubscription(request: UpgradeSubscriptionRequestDto): CheckoutResponseDto
     suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto)
     suspend fun cancelSubscription()
+    suspend fun getPaymentHistory(): PaymentHistoryPageDto
 }
