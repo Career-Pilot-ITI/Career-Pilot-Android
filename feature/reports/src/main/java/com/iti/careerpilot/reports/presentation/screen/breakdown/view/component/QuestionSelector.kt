@@ -26,11 +26,10 @@ import androidx.compose.ui.semantics.semantics
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.reports.R
 import com.iti.careerpilot.reports.presentation.screen.breakdown.uimodels.QuestionUiModel
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun QuestionSelector(
-    questions: ImmutableList<QuestionUiModel>,
+    questions: List<QuestionUiModel>,
     selectedQuestionId: String?,
     onQuestionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.reports.R
 import com.iti.careerpilot.reports.domain.usecase.GetReportDetailsUseCase
+import com.iti.careerpilot.reports.presentation.screen.components.ReportsContentPhase
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsAction
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsEvent
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsState
@@ -14,6 +15,7 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,24 +24,23 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class ReportDetailsViewModel @Inject constructor(
     private val getReportDetails: GetReportDetailsUseCase,
     networkMonitor: NetworkMonitor,
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(
+    private val _state = MutableStateFlow(
         ReportDetailsState(isOnline = networkMonitor.isOnline.value),
     )
-    val state = mutableState
+    val state = _state
         .combine(networkMonitor.isOnline) { currentState, isOnline ->
-            if (currentState.isOnline == isOnline) currentState else currentState.copy(isOnline = isOnline)
+            currentState.copy(isOnline = isOnline)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.WhileSubscribed(5_000L),
-            initialValue = mutableState.value,
+            initialValue = _state.value,
         )
 
     private val eventChannel = Channel<ReportDetailsEvent>(Channel.Factory.BUFFERED)
@@ -48,10 +49,10 @@ class ReportDetailsViewModel @Inject constructor(
     fun onAction(action: ReportDetailsAction) {
         when (action) {
             is ReportDetailsAction.Load -> loadReport(action.sessionId)
-            ReportDetailsAction.Retry -> mutableState.value.sessionId?.let { loadReport(it, force = true) }
+            ReportDetailsAction.Retry -> _state.value.sessionId?.let { loadReport(it, force = true) }
             ReportDetailsAction.BackClicked -> eventChannel.trySend(ReportDetailsEvent.NavigateBack)
             ReportDetailsAction.QuestionBreakdownClicked -> {
-                mutableState.value.content?.sessionId?.let { sessionId ->
+                _state.value.content?.sessionId?.let { sessionId ->
                     eventChannel.trySend(
                         ReportDetailsEvent.NavigateToQuestionBreakdown(sessionId),
                     )
@@ -61,41 +62,60 @@ class ReportDetailsViewModel @Inject constructor(
     }
 
     private fun loadReport(
-        sessionId: String,
+        sessionId: Long,
         force: Boolean = false,
     ) {
-        if (sessionId.isBlank()) {
-            mutableState.update {
+        if (sessionId <= 0L) {
+            _state.update {
                 it.copy(
                     sessionId = sessionId,
                     isLoading = false,
+                    content = null,
                     error = UIText.StringResource(R.string.reports_report_not_found),
+                    phase = ReportsContentPhase.ERROR,
                 )
             }
             return
         }
-        val currentState = mutableState.value
+        val currentState = _state.value
         if (currentState.isLoading || (!force && currentState.content?.sessionId == sessionId)) return
         viewModelScope.launch {
-            mutableState.update {
-                it.copy(sessionId = sessionId, isLoading = true, error = null)
+            _state.update { state ->
+                val isNewSession = state.content?.sessionId != sessionId
+                state.copy(
+                    sessionId = sessionId,
+                    isLoading = true,
+                    content = if (isNewSession) null else state.content,
+                    error = null,
+                    phase = if (isNewSession || state.content == null) {
+                        ReportsContentPhase.LOADING
+                    } else {
+                        state.phase
+                    },
+                )
             }
             when (val result = getReportDetails(sessionId)) {
-                is CareerPilotResult.Success -> mutableState.update {
+                is CareerPilotResult.Success -> _state.update {
                     it.copy(
                         isLoading = false,
                         content = result.data.toUiModel(),
                         error = null,
+                        phase = ReportsContentPhase.CONTENT,
                     )
                 }
 
-                is CareerPilotResult.Error -> mutableState.update {
-                    it.copy(
+                is CareerPilotResult.Error -> _state.update { state ->
+                    state.copy(
                         isLoading = false,
                         error = if (result.error == NetworkError.NOT_FOUND) {
                             UIText.StringResource(R.string.reports_report_not_found)
                         } else {
                             result.error.toUIText()
+                        },
+                        phase = if (state.content == null) {
+                            ReportsContentPhase.ERROR
+                        } else {
+                            state.phase
                         },
                     )
                 }

@@ -47,7 +47,7 @@ private fun InterviewSessionDto?.toResult():
 } ?: CareerPilotResult.Error(NetworkError.BAD_REQUEST)
 
 private fun InterviewSessionDto.toFeedback(): FeedbackReportDto {
-    val score = requireNotNull(overallScore)
+    val score = overallScore ?: 0
     return FeedbackReportDto(
         id = id + FEEDBACK_ID_OFFSET,
         sessionId = id,
@@ -63,12 +63,12 @@ private fun InterviewSessionDto.toFeedback(): FeedbackReportDto {
             "Support each answer with one measurable example from your experience.",
         ),
         generatedAt = completedAt,
-        createdAt = requireNotNull(completedAt),
+        createdAt = completedAt ?: "Today",
     )
 }
 
 private fun InterviewSessionDto.toQuestions(): List<SessionQuestionDto> {
-    val score = requireNotNull(overallScore)
+    val score = overallScore ?: 0
     return listOf(
         createQuestion(
             order = 1,
@@ -131,7 +131,7 @@ private fun InterviewSessionDto.createQuestion(
             fillerWords = (score - 5).coerceAtLeast(MIN_SCORE),
             overallScore = score,
             coachingTip = coachingTip,
-            createdAt = requireNotNull(completedAt),
+            createdAt = completedAt ?: "Today",
         ),
     )
 }
