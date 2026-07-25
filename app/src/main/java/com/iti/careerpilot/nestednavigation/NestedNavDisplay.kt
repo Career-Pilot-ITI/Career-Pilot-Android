@@ -88,6 +88,7 @@ fun NestedNavDisplay(
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
                         openPracticeSession = openPracticeSession,
+                        openSessionDetails = openSessionDetails,
                         openPaywall = openPaywall
                     )
                 }

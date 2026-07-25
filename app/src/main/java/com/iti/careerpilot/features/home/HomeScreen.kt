@@ -25,7 +25,7 @@ fun HomeRoot(
 
     HomeScreen(
         openPaywall = openPaywall,
-        openSessionDetails = openPracticeSession,
+        openPracticeSession = openPracticeSession,
         openSessionDetails = openSessionDetails,
         state = state,
         onAction = viewModel::onAction
