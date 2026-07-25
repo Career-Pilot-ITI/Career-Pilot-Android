@@ -95,8 +95,6 @@ class UploadCvViewModel @Inject constructor(
                                 uploadProgress = 1f,
                             )
                         }
-
-                        _effects.emit(UploadCvEffect.NavigateNext)
                     }
                 }
                 .onError { error ->
