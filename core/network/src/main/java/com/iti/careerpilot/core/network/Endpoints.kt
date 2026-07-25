@@ -13,16 +13,19 @@ object Endpoints {
     // Wallet
     const val WALLET_BALANCE = "${BASE_URL}api/v1/wallet/balance"
     const val WALLET_TOP_UP = "${BASE_URL}api/v1/wallet/top-up"
+    const val WALLET_COIN_PACKS = "${BASE_URL}api/v1/wallet/coin-packs"
 
     // Payments
     const val PAYMENT_INITIATE = "${BASE_URL}api/v1/payments/initiate"
     const val PAYMENT_HISTORY = "${BASE_URL}api/v1/payments/history"
+    const val PAYMENT_CONFIRM = "${BASE_URL}api/v1/payments/confirm"
 
     // Subscriptions
     const val SUBSCRIPTION_CURRENT = "${BASE_URL}api/v1/subscriptions/current"
     const val SUBSCRIPTION_UPGRADE = "${BASE_URL}api/v1/subscriptions/upgrade"
     const val SUBSCRIPTION_DOWNGRADE = "${BASE_URL}api/v1/subscriptions/downgrade"
     const val SUBSCRIPTION_CANCEL = "${BASE_URL}api/v1/subscriptions/cancel"
+    const val SUBSCRIPTION_TIERS = "${BASE_URL}api/v1/subscriptions/tiers"
 
     const val ANALYZE_CV = "$BASE_URL/api/v1/profile/cv/analyze"
 
