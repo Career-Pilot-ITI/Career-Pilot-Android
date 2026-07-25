@@ -377,17 +377,12 @@ class PracticeSessionViewModel @Inject constructor(
                 transcription = null,
                 recordingDuration = Duration.ZERO,
                 amplitudes = emptyList(),
-                volumeBars = createInitialVolumeBars()
+                volumeBars = createInitialVolumeBars(),
+                showQuestionCard = true
             )
         }
         if (_state.value.autoReadQuestion) {
             readQuestion()
-        } else {
-            _state.update {
-                it.copy(
-                    showQuestionCard = true
-                )
-            }
         }
     }
 
@@ -399,6 +394,7 @@ class PracticeSessionViewModel @Inject constructor(
     private fun readQuestion() {
         val question = _state.value.currentSession?.currentQuestion?.questionText
         if (!question.isNullOrBlank()) {
+            _state.update { it.copy(showQuestionCard = true) }
             if (_state.value.isRecording) {
                 voiceRecorder.stop()
             }

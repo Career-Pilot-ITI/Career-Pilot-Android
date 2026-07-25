@@ -1,6 +1,7 @@
 package com.iti.careerpilot.practicesession.data.datasource.remote
 
 import com.iti.careerpilot.core.network.Endpoints
+import com.iti.careerpilot.practicesession.data.datasource.models.CareerPilotApiResponse
 import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.practicesession.data.datasource.models.AnswerRequestDto
 import com.iti.careerpilot.practicesession.data.datasource.models.AnswerResponseDto
@@ -12,6 +13,7 @@ import com.iti.careerpilot.practicesession.data.datasource.models.SessionResultD
 import com.iti.careerpilot.practicesession.domain.repo.SessionRemoteDataSource
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.map
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.forms.formData
@@ -31,30 +33,38 @@ class SessionRemoteDataSourceImpl @Inject constructor(
     override suspend fun createNewSession(
         request: CreateSessionRequestDto
     ): CareerPilotResult<SessionDto, NetworkError> {
-        return safeCall {
+        return safeCall<CareerPilotApiResponse<SessionDto>> {
             httpClient.post(Endpoints.INTERVIEW_SESSIONS) {
                 setBody(request)
             }
-        }
+        }.map { it.data }
     }
 
     override suspend fun uploadAudio(
         file: File,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError> {
-        return safeCall {
+        val contentType = when (file.extension.lowercase()) {
+            "mp3" -> "audio/mpeg"
+            "wav" -> "audio/wav"
+            "ogg" -> "audio/ogg"
+            "m4a" -> "audio/mp4"
+            "mp4" -> "audio/mp4"
+            else -> "audio/mpeg"
+        }
+        return safeCall<FileUploadResponse> {
             httpClient.submitFormWithBinaryData(
                 url = Endpoints.UPLOAD_FILE,
                 formData = formData {
+                    append("type", "audios")
                     append(
                         key = "file",
                         value = file.readBytes(),
                         headers = Headers.build {
-                            append(HttpHeaders.ContentType, "audio/mpeg")
+                            append(HttpHeaders.ContentType, contentType)
                             append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
                         }
                     )
-                    append("type", "audios")
                 }
             ) {
                 onUpload { bytesSentTotal, contentLength ->
@@ -75,28 +85,26 @@ class SessionRemoteDataSourceImpl @Inject constructor(
         sessionId: Long,
         request: AnswerRequestDto
     ): CareerPilotResult<AnswerResponseDto, NetworkError> {
-        return safeCall {
+        return safeCall<CareerPilotApiResponse<AnswerResponseDto>> {
             httpClient.post(Endpoints.SUBMIT_ANSWER(sessionId)) {
                 setBody(request)
             }
-        }
+        }.map { it.data }
     }
 
     override suspend fun getSessionFeedback(
         sessionId: Long
     ): CareerPilotResult<SessionResultDto, NetworkError> {
-        return safeCall {
+        return safeCall<CareerPilotApiResponse<SessionResultDto>> {
             httpClient.get(Endpoints.GET_SESSION_FEEDBACK(sessionId))
-        }
+        }.map { it.data }
     }
 
     override suspend fun getSessionState(
         sessionId: Long
     ): CareerPilotResult<OldSessionDto, NetworkError> {
-        return safeCall {
+        return safeCall<CareerPilotApiResponse<OldSessionDto>> {
             httpClient.get(Endpoints.GET_SESSION_STATE(sessionId))
-        }
+        }.map { it.data }
     }
-
-
 }

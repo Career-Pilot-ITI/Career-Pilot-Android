@@ -9,7 +9,7 @@ data class AnswerResponseDto(
     val sessionStatus: String?,
     @SerialName("score")
     val score: ScoreDto?,
-    @SerialName("nextCurrentQuestion")
+    @SerialName("nextQuestion")
     val nextQuestion: CurrentQuestionDto?
 )
 

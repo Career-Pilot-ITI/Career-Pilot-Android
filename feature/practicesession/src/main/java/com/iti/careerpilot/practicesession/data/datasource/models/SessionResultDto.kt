@@ -44,7 +44,7 @@ data class SessionQuestionResultDto(
     @SerialName("userTranscript")
     val userTranscript: String?,
     @SerialName("durationMs")
-    val durationMs: Int?,
+    val durationMs: Long?,
     @SerialName("speechRateWpm")
     val speechRateWpm: Double?,
     @SerialName("avgPauseMs")
