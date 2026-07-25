@@ -44,4 +44,13 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Onboarding: Route
+
+    @Serializable
+    data object Interviews : Route
+
+    @Serializable
+    data class ReadyToPractice(val trackId: Long, val trackName: String) : Route
+
+    @Serializable
+    data class InterviewSession(val sessionId: Long) : Route
 }

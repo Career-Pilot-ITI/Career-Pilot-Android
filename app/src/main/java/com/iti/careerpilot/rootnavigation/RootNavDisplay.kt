@@ -25,6 +25,8 @@ import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
+import com.iti.careerpilot.home.presentation.interviews.screen.InterviewsRoot
+import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
@@ -164,6 +166,17 @@ fun RootNavDisplay(
                         navigateBack = {
                             rootBackStack.removeLastOrNull()
                         },
+                        openReadyToPractice = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
+                        openInterviews = {
+                            rootBackStack.navigateSingleTop(Route.Interviews)
+                        },
                         logout = {
                             rootBackStack.apply {
                                 clear()
@@ -221,6 +234,46 @@ fun RootNavDisplay(
                 }
                 entry<Route.Paywall> {
                     PaywallRoot()
+                }
+
+                entry<Route.Interviews> {
+                    InterviewsRoot(
+                        openReadyToPractice = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.Interviews>()
+                        },
+                    )
+                }
+
+                entry<Route.ReadyToPractice> { route ->
+                    ReadyToPracticeRoot(
+                        trackId = route.trackId,
+                        trackName = route.trackName,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
+                        },
+                        openInterview = { sessionId ->
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.ReadyToPractice>()
+                                navigateSingleTop(Route.InterviewSession(sessionId = sessionId))
+                            }
+                        },
+                    )
+                }
+
+                entry<Route.InterviewSession> { route ->
+                    // TODO: replace with the real interview screen
+                    InterviewSessionPlaceholder(
+                        sessionId = route.sessionId,
+                        onBack = { rootBackStack.removeLastOrNull() },
+                    )
                 }
             },
         )

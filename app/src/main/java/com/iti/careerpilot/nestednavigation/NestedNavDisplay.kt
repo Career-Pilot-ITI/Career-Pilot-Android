@@ -18,8 +18,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.features.home.HomeRoot
 import com.iti.careerpilot.features.reports.ReportsRoot
+import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
@@ -34,6 +34,8 @@ fun NestedNavDisplay(
     openSessionDetails: (String) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
+    openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openInterviews: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -86,8 +88,17 @@ fun NestedNavDisplay(
             entryProvider = entryProvider {
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
+                        openReadyToPractice = openReadyToPractice,
                         openSessionDetails = openSessionDetails,
-                        openPaywall = openPaywall
+                        openInterviews = openInterviews,
+                        openPaywall = openPaywall,
+                        openReports = {
+                            nestedBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav.Home)
+                                navigateSingleTop(Route.NestedNav.Reports)
+                            }
+                        },
                     )
                 }
                 entry<Route.NestedNav.Reports> {
@@ -111,9 +122,11 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
             Route.NestedNav.Home -> {
                 0
             }
+
             Route.NestedNav.Reports -> {
                 1
             }
+
             else -> {
                 2
             }
