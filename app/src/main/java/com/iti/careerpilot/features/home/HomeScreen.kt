@@ -18,7 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun HomeRoot(
     openPaywall: (Boolean) -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -38,7 +38,7 @@ fun HomeRoot(
 @Composable
 fun HomeScreen(
     openPaywall: (Boolean) -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Long) -> Unit,
     state: HomeState,
     onAction: (HomeAction) -> Unit,
 ) {
@@ -64,7 +64,7 @@ fun HomeScreen(
             Text(text = "Test Get Coins")
         }
         Button(
-            onClick = { openSessionDetails("123") }
+            onClick = { openSessionDetails(123L) }
         ) {
             Text(text = "Open Session Details")
         }
