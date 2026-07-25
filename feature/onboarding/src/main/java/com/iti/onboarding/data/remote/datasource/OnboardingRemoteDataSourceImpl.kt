@@ -17,7 +17,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import android.util.Log
 import java.io.File
 import javax.inject.Inject
 
@@ -101,7 +100,6 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
             "doc" -> "application/msword"
             else -> "application/pdf"
         }
-        Log.d("ANALYZE_CV", "Submitting binary data to ${Endpoints.ANALYZE_CV} with filename=${file.name}, size=${file.length()} bytes")
         val responseDto: UserProfileDto = httpClient.submitFormWithBinaryData(
             url = Endpoints.ANALYZE_CV,
             formData = formData {
@@ -123,7 +121,6 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
                 onProgress(progress)
             }
         }.body()
-        Log.d("ANALYZE_CV", "Received UserProfileDto from ${Endpoints.ANALYZE_CV}: $responseDto")
         return responseDto
     }
 }
