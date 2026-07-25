@@ -5,7 +5,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -169,10 +167,10 @@ fun OnboardingPagerScreen(
 
             val pageButtonConfig = when (settledPage) {
                 PAGE_UPLOAD_CV -> PageButtonConfig(
-                    textRes = R.string.analyze_my_cv,
+                    textRes = R.string.next_button_label,
                     isEnabled = cvState.isFormValid,
                     isSubmitting = cvState.isSubmitting,
-                    onClick = { cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick) },
+                    onClick = { cvViewModel.onIntent(UploadCvIntent.OnNextClick) },
                 )
                 PAGE_PROFILE_INFO -> PageButtonConfig(
                     textRes = R.string.next_button_label,

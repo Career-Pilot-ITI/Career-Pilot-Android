@@ -43,7 +43,7 @@ class UploadCvViewModel @Inject constructor(
         when (intent) {
             UploadCvIntent.OnUploadAreaClick -> openPdfPicker()
             is UploadCvIntent.OnPdfSelected -> prepareAndUpload(intent.uri)
-            UploadCvIntent.OnAnalyzeClick -> navigateAfterAnalysis()
+            UploadCvIntent.OnNextClick -> navigateAfterAnalysis()
             UploadCvIntent.OnSkipClick -> skipUpload()
         }
     }
