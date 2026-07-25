@@ -72,4 +72,22 @@ class PaymentRemoteDataSourceImpl @Inject constructor(
             contentType(ContentType.Application.Json)
         }.body()
     }
+
+    override suspend fun getSubscriptionTiers(): Map<String, Double> {
+        return httpClient.get(Endpoints.SUBSCRIPTION_TIERS) {
+            contentType(ContentType.Application.Json)
+        }.body()
+    }
+
+    override suspend fun getCoinPacks(): Map<Int, Double> {
+        return httpClient.get(Endpoints.WALLET_COIN_PACKS) {
+            contentType(ContentType.Application.Json)
+        }.body()
+    }
+
+    override suspend fun confirmPayment(merchantOrderId: String) {
+        httpClient.post("${Endpoints.PAYMENT_CONFIRM}/$merchantOrderId") {
+            contentType(ContentType.Application.Json)
+        }
+    }
 }

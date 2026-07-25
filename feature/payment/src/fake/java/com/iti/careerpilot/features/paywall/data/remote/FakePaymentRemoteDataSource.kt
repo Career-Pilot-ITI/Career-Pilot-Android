@@ -87,4 +87,28 @@ class FakePaymentRemoteDataSource @Inject constructor() : PaymentRemoteDataSourc
         fakeDelay()
         return PaymentHistoryPageDto()
     }
+
+    override suspend fun getSubscriptionTiers(): Map<String, Double> {
+        fakeDelay()
+        if (shouldFail()) throw Exception("Fake network error")
+        return mapOf(
+            "PLUS" to 199.0,
+            "PRO" to 499.0
+        )
+    }
+
+    override suspend fun getCoinPacks(): Map<Int, Double> {
+        fakeDelay()
+        if (shouldFail()) throw Exception("Fake network error")
+        return mapOf(
+            100 to 50.0,
+            500 to 200.0,
+            1000 to 350.0
+        )
+    }
+
+    override suspend fun confirmPayment(merchantOrderId: String) {
+        fakeDelay()
+        if (shouldFail()) throw Exception("Fake network error")
+    }
 }

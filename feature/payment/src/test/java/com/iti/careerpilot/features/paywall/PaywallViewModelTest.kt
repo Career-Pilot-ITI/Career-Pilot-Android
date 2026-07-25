@@ -5,10 +5,10 @@ import com.iti.careerpilot.features.paywall.data.remote.UserSyncManager
 import com.iti.careerpilot.features.paywall.data.remote.dto.CheckoutResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.CoinBalanceResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.DowngradeSubscriptionRequestDto
+import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentInitiateRequestDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.SubscriptionResponseDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.TopUpRequestDto
-import com.iti.careerpilot.features.paywall.data.remote.dto.PaymentHistoryPageDto
 import com.iti.careerpilot.features.paywall.data.remote.dto.UpgradeSubscriptionRequestDto
 import com.iti.careerpilot.features.paywall.domain.repository.PaymentRepository
 import com.iti.careerpilot.features.paywall.domain.usecase.DowngradeSubscriptionUseCase
@@ -78,6 +78,12 @@ class PaywallViewModelTest {
             CareerPilotResult.Success(Unit)
         override suspend fun cancelSubscription() =
             CareerPilotResult.Success(Unit)
+        override suspend fun getSubscriptionTiers() =
+            CareerPilotResult.Success(mapOf("PLUS" to 199.0, "PRO" to 499.0))
+        override suspend fun getCoinPacks() =
+            CareerPilotResult.Success(mapOf(100 to 50.0, 500 to 200.0, 1000 to 350.0))
+        override suspend fun confirmPayment(merchantOrderId: String) =
+            CareerPilotResult.Success(Unit)
     }
 
     private fun errorRepo() = object : PaymentRepository {
@@ -94,6 +100,12 @@ class PaywallViewModelTest {
         override suspend fun downgradeSubscription(tier: String) =
             CareerPilotResult.Error(NetworkError.SERVER)
         override suspend fun cancelSubscription() =
+            CareerPilotResult.Error(NetworkError.SERVER)
+        override suspend fun getSubscriptionTiers() =
+            CareerPilotResult.Error(NetworkError.SERVER)
+        override suspend fun getCoinPacks() =
+            CareerPilotResult.Error(NetworkError.SERVER)
+        override suspend fun confirmPayment(merchantOrderId: String) =
             CareerPilotResult.Error(NetworkError.SERVER)
     }
 
@@ -118,6 +130,9 @@ class PaywallViewModelTest {
         override suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto) {}
         override suspend fun cancelSubscription() {}
         override suspend fun getPaymentHistory() = PaymentHistoryPageDto()
+        override suspend fun getSubscriptionTiers() = mapOf("PLUS" to 199.0, "PRO" to 499.0)
+        override suspend fun getCoinPacks() = mapOf(100 to 50.0, 500 to 200.0, 1000 to 350.0)
+        override suspend fun confirmPayment(merchantOrderId: String) {}
     }
 
     private fun errorApi() = object : PaymentRemoteDataSource {
@@ -129,6 +144,9 @@ class PaywallViewModelTest {
         override suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto) { throw Exception() }
         override suspend fun cancelSubscription() { throw Exception() }
         override suspend fun getPaymentHistory(): PaymentHistoryPageDto { throw Exception() }
+        override suspend fun getSubscriptionTiers(): Map<String, Double> { throw Exception() }
+        override suspend fun getCoinPacks(): Map<Int, Double> { throw Exception() }
+        override suspend fun confirmPayment(merchantOrderId: String) { throw Exception() }
     }
 
     private fun makeViewModel(
@@ -142,6 +160,9 @@ class PaywallViewModelTest {
             upgradeSubscriptionUseCase = UpgradeSubscriptionUseCase(repo),
             downgradeSubscriptionUseCase = DowngradeSubscriptionUseCase(repo),
             pollPaymentStatusUseCase = PollPaymentStatusUseCase(userSyncManager),
+            getSubscriptionTiersUseCase = com.iti.careerpilot.features.paywall.domain.usecase.GetSubscriptionTiersUseCase(repo),
+            getCoinPacksUseCase = com.iti.careerpilot.features.paywall.domain.usecase.GetCoinPacksUseCase(repo),
+            confirmPaymentUseCase = com.iti.careerpilot.features.paywall.domain.usecase.ConfirmPaymentUseCase(repo),
             userProfileRepo = userRepo,
             userSyncManager = userSyncManager,
             ioDispatcher = testDispatcher
@@ -383,5 +404,23 @@ class PaywallViewModelTest {
 
         assertTrue(effects.any { it is PaywallEffect.NavigateToWebView })
         job.cancel()
+    }
+
+    @Test
+    fun `init loads subscription tier prices and coin pack prices from backend`() = runTest {
+        val customRepo = object : PaymentRepository by successRepo() {
+            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 250.0, "PRO" to 600.0))
+            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(100 to 60.0, 500 to 220.0, 1000 to 400.0))
+        }
+        val viewModel = makeViewModel(repo = customRepo)
+        testScheduler.advanceUntilIdle()
+
+        val plusPlan = viewModel.state.value.subscriptionPlans.find { it.id == "plus" }
+        val proPlan = viewModel.state.value.subscriptionPlans.find { it.id == "pro" }
+        val pack100 = viewModel.state.value.coinPacks.find { it.coins == 100 }
+
+        assertEquals(250, plusPlan?.priceEgp)
+        assertEquals(600, proPlan?.priceEgp)
+        assertEquals(60, pack100?.priceEgp)
     }
 }

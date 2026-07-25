@@ -19,4 +19,7 @@ interface PaymentRemoteDataSource {
     suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto)
     suspend fun cancelSubscription()
     suspend fun getPaymentHistory(): PaymentHistoryPageDto
+    suspend fun getSubscriptionTiers(): Map<String, Double>
+    suspend fun getCoinPacks(): Map<Int, Double>
+    suspend fun confirmPayment(merchantOrderId: String)
 }

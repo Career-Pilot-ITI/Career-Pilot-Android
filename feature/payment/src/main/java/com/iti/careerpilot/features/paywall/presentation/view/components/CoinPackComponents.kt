@@ -150,7 +150,7 @@ fun CoinPackCard(
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
-                    if (pack.originalPriceEgp != null) {
+                    if (pack.originalPriceEgp != null && pack.originalPriceEgp > pack.priceEgp) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             val discount = pack.discountPercentage ?: 0
                             Surface(

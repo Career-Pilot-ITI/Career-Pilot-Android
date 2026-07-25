@@ -12,4 +12,7 @@ interface PaymentRepository {
     suspend fun upgradeSubscription(tier: String, currency: String, method: String): CareerPilotResult<CheckoutSession, NetworkError>
     suspend fun downgradeSubscription(tier: String): CareerPilotResult<Unit, NetworkError>
     suspend fun cancelSubscription(): CareerPilotResult<Unit, NetworkError>
+    suspend fun getSubscriptionTiers(): CareerPilotResult<Map<String, Double>, NetworkError>
+    suspend fun getCoinPacks(): CareerPilotResult<Map<Int, Double>, NetworkError>
+    suspend fun confirmPayment(merchantOrderId: String): CareerPilotResult<Unit, NetworkError>
 }

@@ -116,7 +116,7 @@ fun SubscriptionPlanDetailsCard(
                 .fillMaxWidth()
                 .padding(horizontal = Dimens.SpaceL, vertical = Dimens.SpaceXL)
         ) {
-            if (plan?.originalPriceEgp != null && plan.priceEgp != null) {
+            if (plan?.originalPriceEgp != null && plan.priceEgp != null && plan.originalPriceEgp > plan.priceEgp) {
                 val discount = plan.discountPercentage ?: 0
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

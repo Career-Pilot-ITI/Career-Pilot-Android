@@ -134,6 +134,21 @@ class PaymentRepositoryImpl @Inject constructor(
             remoteDataSource.cancelSubscription()
         }
 
+    override suspend fun getSubscriptionTiers(): CareerPilotResult<Map<String, Double>, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource.getSubscriptionTiers()
+        }
+
+    override suspend fun getCoinPacks(): CareerPilotResult<Map<Int, Double>, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource.getCoinPacks()
+        }
+
+    override suspend fun confirmPayment(merchantOrderId: String): CareerPilotResult<Unit, NetworkError> =
+        safeNetworkCall {
+            remoteDataSource.confirmPayment(merchantOrderId)
+        }
+
     private suspend fun <T> safeNetworkCall(
         block: suspend () -> T,
     ): CareerPilotResult<T, NetworkError> =

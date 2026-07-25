@@ -20,6 +20,8 @@ enum class CheckoutItemType {
 data class PaywallState(
     val isLoadingSubscription: Boolean = false,
     val isLoadingBalance: Boolean = false,
+    val isLoadingTierPrices: Boolean = false,
+    val isLoadingCoinPacks: Boolean = false,
     val isCheckoutInProgress: Boolean = false,
     val coinBalance: Int = 0,
     val currentSubscriptionTier: String = "",
@@ -49,7 +51,7 @@ data class PaywallState(
             id = "plus",
             nameRes = R.string.paywall_plan_plus,
             priceEgp = 199,
-            originalPriceEgp = 299,
+            originalPriceEgp = null,
             isInitiallySelected = true,
             features = persistentListOf(
                 R.string.paywall_feature_detailed_radar,
@@ -61,7 +63,7 @@ data class PaywallState(
             id = "pro",
             nameRes = R.string.paywall_plan_max,
             priceEgp = 499,
-            originalPriceEgp = 699,
+            originalPriceEgp = null,
             features = persistentListOf(
                 R.string.paywall_feature_unlimited_sessions,
                 R.string.paywall_feature_advanced_radar,
@@ -81,7 +83,7 @@ data class PaywallState(
             id = "coins_500",
             coins = 500,
             priceEgp = 200,
-            originalPriceEgp = 250,
+            originalPriceEgp = null,
             subtitleRes = R.string.paywall_pack_sub_500,
             badge = com.iti.careerpilot.features.paywall.domain.model.CoinPackBadge.MOST_POPULAR
         ),
@@ -89,7 +91,7 @@ data class PaywallState(
             id = "coins_1000",
             coins = 1000,
             priceEgp = 350,
-            originalPriceEgp = 500,
+            originalPriceEgp = null,
             subtitleRes = R.string.paywall_pack_sub_1000,
             badge = com.iti.careerpilot.features.paywall.domain.model.CoinPackBadge.BEST_VALUE
         )

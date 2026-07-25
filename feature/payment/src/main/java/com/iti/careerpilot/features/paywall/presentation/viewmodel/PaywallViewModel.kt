@@ -6,7 +6,10 @@ import com.iti.careerpilot.features.paywall.data.remote.UserSyncManager
 import com.iti.careerpilot.features.paywall.domain.model.PaymentFailureReason
 import com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier
 import com.iti.careerpilot.features.paywall.domain.repository.PaymentRepository
+import com.iti.careerpilot.features.paywall.domain.usecase.ConfirmPaymentUseCase
 import com.iti.careerpilot.features.paywall.domain.usecase.DowngradeSubscriptionUseCase
+import com.iti.careerpilot.features.paywall.domain.usecase.GetCoinPacksUseCase
+import com.iti.careerpilot.features.paywall.domain.usecase.GetSubscriptionTiersUseCase
 import com.iti.careerpilot.features.paywall.domain.usecase.PollPaymentStatusUseCase
 import com.iti.careerpilot.features.paywall.domain.usecase.PollResult
 import com.iti.careerpilot.features.paywall.domain.usecase.TopUpWalletUseCase
@@ -19,6 +22,7 @@ import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.CheckoutSession
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +42,9 @@ class PaywallViewModel @Inject constructor(
     private val upgradeSubscriptionUseCase: UpgradeSubscriptionUseCase,
     private val downgradeSubscriptionUseCase: DowngradeSubscriptionUseCase,
     private val pollPaymentStatusUseCase: PollPaymentStatusUseCase,
+    private val getSubscriptionTiersUseCase: GetSubscriptionTiersUseCase,
+    private val getCoinPacksUseCase: GetCoinPacksUseCase,
+    private val confirmPaymentUseCase: ConfirmPaymentUseCase,
     private val userProfileRepo: UserProfileRepo,
     private val userSyncManager: UserSyncManager,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
@@ -80,6 +87,8 @@ class PaywallViewModel @Inject constructor(
 
         loadWalletBalance()
         loadCurrentSubscription()
+        loadSubscriptionTiers()
+        loadCoinPacks()
     }
 
     private fun loadWalletBalance() {
@@ -107,16 +116,69 @@ class PaywallViewModel @Inject constructor(
         }
     }
 
+    private fun loadSubscriptionTiers() {
+        viewModelScope.launch(ioDispatcher) {
+            mutableState.update { it.copy(isLoadingTierPrices = true) }
+            when (val result = getSubscriptionTiersUseCase()) {
+                is CareerPilotResult.Success -> {
+                    val prices = result.data
+                    mutableState.update { currentState ->
+                        val updatedPlans = currentState.subscriptionPlans.map { plan ->
+                            val planKey = plan.id.uppercase()
+                            val price = prices[planKey]?.toInt() ?: plan.priceEgp
+                            plan.copy(priceEgp = price, originalPriceEgp = null)
+                        }.toImmutableList()
+                        currentState.copy(
+                            isLoadingTierPrices = false,
+                            subscriptionPlans = updatedPlans
+                        )
+                    }
+                }
+                is CareerPilotResult.Error -> {
+                    mutableState.update { it.copy(isLoadingTierPrices = false) }
+                }
+            }
+        }
+    }
+
+    private fun loadCoinPacks() {
+        viewModelScope.launch(ioDispatcher) {
+            mutableState.update { it.copy(isLoadingCoinPacks = true) }
+            when (val result = getCoinPacksUseCase()) {
+                is CareerPilotResult.Success -> {
+                    val prices = result.data
+                    mutableState.update { currentState ->
+                        val updatedPacks = currentState.coinPacks.map { pack ->
+                            val price = prices[pack.coins]?.toInt() ?: pack.priceEgp
+                            pack.copy(priceEgp = price, originalPriceEgp = null)
+                        }.toImmutableList()
+                        currentState.copy(
+                            isLoadingCoinPacks = false,
+                            coinPacks = updatedPacks
+                        )
+                    }
+                }
+                is CareerPilotResult.Error -> {
+                    mutableState.update { it.copy(isLoadingCoinPacks = false) }
+                }
+            }
+        }
+    }
+
     fun refreshUserData() {
         viewModelScope.launch(ioDispatcher) {
             mutableState.update {
                 it.copy(
                     isLoadingBalance = true,
-                    isLoadingSubscription = true
+                    isLoadingSubscription = true,
+                    isLoadingTierPrices = true,
+                    isLoadingCoinPacks = true
                 )
             }
             runCatching { userSyncManager.syncWalletBalance() }
             runCatching { userSyncManager.syncSubscriptionTier() }
+            loadSubscriptionTiers()
+            loadCoinPacks()
             mutableState.update {
                 it.copy(
                     isLoadingBalance = false,
@@ -263,6 +325,9 @@ class PaywallViewModel @Inject constructor(
                 val pack = mutableState.value.coinPacks.find { it.id == mutableState.value.selectedCoinPackId }
                 val expectedCoinDelta = if (mutableState.value.checkoutItemType == CheckoutItemType.COIN_PACK) pack?.coins ?: 0 else 0
                 val merchantOrderId = mutableState.value.merchantOrderId
+                if (!merchantOrderId.isNullOrBlank()) {
+                    runCatching { confirmPaymentUseCase(merchantOrderId) }
+                }
 
                 val result = pollPaymentStatusUseCase(
                     baselineBalance = baselineBalance,
