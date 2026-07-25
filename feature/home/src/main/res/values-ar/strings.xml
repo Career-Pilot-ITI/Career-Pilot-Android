@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- التحية -->
+    <!-- Greeting -->
     <string name="home_greeting_morning">صباح الخير</string>
     <string name="home_greeting_afternoon">مساء الخير</string>
     <string name="home_greeting_evening">مساء الخير</string>
     <string name="home_coins_description">رصيد العملات</string>
 
-    <!-- بطاقة النسخة التجريبية المجانية -->
+    <!-- Free trial card -->
     <string name="home_free_trial">نسخة تجريبية مجانية</string>
     <string name="home_upgrade">ترقية</string>
     <plurals name="home_free_sessions_remaining">
-        <item quantity="one">تبقى %1$d جلسة مجانية</item>
-        <item quantity="other">تبقى %1$d جلسات مجانية</item>
+        <item quantity="zero">لا توجد جلسات مجانية متبقية</item>
+        <item quantity="one">تبقى جلسة مجانية واحدة</item>
+        <item quantity="two">تبقى جلستان مجانيتان</item>
+        <item quantity="few">تبقى %1$d جلسات مجانية</item>
+        <item quantity="many">تبقى %1$d جلسة مجانية</item>
+        <item quantity="other">تبقى %1$d جلسة مجانية</item>
     </plurals>
     <string name="home_free_sessions_used">تم استخدام %1$d من %2$d جلسة مجانية</string>
 
-    <!-- بطاقة الدرجة الإجمالية -->
+    <!-- Overall score card -->
     <string name="home_overall_score">الدرجة الإجمالية</string>
     <string name="home_score_excellent">عمل ممتاز</string>
     <string name="home_score_good">تقدم جيد</string>
@@ -27,15 +31,15 @@
     <string name="home_score_no_previous">أول جلسة مسجلة</string>
     <string name="home_open_reports">فتح التقارير</string>
 
-    <!-- بطاقة التدريب على المقابلة -->
+    <!-- Practice interview card -->
     <string name="home_practice_interview">التدريب على المقابلة</string>
     <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
 
-    <!-- المقابلات المتاحة -->
+    <!-- Available interviews -->
     <string name="home_available_interviews">المقابلات المتاحة</string>
     <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
 
-    <!-- الجلسات الأخيرة -->
+    <!-- Recent sessions -->
     <string name="home_recent_sessions">أحدث الجلسات</string>
     <string name="home_see_all">عرض الكل</string>
     <string name="home_recent_sessions_empty_title">لا توجد مقابلات بعد</string>
@@ -46,7 +50,7 @@
     <string name="home_session_yesterday">أمس، %1$s</string>
     <string name="home_session_unscored">—</string>
 
-    <!-- كتالوج المقابلات -->
+    <!-- Interviews catalog -->
     <string name="interviews_title">المقابلات</string>
     <string name="interviews_subtitle">مخصصة حسب ملفك الشخصي</string>
     <string name="interviews_search_hint">ابحث عن مقابلات…</string>
@@ -56,10 +60,9 @@
     <string name="interviews_open">فتح المقابلة</string>
     <string name="interviews_retry">انقر للمحاولة مرة أخرى</string>
 
-    <!-- التنقل المشترك -->
     <string name="back">رجوع</string>
 
-    <!-- جاهز للتدريب -->
+    <!-- Ready to practice -->
     <string name="ready_cancel">إلغاء</string>
     <string name="ready_title">هل أنت جاهز للتدريب؟</string>
     <string name="ready_subtitle">قبل أن نبدأ، إليك بعض النصائح السريعة.</string>

@@ -31,7 +31,7 @@
     <string name="home_practice_interview">Practice Interview</string>
     <string name="home_start_practice">Start practice interview</string>
 
-    <!-- Available interviews (horizontal row) -->
+    <!-- Available interviews -->
     <string name="home_available_interviews">Available Interviews</string>
     <string name="home_available_interviews_subtitle">Pick a track and start practising</string>
 
@@ -56,7 +56,6 @@
     <string name="interviews_open">Open interview</string>
     <string name="interviews_retry">Tap to retry</string>
 
-    <!-- Shared navigation -->
     <string name="back">Back</string>
 
     <!-- Ready to practice -->
