@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- التحية -->
+    <string name="home_greeting_morning">صباح الخير</string>
+    <string name="home_greeting_afternoon">مساء الخير</string>
+    <string name="home_greeting_evening">مساء الخير</string>
+    <string name="home_coins_description">رصيد العملات</string>
+
+    <!-- بطاقة النسخة التجريبية المجانية -->
+    <string name="home_free_trial">نسخة تجريبية مجانية</string>
+    <string name="home_upgrade">ترقية</string>
+    <plurals name="home_free_sessions_remaining">
+        <item quantity="one">تبقى %1$d جلسة مجانية</item>
+        <item quantity="other">تبقى %1$d جلسات مجانية</item>
+    </plurals>
+    <string name="home_free_sessions_used">تم استخدام %1$d من %2$d جلسة مجانية</string>
+
+    <!-- بطاقة الدرجة الإجمالية -->
+    <string name="home_overall_score">الدرجة الإجمالية</string>
+    <string name="home_score_excellent">عمل ممتاز</string>
+    <string name="home_score_good">تقدم جيد</string>
+    <string name="home_score_keep_going">واصل التقدم</string>
+    <string name="home_score_needs_work">بحاجة إلى تحسين</string>
+    <string name="home_score_delta_up">+%1$d عن الجلسة السابقة</string>
+    <string name="home_score_delta_down">%1$d عن الجلسة السابقة</string>
+    <string name="home_score_no_previous">أول جلسة مسجلة</string>
+    <string name="home_open_reports">فتح التقارير</string>
+
+    <!-- بطاقة التدريب على المقابلة -->
+    <string name="home_practice_interview">التدريب على المقابلة</string>
+    <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
+
+    <!-- المقابلات المتاحة -->
+    <string name="home_available_interviews">المقابلات المتاحة</string>
+    <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
+
+    <!-- الجلسات الأخيرة -->
+    <string name="home_recent_sessions">أحدث الجلسات</string>
+    <string name="home_see_all">عرض الكل</string>
+    <string name="home_recent_sessions_empty_title">لا توجد مقابلات بعد</string>
+    <string name="home_recent_sessions_empty_body">تدرب مع مُحاور ذكي واحصل على تغذية راجعة فورية لإجاباتك.</string>
+    <string name="home_recent_sessions_empty_action">ابدأ مقابلتك الأولى</string>
+    <string name="home_session_meta">%1$s · %2$d دقيقة</string>
+    <string name="home_session_today">اليوم، %1$s</string>
+    <string name="home_session_yesterday">أمس، %1$s</string>
+    <string name="home_session_unscored">—</string>
+
+    <!-- كتالوج المقابلات -->
+    <string name="interviews_title">المقابلات</string>
+    <string name="interviews_subtitle">مخصصة حسب ملفك الشخصي</string>
+    <string name="interviews_search_hint">ابحث عن مقابلات…</string>
+    <string name="interviews_available">المقابلات المتاحة</string>
+    <string name="interviews_empty">لا توجد مقابلات متاحة حالياً.</string>
+    <string name="interviews_no_results">لا توجد مقابلات تطابق بحثك.</string>
+    <string name="interviews_open">فتح المقابلة</string>
+    <string name="interviews_retry">انقر للمحاولة مرة أخرى</string>
+
+    <!-- التنقل المشترك -->
+    <string name="back">رجوع</string>
+
+    <!-- جاهز للتدريب -->
+    <string name="ready_cancel">إلغاء</string>
+    <string name="ready_title">هل أنت جاهز للتدريب؟</string>
+    <string name="ready_subtitle">قبل أن نبدأ، إليك بعض النصائح السريعة.</string>
+    <string name="ready_tip_quiet">ابحث عن مكان هادئ مع أقل قدر ممكن من الضوضاء الخلفية</string>
+    <string name="ready_tip_speak">تحدث بوضوح وبوتيرة طبيعية</string>
+    <string name="ready_tip_think">خذ وقتك لجمع أفكارك قبل الإجابة</string>
+    <string name="ready_tip_wait">سينتظر الذكاء الاصطناعي حتى تنتهي قبل الرد</string>
+    <string name="ready_mic_title">الوصول إلى الميكروفون</string>
+    <string name="ready_mic_required">مطلوب للتدريب</string>
+    <string name="ready_mic_granted">تم منح الوصول</string>
+    <string name="ready_begin">ابدأ المقابلة</string>
+    <string name="ready_permission_title">الوصول إلى الميكروفون</string>
+    <string name="ready_permission_text">يحتاج CareerPilot إلى الميكروفون للاستماع إلى إجاباتك أثناء المقابلة.</string>
+    <string name="ready_permission_allow">السماح</string>
+    <string name="ready_permission_cancel">ليس الآن</string>
+
+</resources>
