@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.ScoreRing
 import com.iti.careerpilot.reports.R
@@ -26,11 +25,12 @@ fun PerformanceSummaryCard(
     report: ReportDetailsUiModel,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.colorScheme
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = CareerPilotPalette.navyMid,
-        contentColor = CareerPilotPalette.white,
+        color = colors.surface,
+        contentColor = colors.onSurface,
     ) {
         Row(
             modifier = Modifier.padding(Dimens.SpaceXL),
@@ -39,8 +39,8 @@ fun PerformanceSummaryCard(
         ) {
             ScoreRing(
                 progress = report.overallScore / 100f,
-                progressColor = CareerPilotPalette.amber,
-                trackColor = CareerPilotPalette.white.copy(alpha = 0.16f),
+                progressColor = colors.primary,
+                trackColor = colors.onSurface.copy(alpha = 0.16f),
                 modifier = Modifier.size(Dimens.ScoreRingSize),
                 centerContent = {
                     Text(
@@ -55,7 +55,7 @@ fun PerformanceSummaryCard(
                     text = stringResource(R.string.reports_overall_score),
                     modifier = Modifier.padding(top = Dimens.SpaceS),
                     style = MaterialTheme.typography.labelSmall,
-                    color = CareerPilotPalette.white.copy(alpha = 0.68f),
+                    color = colors.onSurface.copy(alpha = 0.68f),
                 )
                 Text(
                     text = performanceTierLabel(report.performanceTier),
@@ -66,7 +66,7 @@ fun PerformanceSummaryCard(
                         text = stringResource(R.string.reports_top_percent, topPercent),
                         modifier = Modifier.padding(top = Dimens.SpaceXS),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = CareerPilotPalette.teal,
+                        color = colors.secondary,
                     )
                 }
             }

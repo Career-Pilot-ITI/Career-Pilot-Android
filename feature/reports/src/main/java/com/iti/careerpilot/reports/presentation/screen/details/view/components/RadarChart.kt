@@ -38,11 +38,10 @@ import com.iti.careerpilot.reports.presentation.screen.details.util.mapInPlace
 import com.iti.careerpilot.reports.presentation.screen.details.util.normalizeRadarScore
 import com.iti.careerpilot.reports.presentation.screen.details.util.radarVertices
 import com.iti.careerpilot.reports.presentation.screen.details.util.scoreFor
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun RadarChart(
-    metrics: ImmutableList<PerformanceMetricUiModel>,
+    metrics: List<PerformanceMetricUiModel>,
     modifier: Modifier = Modifier,
 ) {
     val clarity = metrics.scoreFor(PerformanceMetricType.CLARITY)

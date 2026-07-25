@@ -5,16 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material3.MaterialTheme
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-
-import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun HomeRoot(
@@ -43,7 +42,7 @@ fun HomeScreen(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize(),
@@ -53,7 +52,7 @@ fun HomeScreen(
         Text(text = "Home Screen")
         Text(text = state.formattedCoinBalance)
         Text(text = "Tier: ${state.formattedSubscriptionTier}")
-        
+
         Button(
             onClick = { openPaywall(false) }
         ) {
@@ -65,7 +64,7 @@ fun HomeScreen(
             Text(text = "Test Get Coins")
         }
         Button(
-            onClick = { openSessionDetails("132") }
+            onClick = { openSessionDetails("123") }
         ) {
             Text(text = "Open Session Details")
         }

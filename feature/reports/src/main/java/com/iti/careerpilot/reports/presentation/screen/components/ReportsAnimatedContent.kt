@@ -20,19 +20,20 @@ enum class ReportsContentPhase {
 }
 
 @Composable
-fun ReportsAnimatedContent(
-    phase: ReportsContentPhase,
+fun <T> ReportsAnimatedContent(
+    targetState: T,
+    contentKey: (T) -> Any?,
     modifier: Modifier = Modifier,
-    content: @Composable (ReportsContentPhase) -> Unit,
+    content: @Composable (T) -> Unit,
 ) {
     AnimatedContent(
-        targetState = phase,
+        targetState = targetState,
         modifier = modifier,
         transitionSpec = { reportsFadeScaleTransition() },
-        contentKey = { it },
+        contentKey = contentKey,
         label = "reportsContentPhase",
-    ) { targetPhase ->
-        content(targetPhase)
+    ) { animatedState ->
+        content(animatedState)
     }
 }
 
