@@ -13,7 +13,7 @@
     <string name="cv_ready_to_upload">Ready</string>
     <string name="cv_uploaded_label">Uploaded</string>
     <string name="cv_upload_progress">%1$d%% uploaded</string>
-    <string name="cv_file_details">%1$.1f MB · %2$s</string>
+    <string name="cv_file_details">%1$s • %2$s</string>
     <string name="cv_uploaded_successfully">CV uploaded successfully</string>
     <string name="skip_for_now">Skip for now</string>
     <string name="analyze_my_cv">Analyse My CV</string>

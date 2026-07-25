@@ -10,6 +10,7 @@ import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.StorageError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.model.PdfFile
+import com.iti.core.model.PdfFileMetadata
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -44,7 +45,7 @@ class PdfOperationsImpl @Inject constructor(
                 )
             }
 
-            if (metadata.sizeBytes != null && metadata.sizeBytes > MAX_CV_SIZE_BYTES) {
+            if (metadata.sizeBytes != null && (metadata.sizeBytes ?: 0L) > MAX_CV_SIZE_BYTES) {
                 return@withContext CareerPilotResult.Error(
                     StorageError.FILE_TOO_LARGE,
                 )
@@ -80,6 +81,39 @@ class PdfOperationsImpl @Inject constructor(
         }
     }
 
+    override suspend fun getPdfMetaData(uri: Uri): CareerPilotResult<PdfFileMetadata, StorageError> = withContext(ioDispatcher) {
+        try {
+            val metadata = readMetadata(uri)
+            val mimeType = contentResolver.getType(uri)
+                ?: PDF_MIME_TYPE
+
+            val isPdf = mimeType.equals(PDF_MIME_TYPE, ignoreCase = true) ||
+                    metadata.name.endsWith(PDF_EXTENSION, ignoreCase = true)
+
+            if (!isPdf) {
+                return@withContext CareerPilotResult.Error(
+                    StorageError.INCOMPATIBLE_FILE,
+                )
+            }
+
+            if (metadata.sizeBytes == null){
+                return@withContext CareerPilotResult.Error(
+                    StorageError.UNKNOWN,
+                )
+            }
+
+            CareerPilotResult.Success(
+                metadata
+            )
+        } catch (_: SecurityException) {
+            CareerPilotResult.Error(StorageError.UNKNOWN)
+        } catch (_: IllegalArgumentException) {
+            CareerPilotResult.Error(StorageError.UNKNOWN)
+        } catch (_: IOException) {
+            CareerPilotResult.Error(StorageError.UNKNOWN)
+        }
+    }
+
     override suspend fun storePdfInternally(uri: String): CareerPilotResult<String, StorageError> =
         withContext(ioDispatcher) {
             try {
@@ -99,14 +133,14 @@ class PdfOperationsImpl @Inject constructor(
 
                 val savedUriString = Uri.fromFile(destinationFile).toString()
                 CareerPilotResult.Success(savedUriString)
-            } catch (e: SecurityException) {
+            } catch (_: SecurityException) {
                 CareerPilotResult.Error(StorageError.PermissionDenied)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 CareerPilotResult.Error(StorageError.UNKNOWN)
             }
         }
 
-    private fun readMetadata(uri: Uri): FileMetadata {
+    private fun readMetadata(uri: Uri): PdfFileMetadata {
         var name = DEFAULT_FILE_NAME
         var size: Long? = null
 
@@ -134,7 +168,7 @@ class PdfOperationsImpl @Inject constructor(
             }
         }
 
-        return FileMetadata(
+        return PdfFileMetadata(
             name = name,
             sizeBytes = size,
         )
@@ -162,11 +196,6 @@ class PdfOperationsImpl @Inject constructor(
             }
         }
     }
-
-    private data class FileMetadata(
-        val name: String,
-        val sizeBytes: Long?,
-    )
 
     private class FileTooLargeException : IOException()
 
