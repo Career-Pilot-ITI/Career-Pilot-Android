@@ -57,6 +57,7 @@ fun HomeRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     openPaywall: (Boolean) -> Unit,
@@ -66,9 +67,8 @@ fun HomeScreen(
     onAction: (HomeAction) -> Unit,
 ) {
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             HomeTopBar(
                 userName = state.userName,
@@ -80,8 +80,11 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(Dimens.SpaceL),
+                .padding(horizontal = Dimens.SpaceL),
+            contentPadding = PaddingValues(
+                top = padding.calculateTopPadding() + Dimens.SpaceL,
+                bottom = padding.calculateBottomPadding() + Dimens.SpaceXXL
+            ),
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {
             item {
@@ -141,66 +144,67 @@ fun HomeScreen(
                     onClick = { openSessionDetails(session.id) }
                 )
             }
-            
-            item {
-                Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
-            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar(
     userName: String,
     coinBalance: String,
     onCoinsClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Dimens.SpaceL, vertical = Dimens.SpaceM),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(
-                text = "Good morning 👋",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
-            Text(
-                text = userName.ifBlank { "Career Pilot" },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Surface(
-            onClick = onCoinsClick,
-            shape = CircleShape,
-            color = CareerPilotPalette.amber.copy(alpha = 0.1f),
-            modifier = Modifier.height(32.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = Dimens.SpaceS)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = CareerPilotPalette.amber,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+    TopAppBar(
+        title = {
+            Column {
                 Text(
-                    text = coinBalance,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = CareerPilotPalette.amber,
+                    text = "Good morning 👋",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
+                Text(
+                    text = userName.ifBlank { "Career Pilot" },
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
-        }
-    }
+        },
+        actions = {
+            Surface(
+                onClick = onCoinsClick,
+                shape = CircleShape,
+                color = CareerPilotPalette.amber.copy(alpha = 0.1f),
+                modifier = Modifier
+                    .padding(end = Dimens.SpaceL)
+                    .height(32.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = Dimens.SpaceS)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = CareerPilotPalette.amber,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = coinBalance,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = CareerPilotPalette.amber,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = MaterialTheme.colorScheme.background
+        ),
+        windowInsets = TopAppBarDefaults.windowInsets // Handles status bar
+    )
 }
 
 @Composable
