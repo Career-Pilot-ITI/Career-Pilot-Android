@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
@@ -127,13 +125,11 @@ fun HomeScreen(
                 }
             }
 
-            state.scoreSummary?.let { summary ->
-                item {
-                    OverallScoreCard(
-                        summary = summary,
-                        onClick = { onAction(HomeAction.ScoreCardClicked) },
-                    )
-                }
+            item {
+                OverallScoreCard(
+                    summary = state.scoreSummary,
+                    onClick = { onAction(HomeAction.ScoreCardClicked) },
+                )
             }
 
             item {

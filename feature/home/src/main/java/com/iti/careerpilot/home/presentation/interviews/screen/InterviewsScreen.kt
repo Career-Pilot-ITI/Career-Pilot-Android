@@ -86,13 +86,6 @@ fun InterviewsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
         ) {
-            item {
-                Text(
-                    text = stringResource(R.string.interviews_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = CareerPilotPalette.gray600,
-                )
-            }
 
             item {
                 SearchField(
@@ -113,7 +106,6 @@ fun InterviewsScreen(
                     }
                 }
 
-                // The message itself is surfaced as a snackbar; this offers the retry affordance.
                 state.error != null -> item {
                     Text(
                         text = stringResource(R.string.interviews_retry),

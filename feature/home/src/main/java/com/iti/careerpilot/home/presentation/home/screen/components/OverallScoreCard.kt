@@ -29,51 +29,105 @@ import com.iti.careerpilot.home.domain.model.ScoreSummary
 
 @Composable
 fun OverallScoreCard(
-    summary: ScoreSummary,
+    summary: ScoreSummary?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(Dimens.CardPadding),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
+        if (summary == null) {
+            EmptyScoreContent()
+        } else {
+            ScoreContent(summary = summary, onClick = onClick)
+        }
+    }
+}
+
+@Composable
+private fun ScoreContent(
+    summary: ScoreSummary,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(Dimens.CardPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
+    ) {
+        ScoreRing(
+            progress = summary.latestScore / MAX_SCORE,
+            progressColor = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(SCORE_RING_SIZE),
         ) {
-            ScoreRing(
-                progress = summary.latestScore / MAX_SCORE,
-                progressColor = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(SCORE_RING_SIZE),
-            ) {
-                Text(
-                    text = summary.latestScore.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            Text(
+                text = summary.latestScore.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.home_overall_score),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = CareerPilotPalette.gray600,
-                )
-                Text(
-                    text = stringResource(scoreLabelRes(summary.latestScore)),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                ScoreDelta(delta = summary.deltaFromPrevious)
-            }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.home_overall_score),
+                style = MaterialTheme.typography.labelMedium,
+                color = CareerPilotPalette.gray600,
+            )
+            Text(
+                text = stringResource(scoreLabelRes(summary.latestScore)),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            ScoreDelta(delta = summary.deltaFromPrevious)
+        }
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = stringResource(R.string.home_open_reports),
-                tint = MaterialTheme.colorScheme.primary,
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = stringResource(R.string.home_open_reports),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+private fun EmptyScoreContent() {
+    Row(
+        modifier = Modifier.padding(Dimens.CardPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
+    ) {
+        ScoreRing(
+            progress = 0f,
+            progressColor = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(SCORE_RING_SIZE),
+        ) {
+            Text(
+                text = stringResource(R.string.home_score_empty_value),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = CareerPilotPalette.gray400,
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.home_overall_score),
+                style = MaterialTheme.typography.labelMedium,
+                color = CareerPilotPalette.gray600,
+            )
+            Text(
+                text = stringResource(R.string.home_score_none),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = stringResource(R.string.home_score_none_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = CareerPilotPalette.gray400,
             )
         }
     }

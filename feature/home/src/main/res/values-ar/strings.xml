@@ -29,6 +29,9 @@
     <string name="home_score_delta_up">+%1$d عن الجلسة السابقة</string>
     <string name="home_score_delta_down">%1$d عن الجلسة السابقة</string>
     <string name="home_score_no_previous">أول جلسة مسجلة</string>
+    <string name="home_score_none">لا توجد نتيجة بعد</string>
+    <string name="home_score_none_hint">قم بإجراء مقابلة لعرض نتيجتك</string>
+    <string name="home_score_empty_value">—</string>
     <string name="home_open_reports">فتح التقارير</string>
 
     <!-- Practice interview card -->

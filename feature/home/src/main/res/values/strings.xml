@@ -25,6 +25,9 @@
     <string name="home_score_delta_up">+%1$d from last session</string>
     <string name="home_score_delta_down">%1$d from last session</string>
     <string name="home_score_no_previous">First scored session</string>
+    <string name="home_score_none">No score yet</string>
+    <string name="home_score_none_hint">Complete an interview to see your score</string>
+    <string name="home_score_empty_value">—</string>
     <string name="home_open_reports">Open reports</string>
 
     <!-- Practice interview card -->
