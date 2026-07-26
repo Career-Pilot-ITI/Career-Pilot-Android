@@ -34,3 +34,7 @@ enum class PhoneValidationError : IError {
     TOO_LONG,
     INVALID_FORMAT,
 }
+
+enum class TranscriptionError : IError {
+    UNKNOWN
+}

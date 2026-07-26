@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -42,6 +43,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
@@ -58,28 +60,28 @@ import com.iti.onboarding.presentation.screen.track.view.ChoosingTracksScreen
 import com.iti.onboarding.presentation.screen.track.viewmodel.ChoosingTracksViewModel
 import kotlinx.coroutines.launch
 
-private const val PAGE_PROFILE_INFO = 0
-private const val PAGE_CHOOSING_TRACKS = 1
-private const val PAGE_UPLOAD_CV = 2
+private const val PAGE_UPLOAD_CV = 0
+private const val PAGE_PROFILE_INFO = 1
+private const val PAGE_CHOOSING_TRACKS = 2
 private const val ONBOARDING_PAGE_COUNT = 3
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnboardingPagerScreen(
     onOnboardingFinished: () -> Unit,
+    cvViewModel: UploadCvViewModel = hiltViewModel(),
     profileViewModel: ProfileInfoViewModel = hiltViewModel(),
     tracksViewModel: ChoosingTracksViewModel = hiltViewModel(),
-    cvViewModel: UploadCvViewModel = hiltViewModel(),
 ) {
     val pagerState = rememberPagerState(
-        initialPage = PAGE_PROFILE_INFO,
+        initialPage = PAGE_UPLOAD_CV,
         pageCount = { ONBOARDING_PAGE_COUNT }
     )
     val scope = rememberCoroutineScope()
 
+    val cvState by cvViewModel.state.collectAsStateWithLifecycle()
     val profileState by profileViewModel.state.collectAsStateWithLifecycle()
     val tracksState by tracksViewModel.state.collectAsStateWithLifecycle()
-    val cvState by cvViewModel.state.collectAsStateWithLifecycle()
 
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val scrollConnection = remember(isRtl) {
@@ -102,107 +104,116 @@ fun OnboardingPagerScreen(
         }
     }
 
-    Box(
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.Start
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            PagerHeader(currentPage = pagerState.currentPage)
+        PagerHeader(currentPage = pagerState.currentPage)
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .weight(1f)
-                    .nestedScroll(scrollConnection),
-                userScrollEnabled = false,
-            ) { page ->
-                when (page) {
-                    PAGE_PROFILE_INFO -> ProfileInfoScreen(
-                        viewModel = profileViewModel,
-                        onNavigateNext = {
-                            scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
-                        }
-                    )
-
-                    PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
-                        viewModel = tracksViewModel,
-                        onNavigateNext = {
-                            scope.launch { pagerState.animateScrollToPage(PAGE_UPLOAD_CV) }
-                        }
-                    )
-
-                    PAGE_UPLOAD_CV -> UploadCvScreen(
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .weight(0.9f)
+                .nestedScroll(scrollConnection),
+            userScrollEnabled = false,
+        ) { page ->
+            when (page) {
+                PAGE_UPLOAD_CV -> UploadCvScreen(
                         viewModel = cvViewModel,
-                        onNavigateNext = onOnboardingFinished,
-                        onSkip = onOnboardingFinished
+                        onNavigateNext = {
+                            scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
+                        },
+                        onSkip = {
+                            scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
+                        }
                     )
-                }
+
+                PAGE_PROFILE_INFO -> ProfileInfoScreen(
+                    viewModel = profileViewModel,
+                    onNavigateNext = {
+                        scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
+                    }
+                )
+
+                PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
+                    viewModel = tracksViewModel,
+                    onNavigateNext =  onOnboardingFinished
+                )
             }
         }
 
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                .imePadding()
+                .navigationBarsPadding()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
                             MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                            MaterialTheme.colorScheme.background
-                        )
-                    )
+                            MaterialTheme.colorScheme.background,
+                        ),
+                    ),
                 )
                 .windowInsetsPadding(WindowInsets.navigationBars)
-                .windowInsetsPadding(WindowInsets.ime)
                 .padding(top = Dimens.SpaceXXXL)
         ) {
-            val currentPage = pagerState.currentPage
+            val settledPage = pagerState.settledPage
+            val isScrollInProgress = pagerState.isScrollInProgress
 
-            val buttonText = when (currentPage) {
-                PAGE_PROFILE_INFO -> stringResource(R.string.next_button_label)
-                PAGE_CHOOSING_TRACKS -> stringResource(R.string.next_button_label)
-                PAGE_UPLOAD_CV -> stringResource(R.string.analyze_my_cv)
-                else -> ""
+            val pageButtonConfig = when (settledPage) {
+                PAGE_UPLOAD_CV -> PageButtonConfig(
+                    textRes = R.string.next_button_label,
+                    isEnabled = cvState.isFormValid,
+                    isSubmitting = cvState.isSubmitting,
+                    onClick = { cvViewModel.onIntent(UploadCvIntent.OnNextClick) },
+                )
+                PAGE_PROFILE_INFO -> PageButtonConfig(
+                    textRes = R.string.next_button_label,
+                    isEnabled = profileState.isFormValid,
+                    isSubmitting = profileState.isSubmitting,
+                    onClick = { profileViewModel.onIntent(ProfileInfoIntent.OnSubmit) },
+                )
+                PAGE_CHOOSING_TRACKS -> PageButtonConfig(
+                    textRes = R.string.next_button_label,
+                    isEnabled = tracksState.isFormValid,
+                    isSubmitting = tracksState.isSubmitting,
+                    onClick = { tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext) },
+                )
+                else -> PageButtonConfig(
+                    textRes = 0,
+                    isEnabled = false,
+                    isSubmitting = false,
+                    onClick = {},
+                )
             }
 
-            val isButtonEnabled = when (currentPage) {
-                PAGE_PROFILE_INFO -> profileState.isFormValid
-                PAGE_CHOOSING_TRACKS -> tracksState.isFormValid
-                PAGE_UPLOAD_CV -> cvState.isFormValid
-                else -> false
+            if (pageButtonConfig.textRes != 0) {
+                CareerPilotButton(
+                    text = stringResource(pageButtonConfig.textRes),
+                    enabled = pageButtonConfig.isEnabled && !pageButtonConfig.isSubmitting,
+                    onClick = {
+                        if (!isScrollInProgress) {
+                            pageButtonConfig.onClick()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 42.dp)
+                )
             }
-
-            val isSubmitting = when (currentPage) {
-                PAGE_PROFILE_INFO -> profileState.isSubmitting
-                PAGE_CHOOSING_TRACKS -> false
-                PAGE_UPLOAD_CV -> cvState.isSubmitting
-                else -> false
-            }
-
-            val onClick = {
-                when (currentPage) {
-                    PAGE_PROFILE_INFO -> profileViewModel.onIntent(ProfileInfoIntent.OnSubmit)
-                    PAGE_CHOOSING_TRACKS -> tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext)
-                    PAGE_UPLOAD_CV -> cvViewModel.onIntent(UploadCvIntent.OnAnalyzeClick)
-                }
-            }
-
-            CareerPilotButton(
-                text = buttonText,
-                enabled = isButtonEnabled && !isSubmitting,
-                onClick = onClick,
-                modifier = Modifier
-                    .padding(horizontal = Dimens.SpaceXXL)
-                    .padding(bottom = Dimens.SpaceXXL)
-            )
         }
     }
 }
+
+private data class PageButtonConfig(
+    val textRes: Int,
+    val isEnabled: Boolean,
+    val isSubmitting: Boolean,
+    val onClick: () -> Unit,
+)
 
 @Composable
 private fun PagerHeader(currentPage: Int) {

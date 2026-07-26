@@ -15,5 +15,3 @@
 local.properties
 .idea
 /convention/build
-/convention/bin
-bin/

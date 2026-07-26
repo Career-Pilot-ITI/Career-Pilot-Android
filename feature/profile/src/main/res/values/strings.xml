@@ -7,6 +7,8 @@
     <string name="coins">Coins</string>
     <string name="plan">Plan</string>
     <string name="free">Free</string>
+    <string name="plus">Plus</string>
+    <string name="max">Max</string>
     <string name="email">Email</string>
     <string name="not_set">Not set</string>
     <string name="phone">Phone</string>

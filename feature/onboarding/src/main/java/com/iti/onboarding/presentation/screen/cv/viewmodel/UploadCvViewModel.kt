@@ -1,13 +1,13 @@
 package com.iti.onboarding.presentation.screen.cv.viewmodel
 
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.common.result.CareerPilotResult
+import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
-import com.iti.onboarding.domain.usecase.CompleteOnboardingUseCase
-import com.iti.onboarding.domain.usecase.UploadCvUseCase
+import com.iti.onboarding.domain.usecase.AnalyzeCvUseCase
 import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
@@ -15,7 +15,6 @@ import com.iti.onboarding.presentation.screen.cv.state.UploadCvIntent
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -24,13 +23,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import androidx.core.net.toUri
 
 @HiltViewModel
 class UploadCvViewModel @Inject constructor(
-    private val uploadCv: UploadCvUseCase,
-    private val completeOnboarding: CompleteOnboardingUseCase,
+    private val analyzeCv: AnalyzeCvUseCase,
+    private val pdfReaderOperations: PdfOperations,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UploadCvUiState())
@@ -40,12 +37,13 @@ class UploadCvViewModel @Inject constructor(
     val effects = _effects.asSharedFlow()
 
     private val uploadJob = AtomicReference<Job?>(null)
+    private var selectedUriString: String? = null
 
     fun onIntent(intent: UploadCvIntent) {
         when (intent) {
             UploadCvIntent.OnUploadAreaClick -> openPdfPicker()
             is UploadCvIntent.OnPdfSelected -> prepareAndUpload(intent.uri)
-            UploadCvIntent.OnAnalyzeClick -> navigateAfterAnalysis()
+            UploadCvIntent.OnNextClick -> navigateAfterAnalysis()
             UploadCvIntent.OnSkipClick -> skipUpload()
         }
     }
@@ -59,89 +57,75 @@ class UploadCvViewModel @Inject constructor(
     }
 
     private fun prepareAndUpload(uriString: String) {
+        selectedUriString = uriString
         val uri = uriString.toUri()
-        uploadJob.getAndSet(viewModelScope.launch {
-            val startTime = System.currentTimeMillis()
-            var realProgress = 0
-            var isDone = false
-            var uploadResult: CareerPilotResult<com.iti.onboarding.domain.model.UploadedFile, com.iti.common.error.NetworkError>? = null
+        uploadJob.get()?.cancel()
 
-            _state.update { it.copy(stage = CvUploadStage.UPLOADING, uploadProgress = 0f) }
-
-            launch {
-                uploadResult = uploadCv(uri) { realProgress = it }
-                isDone = true
+        uploadJob.set(viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    stage = CvUploadStage.UPLOADING,
+                    uploadProgress = 0f,
+                    selectedFile = null
+                )
             }
 
-            // Progress simulation like in EditProfile
-            while (!isDone && realProgress == 0) delay(50.milliseconds)
+            val analyzeResult = analyzeCv(uri) { progress ->
+                val normalizedProgress = (progress / 100f)
+                    .coerceIn(0f, 1f)
 
-            var displayProgress = 0
-            while (true) {
-                if (isDone && uploadResult is CareerPilotResult.Error) break
-                val target = if (isDone && uploadResult is CareerPilotResult.Success) 100 else realProgress
-                if (displayProgress < target) {
-                    displayProgress++
-                    _state.update { it.copy(uploadProgress = displayProgress / 100f) }
-                }
-                if (isDone && displayProgress >= 100) break
-                delay(20.milliseconds)
-            }
-
-            val elapsed = System.currentTimeMillis() - startTime
-            uploadResult?.onSuccess { response ->
-                if (elapsed < 1000) delay((1000 - elapsed).milliseconds)
-                _state.update {
-                    it.copy(
-                        selectedFile = SelectedCvUiModel(
-                            fileId = response.id,
-                            name = response.originalName,
-                            sizeBytes = response.sizeBytes,
-                        ),
-                        stage = CvUploadStage.UPLOADED,
-                        uploadProgress = 1f,
+                _state.update { currentState ->
+                    currentState.copy(
+                        uploadProgress = normalizedProgress,
                     )
                 }
-            }?.onError { error ->
-                _state.update { it.copy(stage = CvUploadStage.EMPTY, uploadProgress = 0f) }
-                _effects.emit(UploadCvEffect.ShowError(error.toUIText()))
             }
-        })?.cancel()
+
+            analyzeResult
+                .onSuccess { response ->
+                    pdfReaderOperations.getPdfMetaData(uri).onSuccess { metadata ->
+                        _state.update {
+                            it.copy(
+                                selectedFile = SelectedCvUiModel(
+                                    fileId = response.id.toLong(),
+                                    name = metadata.name,
+                                    sizeBytes = metadata.sizeBytes ?: 0L,
+                                ),
+                                stage = CvUploadStage.UPLOADED,
+                                uploadProgress = 1f,
+                            )
+                        }
+                    }
+                }
+                .onError { error ->
+                    _state.update {
+                        it.copy(
+                            stage = CvUploadStage.EMPTY,
+                            uploadProgress = 0f,
+                        )
+                    }
+
+                    _effects.emit(
+                        UploadCvEffect.ShowError(error.toUIText())
+                    )
+                }
+        })
     }
 
     private fun navigateAfterAnalysis() {
-        if (!_state.value.canAnalyze) return
-        finishOnboarding(
-            cvFileId = _state.value.selectedFile?.fileId,
-            successEffect = UploadCvEffect.NavigateNext,
-        )
+        if (_state.value.stage == CvUploadStage.UPLOADED) {
+            viewModelScope.launch {
+                _effects.emit(UploadCvEffect.NavigateNext)
+            }
+        } else if (selectedUriString != null && _state.value.stage != CvUploadStage.UPLOADING) {
+            prepareAndUpload(selectedUriString!!)
+        }
     }
 
     private fun skipUpload() {
         uploadJob.get()?.cancel()
-
-        finishOnboarding(
-            cvFileId = null,
-            successEffect = UploadCvEffect.Skip,
-        )
-    }
-
-    private fun finishOnboarding(
-        cvFileId: Long?,
-        successEffect: UploadCvEffect,
-    ) {
         viewModelScope.launch {
-            val previousStage = _state.value.stage
-            _state.update { it.copy(stage = CvUploadStage.PREPARING) }
-
-            completeOnboarding(cvFileId)
-                .onSuccess {
-                    _effects.emit(successEffect)
-                }
-                .onError { error ->
-                    _state.update { it.copy(stage = previousStage) }
-                    _effects.emit(UploadCvEffect.ShowError(error.toUIText()))
-                }
+            _effects.emit(UploadCvEffect.Skip)
         }
     }
 }

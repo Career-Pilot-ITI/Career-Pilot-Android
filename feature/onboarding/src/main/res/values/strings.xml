@@ -13,7 +13,7 @@
     <string name="cv_ready_to_upload">Ready</string>
     <string name="cv_uploaded_label">Uploaded</string>
     <string name="cv_upload_progress">%1$d%% uploaded</string>
-    <string name="cv_file_details">%1$.1f MB · %2$s</string>
+    <string name="cv_file_details">%1$s • %2$s</string>
     <string name="cv_uploaded_successfully">CV uploaded successfully</string>
     <string name="skip_for_now">Skip for now</string>
     <string name="analyze_my_cv">Analyse My CV</string>
@@ -46,6 +46,15 @@
     <string name="profile_info_email_invalid">Please enter a valid email address</string>
     <string name="pager_header">%1$d of %2$d</string>
 
+    <!-- Experience Levels -->
+    <string name="experience_entry_level">Entry-level</string>
+    <string name="experience_junior">Junior</string>
+    <string name="experience_mid_level">Mid-level</string>
+    <string name="experience_senior">Senior</string>
+    <string name="experience_lead">Lead</string>
+    <string name="experience_executive">Executive</string>
+    <string name="cv_default_filename">CV File</string>
+
     <string-array name="profile_info_default_skills">
         <item>React</item>
         <item>Node.js</item>
@@ -53,5 +62,14 @@
         <item>Python</item>
         <item>AWS</item>
         <item>System Design</item>
+    </string-array>
+
+    <string-array name="experience_level">
+        <item>Entry-level</item>
+        <item>Junior</item>
+        <item>Mid-level</item>
+        <item>Senior</item>
+        <item>Lead</item>
+        <item>Executive</item>
     </string-array>
 </resources>

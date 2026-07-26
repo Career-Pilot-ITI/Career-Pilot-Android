@@ -25,8 +25,8 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
         return CareerPilotResult.Success(
             OtpAuthResponse(
                 authTokens = AuthTokensDto(
-                    accessToken = "fake_access_token",
-                    refreshToken = "fake_refresh_token",
+                    accessToken = "access_token",
+                    refreshToken = "refresh_token",
                     expiresIn = 3600L
                 ),
                 user = AuthUserDto(

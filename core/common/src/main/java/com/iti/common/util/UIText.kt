@@ -12,16 +12,20 @@ sealed interface UIText {
         vararg val args: Any,
     ) : UIText
 
+    data class DynamicString(val value: String) : UIText
+
     @Composable
     fun asString(): String {
         return when (this) {
             is StringResource -> stringResource(resId, *args)
+            is DynamicString -> value
         }
     }
 
     fun asString(context: Context): String {
         return when (this) {
             is StringResource -> context.getString(resId, *args)
+            is DynamicString -> value
         }
     }
 }

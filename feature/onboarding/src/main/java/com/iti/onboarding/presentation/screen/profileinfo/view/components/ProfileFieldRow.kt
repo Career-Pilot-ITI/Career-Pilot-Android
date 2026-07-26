@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ProfileFieldRow(
@@ -116,7 +117,7 @@ fun ProfileDropdownRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     value: String,
-    options: List<String>,
+    options: ImmutableList<String>,
     onValueChange: (String) -> Unit,
     placeholder: String
 ) {
@@ -178,11 +179,19 @@ fun ProfileDropdownRow(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth(0.6f)
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        text = {
+                            Text(
+                                text = option,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
                         onClick = {
                             onValueChange(option)
                             expanded = false

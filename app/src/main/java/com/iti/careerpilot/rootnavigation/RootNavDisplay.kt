@@ -2,6 +2,8 @@ package com.iti.careerpilot.rootnavigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,20 +21,24 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
-import com.iti.careerpilot.features.paywall.PaywallRoot
-import com.iti.careerpilot.features.sessiondetails.SessionDetailsRoot
 import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.home.presentation.interviews.screen.InterviewsRoot
 import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
+import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
+import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
+import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
+import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
+import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 @Composable
 fun RootNavDisplay(
     startRoute: Route,
@@ -57,27 +63,21 @@ fun RootNavDisplay(
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
-        CareerPilotSnackbarController.requests.collect { request ->
-            try {
-                val event = request.event
-                val materialResult = snackbarHostState.showSnackbar(
-                    message = event.message.asString(context),
-                    withDismissAction =
-                        event.type ==
-                                CareerPilotSnackbarType.DISMISSIBLE,
-                    duration = event.duration,
-                    actionLabel =
-                        event.actionLabel?.asString(context),
-                )
+        CareerPilotSnackbarController.requests.collectLatest { request ->
+            snackbarHostState.currentSnackbarData?.dismiss()
 
-                request.complete(materialResult)
-            } catch (cancellation: CancellationException) {
-                request.complete(
-                    SnackbarResult.Dismissed,
-                )
+            val event = request.event
+            val result = snackbarHostState.showSnackbar(
+                message = event.message.asString(context),
+                withDismissAction =
+                    event.type ==
+                            CareerPilotSnackbarType.DISMISSIBLE,
+                duration = event.duration,
+                actionLabel =
+                    event.actionLabel?.asString(context),
+            )
 
-                throw cancellation
-            }
+            request.complete(result)
         }
     }
 
@@ -98,30 +98,22 @@ fun RootNavDisplay(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             transitionSpec = {
-                slideIntoContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Left,
-                    animationSpec = tween(350),
-                ) togetherWith slideOutOfContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Left,
-                    animationSpec = tween(350),
-                )
+                (slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing))) togetherWith (slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeOut(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing)))
             },
             popTransitionSpec = {
-                slideIntoContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Right,
-                    animationSpec = tween(350),
-                ) togetherWith slideOutOfContainer(
-                    towards =
-                        AnimatedContentTransitionScope
-                            .SlideDirection.Right,
-                    animationSpec = tween(350),
-                )
+                (slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeIn(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing))) togetherWith (slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+                ) + fadeOut(animationSpec = tween(400, easing = androidx.compose.animation.core.FastOutSlowInEasing)))
             },
             entryProvider = entryProvider {
                 entry<Route.Splash> {
@@ -185,10 +177,16 @@ fun RootNavDisplay(
                                 )
                             }
                         },
-                        openSessionDetails = { id ->
+                        openSessionDetails = { sessionId ->
                             rootBackStack.navigateSingleTop(
-                                Route.SessionDetails(
-                                    id = id,
+                                Route.SessionDetails(sessionId),
+                            )
+                        },
+                        openPracticeSession = { trackId, sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeSession(
+                                    trackId = trackId,
+                                    sessionId = sessionId,
                                 ),
                             )
                         },
@@ -200,9 +198,9 @@ fun RootNavDisplay(
                         openEditProfile = { section ->
                             rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
                         },
-                        openPaywall = {
+                        openPaywall = { showGetCoins ->
                             rootBackStack.navigateSingleTop(
-                                Route.Paywall,
+                                Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
                     )
@@ -214,9 +212,49 @@ fun RootNavDisplay(
                         }
                     )
                 }
+
+                entry<Route.PracticeSession> {
+                    PracticeSessionRoot(
+                        trackId = it.trackId,
+                        sessionId = it.sessionId,
+                        onNavigateToResult = { sessionId ->
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                            rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
+                        },
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                        }
+                    )
+                }
+
+                entry<Route.PracticeResult> {
+                    ResultRoot(
+                        sessionId = it.sessionId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.PracticeResult>()
+                        }
+                    )
+                }
                 entry<Route.SessionDetails> {
-                    SessionDetailsRoot(
+                    ReportDetailsRoot(
                         sessionId = it.id,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.SessionDetails>()
+                        },
+                        openQuestionBreakdown = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.QuestionBreakdown(sessionId),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.QuestionBreakdown> {
+                    QuestionBreakdownRoot(
+                        sessionId = it.sessionId,
+                        navigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.QuestionBreakdown>()
+                        },
                     )
                 }
 
@@ -233,7 +271,12 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.Paywall> {
-                    PaywallRoot()
+                    PaymentNavDisplay(
+                        startRoute = if (it.showGetCoins) PaymentRoute.GetCoins else PaymentRoute.ChoosePlan,
+                        onNavigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.Paywall>()
+                        }
+                    )
                 }
 
                 entry<Route.Interviews> {
@@ -262,17 +305,14 @@ fun RootNavDisplay(
                         openInterview = { sessionId ->
                             rootBackStack.apply {
                                 popIfCurrentIs<Route.ReadyToPractice>()
-                                navigateSingleTop(Route.InterviewSession(sessionId = sessionId))
+                                navigateSingleTop(
+                                    Route.PracticeSession(
+                                        trackId = route.trackId,
+                                        sessionId = sessionId,
+                                    ),
+                                )
                             }
                         },
-                    )
-                }
-
-                entry<Route.InterviewSession> { route ->
-                    // TODO: replace with the real interview screen
-                    InterviewSessionPlaceholder(
-                        sessionId = route.sessionId,
-                        onBack = { rootBackStack.removeLastOrNull() },
                     )
                 }
             },

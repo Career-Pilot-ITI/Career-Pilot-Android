@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -16,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
-import com.iti.onboarding.util.toMegabytes
+import com.iti.onboarding.util.toLocalizedFileSize
 
 
 @Composable
@@ -26,6 +27,15 @@ fun FileDetails(
     icon: @Composable () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+
+    val detailsText = selectedFile?.let { file ->
+        stringResource(
+            R.string.cv_file_details,
+            file.sizeBytes.toLocalizedFileSize(context),
+            statusText,
+        )
+    } ?: statusText
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -47,13 +57,7 @@ fun FileDetails(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = selectedFile?.let {
-                stringResource(
-                    R.string.cv_file_details,
-                    it.sizeBytes.toMegabytes(),
-                    statusText,
-                )
-            }.orEmpty(),
+            text = detailsText,
             style = MaterialTheme.typography.bodyMedium,
             color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,

@@ -43,7 +43,7 @@ import com.iti.careerpilot.home.presentation.home.screen.components.rememberGree
 @Composable
 fun HomeRoot(
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
-    openSessionDetails: (String) -> Unit,
+    openSessionDetails: (Long) -> Unit,
     openInterviews: () -> Unit,
     openPaywall: () -> Unit,
     openReports: () -> Unit,
@@ -57,7 +57,7 @@ fun HomeRoot(
                 openReadyToPractice(event.trackId, event.trackName)
 
             is HomeEvent.NavigateToSessionDetails ->
-                openSessionDetails(event.sessionId.toString())
+                openSessionDetails(event.sessionId)
 
             HomeEvent.NavigateToInterviews -> openInterviews()
             HomeEvent.NavigateToPaywall -> openPaywall()

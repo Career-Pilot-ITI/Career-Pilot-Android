@@ -1,7 +1,7 @@
 package com.iti.careerpilot.buildlogic.features
 
 import com.android.build.api.dsl.LibraryExtension
-import com.iti.careerpilot.buildlogic.configureCareerPilotFlavors
+import com.iti.careerpilot.buildlogic.configureFlavors
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -39,7 +39,7 @@ class HomeFeatureConventionPlugin : Plugin<Project> {
             testOptions {
                 unitTests.isIncludeAndroidResources = true
             }
-            configureCareerPilotFlavors()
+            configureFlavors()
             packaging {
                 resources.excludes += setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",

@@ -22,8 +22,7 @@ sealed interface Route : NavKey {
         data object Home : Route
 
         @Serializable
-        data object Reports : Route
-
+        data object SessionHistory : Route
 
         @Serializable
         data object Profile : Route
@@ -31,7 +30,21 @@ sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class SessionDetails(val id: String) : Route
+    data class SessionDetails(val id: Long) : Route
+
+    @Serializable
+    data class PracticeSession(
+        val trackId: Long,
+        val sessionId: Long? = null,
+    ) : Route
+
+    @Serializable
+    data class PracticeResult(
+        val sessionId: Long,
+    ) : Route
+
+    @Serializable
+    data class QuestionBreakdown(val sessionId: Long) : Route
 
     @Serializable
     data object Settings : Route
@@ -40,7 +53,7 @@ sealed interface Route : NavKey {
     data class EditProfile(val section: ProfileEditSection = ProfileEditSection.ALL) : Route
 
     @Serializable
-    data object Paywall : Route
+    data class Paywall(val showGetCoins: Boolean = false) : Route
 
     @Serializable
     data object Onboarding: Route
@@ -50,7 +63,4 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class ReadyToPractice(val trackId: Long, val trackName: String) : Route
-
-    @Serializable
-    data class InterviewSession(val sessionId: Long) : Route
 }

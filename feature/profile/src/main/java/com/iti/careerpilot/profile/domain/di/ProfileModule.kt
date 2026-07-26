@@ -1,8 +1,10 @@
 package com.iti.careerpilot.profile.domain.di
 
 import com.iti.careerpilot.profile.data.datasource.local.ProfileLocalDataSourceImpl
+import com.iti.careerpilot.profile.data.datasource.remote.ProfileRemoteDataSourceImpl
 import com.iti.careerpilot.profile.data.repo.ProfileRepoImpl
 import com.iti.careerpilot.profile.domain.datasource.local.ProfileLocalDataSource
+import com.iti.careerpilot.profile.domain.datasource.remote.ProfileRemoteDataSource
 import com.iti.careerpilot.profile.domain.repo.ProfileRepo
 import dagger.Binds
 import dagger.Module

@@ -85,7 +85,6 @@ fun ProfileScreenContent(
         onCameraPermissionDenied = { onIntent(ProfileInfoIntent.OnCameraPermissionDenied) }
     )
 
-    @Suppress("LocalContextGetResourceValueCall")
     LaunchedEffect(Unit) {
         effectFlow.collect { effect ->
             when (effect) {
@@ -113,8 +112,6 @@ fun ProfileScreenContent(
     }
 
     val focusManager = LocalFocusManager.current
-    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
-
     val defaultSkills = stringArrayResource(id = R.array.profile_info_default_skills).toList()
 
     LaunchedEffect(defaultSkills) {
@@ -130,8 +127,7 @@ fun ProfileScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp)
-                .padding(bottom = 120.dp), // Extra padding for the global floating button
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ProfileHeader(modifier = Modifier.align(Alignment.Start))
@@ -154,7 +150,7 @@ fun ProfileScreenContent(
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
                 email = data.email,
                 onEmailChanged = { onIntent(ProfileInfoIntent.OnEmailChanged(it)) },
-                isEmailValid = isEmailValid,
+                isEmailInvalid = state.isEmailInvalid,
                 title = data.title,
                 onTitleChanged = { onIntent(ProfileInfoIntent.OnTitleChanged(it)) },
                 experience = data.experience,
@@ -175,8 +171,6 @@ fun ProfileScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             ProfileBanner()
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 

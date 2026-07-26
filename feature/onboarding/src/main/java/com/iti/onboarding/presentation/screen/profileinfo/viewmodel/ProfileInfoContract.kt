@@ -26,13 +26,15 @@ data class ProfileInfoUiState(
     val hasSuccessfullySubmitted: Boolean = false,
     val allSkills: ImmutableList<String> = persistentListOf(),
     val showAddSkillDialog: Boolean = false,
-    val newSkillText: String = ""
+    val newSkillText: String = "",
+    val isEmailInvalid: Boolean = false,
 ) {
     val isFormValid: Boolean
         get() {
-            val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
-            return data.name.isNotBlank() && isEmailValid && data.title.isNotBlank() && data.experience.isNotBlank()
+            return data.name.isNotBlank() && data.email.isNotBlank() && data.title.isNotBlank() && data.experience.isNotBlank()
         }
+
+    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
 }
 
 fun ProfileInfoUiState.updateData(

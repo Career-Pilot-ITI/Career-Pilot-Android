@@ -13,6 +13,5 @@ import javax.inject.Singleton
 internal abstract class FakeLoginDataModule {
 
     @Binds
-    @Singleton
     abstract fun bindAuthApiService(impl: FakeAuthRemoteDataSource): AuthRemoteDataSource
 }
