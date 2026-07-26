@@ -18,6 +18,7 @@ object CustomTabManager {
         val builder = CustomTabsIntent.Builder()
             .setShowTitle(true)
             .setUrlBarHidingEnabled(false)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
 
         toolbarColor?.let { color ->
             val colorSchemeParams = CustomTabColorSchemeParams.Builder()
