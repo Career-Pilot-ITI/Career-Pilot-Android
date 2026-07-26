@@ -24,7 +24,7 @@ fun TrackChip(
     modifier: Modifier = Modifier,
 ) {
     val selectedContainerColor = MaterialTheme.colorScheme.onBackground
-    val selectedContentColor = MaterialTheme.colorScheme.onPrimary
+    val selectedContentColor = MaterialTheme.colorScheme.background
 
     val unselectedContainerColor = MaterialTheme.colorScheme.background
     val unselectedContentColor = MaterialTheme.colorScheme.onBackground

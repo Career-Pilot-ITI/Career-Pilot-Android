@@ -13,7 +13,7 @@
     <string name="cv_ready_to_upload">جاهزة للرفع</string>
     <string name="cv_uploaded_label">تم الرفع</string>
     <string name="cv_upload_progress">تم رفع %1$d%%</string>
-    <string name="cv_file_details">%1$.1f ميجابايت · %2$s</string>
+    <string name="cv_file_details">%1$s • %2$s</string>
     <string name="cv_uploaded_successfully">تم رفع السيرة الذاتية بنجاح</string>
     <string name="skip_for_now">تخطي الآن</string>
     <string name="analyze_my_cv">حلّل سيرتي الذاتية</string>

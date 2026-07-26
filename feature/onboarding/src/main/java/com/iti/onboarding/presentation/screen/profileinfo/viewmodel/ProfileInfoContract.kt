@@ -33,6 +33,8 @@ data class ProfileInfoUiState(
         get() {
             return data.name.isNotBlank() && data.email.isNotBlank() && data.title.isNotBlank() && data.experience.isNotBlank()
         }
+
+    val isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(data.email).matches()
 }
 
 fun ProfileInfoUiState.updateData(
