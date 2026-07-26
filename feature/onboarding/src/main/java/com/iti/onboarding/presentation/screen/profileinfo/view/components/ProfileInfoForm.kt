@@ -19,12 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.iti.onboarding.R
+import kotlinx.collections.immutable.toImmutableList
 
 import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
 
@@ -97,7 +99,7 @@ fun ProfileInfoForm(
                 icon = Icons.Default.Assessment,
                 label = stringResource(R.string.profile_info_experience_level_label),
                 value = experience,
-                options = ExperienceLevel.entries.map { stringResource(it.labelRes) },
+                options = ExperienceLevel.entries.map { stringResource(it.labelRes) }.toImmutableList(),
                 onValueChange = onExperienceChanged,
                 placeholder = stringResource(R.string.profile_info_experience_level_placeholder)
             )

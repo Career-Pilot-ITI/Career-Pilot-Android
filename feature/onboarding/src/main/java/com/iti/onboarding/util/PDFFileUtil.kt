@@ -1,5 +1,11 @@
 package com.iti.onboarding.util
+import android.content.Context
+import android.text.format.Formatter
 
-fun Long.toMegabytes(): Float {
-    return this / (1024f * 1024f)
+
+fun Long.toLocalizedFileSize(context: Context): String {
+    return Formatter.formatShortFileSize(
+        context,
+        coerceAtLeast(0L),
+    )
 }

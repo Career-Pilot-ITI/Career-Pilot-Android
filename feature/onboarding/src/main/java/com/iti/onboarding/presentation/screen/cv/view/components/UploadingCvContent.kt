@@ -22,7 +22,6 @@ fun UploadingCvContent(
         selectedFile = selectedFile,
         icon = {
             LoadingIndicator(
-                progress = { progress },
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp),
             )
