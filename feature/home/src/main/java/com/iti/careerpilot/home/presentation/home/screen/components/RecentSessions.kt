@@ -109,7 +109,6 @@ fun SessionRow(
 
 @Composable
 private fun ScoreBadge(score: Int?) {
-    // Colour tracks the same bands as the headline score card.
     val accent = when {
         score == null -> CareerPilotPalette.gray400
         score >= HIGH_SCORE -> CareerPilotPalette.green
@@ -119,9 +118,9 @@ private fun ScoreBadge(score: Int?) {
 
     Box(
         modifier = Modifier
-            .size(BADGE_SIZE)
+            .size(48.dp)
             .clip(CareerPilotShapes.small)
-            .background(accent.copy(alpha = BADGE_BACKGROUND_ALPHA)),
+            .background(accent.copy(alpha = 0.15f)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -133,12 +132,6 @@ private fun ScoreBadge(score: Int?) {
     }
 }
 
-/**
- * Renders a session time as "Today, 2:14 PM" / "Yesterday, 10:30 AM" / "Mon, 9:00 AM".
- *
- * The instant was built by treating the server's offset-less timestamp as UTC; here it is
- * converted into the device's zone so the label matches the user's own clock.
- */
 @Composable
 private fun rememberSessionTimestamp(instant: Instant?): String {
     if (instant == null) return stringResource(R.string.home_session_unscored)
@@ -162,5 +155,3 @@ private val DAY_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE"
 
 private const val HIGH_SCORE = 80
 private const val MID_SCORE = 60
-private const val BADGE_BACKGROUND_ALPHA = 0.15f
-private val BADGE_SIZE = 48.dp

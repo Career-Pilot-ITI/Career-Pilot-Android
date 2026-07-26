@@ -27,10 +27,6 @@ import com.iti.careerpilot.core.designsystem.components.ScoreRing
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.domain.model.ScoreSummary
 
-/**
- * Headline score card. The number is the most recently scored session and the delta compares it
- * with the session scored before it — there is no aggregate stats endpoint to average over.
- */
 @Composable
 fun OverallScoreCard(
     summary: ScoreSummary,
@@ -116,10 +112,6 @@ private fun ScoreDelta(delta: Int?) {
     }
 }
 
-/**
- * Score-to-label bands. The design only shows "Good Progress", so the surrounding bands are an
- * interpretation — adjust here if product defines them differently.
- */
 private fun scoreLabelRes(score: Int): Int = when {
     score >= EXCELLENT_THRESHOLD -> R.string.home_score_excellent
     score >= GOOD_THRESHOLD -> R.string.home_score_good

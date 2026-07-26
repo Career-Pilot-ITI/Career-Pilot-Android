@@ -46,9 +46,9 @@ fun PracticeInterviewCard(
     ) {
         Box(
             modifier = Modifier
-                .size(ICON_BOX_SIZE)
+                .size(56.dp)
                 .clip(CareerPilotShapes.small)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = ICON_BOX_ALPHA)),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -76,7 +76,7 @@ fun PracticeInterviewCard(
 
         Box(
             modifier = Modifier
-                .size(ARROW_BOX_SIZE)
+                .size(44.dp)
                 .clip(CareerPilotShapes.small)
                 .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
@@ -90,6 +90,3 @@ fun PracticeInterviewCard(
     }
 }
 
-private const val ICON_BOX_ALPHA = 0.2f
-private val ICON_BOX_SIZE = 56.dp
-private val ARROW_BOX_SIZE = 44.dp

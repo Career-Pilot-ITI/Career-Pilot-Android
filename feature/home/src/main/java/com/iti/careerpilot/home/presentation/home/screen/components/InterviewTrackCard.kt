@@ -36,7 +36,7 @@ fun InterviewTrackCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    CareerPilotCard(modifier = modifier.width(CARD_WIDTH)) {
+    CareerPilotCard(modifier = modifier.width(168.dp)) {
         Column(
             modifier = Modifier
                 .clickable(onClick = onClick)
@@ -45,9 +45,9 @@ fun InterviewTrackCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(ICON_BOX_SIZE)
+                    .size(44.dp)
                     .clip(CareerPilotShapes.small)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = ICON_BOX_ALPHA)),
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -62,16 +62,16 @@ fun InterviewTrackCard(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = TITLE_MAX_LINES,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.height(TITLE_HEIGHT),
+                modifier = Modifier.height(48.dp),
             )
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .size(ACTION_SIZE)
+                        .size(36.dp)
                         .clip(CareerPilotShapes.small)
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center,
@@ -86,10 +86,3 @@ fun InterviewTrackCard(
         }
     }
 }
-
-private const val ICON_BOX_ALPHA = 0.18f
-private const val TITLE_MAX_LINES = 2
-private val CARD_WIDTH = 168.dp
-private val ICON_BOX_SIZE = 44.dp
-private val ACTION_SIZE = 36.dp
-private val TITLE_HEIGHT = 48.dp
