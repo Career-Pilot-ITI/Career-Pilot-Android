@@ -214,9 +214,11 @@ class ProfileInfoViewModel @Inject constructor(
     }
 
     private fun handleCameraPermissionDenied() {
-        CareerPilotSnackbarController.show(
-            UIText.StringResource(R.string.profile_info_camera_permission_message)
-        )
+        viewModelScope.launch {
+            CareerPilotSnackbarController.show(
+                UIText.StringResource(R.string.profile_info_camera_permission_message)
+            )
+        }
     }
 
     private fun retryPhotoUpload() {
