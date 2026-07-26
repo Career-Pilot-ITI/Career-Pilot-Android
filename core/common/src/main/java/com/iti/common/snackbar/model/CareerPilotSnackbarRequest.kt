@@ -1,10 +1,13 @@
 package com.iti.common.snackbar.model
 
+import androidx.compose.material3.SnackbarResult
+import kotlinx.coroutines.CompletableDeferred
+
 class CareerPilotSnackbarRequest internal constructor(
     val event: CareerPilotSnackbarEvent,
-    private val onAction: (() -> Unit)?,
+    private val result: CompletableDeferred<SnackbarResult>,
 ) {
-    fun performAction() {
-        onAction?.invoke()
+    fun complete(value: SnackbarResult) {
+        result.complete(value)
     }
 }

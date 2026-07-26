@@ -18,6 +18,7 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.request.header
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import com.iti.careerpilot.core.network.Endpoints
@@ -43,6 +44,7 @@ object NetworkModule {
         coerceInputValues = true
         encodeDefaults = true
         explicitNulls = false
+        prettyPrint = true
     }
 
     @Provides
@@ -92,6 +94,7 @@ object NetworkModule {
                 contentType(
                     ContentType.Application.Json
                 )
+                header("ngrok-skip-browser-warning", "true")
             }
 
             install(Auth) {

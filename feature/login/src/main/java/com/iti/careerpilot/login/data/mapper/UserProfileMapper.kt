@@ -30,7 +30,7 @@ fun OtpAuthResponse.toUserProfile(): UserProfile =
             currentJobTitle = user.profile?.currentJobTitle.orEmpty(),
             yearsOfExperience = user.profile?.yearsOfExperience ?: 0,
             skills = user.profile?.skills?.mapNotNull { it.skillName } ?: emptyList(),
-            targetCompanies = user.profile?.targetCompanies?.filterNotNull() ?: emptyList(),
+            targetCompanies = user.profile?.targetCompanies?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList(),
             educationLevel = user.profile?.educationLevel.orEmpty(),
             trackName = user.profile?.trackName.orEmpty()
         ),
