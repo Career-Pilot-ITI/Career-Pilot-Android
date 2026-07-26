@@ -20,6 +20,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -64,7 +65,7 @@ fun ChoosingTracksScreen(
     ChoosingTracksScreenContent(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier.safeContentPadding(),
+        modifier = modifier.padding(horizontal = 24.dp),
     )
 }
 
@@ -104,16 +105,18 @@ fun ChoosingTracksScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item(key= "tracks_header") {
+                ChoosingTracksScreenHeader()
+            }
+
             item(key = "tracks_content") {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    ChoosingTracksScreenHeader()
-
                     AnimatedVisibility(state.tracks.isNotEmpty()) {
                         TracksFlow(
                             tracks = state.tracks,
@@ -128,16 +131,12 @@ fun ChoosingTracksScreenContent(
                     }
 
                     if (state.isLoading) {
-                        Spacer(Modifier.fillParentMaxHeight(0.35f))
+                        Spacer(Modifier.fillParentMaxHeight(0.4f))
                         LoadingIndicator(
                             color = colors.primary,
                         )
                     }
                 }
-            }
-
-            item(key = "bottom_spacing") {
-                Spacer(modifier = Modifier.height(120.dp))
             }
         }
     }

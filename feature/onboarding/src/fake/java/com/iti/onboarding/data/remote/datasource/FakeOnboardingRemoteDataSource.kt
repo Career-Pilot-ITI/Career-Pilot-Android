@@ -1,5 +1,6 @@
 package com.iti.onboarding.data.remote.datasource
 
+import com.iti.careerpilot.core.network.model.SkillDto
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserProfileDto
 import com.iti.onboarding.data.remote.dto.TracksResponseDto
@@ -8,6 +9,9 @@ import com.iti.common.util.fakeDelay
 import com.iti.common.util.shouldFail
 import java.io.File
 import javax.inject.Inject
+
+import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
+import kotlinx.coroutines.delay
 
 class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDataSource {
     override suspend fun uploadFile(file: File, onProgress: (Int) -> Unit): UploadFileResponseDto {
@@ -32,7 +36,7 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
             email = request.email,
             targetRole = request.targetRole,
             yearsOfExperience = request.yearsOfExperience,
-            skills = request.skills?.map { com.iti.careerpilot.core.network.model.SkillDto(skillName = it) },
+            skills = request.skills?.map { SkillDto(skillName = it) },
             onboardingCompleted = request.onboardingCompleted ?: true
         )
     }
@@ -61,21 +65,45 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         )
     }
 
-    override suspend fun analyzeCv(file: File, onProgress: (Int) -> Unit): UserProfileDto {
-        fakeDelay()
-        if (shouldFail()) throw Exception("Fake network error")
-        onProgress(100)
+    override suspend fun analyzeCv(
+        file: File,
+        onProgress: (Int) -> Unit,
+    ): UserProfileDto {
+        if (shouldFail()) {
+            throw Exception("Fake network error")
+        }
+
+        val progressUpdates = listOf(
+            0,
+            5,
+            12,
+            24,
+            38,
+            51,
+            63,
+            74,
+            86,
+            94,
+            100,
+        )
+
+        progressUpdates.forEach { progress ->
+            delay(250)
+            onProgress(progress)
+        }
+
         return UserProfileDto(
             id = 1L,
             displayName = "Fake User",
             email = "fake@example.com",
             currentJobTitle = "Android Developer",
+            experienceLevel = ExperienceLevel.MID_LEVEL.apiKey,
             yearsOfExperience = 3,
             skills = listOf(
-                com.iti.careerpilot.core.network.model.SkillDto(skillName = "Kotlin"),
-                com.iti.careerpilot.core.network.model.SkillDto(skillName = "Android")
+                SkillDto(skillName = "Kotlin"),
+                SkillDto(skillName = "Android"),
             ),
-            trackName = "Android"
+            trackName = "Android",
         )
     }
 }
