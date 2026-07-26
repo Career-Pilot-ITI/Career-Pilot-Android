@@ -178,9 +178,9 @@ fun RootNavDisplay(
                             )
                         },
                         openSettings = {
-                            rootBackStack.navigateSingleTop(
-                                Route.Settings,
-                            )
+//                            rootBackStack.navigateSingleTop(
+//                                Route.Settings,
+//                            )
                         },
                         openEditProfile = { section ->
                             rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
