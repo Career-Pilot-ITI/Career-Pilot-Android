@@ -28,13 +28,15 @@ import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
 import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
+import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 @Composable
 fun RootNavDisplay(
     startRoute: Route,
@@ -162,10 +164,16 @@ fun RootNavDisplay(
                                 )
                             }
                         },
-                        openSessionDetails = { id ->
+                        openSessionDetails = { sessionId ->
                             rootBackStack.navigateSingleTop(
-                                Route.SessionDetails(
-                                    id = id,
+                                Route.SessionDetails(sessionId),
+                            )
+                        },
+                        openPracticeSession = { trackId, sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeSession(
+                                    trackId = trackId,
+                                    sessionId = sessionId,
                                 ),
                             )
                         },
@@ -188,6 +196,29 @@ fun RootNavDisplay(
                     com.iti.onboarding.navigation.OnboardingPagerScreen(
                         onOnboardingFinished = {
                             rootBackStack.replaceAll(Route.NestedNav)
+                        }
+                    )
+                }
+
+                entry<Route.PracticeSession> {
+                    PracticeSessionRoot(
+                        trackId = it.trackId,
+                        sessionId = it.sessionId,
+                        onNavigateToResult = { sessionId ->
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                            rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
+                        },
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                        }
+                    )
+                }
+
+                entry<Route.PracticeResult> {
+                    ResultRoot(
+                        sessionId = it.sessionId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }
                     )
                 }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">الرجوع</string>
+
+    <string name="mic_permission">إذن الميكروفون</string>
+    <string name="please_allow_microphone_permission_to_continue">يرجى السماح بإذن الميكروفون للمتابعة.</string>
+    <string name="cancel">إلغاء</string>
+    <string name="allow">سماح</string>
+    <string name="leave_confirmation_title">مغادرة الجلسة؟</string>
+    <string name="leave_confirmation_message">سيتم تجاهل الإجابة الحالية، ولكن ستتمكن من متابعة جلسة المقابلة لاحقًا.</string>
+    <string name="leave">مغادرة</string>
+
+    <!-- Skip question confirmation -->
+    <string name="skip_question_title">تخطي السؤال؟</string>
+    <string name="skip_question_message">هل أنت متأكد أنك تريد تخطي هذا السؤال؟ لن تتمكن من الإجابة عليه لاحقًا في هذه الجلسة.</string>
+    <string name="skip">تخطي</string>
+    <string name="skip_question">تخطي السؤال</string>
+
+    <!-- Discard recording confirmation -->
+    <string name="discard_recording_title">حذف التسجيل؟</string>
+    <string name="discard_recording_message">سيؤدي هذا إلى حذف التسجيل الحالي نهائيًا.</string>
+    <string name="discard">حذف</string>
+    <string name="delete_recording">حذف التسجيل</string>
+
+    <!-- Playback / recording controls -->
+    <string name="play">تشغيل</string>
+    <string name="pause">إيقاف مؤقت</string>
+    <string name="stop">إيقاف</string>
+    <string name="submit_answer">إرسال الإجابة</string>
+    <string name="stop_recording">إيقاف التسجيل</string>
+    <string name="start_recording">بدء التسجيل</string>
+    <string name="playback_position_value">%1$s من %2$s</string>
+
+    <!-- Session screen chrome -->
+    <string name="toggle_question_card">إظهار/إخفاء بطاقة السؤال</string>
+    <string name="session_status_icon">حالة الجلسة</string>
+    <string name="loading_question">جارٍ تحميل السؤال…</string>
+    <string name="question_number">السؤال %1$s</string>
+
+    <string name="session_settings">إعدادات الجلسة</string>
+    <string name="auto_read_question">قراءة السؤال تلقائيًا</string>
+    <string name="automatically_speak_the_question_when_it_s_shown">قراءة السؤال بصوت عالٍ تلقائيًا عند عرضه</string>
+    <string name="auto_send_answer">إرسال الإجابة تلقائيًا</string>
+    <string name="automatically_send_the_answer_when_you_stop_recording">إرسال الإجابة تلقائيًا عند إيقاف التسجيل</string>
+    <string name="dismiss">تجاهل</string>
+
+    <!-- Result Screen -->
+    <string name="session_results">نتائج الجلسة</string>
+    <string name="overall_score">الدرجة الكلية</string>
+    <string name="clarity">الوضوح</string>
+    <string name="confidence">الثقة</string>
+    <string name="pacing">السرعة</string>
+    <string name="filler_words">الكلمات الحشوية</string>
+    <string name="content_relevance">صلة المحتوى</string>
+    <string name="coaching_tips">نصائح التدريب</string>
+    <string name="excellent_performance">أداء ممتاز!</string>
+    <string name="good_performance">أداء جيد!</string>
+    <string name="keep_practicing">استمر في الممارسة!</string>
+    <string name="score_out_of_100">%1$d/100</string>
+    <string name="view_details">عرض التفاصيل</string>
+    <string name="performance_breakdown">تفاصيل الأداء</string>
+    <string name="question_details">تفاصيل السؤال</string>
+    <string name="your_transcript">النص الخاص بك</string>
+    <string name="analysis">التحليل</string>
+    <string name="no_results_found">لم يتم العثور على نتائج</string>
+    <string name="no_transcript_available">لا يوجد نص متاح</string>
+</resources>

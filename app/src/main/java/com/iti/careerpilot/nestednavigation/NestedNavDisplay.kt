@@ -35,6 +35,7 @@ fun NestedNavDisplay(
     navigateBack: () -> Unit,
     openPaywall: (showGetCoins: Boolean) -> Unit,
     logout: () -> Unit,
+    openPracticeSession: (Long, Long?) -> Unit,
     openSessionDetails: (Long) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
@@ -95,6 +96,7 @@ fun NestedNavDisplay(
             entryProvider = entryProvider {
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
+                        openPracticeSession = openPracticeSession,
                         openSessionDetails = openSessionDetails,
                         openPaywall = openPaywall
                     )
