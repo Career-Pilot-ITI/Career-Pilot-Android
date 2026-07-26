@@ -4,9 +4,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 
 internal fun ApplicationExtension.configureCareerPilotApplication() {
-    compileSdk {
-        version = release(CareerPilotBuildConfig.COMPILE_SDK)
-    }
+    compileSdk = CareerPilotBuildConfig.COMPILE_SDK
 
     defaultConfig {
         minSdk = CareerPilotBuildConfig.DEFAULT_MIN_SDK
@@ -32,9 +30,7 @@ internal fun ApplicationExtension.configureCareerPilotApplication() {
 }
 
 internal fun LibraryExtension.configureCareerPilotLibrary() {
-    compileSdk {
-        version = release(CareerPilotBuildConfig.COMPILE_SDK)
-    }
+    compileSdk = CareerPilotBuildConfig.COMPILE_SDK
 
     defaultConfig {
         minSdk = CareerPilotBuildConfig.DEFAULT_MIN_SDK

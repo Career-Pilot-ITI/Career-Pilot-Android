@@ -30,6 +30,9 @@ object Endpoints {
     const val ANALYZE_CV = "$BASE_URL/api/v1/profile/cv/analyze"
 
     const val INTERVIEW_SESSIONS = "$BASE_URL/api/v1/interviews/sessions"
+    fun SUBMIT_ANSWER(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/answer"
+    fun GET_SESSION_FEEDBACK(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/feedback"
+    fun GET_SESSION_STATE(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/state"
 
     fun interviewSession(sessionId: Long): String = "$INTERVIEW_SESSIONS/$sessionId"
 

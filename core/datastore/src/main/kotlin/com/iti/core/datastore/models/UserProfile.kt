@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserProfile(
-    val id: Int = 0,
+    val id: Long = 0,
     val account: AccountInfo = AccountInfo(),
     val personal: PersonalInfo = PersonalInfo(),
     val career: CareerInfo = CareerInfo(),

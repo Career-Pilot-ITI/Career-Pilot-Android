@@ -12,12 +12,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun HomeRoot(
     openPaywall: (Boolean) -> Unit,
+    openPracticeSession: (Long, Long?) -> Unit,
     openSessionDetails: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -29,6 +31,7 @@ fun HomeRoot(
 
     HomeScreen(
         openPaywall = openPaywall,
+        openPracticeSession = openPracticeSession,
         openSessionDetails = openSessionDetails,
         state = state,
         onAction = viewModel::onAction
@@ -38,6 +41,7 @@ fun HomeRoot(
 @Composable
 fun HomeScreen(
     openPaywall: (Boolean) -> Unit,
+    openPracticeSession: (Long, Long?) -> Unit,
     openSessionDetails: (Long) -> Unit,
     state: HomeState,
     onAction: (HomeAction) -> Unit,
@@ -57,6 +61,11 @@ fun HomeScreen(
             onClick = { openPaywall(false) }
         ) {
             Text(text = "Open Paywall")
+        }
+        Button(
+            onClick = { openPracticeSession(1, null) }
+        ) {
+            Text(text = "Open Practice Session")
         }
         Button(
             onClick = { openPaywall(true) }

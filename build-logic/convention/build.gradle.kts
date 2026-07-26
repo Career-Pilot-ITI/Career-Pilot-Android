@@ -114,7 +114,6 @@ gradlePlugin {
             implementationClass = "com.iti.careerpilot.buildlogic.TestingConventionPlugin"
         }
 
-        // Features
         register("onboardingFeature") {
             id = "feature.onboarding"
             implementationClass = "com.iti.careerpilot.buildlogic.OnboardingConventionPlugin"
@@ -122,6 +121,14 @@ gradlePlugin {
         register("careerPilotFeatureReports") {
             id = libs.plugins.careerpilot.feature.reports.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.ReportsFeatureConvention"
+        }
+        register("whisperModule") {
+            id = libs.plugins.careerpilot.module.whisper.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.WhisperModuleConventionPlugin"
+        }
+        register("careerPilotFeaturePracticeSession") {
+            id = libs.plugins.careerpilot.feature.practice.session.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.PracticeSessionConventionPlugin"
         }
     }
 }

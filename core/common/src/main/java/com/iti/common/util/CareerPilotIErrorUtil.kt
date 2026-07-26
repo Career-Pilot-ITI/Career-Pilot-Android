@@ -3,6 +3,7 @@ package com.iti.common.util
 import com.iti.common.R
 import com.iti.common.error.NetworkError
 import com.iti.common.error.StorageError
+import com.iti.common.error.TranscriptionError
 
 fun NetworkError.toUIText(): UIText {
     return UIText.StringResource(
@@ -78,6 +79,15 @@ fun StorageError.toUIText(): UIText {
 
             StorageError.PermissionDenied ->
                 R.string.error_storage_permission_denied
+        }
+    )
+}
+
+fun TranscriptionError.toUIText(): UIText {
+    return UIText.StringResource(
+        resId = when (this) {
+            TranscriptionError.UNKNOWN ->
+                R.string.error_network_timeout
         }
     )
 }

@@ -1,0 +1,5 @@
+/build
+
+# Whisper Models
+src/main/assets/models/*.onnx
+src/main/assets/models/*.txt

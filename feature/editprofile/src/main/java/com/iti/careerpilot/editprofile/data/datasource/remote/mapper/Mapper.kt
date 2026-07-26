@@ -19,7 +19,7 @@ fun UserProfileDto.toDomain(current: UserProfile? = null): UserProfile {
         subscriptionTier.orEmpty()
     }
     return UserProfile(
-        id = id?.toInt() ?: current?.id ?: 0,
+        id = id ?: current?.id ?: 0,
         account = AccountInfo(
             username = username.orEmpty(),
             email = email.orEmpty(),

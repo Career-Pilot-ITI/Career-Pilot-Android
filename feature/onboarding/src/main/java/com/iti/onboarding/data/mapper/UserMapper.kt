@@ -9,7 +9,7 @@ import com.iti.core.datastore.models.UserProfile
 
 fun UserProfileDto.toDomain(): UserProfile {
     return UserProfile(
-        id = id?.toInt() ?: 0,
+        id = id ?: 0,
         account = AccountInfo(
             username = username.orEmpty(),
             email = email.orEmpty(),

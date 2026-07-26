@@ -20,6 +20,9 @@ internal fun Project.configureFlavors() {
         when (androidExtension) {
             is ApplicationExtension -> {
                 androidExtension.apply {
+                    buildFeatures {
+                        buildConfig = true
+                    }
                     flavorDimensions += FlavorDimension.contentType.name
                     productFlavors {
                         CareerPilotFlavor.entries.forEach {
@@ -37,6 +40,9 @@ internal fun Project.configureFlavors() {
 
             is LibraryExtension -> {
                 androidExtension.apply {
+                    buildFeatures {
+                        buildConfig = true
+                    }
                     flavorDimensions += FlavorDimension.contentType.name
                     productFlavors {
                         CareerPilotFlavor.entries.forEach {
