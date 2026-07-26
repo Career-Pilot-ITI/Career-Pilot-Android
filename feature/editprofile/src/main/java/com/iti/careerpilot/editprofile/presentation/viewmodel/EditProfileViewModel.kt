@@ -293,7 +293,9 @@ class EditProfileViewModel @Inject constructor(
                 if (elapsed < 2000) delay((2000 - elapsed).milliseconds)
                 onSuccess(response)
             }?.onError { error ->
-                CareerPilotSnackbarController.show(error.toUIText())
+                viewModelScope.launch {
+                    CareerPilotSnackbarController.show(error.toUIText())
+                }
             }
             onFinish()
         }
@@ -313,7 +315,9 @@ class EditProfileViewModel @Inject constructor(
                 }
                 .onError {
                     _state.update { it.copy(isLoading = false) }
-                    CareerPilotSnackbarController.show(it.toUIText())
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(it.toUIText())
+                    }
                 }
         }
     }

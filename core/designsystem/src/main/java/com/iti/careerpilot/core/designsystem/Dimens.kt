@@ -31,13 +31,22 @@ object Dimens {
     // Border widths
     val BorderThin = 1.dp
     val BorderThick = 1.5.dp
+    val BorderMedium = 2.dp
+    val SpaceXXXS = 2.dp
+    val IconSizeMedium = 28.dp
+    val ScanBarHeight = 30.dp
 
     // otp cell
     val OtpCellHeight = 56.dp
 
-    // Success feedback (checkmark + audio waveform)
+    // Success & status feedback
     val SuccessRingSize = 96.dp
     val SuccessIconSize = 44.dp
+    val ErrorRingSize = 120.dp
+    val ErrorIconSize = 60.dp
+    val LockIconBoxSize = 80.dp
+    val CardPulseSize = 140.dp
+    val AnimationBoxSize = 200.dp
     val WaveformHeight = 36.dp
     val WaveformBarWidth = 4.dp
     val WaveformBarGap = 3.dp

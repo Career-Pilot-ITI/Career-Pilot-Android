@@ -1,5 +1,6 @@
 package com.iti.careerpilot.login.data.remote
 
+import android.util.Log
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.login.data.remote.dto.ApiMessageResponse
@@ -19,19 +20,31 @@ class AuthRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun sendOtp(
         request: SendOtpRequest,
-    ): CareerPilotResult<ApiMessageResponse, NetworkError> =
-        safeCall {
+    ): CareerPilotResult<ApiMessageResponse, NetworkError> {
+
+
+        Log.d("TAG", "sendOtp: $request")
+
+return        safeCall {
+
             client.post(Endpoints.SEND_OTP) {
                 setBody(request)
             }
+
         }
+
+    }
 
     override suspend fun verifyOtp(
         request: VerifyOtpRequest,
-    ): CareerPilotResult<OtpAuthResponse, NetworkError> =
-        safeCall {
+    ): CareerPilotResult<OtpAuthResponse, NetworkError> {
+
+
+        Log.d("TAG", "sendOtp: $request")
+
+        return safeCall {
             client.post(Endpoints.VERIFY_OTP) {
                 setBody(request)
             }
-        }
+        }}
 }

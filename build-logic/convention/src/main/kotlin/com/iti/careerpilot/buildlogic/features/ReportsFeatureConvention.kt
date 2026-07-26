@@ -1,7 +1,6 @@
 package com.iti.careerpilot.buildlogic.features
 
 import com.android.build.api.dsl.LibraryExtension
-import com.iti.careerpilot.buildlogic.configureCareerPilotFlavors
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,7 +12,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 class ReportsFeatureConvention : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
-        pluginManager.apply("com.android.library")
+        pluginManager.apply("careerpilot.android.library")
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
         pluginManager.apply("com.google.devtools.ksp")
         pluginManager.apply("com.google.dagger.hilt.android")
@@ -33,13 +32,12 @@ class ReportsFeatureConvention : Plugin<Project> {
                 targetCompatibility = JavaVersion.VERSION_11
             }
             buildFeatures {
-                buildConfig = false
+                buildConfig = true
                 compose = true
             }
             testOptions {
                 unitTests.isIncludeAndroidResources = true
             }
-            configureCareerPilotFlavors()
             packaging {
                 resources.excludes += setOf(
                     "/META-INF/{AL2.0,LGPL2.1}",

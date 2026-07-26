@@ -1,5 +1,9 @@
 plugins {
-    alias(libs.plugins.careerpilot.feature.onboarding)
+    alias(libs.plugins.feature.onboarding)
+}
+
+android {
+    namespace = "com.iti.onboarding"
 }
 
 dependencies {
@@ -9,4 +13,5 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:model"))
     implementation(project(":core:common"))
+    testImplementation(libs.junit)
 }

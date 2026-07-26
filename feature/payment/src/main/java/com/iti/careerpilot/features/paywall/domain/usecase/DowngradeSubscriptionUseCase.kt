@@ -1,0 +1,10 @@
+package com.iti.careerpilot.features.paywall.domain.usecase
+
+import com.iti.careerpilot.features.paywall.domain.repository.PaymentRepository
+import javax.inject.Inject
+
+class DowngradeSubscriptionUseCase @Inject constructor(
+    private val repository: PaymentRepository
+) {
+    suspend operator fun invoke(tier: String) = repository.downgradeSubscription(tier)
+}

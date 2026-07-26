@@ -16,7 +16,12 @@ fun UserProfileDto.toDomain(current: UserProfile): UserProfile =
             email = email.orEmpty(),
             timezone = timezone.orEmpty(),
             termsAccepted = termsAccepted ?: false,
-            subscriptionTier = subscriptionTier.orEmpty(),
+            subscriptionTier = if (current.account.subscriptionTier.equals("FREE", ignoreCase = true) &&
+                (subscriptionTier.equals("PLUS", ignoreCase = true) || subscriptionTier.equals("PRO", ignoreCase = true))) {
+                "FREE"
+            } else {
+                subscriptionTier.orEmpty()
+            },
             coinBalance = coinBalance ?: 0,
         ),
         personal = PersonalInfo(

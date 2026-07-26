@@ -88,7 +88,9 @@ class OTPViewModel @Inject constructor(
                             code = ""
                         )
                     }
-                    CareerPilotSnackbarController.show(error.toUIText())
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
         }
     }
@@ -106,7 +108,9 @@ class OTPViewModel @Inject constructor(
                 }
                 .onError { error ->
                     _state.update { it.copy(isLoading = false) }
-                    CareerPilotSnackbarController.show(error.toUIText())
+                    viewModelScope.launch {
+                        CareerPilotSnackbarController.show(error.toUIText())
+                    }
                 }
         }
     }
