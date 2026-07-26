@@ -8,20 +8,24 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun HomeRoot(
-    openPaywall: () -> Unit,
+    openPaywall: (Boolean) -> Unit,
     openSessionDetails: (Long) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.syncFromServer()
+    }
 
     HomeScreen(
         openPaywall = openPaywall,
@@ -33,12 +37,12 @@ fun HomeRoot(
 
 @Composable
 fun HomeScreen(
-    openPaywall: () -> Unit,
+    openPaywall: (Boolean) -> Unit,
     openSessionDetails: (Long) -> Unit,
     state: HomeState,
     onAction: (HomeAction) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize(),
@@ -46,13 +50,21 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Home Screen")
+        Text(text = state.formattedCoinBalance)
+        Text(text = "Tier: ${state.formattedSubscriptionTier}")
+
         Button(
-            onClick = openPaywall
+            onClick = { openPaywall(false) }
         ) {
-            Text(text = "open Paywall")
+            Text(text = "Open Paywall")
         }
         Button(
-            onClick = { openSessionDetails(123) }
+            onClick = { openPaywall(true) }
+        ) {
+            Text(text = "Test Get Coins")
+        }
+        Button(
+            onClick = { openSessionDetails(123L) }
         ) {
             Text(text = "Open Session Details")
         }

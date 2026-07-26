@@ -39,12 +39,14 @@ data class AuthUserProfileDto(
     @SerialName("yearsOfExperience") val yearsOfExperience: Int? = null,
     @SerialName("cvUrl") val cvUrl: String? = null,
     @SerialName("skills") val skills: List<AuthSkillDto>? = null,
-    @SerialName("targetCompanies") val targetCompanies: List<String?>? = null,
+    @SerialName("targetCompanies") val targetCompanies: String? = null,
     @SerialName("educationLevel") val educationLevel: String? = null,
     @SerialName("timezone") val timezone: String? = null,
     @SerialName("termsAccepted") val termsAccepted: Boolean? = null,
     @SerialName("onboardingCompleted") val onboardingCompleted: Boolean = false,
     @SerialName("trackName") val trackName: String? = null,
+    @SerialName("subscriptionTier") val subscriptionTier: String? = null,
+    @SerialName("coinBalance") val coinBalance: Int? = null,
 )
 
 @Serializable

@@ -25,11 +25,15 @@ import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 import com.iti.common.model.ProfileEditSection
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
 @Composable
 fun NestedNavDisplay(
     currentRootRoute: NavKey?,
     navigateBack: () -> Unit,
-    openPaywall: () -> Unit,
+    openPaywall: (showGetCoins: Boolean) -> Unit,
     logout: () -> Unit,
     openSessionDetails: (Long) -> Unit,
     openSettings: () -> Unit,
@@ -40,9 +44,14 @@ fun NestedNavDisplay(
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
         bottomBar = {
             CareerPilotBottomNavBar(
-                selectedIndex = nestedBackStack.selectedBottomNavBarIndex()
+                selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 12.dp)
+                    .navigationBarsPadding()
             ) {
                 BottomBarDestination.entries.forEach { destination ->
                     BottomNavBarItem(

@@ -3,9 +3,11 @@ package com.iti.careerpilot.editprofile.domain.di
 
 import com.iti.careerpilot.editprofile.data.datasource.local.EditProfileLocalDataSourceImpl
 import com.iti.careerpilot.editprofile.data.datasource.local.ImageCompressorImpl
+import com.iti.careerpilot.editprofile.data.datasource.remote.EditProfileRemoteDataSourceImpl
 import com.iti.careerpilot.editprofile.data.repo.EditProfileRepoImpl
 import com.iti.careerpilot.editprofile.domain.datasource.local.EditProfileLocalDataSource
 import com.iti.careerpilot.editprofile.domain.datasource.local.ImageCompressor
+import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
 import dagger.Binds
 import dagger.Module

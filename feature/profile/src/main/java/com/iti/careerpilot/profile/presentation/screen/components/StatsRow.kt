@@ -28,13 +28,18 @@ fun StatsRow(profile: UserProfile) {
             label = stringResource(R.string.coins),
             value = profile.account.coinBalance.toString()
         )
+        val formattedPlan = when (profile.account.subscriptionTier.uppercase()) {
+            "PRO", "MAX" -> stringResource(R.string.max)
+            "PLUS" -> stringResource(R.string.plus)
+            else -> stringResource(R.string.free)
+        }
         StatPill(
             modifier = Modifier.weight(1f),
             icon = ImageVector.vectorResource(id = R.drawable.ic_workspace_premium),
             containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
             iconTint = MaterialTheme.colorScheme.secondary,
             label = stringResource(R.string.plan),
-            value = profile.account.subscriptionTier.ifBlank { stringResource(R.string.free) }
+            value = formattedPlan
         )
     }
 }

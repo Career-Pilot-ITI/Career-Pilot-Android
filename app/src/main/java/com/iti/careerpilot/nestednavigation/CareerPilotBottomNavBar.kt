@@ -28,14 +28,14 @@ fun CareerPilotBottomNavBar(
     AnimatedNavigationBar(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(80.dp)
             .selectableGroup(),
         selectedIndex = selectedIndex,
 
         ballColor = MaterialTheme.colorScheme.primary,
         barColor = MaterialTheme.colorScheme.surface,
 
-        cornerRadius = shapeCornerRadius(24.dp),
+        cornerRadius = shapeCornerRadius(28.dp),
 
         ballAnimation = Parabolic(
             animationSpec = tween(
