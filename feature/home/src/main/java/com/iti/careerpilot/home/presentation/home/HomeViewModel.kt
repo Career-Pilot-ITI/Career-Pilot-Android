@@ -7,10 +7,11 @@ import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
-import com.iti.core.datastore.sync.UserProfileSync
-import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
+import com.iti.core.datastore.sync.UserProfileSync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -112,36 +113,40 @@ class HomeViewModel @Inject constructor(
                     error = null,
                 )
             }
-
-            when (val result = getInterviewSessions()) {
-                is CareerPilotResult.Error -> {
+            getInterviewSessions()
+                .onSuccess { data ->
+                    applySessions(data)
+                }
+                .onError { error ->
                     _state.update {
                         it.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            error = result.error.toUIText(),
+                            error = error.toUIText(),
                         )
                     }
-                    CareerPilotSnackbarController.show(result.error.toUIText())
+                    CareerPilotSnackbarController.show(error.toUIText())
                 }
+        }
+        loadInterviewTracks()
+        syncAccount()
+    }
 
-                is CareerPilotResult.Success -> applySessions(result.data)
-            }
-
-            loadInterviewTracks()
-            syncAccount()
+    private fun syncAccount() {
+        viewModelScope.launch {
+            userProfileSync.syncWalletBalance()
+        }
+        viewModelScope.launch {
+            userProfileSync.syncSubscriptionTier()
         }
     }
 
-    private suspend fun syncAccount() {
-        userProfileSync.syncWalletBalance()
-        userProfileSync.syncSubscriptionTier()
-    }
-
-    private suspend fun loadInterviewTracks() {
-        val tracks = (getInterviewTracks() as? CareerPilotResult.Success)?.data ?: return
-
-        _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
+    private fun loadInterviewTracks() {
+        viewModelScope.launch {
+            getInterviewTracks().onSuccess { tracks ->
+                _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
+            }
+        }
     }
 
     private fun applySessions(sessions: List<InterviewSession>) {
