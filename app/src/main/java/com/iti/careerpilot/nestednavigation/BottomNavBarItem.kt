@@ -9,6 +9,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -129,14 +130,15 @@ fun BottomNavBarItem(
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = label,
                 tint = iconColor,
                 modifier = Modifier
-                    .size(27.dp)
+                    .size(24.dp)
                     .graphicsLayer {
                         translationY = with(density) {
                             bounceOffset.value.dp.toPx()
@@ -147,13 +149,13 @@ fun BottomNavBarItem(
                     },
             )
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(2.dp))
 
             AnimatedVisibility(isSelected) {
                 Text(
                     modifier = Modifier.visible(isSelected),
                     text = label,
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    style = MaterialTheme.typography.labelSmall.copy(
                         color = labelColor
                     )
                 )

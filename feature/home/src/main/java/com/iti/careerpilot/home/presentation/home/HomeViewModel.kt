@@ -105,14 +105,16 @@ class HomeViewModel @Inject constructor(
         val current = _state.value
         if (current.isLoading || current.isRefreshing) return
 
+        _state.update {
+            it.copy(
+                isLoading = !isRefresh,
+                isRefreshing = isRefresh,
+                error = null,
+            )
+        }
+        loadInterviewTracks()
+        syncAccount()
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = !isRefresh,
-                    isRefreshing = isRefresh,
-                    error = null,
-                )
-            }
             getInterviewSessions()
                 .onSuccess { data ->
                     applySessions(data)
@@ -128,8 +130,6 @@ class HomeViewModel @Inject constructor(
                     CareerPilotSnackbarController.show(error.toUIText())
                 }
         }
-        loadInterviewTracks()
-        syncAccount()
     }
 
     private fun syncAccount() {
