@@ -4,6 +4,7 @@ import java.time.Instant
 
 data class InterviewSession(
     val id: Long,
+    val trackId: Long?,
     val trackName: String,
     val overallScore: Int?,
     val durationMinutes: Int,

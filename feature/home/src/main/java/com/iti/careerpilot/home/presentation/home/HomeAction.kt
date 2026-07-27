@@ -9,4 +9,5 @@ sealed interface HomeAction {
     data object SeeAllInterviewsClicked : HomeAction
     data class InterviewTrackClicked(val trackId: Long, val trackName: String) : HomeAction
     data class SessionClicked(val sessionId: Long) : HomeAction
+    data class ResumeSessionClicked(val sessionId: Long) : HomeAction
 }

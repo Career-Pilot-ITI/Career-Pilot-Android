@@ -52,6 +52,7 @@
     <string name="home_session_today">اليوم، %1$s</string>
     <string name="home_session_yesterday">أمس، %1$s</string>
     <string name="home_session_unscored">—</string>
+    <string name="home_session_continue">متابعة</string>
 
     <!-- Interviews catalog -->
     <string name="interviews_title">المقابلات</string>

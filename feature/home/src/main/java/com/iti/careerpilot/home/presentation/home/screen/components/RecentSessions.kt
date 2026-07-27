@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -68,12 +69,15 @@ fun SectionHeader(
 fun SessionRow(
     session: InterviewSession,
     onClick: () -> Unit,
+    onResume: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val rowClick = if (session.isCompleted) onClick else onResume
+
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onClick)
+                .clickable(onClick = rowClick)
                 .padding(Dimens.CardPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
@@ -98,12 +102,42 @@ fun SessionRow(
                 )
             }
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = CareerPilotPalette.gray400,
-            )
+            if (session.isCompleted) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = CareerPilotPalette.gray400,
+                )
+            } else {
+                ContinueChip(onClick = onResume)
+            }
         }
+    }
+}
+
+@Composable
+private fun ContinueChip(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clip(CareerPilotShapes.small)
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = Dimens.SpaceL, vertical = Dimens.SpaceS),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceXS),
+    ) {
+        Text(
+            text = stringResource(R.string.home_session_continue),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        Icon(
+            imageVector = Icons.Filled.PlayArrow,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(18.dp),
+        )
     }
 }
 

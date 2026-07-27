@@ -69,6 +69,17 @@ class HomeViewModel @Inject constructor(
 
             is HomeAction.SessionClicked ->
                 sendEvent(HomeEvent.NavigateToSessionDetails(action.sessionId))
+
+            is HomeAction.ResumeSessionClicked -> {
+                val session = _state.value.recentSessions
+                    .firstOrNull { it.id == action.sessionId }
+                sendEvent(
+                    HomeEvent.NavigateToPracticeSession(
+                        trackId = session?.trackId ?: 0L,
+                        sessionId = action.sessionId,
+                    )
+                )
+            }
         }
     }
 

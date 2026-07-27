@@ -13,6 +13,7 @@ fun InterviewSessionDto.toDomain(): InterviewSession? {
 
     return InterviewSession(
         id = sessionId,
+        trackId = trackId,
         trackName = trackName.orEmpty(),
         overallScore = overallScore,
         durationMinutes = durationSeconds.secondsToWholeMinutes(),

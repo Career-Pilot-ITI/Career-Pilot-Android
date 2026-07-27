@@ -100,6 +100,9 @@ fun NestedNavDisplay(
                     HomeRoot(
                         openReadyToPractice = openReadyToPractice,
                         openSessionDetails = openSessionDetails,
+                        openPracticeSession = { trackId, sessionId ->
+                            openPracticeSession(trackId, sessionId)
+                        },
                         openInterviews = openInterviews,
                         openPaywall = { openPaywall(false) },
                         openReports = {

@@ -44,6 +44,7 @@ import com.iti.careerpilot.home.presentation.home.screen.components.rememberGree
 fun HomeRoot(
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
     openSessionDetails: (Long) -> Unit,
+    openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     openInterviews: () -> Unit,
     openPaywall: () -> Unit,
     openReports: () -> Unit,
@@ -58,6 +59,9 @@ fun HomeRoot(
 
             is HomeEvent.NavigateToSessionDetails ->
                 openSessionDetails(event.sessionId)
+
+            is HomeEvent.NavigateToPracticeSession ->
+                openPracticeSession(event.trackId, event.sessionId)
 
             HomeEvent.NavigateToInterviews -> openInterviews()
             HomeEvent.NavigateToPaywall -> openPaywall()
@@ -199,6 +203,7 @@ fun HomeScreen(
                     SessionRow(
                         session = session,
                         onClick = { onAction(HomeAction.SessionClicked(session.id)) },
+                        onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
                     )
                 }
             }

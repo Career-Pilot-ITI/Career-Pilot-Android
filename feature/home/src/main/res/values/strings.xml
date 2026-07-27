@@ -48,6 +48,7 @@
     <string name="home_session_today">Today, %1$s</string>
     <string name="home_session_yesterday">Yesterday, %1$s</string>
     <string name="home_session_unscored">—</string>
+    <string name="home_session_continue">Continue</string>
 
     <!-- Interviews catalog -->
     <string name="interviews_title">Interviews</string>
