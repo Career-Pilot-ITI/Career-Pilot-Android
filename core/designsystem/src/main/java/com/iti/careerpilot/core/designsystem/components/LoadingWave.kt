@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,7 +31,7 @@ import kotlin.math.sin
 fun LoadingWave(
     modifier: Modifier = Modifier,
     barCount: Int = 28,
-    color: Color = CareerPilotPalette.teal,
+    color: Color = MaterialTheme.colorScheme.primary,
     height: Dp = Dimens.WaveformHeight,
     barWidth: Dp = Dimens.WaveformBarWidth,
     barGap: Dp = Dimens.WaveformBarGap,
