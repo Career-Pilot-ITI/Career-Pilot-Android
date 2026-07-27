@@ -13,10 +13,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,12 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
+import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.presentation.home.HomeAction
@@ -89,45 +96,63 @@ fun HomeRoot(
         state = state,
         onAction = viewModel::onAction,
     )
+
+    if (state.isLoading) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            )
+        ) {
+            CareerPilotCard{
+                Box(
+                    modifier = Modifier
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    LoadingWave(color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
     state: HomeState,
     onAction: (HomeAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.colorScheme
+    val pullToRefreshState = rememberPullToRefreshState()
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets
             .exclude(WindowInsets.navigationBars),
     ) { innerPadding ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center,
-            ) {
-                LoadingWave(color = MaterialTheme.colorScheme.primary)
-            }
-            return@Scaffold
-        }
-
         PullToRefreshBox(
+            state = pullToRefreshState,
             isRefreshing = state.isRefreshing,
             onRefresh = { onAction(HomeAction.Refresh) },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = pullToRefreshState,
+                    isRefreshing = state.isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    color = colors.primary,
+                    containerColor = colors.surface,
+                )
+            },
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    start = Dimens.SpaceXXL,
-                    end = Dimens.SpaceXXL,
                     top = Dimens.SpaceXXL,
                     bottom = Dimens.SpaceXXXXL,
                 ),
@@ -138,7 +163,11 @@ fun HomeScreen(
                         greeting = rememberGreeting(),
                         userName = state.userName,
                         coins = state.coins,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = Dimens.SpaceXXL
+                            ),
                     )
                 }
 
@@ -147,6 +176,10 @@ fun HomeScreen(
                         planLabel = state.planLabel,
                         isSubscribed = state.isSubscribed,
                         onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                        modifier = Modifier
+                            .padding(
+                                horizontal = Dimens.SpaceXXL
+                            )
                     )
                 }
 
@@ -154,6 +187,10 @@ fun HomeScreen(
                     OverallScoreCard(
                         summary = state.scoreSummary,
                         onClick = { onAction(HomeAction.ScoreCardClicked) },
+                        modifier = Modifier
+                            .padding(
+                                horizontal = Dimens.SpaceXXL
+                            )
                     )
                 }
 
@@ -162,6 +199,10 @@ fun HomeScreen(
                         trackName = state.practiceTrackName,
                         enabled = state.canStartPractice,
                         onClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                        modifier = Modifier
+                            .padding(
+                                horizontal = Dimens.SpaceXXL
+                            )
                     )
                 }
 
@@ -171,6 +212,10 @@ fun HomeScreen(
                             title = stringResource(R.string.home_available_interviews),
                             actionLabel = stringResource(R.string.home_see_all),
                             onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = Dimens.SpaceXXL
+                                )
                         )
                     }
 
@@ -178,6 +223,9 @@ fun HomeScreen(
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
                             modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(
+                                horizontal = Dimens.SpaceXXL
+                            )
                         ) {
                             items(
                                 items = state.availableInterviews,
@@ -206,6 +254,10 @@ fun HomeScreen(
                             .takeIf { state.recentSessions.isNotEmpty() },
                         onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
                             .takeIf { state.recentSessions.isNotEmpty() },
+                        modifier = Modifier
+                            .padding(
+                                horizontal = Dimens.SpaceXXL
+                            )
                     )
                 }
 
@@ -214,6 +266,10 @@ fun HomeScreen(
                         EmptySessionsCard(
                             onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
                             isActionEnabled = state.canStartPractice,
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = Dimens.SpaceXXL
+                                )
                         )
                     }
                 } else {
@@ -225,6 +281,10 @@ fun HomeScreen(
                             session = session,
                             onClick = { onAction(HomeAction.SessionClicked(session.id)) },
                             onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = Dimens.SpaceXXL
+                                )
                         )
                     }
                 }
