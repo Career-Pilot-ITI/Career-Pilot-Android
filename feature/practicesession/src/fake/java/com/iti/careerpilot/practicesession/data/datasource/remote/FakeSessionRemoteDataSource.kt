@@ -21,7 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSource {
 
-    private var questionCounter = 0
+    private var questionCounter = 1
     private val totalQuestions = 4
 
     private val questions = listOf(
