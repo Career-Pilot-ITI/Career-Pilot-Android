@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,6 +91,7 @@ fun HomeRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     state: HomeState,
@@ -113,112 +116,118 @@ fun HomeScreen(
             return@Scaffold
         }
 
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { onAction(HomeAction.Refresh) },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(
-                start = Dimens.SpaceXXL,
-                end = Dimens.SpaceXXL,
-                top = Dimens.SpaceXXL,
-                bottom = Dimens.SpaceXXXXL,
-            ),
-            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
         ) {
-            item {
-                HomeHeader(
-                    greeting = rememberGreeting(),
-                    userName = state.userName,
-                    coins = state.coins,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            state.trial?.let { trial ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = Dimens.SpaceXXL,
+                    end = Dimens.SpaceXXL,
+                    top = Dimens.SpaceXXL,
+                    bottom = Dimens.SpaceXXXXL,
+                ),
+                verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
+            ) {
                 item {
-                    FreeTrialCard(
-                        trial = trial,
-                        onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
-                    )
-                }
-            }
-
-            item {
-                OverallScoreCard(
-                    summary = state.scoreSummary,
-                    onClick = { onAction(HomeAction.ScoreCardClicked) },
-                )
-            }
-
-            item {
-                PracticeInterviewCard(
-                    trackName = state.practiceTrackName,
-                    enabled = state.canStartPractice,
-                    onClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                )
-            }
-
-            if (state.availableInterviews.isNotEmpty()) {
-                item {
-                    SectionHeader(
-                        title = stringResource(R.string.home_available_interviews),
-                        actionLabel = stringResource(R.string.home_see_all),
-                        onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
-                    )
-                }
-
-                item {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
+                    HomeHeader(
+                        greeting = rememberGreeting(),
+                        userName = state.userName,
+                        coins = state.coins,
                         modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        items(
-                            items = state.availableInterviews,
-                            key = { track -> track.id },
-                        ) { track ->
-                            InterviewTrackCard(
-                                track = track,
-                                onClick = {
-                                    onAction(
-                                        HomeAction.InterviewTrackClicked(
-                                            trackId = track.id,
-                                            trackName = track.name,
+                    )
+                }
+
+                state.trial?.let { trial ->
+                    item {
+                        FreeTrialCard(
+                            trial = trial,
+                            onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                        )
+                    }
+                }
+
+                item {
+                    OverallScoreCard(
+                        summary = state.scoreSummary,
+                        onClick = { onAction(HomeAction.ScoreCardClicked) },
+                    )
+                }
+
+                item {
+                    PracticeInterviewCard(
+                        trackName = state.practiceTrackName,
+                        enabled = state.canStartPractice,
+                        onClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                    )
+                }
+
+                if (state.availableInterviews.isNotEmpty()) {
+                    item {
+                        SectionHeader(
+                            title = stringResource(R.string.home_available_interviews),
+                            actionLabel = stringResource(R.string.home_see_all),
+                            onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
+                        )
+                    }
+
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            items(
+                                items = state.availableInterviews,
+                                key = { track -> track.id },
+                            ) { track ->
+                                InterviewTrackCard(
+                                    track = track,
+                                    onClick = {
+                                        onAction(
+                                            HomeAction.InterviewTrackClicked(
+                                                trackId = track.id,
+                                                trackName = track.name,
+                                            )
                                         )
-                                    )
-                                },
-                            )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            item {
-                SectionHeader(
-                    title = stringResource(R.string.home_recent_sessions),
-                    actionLabel = stringResource(R.string.home_see_all)
-                        .takeIf { state.recentSessions.isNotEmpty() },
-                    onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
-                        .takeIf { state.recentSessions.isNotEmpty() },
-                )
-            }
-
-            if (state.recentSessions.isEmpty()) {
                 item {
-                    EmptySessionsCard(
-                        onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                        isActionEnabled = state.canStartPractice,
+                    SectionHeader(
+                        title = stringResource(R.string.home_recent_sessions),
+                        actionLabel = stringResource(R.string.home_see_all)
+                            .takeIf { state.recentSessions.isNotEmpty() },
+                        onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
+                            .takeIf { state.recentSessions.isNotEmpty() },
                     )
                 }
-            } else {
-                items(
-                    items = state.recentSessions,
-                    key = { session -> session.id },
-                ) { session ->
-                    SessionRow(
-                        session = session,
-                        onClick = { onAction(HomeAction.SessionClicked(session.id)) },
-                        onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
-                    )
+
+                if (state.recentSessions.isEmpty()) {
+                    item {
+                        EmptySessionsCard(
+                            onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                            isActionEnabled = state.canStartPractice,
+                        )
+                    }
+                } else {
+                    items(
+                        items = state.recentSessions,
+                        key = { session -> session.id },
+                    ) { session ->
+                        SessionRow(
+                            session = session,
+                            onClick = { onAction(HomeAction.SessionClicked(session.id)) },
+                            onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
+                        )
+                    }
                 }
             }
         }
