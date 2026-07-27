@@ -25,7 +25,7 @@ fun CareerPilotAppScaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0), // keep 0 and handle padding in every screen
 
         topBar = {
             AnimatedVisibility(

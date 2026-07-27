@@ -2,9 +2,9 @@
 <resources>
 
     <!-- Greeting -->
-    <string name="home_greeting_morning">Good morning</string>
-    <string name="home_greeting_afternoon">Good afternoon</string>
-    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_greeting_morning">Good morning 👋</string>
+    <string name="home_greeting_afternoon">Good afternoon 👋</string>
+    <string name="home_greeting_evening">Good evening 👋</string>
     <string name="home_coins_description">Coin balance</string>
 
     <!-- Free trial card -->

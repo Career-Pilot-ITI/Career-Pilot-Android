@@ -45,16 +45,12 @@ fun NestedNavDisplay(
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
             CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 12.dp)
-                    .navigationBarsPadding()
             ) {
                 BottomBarDestination.entries.forEach { destination ->
                     BottomNavBarItem(

@@ -3,14 +3,19 @@ package com.iti.careerpilot.reports.presentation.screen.history.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -18,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -72,20 +78,24 @@ fun SessionHistoryScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = Color.Transparent,
                 ),
+                windowInsets = TopAppBarDefaults.windowInsets.exclude(WindowInsets.statusBars)
             )
         },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { innerPadding ->
         ReportsAnimatedContent(
             targetState = state,
             contentKey = SessionHistoryState::phase,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
         ) { animatedState ->
             when (animatedState.phase) {
                 ReportsContentPhase.LOADING -> ReportsLoadingContent(
                     messageRes = R.string.reports_loading_history,
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier,
                 )
 
                 ReportsContentPhase.ERROR -> {
@@ -95,12 +105,12 @@ fun SessionHistoryScreen(
                             error = error,
                             isOnline = animatedState.isOnline,
                             onRetry = { onAction(SessionHistoryAction.Retry) },
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier,
                         )
                     } else {
                         ReportsLoadingContent(
                             messageRes = R.string.reports_loading_history,
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier,
                         )
                     }
                 }
@@ -108,7 +118,7 @@ fun SessionHistoryScreen(
                 ReportsContentPhase.EMPTY -> ReportsEmptyContent(
                     titleRes = R.string.reports_empty_history_title,
                     messageRes = R.string.reports_empty_history_message,
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier,
                 )
 
                 ReportsContentPhase.CONTENT -> {
@@ -116,8 +126,7 @@ fun SessionHistoryScreen(
                     if (history != null) {
                         LazyColumn(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding),
+                                .fillMaxSize(),
                             contentPadding = PaddingValues(
                                 horizontal = Dimens.SpaceXL,
                                 vertical = Dimens.SpaceS,

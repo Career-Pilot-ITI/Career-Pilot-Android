@@ -2,9 +2,9 @@
 <resources>
 
     <!-- Greeting -->
-    <string name="home_greeting_morning">صباح الخير</string>
-    <string name="home_greeting_afternoon">مساء الخير</string>
-    <string name="home_greeting_evening">مساء الخير</string>
+    <string name="home_greeting_morning">صباح الخير 👋</string>
+    <string name="home_greeting_afternoon">مساء الخير 👋</string>
+    <string name="home_greeting_evening">مساء الخير 👋</string>
     <string name="home_coins_description">رصيد العملات</string>
 
     <!-- Free trial card -->

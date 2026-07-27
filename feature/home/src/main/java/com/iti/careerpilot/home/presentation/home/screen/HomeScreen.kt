@@ -129,9 +129,15 @@ fun HomeScreen(
     val pullToRefreshState = rememberPullToRefreshState()
     Scaffold(
         modifier = modifier,
+        topBar = {
+            HomeHeader(
+                greeting = rememberGreeting(),
+                userName = state.userName,
+                coins = state.coins,
+            )
+        },
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets
-            .exclude(WindowInsets.navigationBars),
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { innerPadding ->
         PullToRefreshBox(
             state = pullToRefreshState,
@@ -158,18 +164,6 @@ fun HomeScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
             ) {
-                item {
-                    HomeHeader(
-                        greeting = rememberGreeting(),
-                        userName = state.userName,
-                        coins = state.coins,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                horizontal = Dimens.SpaceXXL
-                            ),
-                    )
-                }
 
                 item {
                     SubscriptionCard(
