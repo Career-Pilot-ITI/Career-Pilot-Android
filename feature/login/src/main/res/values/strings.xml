@@ -21,5 +21,6 @@
     <string name="otp_resend">Resend</string>
     <string name="otp_success_title">You\'re in!</string>
     <string name="otp_success_subtitle">Setting up your coaching session…</string>
+    <string name="sending_otp">Sending OTP</string>
 
 </resources>

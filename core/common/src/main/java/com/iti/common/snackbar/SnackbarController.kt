@@ -13,14 +13,14 @@ interface SnackbarController {
 
     suspend fun show(
         message: UIText,
-        type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
+        type: CareerPilotSnackbarType = CareerPilotSnackbarType.DISMISSIBLE,
         duration: SnackbarDuration = type.defaultDuration(),
     ): SnackbarResult
 
     suspend fun show(
         message: UIText,
         actionLabel: UIText,
-        type: CareerPilotSnackbarType = CareerPilotSnackbarType.NORMAL,
+        type: CareerPilotSnackbarType = CareerPilotSnackbarType.DISMISSIBLE,
         duration: SnackbarDuration = type.defaultDuration(),
     ): SnackbarResult
 }
