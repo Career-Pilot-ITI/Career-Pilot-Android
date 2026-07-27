@@ -62,17 +62,17 @@ class OTPViewModel @Inject constructor(
 
     private fun verify() {
         val current = _state.value
-        if (current.isLoading || current.isVerified) return
+        if (current.isVerifyingOtp || current.isVerified) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isVerifyingOtp = true, error = null) }
 
             verifyOtp(current.phoneNumber, current.code)
                 .onSuccess { session ->
                     viewModelScope.launch {
 
                         resendTimerJob?.cancel()
-                        _state.update { it.copy(isLoading = false, isVerified = true) }
+                        _state.update { it.copy(isVerifyingOtp = false, isVerified = true) }
                         delay(SUCCESS_DISMISS_MILLIS.milliseconds)
                         if (session.hasCompletedOnboarding) {
                             _events.send(OTPEvent.NavigateToHome)
@@ -84,7 +84,7 @@ class OTPViewModel @Inject constructor(
                 .onError { error ->
                     _state.update {
                         it.copy(
-                            isLoading = false,
+                            isVerifyingOtp = false,
                             code = ""
                         )
                     }
@@ -99,15 +99,15 @@ class OTPViewModel @Inject constructor(
         if (!_state.value.canResend) return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isResendingOtp = true, error = null) }
 
             sendOtp(_state.value.phoneNumber)
                 .onSuccess {
-                    _state.update { it.copy(isLoading = false, code = "") }
+                    _state.update { it.copy(isResendingOtp = false, code = "") }
                     startResendCountdown()
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isResendingOtp = false) }
                     viewModelScope.launch {
                         CareerPilotSnackbarController.show(error.toUIText())
                     }
