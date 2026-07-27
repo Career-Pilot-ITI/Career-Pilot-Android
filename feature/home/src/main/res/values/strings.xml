@@ -10,6 +10,9 @@
     <!-- Free trial card -->
     <string name="home_free_trial">FREE TRIAL</string>
     <string name="home_upgrade">Upgrade</string>
+    <string name="home_plan_label">%1$s plan</string>
+    <string name="home_plan_upgrade_subtitle">Upgrade for unlimited interviews</string>
+    <string name="home_plan_active_subtitle">You\'re all set</string>
     <plurals name="home_free_sessions_remaining">
         <item quantity="one">%1$d free session remaining</item>
         <item quantity="other">%1$d free sessions remaining</item>

@@ -10,6 +10,9 @@
     <!-- Free trial card -->
     <string name="home_free_trial">نسخة تجريبية مجانية</string>
     <string name="home_upgrade">ترقية</string>
+    <string name="home_plan_label">خطة %1$s</string>
+    <string name="home_plan_upgrade_subtitle">ترقية للحصول على مقابلات غير محدودة</string>
+    <string name="home_plan_active_subtitle">أنت جاهز تماماً</string>
     <plurals name="home_free_sessions_remaining">
         <item quantity="zero">لا توجد جلسات مجانية متبقية</item>
         <item quantity="one">تبقى جلسة مجانية واحدة</item>

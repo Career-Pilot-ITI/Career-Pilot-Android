@@ -7,6 +7,7 @@ import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
+import com.iti.core.datastore.sync.UserProfileSync
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
@@ -26,6 +27,7 @@ class HomeViewModel @Inject constructor(
     private val getInterviewSessions: GetInterviewSessionsUseCase,
     private val getInterviewTracks: GetTracksUseCase,
     private val getScoreSummary: GetScoreSummaryUseCase,
+    private val userProfileSync: UserProfileSync,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -90,6 +92,8 @@ class HomeViewModel @Inject constructor(
                         userName = profile.personal.displayName,
                         practiceTrackName = profile.career.trackName,
                         practiceTrackId = profile.career.trackId?.takeIf { id -> id != 0L },
+                        coins = profile.account.coinBalance,
+                        subscriptionTier = profile.account.subscriptionTier,
                     )
                 }
             }
@@ -125,8 +129,13 @@ class HomeViewModel @Inject constructor(
             }
 
             loadInterviewTracks()
-            applyPendingIntegrationPlaceholders()
+            syncAccount()
         }
+    }
+
+    private suspend fun syncAccount() {
+        userProfileSync.syncWalletBalance()
+        userProfileSync.syncSubscriptionTier()
     }
 
     private suspend fun loadInterviewTracks() {
@@ -146,19 +155,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
-    // TODO: provide coins and subscription state
-    private fun applyPendingIntegrationPlaceholders() {
-        _state.update {
-            it.copy(
-                coins = 0,
-                trial = TrialUiState(
-                    sessionsUsed = 0,
-                    totalFreeSessions = 1,
-                ),
-            )
-        }
-    }
 
     private fun sendEvent(event: HomeEvent) {
         viewModelScope.launch { _events.send(event) }

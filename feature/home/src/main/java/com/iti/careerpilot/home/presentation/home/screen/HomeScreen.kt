@@ -38,7 +38,7 @@ import com.iti.careerpilot.home.presentation.home.HomeEvent
 import com.iti.careerpilot.home.presentation.home.HomeState
 import com.iti.careerpilot.home.presentation.home.HomeViewModel
 import com.iti.careerpilot.home.presentation.home.screen.components.EmptySessionsCard
-import com.iti.careerpilot.home.presentation.home.screen.components.FreeTrialCard
+import com.iti.careerpilot.home.presentation.home.screen.components.SubscriptionCard
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeHeader
 import com.iti.careerpilot.home.presentation.home.screen.components.InterviewTrackCard
 import com.iti.careerpilot.home.presentation.home.screen.components.OverallScoreCard
@@ -142,13 +142,12 @@ fun HomeScreen(
                     )
                 }
 
-                state.trial?.let { trial ->
-                    item {
-                        FreeTrialCard(
-                            trial = trial,
-                            onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
-                        )
-                    }
+                item {
+                    SubscriptionCard(
+                        planLabel = state.planLabel,
+                        isSubscribed = state.isSubscribed,
+                        onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                    )
                 }
 
                 item {

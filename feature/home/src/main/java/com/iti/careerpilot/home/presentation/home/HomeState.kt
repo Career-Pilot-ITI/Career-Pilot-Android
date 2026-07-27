@@ -18,7 +18,7 @@ data class HomeState(
 
     val coins: Int? = null,
 
-    val trial: TrialUiState? = null,
+    val subscriptionTier: String = "",
     val scoreSummary: ScoreSummary? = null,
 
     val availableInterviews: ImmutableList<InterviewTrack> = persistentListOf(),
@@ -26,14 +26,19 @@ data class HomeState(
     val error: UIText? = null,
 ) {
     val canStartPractice: Boolean get() = practiceTrackId != null
-}
 
-data class TrialUiState(
-    val sessionsUsed: Int,
-    val totalFreeSessions: Int,
-) {
-    val sessionsRemaining: Int get() = (totalFreeSessions - sessionsUsed).coerceAtLeast(0)
-    val progress: Float
-        get() = if (totalFreeSessions <= 0) 0f
-        else (sessionsUsed.toFloat() / totalFreeSessions).coerceIn(0f, 1f)
+    val isSubscribed: Boolean
+        get() = subscriptionTier.uppercase() in PAID_TIERS
+
+    val planLabel: String
+        get() = when (subscriptionTier.uppercase()) {
+            "PLUS" -> "Plus"
+            "PRO" -> "Pro"
+            "MAX" -> "Max"
+            else -> "Free"
+        }
+
+    private companion object {
+        val PAID_TIERS = setOf("PLUS", "PRO", "MAX")
+    }
 }
