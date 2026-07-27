@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Greeting -->
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_coins_description">Coin balance</string>
+
+    <!-- Free trial card -->
+    <string name="home_free_trial">FREE TRIAL</string>
+    <string name="home_upgrade">Upgrade</string>
+    <string name="home_plan_label">%1$s plan</string>
+    <string name="home_plan_upgrade_subtitle">Upgrade for unlimited interviews</string>
+    <string name="home_plan_active_subtitle">You\'re all set</string>
+    <plurals name="home_free_sessions_remaining">
+        <item quantity="one">%1$d free session remaining</item>
+        <item quantity="other">%1$d free sessions remaining</item>
+    </plurals>
+    <string name="home_free_sessions_used">%1$d of %2$d free sessions used</string>
+
+    <!-- Overall score card -->
+    <string name="home_overall_score">OVERALL SCORE</string>
+    <string name="home_score_excellent">Excellent Work</string>
+    <string name="home_score_good">Good Progress</string>
+    <string name="home_score_keep_going">Keep Going</string>
+    <string name="home_score_needs_work">Needs Work</string>
+    <string name="home_score_delta_up">+%1$d from last session</string>
+    <string name="home_score_delta_down">%1$d from last session</string>
+    <string name="home_score_no_previous">First scored session</string>
+    <string name="home_score_none">No score yet</string>
+    <string name="home_score_none_hint">Complete an interview to see your score</string>
+    <string name="home_score_empty_value">—</string>
+    <string name="home_open_reports">Open reports</string>
+
+    <!-- Practice interview card -->
+    <string name="home_practice_interview">Practice Interview</string>
+    <string name="home_start_practice">Start practice interview</string>
+
+    <!-- Available interviews -->
+    <string name="home_available_interviews">Available Interviews</string>
+    <string name="home_available_interviews_subtitle">Pick a track and start practising</string>
+
+    <!-- Recent sessions -->
+    <string name="home_recent_sessions">Recent Sessions</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_recent_sessions_empty_title">No interviews yet</string>
+    <string name="home_recent_sessions_empty_body">Practise with an AI interviewer and get instant feedback on your answers.</string>
+    <string name="home_recent_sessions_empty_action">Start your first interview</string>
+    <string name="home_session_meta">%1$s · %2$d min</string>
+    <string name="home_session_today">Today, %1$s</string>
+    <string name="home_session_yesterday">Yesterday, %1$s</string>
+    <string name="home_session_unscored">—</string>
+    <string name="home_session_continue">Continue</string>
+
+    <!-- Interviews catalog -->
+    <string name="interviews_title">Interviews</string>
+    <string name="interviews_subtitle">Personalized to your profile</string>
+    <string name="interviews_search_hint">Search interviews…</string>
+    <string name="interviews_available">Available Interviews</string>
+    <string name="interviews_empty">No interviews available right now.</string>
+    <string name="interviews_no_results">No interviews match your search.</string>
+    <string name="interviews_open">Open interview</string>
+    <string name="interviews_retry">Tap to retry</string>
+
+    <string name="back">Back</string>
+
+    <!-- Ready to practice -->
+    <string name="ready_cancel">Cancel</string>
+    <string name="ready_title">Ready to practice?</string>
+    <string name="ready_subtitle">Before we begin, a few quick tips.</string>
+    <string name="ready_tip_quiet">Find a quiet space with minimal background noise</string>
+    <string name="ready_tip_speak">Speak clearly and at a natural pace</string>
+    <string name="ready_tip_think">Take time to gather your thoughts before answering</string>
+    <string name="ready_tip_wait">The AI will wait for you to finish before responding</string>
+    <string name="ready_mic_title">Microphone Access</string>
+    <string name="ready_mic_required">Required to practice</string>
+    <string name="ready_mic_granted">Granted</string>
+    <string name="ready_begin">Begin Interview</string>
+    <string name="ready_permission_title">Microphone access</string>
+    <string name="ready_permission_text">CareerPilot needs your microphone to hear your answers during the interview.</string>
+    <string name="ready_permission_allow">Allow</string>
+    <string name="ready_permission_cancel">Not now</string>
+
+</resources>

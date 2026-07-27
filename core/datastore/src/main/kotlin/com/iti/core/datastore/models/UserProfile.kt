@@ -44,7 +44,8 @@ data class CareerInfo(
     val skills: List<String> = emptyList(),
     val targetCompanies: List<String> = emptyList(),
     val educationLevel: String = "",
-    val trackName: String = ""
+    val trackName: String = "",
+    val trackId: Long? = null,
 )
 
 @Serializable

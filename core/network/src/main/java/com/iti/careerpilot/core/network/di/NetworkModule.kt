@@ -22,6 +22,8 @@ import io.ktor.client.request.header
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import com.iti.careerpilot.core.network.Endpoints
+import com.iti.careerpilot.core.network.auth.SessionManager
+import com.iti.careerpilot.core.network.auth.SessionManagerImpl
 import com.iti.careerpilot.core.network.model.AuthTokensDto
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -46,6 +48,13 @@ object NetworkModule {
         explicitNulls = false
         prettyPrint = true
     }
+
+    @Provides
+    @Singleton
+    fun provideSessionManager(
+        client: HttpClient,
+        tokensRepo: UserTokensRepo,
+    ): SessionManager = SessionManagerImpl(client, tokensRepo)
 
     @Provides
     @Singleton

@@ -35,6 +35,7 @@ data class UserProfileDto(
     val coinBalance: Int? = null,
     val onboardingCompleted: Boolean? = null,
     val trackName: String? = null,
+    val trackId: Long? = null,
 )
 
 @Serializable

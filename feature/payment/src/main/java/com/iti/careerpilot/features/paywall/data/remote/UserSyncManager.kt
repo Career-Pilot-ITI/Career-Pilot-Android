@@ -2,6 +2,7 @@ package com.iti.careerpilot.features.paywall.data.remote
 
 import android.util.Log
 import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.datastore.sync.UserProfileSync
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -10,8 +11,8 @@ import kotlinx.coroutines.CancellationException
 class UserSyncManager @Inject constructor(
     private val paymentApi: PaymentRemoteDataSource,
     private val userProfileRepo: UserProfileRepo
-) {
-    suspend fun syncWalletBalance() {
+) : UserProfileSync {
+    override suspend fun syncWalletBalance() {
         try {
             val balanceResponse = paymentApi.getWalletBalance()
             userProfileRepo.updateUserProfile { profile ->
@@ -28,7 +29,7 @@ class UserSyncManager @Inject constructor(
         }
     }
 
-    suspend fun syncSubscriptionTier() {
+    override suspend fun syncSubscriptionTier() {
         try {
             val subscriptionResponse = paymentApi.getCurrentSubscription()
             val currentTier = subscriptionResponse.tier

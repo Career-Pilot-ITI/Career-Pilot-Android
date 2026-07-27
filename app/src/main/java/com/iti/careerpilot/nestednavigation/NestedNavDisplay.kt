@@ -18,7 +18,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.features.home.HomeRoot
+import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
@@ -39,6 +39,8 @@ fun NestedNavDisplay(
     openSessionDetails: (Long) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
+    openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openInterviews: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -96,9 +98,20 @@ fun NestedNavDisplay(
             entryProvider = entryProvider {
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
-                        openPracticeSession = openPracticeSession,
+                        openReadyToPractice = openReadyToPractice,
                         openSessionDetails = openSessionDetails,
-                        openPaywall = openPaywall
+                        openPracticeSession = { trackId, sessionId ->
+                            openPracticeSession(trackId, sessionId)
+                        },
+                        openInterviews = openInterviews,
+                        openPaywall = { openPaywall(false) },
+                        openReports = {
+                            nestedBackStack.apply {
+                                clear()
+                                navigateSingleTop(Route.NestedNav.Home)
+                                navigateSingleTop(Route.NestedNav.SessionHistory)
+                            }
+                        },
                     )
                 }
                 entry<Route.NestedNav.SessionHistory> {
@@ -124,9 +137,11 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
             Route.NestedNav.Home -> {
                 0
             }
+
             Route.NestedNav.SessionHistory -> {
                 1
             }
+
             else -> {
                 2
             }
