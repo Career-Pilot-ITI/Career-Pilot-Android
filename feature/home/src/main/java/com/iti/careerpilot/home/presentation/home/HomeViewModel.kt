@@ -3,7 +3,6 @@ package com.iti.careerpilot.home.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.home.domain.model.InterviewSession
-import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
@@ -90,9 +89,9 @@ class HomeViewModel @Inject constructor(
                     it.copy(
                         userName = profile.personal.displayName,
                         practiceTrackName = profile.career.trackName,
+                        practiceTrackId = profile.career.trackId?.takeIf { id -> id != 0L },
                     )
                 }
-                resolvePracticeTrackId(_state.value.availableInterviews)
             }
         }
     }
@@ -134,7 +133,6 @@ class HomeViewModel @Inject constructor(
         val tracks = (getInterviewTracks() as? CareerPilotResult.Success)?.data ?: return
 
         _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
-        resolvePracticeTrackId(tracks)
     }
 
     private fun applySessions(sessions: List<InterviewSession>) {
@@ -148,17 +146,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
-    private fun resolvePracticeTrackId(tracks: List<InterviewTrack>) {
-        val trackName = _state.value.practiceTrackName
-        if (trackName.isBlank() || tracks.isEmpty() || _state.value.practiceTrackId != null) return
-
-        val match = tracks.firstOrNull { track ->
-            track.name.equals(trackName, ignoreCase = true)
-        }
-
-        _state.update { it.copy(practiceTrackId = match?.id) }
-    }
 
     // TODO: provide coins and subscription state
     private fun applyPendingIntegrationPlaceholders() {

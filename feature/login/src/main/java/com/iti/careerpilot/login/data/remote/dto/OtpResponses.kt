@@ -45,6 +45,7 @@ data class AuthUserProfileDto(
     @SerialName("termsAccepted") val termsAccepted: Boolean? = null,
     @SerialName("onboardingCompleted") val onboardingCompleted: Boolean = false,
     @SerialName("trackName") val trackName: String? = null,
+    @SerialName("trackId") val trackId: Long? = null,
     @SerialName("subscriptionTier") val subscriptionTier: String? = null,
     @SerialName("coinBalance") val coinBalance: Int? = null,
 )

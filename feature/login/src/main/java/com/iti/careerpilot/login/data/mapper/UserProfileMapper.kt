@@ -32,7 +32,8 @@ fun OtpAuthResponse.toUserProfile(): UserProfile =
             skills = user.profile?.skills?.mapNotNull { it.skillName } ?: emptyList(),
             targetCompanies = user.profile?.targetCompanies?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList(),
             educationLevel = user.profile?.educationLevel.orEmpty(),
-            trackName = user.profile?.trackName.orEmpty()
+            trackName = user.profile?.trackName.orEmpty(),
+            trackId = user.profile?.trackId,
         ),
         avatar = AvatarInfo(
             avatarUrl = user.profile?.avatarUrl.orEmpty()

@@ -40,6 +40,7 @@ fun UserProfileDto.toDomain(current: UserProfile): UserProfile =
             targetCompanies = targetCompanies ?: emptyList(),
             educationLevel = educationLevel.orEmpty(),
             trackName = trackName.orEmpty(),
+            trackId = trackId,
         ),
         avatar = AvatarInfo(
             avatarUrl = avatarUrl.orEmpty(),
