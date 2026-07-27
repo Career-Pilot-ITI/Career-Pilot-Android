@@ -6,7 +6,7 @@ import com.iti.careerpilot.profile.domain.repo.ProfileRepo
 import com.iti.careerpilot.profile.presentation.action.ProfileAction
 import com.iti.careerpilot.profile.presentation.event.ProfileEvent
 import com.iti.careerpilot.profile.presentation.state.ProfileState
-import com.iti.core.datastore.UserTokensRepo
+import com.iti.careerpilot.core.network.auth.SessionManager
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.result.onError
@@ -28,7 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val profileRepo: ProfileRepo,
-    private val datastore: UserTokensRepo,
+    private val sessionManager: SessionManager,
     @param:Dispatcher(CareerPilotDispatchers.Default) private val dispatcherDefault: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -61,7 +61,7 @@ class ProfileViewModel @Inject constructor(
             ProfileAction.OnLogoutConfirm -> {
                 _state.update { it.copy(showLogoutDialog = false) }
                 viewModelScope.launch {
-                    datastore.clear()
+                    sessionManager.clearSession()
                     profileRepo.clearUserProfile()
                     sendEvent(ProfileEvent.NavigateToLogout)
                 }

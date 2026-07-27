@@ -10,13 +10,13 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import javax.inject.Inject
 import com.iti.careerpilot.login.data.mapper.toUserProfile
-import com.iti.core.datastore.UserTokensRepo
+import com.iti.careerpilot.core.network.auth.SessionManager
 import com.iti.core.datastore.repo.UserProfileRepo
 
 class AuthRepositoryImpl @Inject constructor(
     private val remote: AuthRemoteDataSource,
     private val userProfileRepo: UserProfileRepo,
-    private val userTokensRepo: UserTokensRepo,
+    private val sessionManager: SessionManager,
 ) : AuthRepository {
 
     override suspend fun sendOtp(phoneNumber: String): CareerPilotResult<Unit, NetworkError> =
@@ -36,8 +36,10 @@ class AuthRepositoryImpl @Inject constructor(
                 userProfileRepo.updateUserProfile {
                     result.data.toUserProfile()
                 }
-                userTokensRepo.setAccessToken(result.data.authTokens.accessToken)
-                userTokensRepo.setRefreshToken(result.data.authTokens.refreshToken)
+                sessionManager.onAuthenticated(
+                    accessToken = result.data.authTokens.accessToken,
+                    refreshToken = result.data.authTokens.refreshToken,
+                )
                 CareerPilotResult.Success(result.data.toDomain())
             }
 
