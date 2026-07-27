@@ -3,10 +3,6 @@ package com.iti.careerpilot.home.presentation.ready
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.home.domain.usecase.StartInterviewSessionUseCase
-import com.iti.common.result.CareerPilotResult
-import com.iti.common.snackbar.CareerPilotSnackbarController
-import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +15,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadyToPracticeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val startInterviewSession: StartInterviewSessionUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReadyToPracticeState())
@@ -70,24 +65,7 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun beginInterview() {
         val id = trackId ?: return
         if (!_state.value.canBegin) return
-
-        viewModelScope.launch {
-            _state.update { it.copy(isStarting = true, error = null) }
-
-            when (val result = startInterviewSession(id)) {
-                is CareerPilotResult.Error -> {
-                    _state.update {
-                        it.copy(isStarting = false, error = result.error.toUIText())
-                    }
-                    CareerPilotSnackbarController.show(result.error.toUIText())
-                }
-
-                is CareerPilotResult.Success -> {
-                    _state.update { it.copy(isStarting = false) }
-                    sendEvent(ReadyToPracticeEvent.NavigateToInterview(result.data.sessionId))
-                }
-            }
-        }
+        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id))
     }
 
     private fun sendEvent(event: ReadyToPracticeEvent) {

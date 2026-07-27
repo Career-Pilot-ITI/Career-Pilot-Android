@@ -44,7 +44,7 @@ fun ReadyToPracticeRoot(
     trackId: Long,
     trackName: String,
     onBack: () -> Unit,
-    openInterview: (sessionId: Long) -> Unit,
+    openPractice: (trackId: Long) -> Unit,
     viewModel: ReadyToPracticeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -67,7 +67,7 @@ fun ReadyToPracticeRoot(
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is ReadyToPracticeEvent.NavigateToInterview -> openInterview(event.sessionId)
+            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(event.trackId)
             ReadyToPracticeEvent.NavigateBack -> onBack()
         }
     }

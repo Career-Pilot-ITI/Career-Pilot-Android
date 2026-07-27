@@ -1,11 +1,9 @@
 package com.iti.careerpilot.home.data.repository
 
-import com.iti.careerpilot.home.data.datasource.remote.dto.StartSessionRequestDto
 import com.iti.careerpilot.home.data.mapper.toDomain
 import com.iti.careerpilot.home.data.datasource.remote.InterviewRemoteDataSource
 import com.iti.careerpilot.home.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.model.InterviewTrack
-import com.iti.careerpilot.home.domain.model.StartedSession
 import com.iti.careerpilot.home.domain.repository.InterviewRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
@@ -27,16 +25,5 @@ class InterviewRepositoryImpl @Inject constructor(
         when (val result = remoteDataSource.getTracks()) {
             is CareerPilotResult.Error -> result
             is CareerPilotResult.Success -> CareerPilotResult.Success(result.data.toDomain())
-        }
-
-    override suspend fun startSession(trackId: Long): CareerPilotResult<StartedSession, NetworkError> =
-        when (
-            val result = remoteDataSource.startSession(StartSessionRequestDto(trackId = trackId))
-        ) {
-            is CareerPilotResult.Error -> result
-            is CareerPilotResult.Success ->
-                result.data.toDomain()
-                    ?.let { CareerPilotResult.Success(it) }
-                    ?: CareerPilotResult.Error(NetworkError.EMPTY_RESULT)
         }
 }
