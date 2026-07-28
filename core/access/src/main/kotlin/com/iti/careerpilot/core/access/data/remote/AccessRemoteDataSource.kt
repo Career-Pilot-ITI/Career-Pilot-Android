@@ -1,0 +1,16 @@
+package com.iti.careerpilot.core.access.data.remote
+
+import com.iti.careerpilot.core.access.data.remote.dto.SubscriptionStatusDto
+import com.iti.careerpilot.core.network.Endpoints
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import javax.inject.Inject
+
+class AccessRemoteDataSource @Inject constructor(
+    private val httpClient: HttpClient
+) {
+    suspend fun getSubscriptionStatus(): SubscriptionStatusDto {
+        return httpClient.get(Endpoints.SUBSCRIPTION_CURRENT).body()
+    }
+}
