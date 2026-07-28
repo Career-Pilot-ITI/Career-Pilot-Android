@@ -60,7 +60,9 @@
     <string name="question_details">Question Details</string>
     <string name="your_transcript">Your Transcript</string>
     <string name="analysis">Analysis</string>
-    <string name="no_results_found">No results found</string>
+    <string name="no_results_found">No results, yet</string>
+    <string name="error_creating_results">An error occurred while creating your results. Please try again.</string>
     <string name="no_transcript_available">No transcript available</string>
     <string name="loading_session">Loading Session</string>
+    <string name="retry">Retry</string>
 </resources>
