@@ -3,12 +3,14 @@ package com.iti.onboarding.presentation.screen.cv.view
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -81,7 +83,7 @@ fun UploadCvScreen(
     UploadCvScreenContent(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier.padding(24.dp),
+        modifier = modifier,
     )
 }
 
@@ -93,15 +95,16 @@ fun UploadCvScreenContent(
 ) {
     val colors = MaterialTheme.colorScheme
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceBetween
+    LazyColumn(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        UploadCvHeader()
-
-        Column {
+        item {
+            UploadCvHeader()
+        }
+        item {
             UploadCvCard(
                 selectedFile = state.value.selectedFile,
                 stage = state.value.stage,
@@ -110,9 +113,13 @@ fun UploadCvScreenContent(
                     onIntent(UploadCvIntent.OnUploadAreaClick)
                 },
             )
+        }
 
+        item {
             AnimatedVisibility(
                 visible = state.value.stage == CvUploadStage.UPLOADED,
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
@@ -135,31 +142,34 @@ fun UploadCvScreenContent(
                     )
                 }
             }
-
-            TextButton(
-                onClick = {
-                    onIntent(UploadCvIntent.OnSkipClick)
-                },
-                enabled = !state.value.isSubmitting,
+        }
+        item {
+            AnimatedVisibility(
+                visible = state.value.stage != CvUploadStage.UPLOADED,
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 12.dp),
+                    .fillMaxWidth()
             ) {
-                Text(
-                    text = stringResource(R.string.skip_for_now),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurfaceVariant,
-                )
+                TextButton(
+                    onClick = {
+                        onIntent(UploadCvIntent.OnSkipClick)
+                    },
+                    enabled = !state.value.isSubmitting,
+                    modifier = Modifier,
+                ) {
+                    Text(
+                        text = stringResource(R.string.skip_for_now),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                    )
 
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    tint = colors.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 4.dp),
-                )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                        contentDescription = null,
+                        tint = colors.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }

@@ -36,6 +36,7 @@ import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBr
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
+import com.iti.onboarding.navigation.OnboardingPagerScreen
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -238,7 +239,7 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.Onboarding> {
-                    com.iti.onboarding.navigation.OnboardingPagerScreen(
+                    OnboardingPagerScreen(
                         onOnboardingFinished = {
                             rootBackStack.replaceAll(Route.NestedNav)
                         }
