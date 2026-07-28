@@ -39,12 +39,13 @@ fun MenuSection(
                 label = stringResource(R.string.career_info),
                 onClick = onEditCareerClick
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-            MenuRow(
-                icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                label = stringResource(R.string.settings),
-                onClick = onOpenSettings
-            )
+            //TODO Implement Settings Screen
+//            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+//            MenuRow(
+//                icon = ImageVector.vectorResource(id = R.drawable.ic_settings),
+//                label = stringResource(R.string.settings),
+//                onClick = onOpenSettings
+//            )
             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
             MenuRow(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_logout),
