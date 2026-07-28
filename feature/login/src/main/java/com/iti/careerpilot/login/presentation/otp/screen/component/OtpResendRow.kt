@@ -1,15 +1,18 @@
 package com.iti.careerpilot.login.presentation.otp.screen.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.login.R
 
@@ -32,6 +35,7 @@ fun OtpResendRow(
                     style = MaterialTheme.typography.labelMedium,
                     color = CareerPilotPalette.gray400,
                 )
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = formatCountdown(secondsRemaining),
                     style = MaterialTheme.typography.labelMedium,
@@ -42,12 +46,16 @@ fun OtpResendRow(
             Text(text = "", style = MaterialTheme.typography.labelMedium)
         }
 
-        Text(
-            text = stringResource(id = R.string.otp_resend),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (canResend) MaterialTheme.colorScheme.primary else CareerPilotPalette.gray400,
-            modifier = Modifier.clickable(enabled = canResend, onClick = onResend),
-        )
+        TextButton(
+            onClick = onResend,
+            enabled = canResend
+        ) {
+            Text(
+                text = stringResource(id = R.string.otp_resend),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (canResend) MaterialTheme.colorScheme.primary else CareerPilotPalette.gray400,
+            )
+        }
     }
 }
 

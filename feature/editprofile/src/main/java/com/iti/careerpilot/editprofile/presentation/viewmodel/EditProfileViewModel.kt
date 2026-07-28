@@ -28,10 +28,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -54,6 +54,7 @@ class EditProfileViewModel @Inject constructor(
 
     init {
         loadProfile()
+        loadTracks()
     }
 
     private fun loadProfile() {
@@ -74,6 +75,7 @@ class EditProfileViewModel @Inject constructor(
                     industry = profile.career.industry,
                     experienceLevel = profile.career.experienceLevel,
                     trackName = profile.career.trackName,
+                    trackId = profile.career.trackId,
                     currentJobTitle = profile.career.currentJobTitle,
                     yearsOfExperience = profile.career.yearsOfExperience.toString(),
                     skills = profile.career.skills,
@@ -88,6 +90,14 @@ class EditProfileViewModel @Inject constructor(
                     cvFileSize = if (profile.cv.cvSizeBytes > 0) "${profile.cv.cvSizeBytes / 1024} KB" else "",
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    private fun loadTracks() {
+        viewModelScope.launch {
+            editProfileRepo.getTracks().onSuccess { tracks ->
+                _state.update { it.copy(tracks = tracks.toImmutableList()) }
             }
         }
     }
@@ -137,7 +147,7 @@ class EditProfileViewModel @Inject constructor(
                 _state.update { it.copy(experienceLevel = action.value) }
 
             is EditProfileAction.OnTrackChange ->
-                _state.update { it.copy(trackName = action.value) }
+                _state.update { it.copy(trackName = action.value.name, trackId = action.value.id) }
 
             is EditProfileAction.OnCurrentJobTitleChange ->
                 _state.update { it.copy(currentJobTitle = action.value) }
@@ -359,6 +369,7 @@ class EditProfileViewModel @Inject constructor(
                 yearsOfExperience = current.yearsOfExperience.toIntOrNull()
                     ?.takeIf { it != original.career.yearsOfExperience },
                 cvFileId = current.cvFileId,
+                trackId = current.trackId.takeIf { it != original.career.trackId },
                 skills = current.skills.takeIf { it != original.career.skills },
                 targetCompanies = current.targetCompanies.takeIf { it != original.career.targetCompanies },
                 educationLevel = current.educationLevel.takeIf { it != original.career.educationLevel },
@@ -379,6 +390,7 @@ class EditProfileViewModel @Inject constructor(
                 yearsOfExperience = current.yearsOfExperience.toIntOrNull()
                     ?.takeIf { it != original.career.yearsOfExperience },
                 cvFileId = current.cvFileId,
+                trackId = current.trackId.takeIf { it != original.career.trackId },
                 skills = current.skills.takeIf { it != original.career.skills },
                 targetCompanies = current.targetCompanies.takeIf { it != original.career.targetCompanies },
                 educationLevel = current.educationLevel.takeIf { it != original.career.educationLevel },

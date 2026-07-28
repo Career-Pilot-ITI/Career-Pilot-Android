@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.iti.careerpilot.R
 import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.LogoImage
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
 
@@ -55,11 +55,11 @@ fun SplashRoot(
 fun SplashScreen(
     modifier: Modifier = Modifier,
 ) {
-    val scale = remember { Animatable(0.5f) }
+    val scale = remember { Animatable(1f) }
 
     LaunchedEffect(Unit) {
         scale.animateTo(
-            targetValue = 1f,
+            targetValue = 0.7f,
             animationSpec = infiniteRepeatable(
                 animation = tween(1000),
                 repeatMode = RepeatMode.Reverse
@@ -76,21 +76,13 @@ fun SplashScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+
+            LogoImage(
                 modifier = Modifier
-                    .size(100.dp)
                     .scale(scale.value)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "CP", //todo add logo
-                    color = Color.White,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                    .size(100.dp)
+                    .clip(CircleShape),
+            )
 
             Spacer(modifier = Modifier.height(Dimens.SpaceL))
 
@@ -106,7 +98,6 @@ fun SplashScreen(
 
             LoadingWave(
                 color = MaterialTheme.colorScheme.primary,
-                barCount = 12,
                 height = 30.dp
             )
         }

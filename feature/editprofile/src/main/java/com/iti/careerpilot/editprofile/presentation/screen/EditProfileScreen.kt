@@ -59,6 +59,7 @@ import com.iti.careerpilot.editprofile.presentation.screen.components.FormSectio
 import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledDropdownField
 import com.iti.careerpilot.editprofile.presentation.screen.components.LabeledTextField
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.TracksFlow
 import com.iti.careerpilot.core.designsystem.components.UploadProgressDialog
 import com.iti.careerpilot.editprofile.presentation.screen.components.SaveBar
 import com.iti.careerpilot.editprofile.presentation.screen.models.EducationLevel
@@ -368,6 +369,24 @@ fun EditProfileScreen(
                                 onRemove = { onAction(EditProfileAction.OnTargetCompanyRemove(it)) }
                             )
                         }
+                    }
+                }
+
+                if (state.tracks.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.track),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        TracksFlow(
+                            items = state.tracks,
+                            selectedItem = state.tracks.find { it.name == state.trackName },
+                            onItemClick = { onAction(EditProfileAction.OnTrackChange(it)) },
+                            labelProvider = { it.name },
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
                     }
                 }
 

@@ -9,23 +9,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -105,104 +102,100 @@ fun OnboardingPagerScreen(
     }
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        horizontalAlignment = Alignment.Start
-    ) {
-        PagerHeader(currentPage = pagerState.currentPage)
-
-        HorizontalPager(
-            state = pagerState,
+    Scaffold(
+        topBar = {
+            PagerHeader(currentPage = pagerState.currentPage)
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .weight(0.9f)
-                .nestedScroll(scrollConnection),
-            userScrollEnabled = false,
-        ) { page ->
-            when (page) {
-                PAGE_UPLOAD_CV -> UploadCvScreen(
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding(),
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .nestedScroll(scrollConnection),
+                userScrollEnabled = false,
+            ) { page ->
+                when (page) {
+                    PAGE_UPLOAD_CV -> UploadCvScreen(
                         viewModel = cvViewModel,
                         onNavigateNext = {
                             scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
                         },
                         onSkip = {
                             scope.launch { pagerState.animateScrollToPage(PAGE_PROFILE_INFO) }
+                        },
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+
+                    PAGE_PROFILE_INFO -> ProfileInfoScreen(
+                        viewModel = profileViewModel,
+                        onNavigateNext = {
+                            scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
                         }
                     )
 
-                PAGE_PROFILE_INFO -> ProfileInfoScreen(
-                    viewModel = profileViewModel,
-                    onNavigateNext = {
-                        scope.launch { pagerState.animateScrollToPage(PAGE_CHOOSING_TRACKS) }
-                    }
-                )
-
-                PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
-                    viewModel = tracksViewModel,
-                    onNavigateNext =  onOnboardingFinished
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .navigationBarsPadding()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                            MaterialTheme.colorScheme.background,
-                        ),
-                    ),
-                )
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(top = Dimens.SpaceXXXL)
-        ) {
-            val settledPage = pagerState.settledPage
-            val isScrollInProgress = pagerState.isScrollInProgress
-
-            val pageButtonConfig = when (settledPage) {
-                PAGE_UPLOAD_CV -> PageButtonConfig(
-                    textRes = R.string.next_button_label,
-                    isEnabled = cvState.isFormValid,
-                    isSubmitting = cvState.isSubmitting,
-                    onClick = { cvViewModel.onIntent(UploadCvIntent.OnNextClick) },
-                )
-                PAGE_PROFILE_INFO -> PageButtonConfig(
-                    textRes = R.string.next_button_label,
-                    isEnabled = profileState.isFormValid,
-                    isSubmitting = profileState.isSubmitting,
-                    onClick = { profileViewModel.onIntent(ProfileInfoIntent.OnSubmit) },
-                )
-                PAGE_CHOOSING_TRACKS -> PageButtonConfig(
-                    textRes = R.string.next_button_label,
-                    isEnabled = tracksState.isFormValid,
-                    isSubmitting = tracksState.isSubmitting,
-                    onClick = { tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext) },
-                )
-                else -> PageButtonConfig(
-                    textRes = 0,
-                    isEnabled = false,
-                    isSubmitting = false,
-                    onClick = {},
-                )
+                    PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
+                        isCurrent = pagerState.currentPage == PAGE_CHOOSING_TRACKS,
+                        viewModel = tracksViewModel,
+                        onNavigateNext =  onOnboardingFinished
+                    )
+                }
             }
 
-            if (pageButtonConfig.textRes != 0) {
-                CareerPilotButton(
-                    text = stringResource(pageButtonConfig.textRes),
-                    enabled = pageButtonConfig.isEnabled && !pageButtonConfig.isSubmitting,
-                    onClick = {
-                        if (!isScrollInProgress) {
-                            pageButtonConfig.onClick()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 42.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp, bottom = 16.dp, top = 8.dp)
+            ) {
+                val settledPage = pagerState.settledPage
+                val isScrollInProgress = pagerState.isScrollInProgress
+
+                val pageButtonConfig = when (settledPage) {
+                    PAGE_UPLOAD_CV -> PageButtonConfig(
+                        textRes = R.string.next_button_label,
+                        isEnabled = cvState.isFormValid,
+                        isSubmitting = cvState.isSubmitting,
+                        onClick = { cvViewModel.onIntent(UploadCvIntent.OnNextClick) },
+                    )
+                    PAGE_PROFILE_INFO -> PageButtonConfig(
+                        textRes = R.string.next_button_label,
+                        isEnabled = profileState.isFormValid,
+                        isSubmitting = profileState.isSubmitting,
+                        onClick = { profileViewModel.onIntent(ProfileInfoIntent.OnSubmit) },
+                    )
+                    PAGE_CHOOSING_TRACKS -> PageButtonConfig(
+                        textRes = R.string.next_button_label,
+                        isEnabled = tracksState.isFormValid,
+                        isSubmitting = tracksState.isSubmitting,
+                        onClick = { tracksViewModel.onIntent(ChoosingTracksIntent.OnNavigateNext) },
+                    )
+                    else -> PageButtonConfig(
+                        textRes = 0,
+                        isEnabled = false,
+                        isSubmitting = false,
+                        onClick = {},
+                    )
+                }
+
+                if (pageButtonConfig.textRes != 0) {
+                    CareerPilotButton(
+                        text = stringResource(pageButtonConfig.textRes),
+                        enabled = pageButtonConfig.isEnabled && !pageButtonConfig.isSubmitting,
+                        onClick = {
+                            if (!isScrollInProgress) {
+                                pageButtonConfig.onClick()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -217,28 +210,26 @@ private data class PageButtonConfig(
 
 @Composable
 private fun PagerHeader(currentPage: Int) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(vertical = Dimens.SpaceL, horizontal = Dimens.SpaceM),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        PagerIndicator(
-            pageCount = ONBOARDING_PAGE_COUNT,
-            currentPage = currentPage,
-        )
-
-        Text(
-            stringResource(R.string.pager_header, currentPage + 1, ONBOARDING_PAGE_COUNT),
-            style = MaterialTheme.typography.labelMedium.copy(
-                color = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = 0.7f
-                )
+    TopAppBar(
+        title = {
+            PagerIndicator(
+                pageCount = ONBOARDING_PAGE_COUNT,
+                currentPage = currentPage,
             )
-        )
-    }
+        },
+        actions = {
+            Text(
+                text = stringResource(R.string.pager_header, currentPage + 1, ONBOARDING_PAGE_COUNT),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                ),
+                modifier = Modifier.padding(end = Dimens.SpaceM),
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+        ),
+    )
 }
 
 @Composable

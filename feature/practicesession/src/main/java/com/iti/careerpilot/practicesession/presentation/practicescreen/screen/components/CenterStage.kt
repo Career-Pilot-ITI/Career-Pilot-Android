@@ -9,9 +9,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CenterStage(
-    isRecording: Boolean,
     isReadingQuestion: Boolean,
-    hasRecordedAudio: Boolean,
     onToggleListening: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

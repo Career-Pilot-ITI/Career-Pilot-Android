@@ -16,5 +16,7 @@ data class RequestProfileUpdate(
     val skills: List<String>? = null,
     val targetCompanies: List<String>? = null,
     val educationLevel: String? = null,
+    val trackName: String? = null,
+    val trackId: Long? = null,
     val timezone: String? = null,
 )

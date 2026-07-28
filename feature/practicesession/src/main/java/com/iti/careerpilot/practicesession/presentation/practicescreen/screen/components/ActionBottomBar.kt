@@ -9,16 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -52,53 +48,23 @@ fun ActionBottomBar(
     ) {
         PracticeIconButton(
             onClick = onToggleQuestionCard,
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(
-                    if (showQuestionCard) R.drawable.ic_expand_down
-                    else R.drawable.ic_expand_up
-                ),
-                contentDescription = stringResource(R.string.toggle_question_card),
-                modifier = Modifier.size(28.dp)
-            )
-        }
+            iconId = if (showQuestionCard) R.drawable.ic_expand_down
+            else R.drawable.ic_expand_up,
+            descriptionId = R.string.toggle_question_card
+        )
 
         Box(
             modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background, CircleShape)
                 .background(
-                    MaterialTheme.colorScheme.background,
-                    CircleShape
+                    brush = Brush.radialGradient(
+                        0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                    ),
+                    shape = CircleShape
                 )
-                .drawBehind {
-                    val maxRadius = size.width / 2f
-                    val color = extendedColors.pulsingRing
-                    drawCircle(
-                        color = color.copy(alpha = 0.2f),
-                        radius = maxRadius,
-                        center = center
-                    )
-                    drawCircle(
-                        color = color.copy(alpha = 0.2f),
-                        radius = maxRadius - 30,
-                        center = center
-                    )
-                    drawCircle(
-                        color = color.copy(alpha = 0.2f),
-                        radius = maxRadius - 60,
-                        center = center
-                    )
-                    drawRect(
-                        brush = Brush
-                            .radialGradient(
-                                0f to extendedColors.radialGradientStart,
-                                1f to extendedColors.radialGradientEnd,
-                                radius = 200f,
-                                center = Offset(150f, 150f)
-                            )
-                    )
-                }
                 .border(1.dp, extendedColors.actionBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -127,12 +93,10 @@ fun ActionBottomBar(
             )
         }
 
-        PracticeIconButton(onClick = onOpenSettings) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_more),
-                contentDescription = stringResource(R.string.session_settings),
-                modifier = Modifier.size(28.dp)
-            )
-        }
+        PracticeIconButton(
+            onClick = onOpenSettings,
+            iconId = R.drawable.ic_more,
+            descriptionId = R.string.session_settings
+        )
     }
 }

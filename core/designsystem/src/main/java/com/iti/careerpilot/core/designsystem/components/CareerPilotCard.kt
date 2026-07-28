@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -20,8 +21,8 @@ import com.iti.careerpilot.core.designsystem.softShadow
 fun CareerPilotCard(
     modifier: Modifier = Modifier,
     useShadow: Boolean = true,
-    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
-    elevation: androidx.compose.ui.unit.Dp = 16.dp,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    elevation: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {
     Card(

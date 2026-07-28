@@ -21,4 +21,7 @@
     <string name="otp_resend">إعادة الإرسال</string>
     <string name="otp_success_title">تم تسجيل دخولك!</string>
     <string name="otp_success_subtitle">جارٍ إعداد جلسة التدريب…</string>
+    <string name="sending_otp">جارى ارسال الكود</string>
+
+    <string name="verifying_otp">جارى تأكيد الكود</string>
 </resources>

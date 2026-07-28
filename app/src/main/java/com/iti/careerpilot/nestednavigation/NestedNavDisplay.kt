@@ -4,7 +4,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -25,9 +24,7 @@ import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 import com.iti.common.model.ProfileEditSection
 
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun NestedNavDisplay(
@@ -45,16 +42,12 @@ fun NestedNavDisplay(
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
             CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 12.dp)
-                    .navigationBarsPadding()
             ) {
                 BottomBarDestination.entries.forEach { destination ->
                     BottomNavBarItem(
@@ -104,7 +97,8 @@ fun NestedNavDisplay(
                             openPracticeSession(trackId, sessionId)
                         },
                         openInterviews = openInterviews,
-                        openPaywall = { openPaywall(false) },
+                        openPlansPaywall = { openPaywall(false) },
+                        openCoinsPaywall = { openPaywall(true) },
                         openReports = {
                             nestedBackStack.apply {
                                 clear()

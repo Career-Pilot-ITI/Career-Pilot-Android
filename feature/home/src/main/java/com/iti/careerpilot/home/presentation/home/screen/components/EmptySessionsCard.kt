@@ -31,7 +31,6 @@ import com.iti.careerpilot.home.R
 @Composable
 fun EmptySessionsCard(
     onStartInterviewClick: () -> Unit,
-    isActionEnabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
@@ -71,7 +70,6 @@ fun EmptySessionsCard(
             CareerPilotButton(
                 text = stringResource(R.string.home_recent_sessions_empty_action),
                 onClick = onStartInterviewClick,
-                enabled = isActionEnabled,
                 variant = ButtonVariant.PRIMARY,
             )
         }

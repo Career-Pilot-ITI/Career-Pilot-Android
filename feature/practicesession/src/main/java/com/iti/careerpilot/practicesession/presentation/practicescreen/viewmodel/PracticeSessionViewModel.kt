@@ -51,8 +51,8 @@ import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.milliseconds
 
-const val QUESTION_COUNT = 15
-const val SESSION_DURATION = 30
+const val QUESTION_COUNT = 10
+const val SESSION_DURATION = 20
 const val WAVE_BAR_COUNT = 32
 
 @HiltViewModel

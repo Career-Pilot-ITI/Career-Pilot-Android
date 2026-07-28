@@ -26,9 +26,9 @@
     <string name="profile_info_title">تم إعداد ملفك الشخصي</string>
     <string name="profile_info_subtitle">إليك ما وجدناه. يمكنك دائماً تحديث ذلك لاحقاً.</string>
     <string name="profile_info_full_name_label">الاسم الكامل</string>
-    <string name="profile_info_full_name_placeholder">سارة تشين</string>
+    <string name="profile_info_full_name_placeholder">ادخل اسمك</string>
     <string name="profile_info_email_label">البريد الإلكتروني</string>
-    <string name="profile_info_email_placeholder">sarah.chen@gmail.com</string>
+    <string name="profile_info_email_placeholder">email@example.com</string>
     <string name="profile_info_title_role_label">المسمى الوظيفي / الدور الحالي</string>
     <string name="profile_info_title_role_placeholder">مهندس برمجيات أول</string>
     <string name="profile_info_experience_level_label">مستوى الخبرة</string>
@@ -54,4 +54,8 @@
     <string name="experience_lead">قائد فريق</string>
     <string name="experience_executive">تنفيذي</string>
     <string name="cv_default_filename">ملف السيرة الذاتية</string>
+
+    <string name="getting_tracks">جاري التحميل</string>
+    <string name="submitting">جاري الرفع…</string>
+    <string name="uploading">جاري الرفع…</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -25,7 +26,7 @@ fun CareerPilotAppScaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0), // keep 0 and handle padding in every screen
 
         topBar = {
             AnimatedVisibility(
@@ -40,15 +41,14 @@ fun CareerPilotAppScaffold(
             CareerPilotSnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier
-                    .padding(horizontal = Dimens.SpaceL)
                     .padding(
                         bottom = if (hasBottomNavigationBar) {
-                            Dimens.BottomNavHeight + Dimens.SpaceM
+                            Dimens.BottomNavHeight + Dimens.SpaceL
                         } else {
-                            Dimens.SpaceM
+                            Dimens.SpaceL
                         },
                     )
-                    .navigationBarsPadding(),
+                    .safeContentPadding(),
             )
         },
         content = content,

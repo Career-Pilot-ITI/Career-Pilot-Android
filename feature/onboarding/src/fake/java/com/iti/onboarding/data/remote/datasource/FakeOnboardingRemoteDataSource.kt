@@ -3,15 +3,13 @@ package com.iti.onboarding.data.remote.datasource
 import com.iti.careerpilot.core.network.model.SkillDto
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserProfileDto
-import com.iti.onboarding.data.remote.dto.TracksResponseDto
-import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
 import com.iti.common.util.fakeDelay
 import com.iti.common.util.shouldFail
+import com.iti.onboarding.data.remote.dto.TracksResponseDto
+import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
+import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
 import java.io.File
 import javax.inject.Inject
-
-import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
-import kotlinx.coroutines.delay
 
 class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDataSource {
     override suspend fun uploadFile(file: File, onProgress: (Int) -> Unit): UploadFileResponseDto {
@@ -47,7 +45,11 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         return listOf(
             TracksResponseDto(1L, "Android", "Android Development", true, "2023-01-01"),
             TracksResponseDto(2L, "iOS", "iOS Development", true, "2023-01-01"),
-            TracksResponseDto(3L, "Backend", "Backend Development", true, "2023-01-01")
+            TracksResponseDto(3L, "Backend", "Backend Development", true, "2023-01-01"),
+            TracksResponseDto(4L, "Frontend", "Frontend Development", true, "2023-01-01"),
+            TracksResponseDto(5L, "Java", "Java Development", true, "2023-01-01"),
+            TracksResponseDto(6L, "C++", "C++ Development", true, "2023-01-01"),
+            TracksResponseDto(7L, "Python", "Python Development", true, "2023-01-01"),
         )
     }
 
@@ -72,25 +74,7 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         if (shouldFail()) {
             throw Exception("Fake network error")
         }
-
-        val progressUpdates = listOf(
-            0,
-            5,
-            12,
-            24,
-            38,
-            51,
-            63,
-            74,
-            86,
-            94,
-            100,
-        )
-
-        progressUpdates.forEach { progress ->
-            delay(250)
-            onProgress(progress)
-        }
+        onProgress(100)
 
         return UserProfileDto(
             id = 1L,

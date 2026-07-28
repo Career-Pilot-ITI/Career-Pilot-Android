@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -43,7 +44,11 @@ class LoginViewModel @Inject constructor(
             is LoginAction.RegionChanged ->
                 _state.update { it.copy(regionCode = action.regionCode) }
 
-            is LoginAction.SendOtpClicked -> sendOtp()
+            LoginAction.SendOtpClicked -> sendOtp()
+
+            LoginAction.StopIsLoading -> {
+                _state.update { it.copy(isLoading = false) }
+            }
         }
     }
 
@@ -78,7 +83,6 @@ class LoginViewModel @Inject constructor(
 
             sendOtp(fullPhoneNumber)
                 .onSuccess {
-                    _state.update { it.copy(isLoading = false) }
                     _events.send(LoginEvent.NavigateToOtp(fullPhoneNumber))
                 }
                 .onError { error ->

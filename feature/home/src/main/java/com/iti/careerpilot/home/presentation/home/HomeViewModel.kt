@@ -7,13 +7,15 @@ import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
-import com.iti.core.datastore.sync.UserProfileSync
-import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
+import com.iti.core.datastore.sync.UserProfileSync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -47,16 +49,17 @@ class HomeViewModel @Inject constructor(
 
             HomeAction.PracticeInterviewClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: return
+                val trackId = current.practiceTrackId ?: 1L
                 sendEvent(
                     HomeEvent.NavigateToReadyToPractice(
                         trackId = trackId,
-                        trackName = current.practiceTrackName,
+                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
                     )
                 )
             }
 
-            HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPaywall)
+            HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
+            HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllInterviewsClicked -> sendEvent(HomeEvent.NavigateToInterviews)
@@ -109,46 +112,46 @@ class HomeViewModel @Inject constructor(
                 it.copy(
                     isLoading = !isRefresh,
                     isRefreshing = isRefresh,
-                    error = null,
                 )
             }
-
-            when (val result = getInterviewSessions()) {
-                is CareerPilotResult.Error -> {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            error = result.error.toUIText(),
-                        )
-                    }
-                    CareerPilotSnackbarController.show(result.error.toUIText())
+            coroutineScope {
+                launch {
+                    userProfileSync.syncWalletBalance()
                 }
-
-                is CareerPilotResult.Success -> applySessions(result.data)
+                launch {
+                    userProfileSync.syncSubscriptionTier()
+                }
+                launch {
+                    loadInterviewTracks()
+                }
+                launch {
+                    getInterviewSessions()
+                        .onSuccess { data ->
+                            applySessions(data)
+                        }
+                        .onError { error ->
+                            CareerPilotSnackbarController.show(error.toUIText())
+                        }
+                }
             }
-
-            loadInterviewTracks()
-            syncAccount()
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                )
+            }
         }
     }
 
-    private suspend fun syncAccount() {
-        userProfileSync.syncWalletBalance()
-        userProfileSync.syncSubscriptionTier()
-    }
-
     private suspend fun loadInterviewTracks() {
-        val tracks = (getInterviewTracks() as? CareerPilotResult.Success)?.data ?: return
-
-        _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
+        getInterviewTracks().onSuccess { tracks ->
+            _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
+        }
     }
 
     private fun applySessions(sessions: List<InterviewSession>) {
         _state.update {
             it.copy(
-                isLoading = false,
-                isRefreshing = false,
                 recentSessions = sessions.take(RECENT_SESSIONS_COUNT).toImmutableList(),
                 scoreSummary = getScoreSummary(sessions),
             )

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import com.iti.careerpilot.core.designsystem.R
 
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontWeight
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
 
 @androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 @Composable
@@ -69,22 +71,10 @@ fun AvatarImagePicker(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-            } else if (!name.isNullOrBlank()) {
-                val initials = name.trim().split("\\s+".toRegex())
-                    .take(2)
-                    .mapNotNull { it.firstOrNull()?.uppercase() }
-                    .joinToString("")
-                Text(
-                    text = initials,
-                    style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
             } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = stringResource(id = R.string.avatar_picker_content_description),
+                GradientIcon(
+                    icon = Icons.Default.Person,
                     modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
             
@@ -95,7 +85,7 @@ fun AvatarImagePicker(
                         .background(Color.Black.copy(alpha = 0.3f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    androidx.compose.material3.LoadingIndicator(
+                    LoadingIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.primary
                     )

@@ -1,6 +1,7 @@
 package com.iti.careerpilot.editprofile.data.datasource.remote.mapper
 
 
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.TrackDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
@@ -10,6 +11,7 @@ import com.iti.core.datastore.models.CareerInfo
 import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.PersonalInfo
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.Track
 
 fun UserProfileDto.toDomain(current: UserProfile? = null): UserProfile {
     val effectiveTier = if (current?.account?.subscriptionTier?.equals("FREE", ignoreCase = true) == true &&
@@ -73,6 +75,14 @@ fun RequestProfileUpdate.toDto(): UpdateProfileRequestDto {
         skills = skills,
         targetCompanies = targetCompanies,
         educationLevel = educationLevel,
+        trackId = trackId,
         timezone = timezone,
+    )
+}
+
+fun TrackDto.toDomain(): Track {
+    return Track(
+        id = id ?: 0,
+        name = name.orEmpty(),
     )
 }

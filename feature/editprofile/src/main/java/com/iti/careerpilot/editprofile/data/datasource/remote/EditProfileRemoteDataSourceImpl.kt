@@ -3,6 +3,7 @@ package com.iti.careerpilot.editprofile.data.datasource.remote
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.safecall.safeApiCall
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.TrackDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
 import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
@@ -12,6 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
@@ -87,6 +89,12 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> {
+        return safeApiCall<List<TrackDto>> {
+            httpClient.get(Endpoints.GET_TRACKS)
         }
     }
 }

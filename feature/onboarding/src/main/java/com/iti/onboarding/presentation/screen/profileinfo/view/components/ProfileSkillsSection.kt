@@ -1,6 +1,7 @@
 package com.iti.onboarding.presentation.screen.profileinfo.view.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,11 +29,11 @@ fun ProfileSkillsSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             allSkills.forEach { skill ->
                 val isSelected = skills.contains(skill)
@@ -57,7 +58,7 @@ fun ProfileSkillsSection(
                                          else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     ),
                     border = null,
-                    shape = RoundedCornerShape(16.dp)
+                    shape = CircleShape
                 )
             }
             
@@ -73,7 +74,7 @@ fun ProfileSkillsSection(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ),
                 border = null,
-                shape = RoundedCornerShape(16.dp)
+                shape = CircleShape
             )
         }
     }

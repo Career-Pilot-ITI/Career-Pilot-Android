@@ -8,6 +8,7 @@ import com.iti.careerpilot.practicesession.data.datasource.models.FileUploadResp
 import com.iti.careerpilot.practicesession.data.datasource.models.OldSessionDto
 import com.iti.careerpilot.practicesession.data.datasource.models.ScoreDto
 import com.iti.careerpilot.practicesession.data.datasource.models.SessionDto
+import com.iti.careerpilot.practicesession.data.datasource.models.SessionQuestionResultDto
 import com.iti.careerpilot.practicesession.data.datasource.models.SessionResultDto
 import com.iti.careerpilot.practicesession.domain.repo.SessionRemoteDataSource
 import com.iti.common.error.NetworkError
@@ -21,7 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSource {
 
-    private var questionCounter = 0
+    private var questionCounter = 1
     private val totalQuestions = 4
 
     private val questions = listOf(
@@ -140,7 +141,33 @@ class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSourc
                 ),
                 generatedAt = "2023-10-27T11:00:00Z",
                 createdAt = "2023-10-27T11:00:01Z",
-                questions = emptyList()
+                questions = questions.mapIndexed { index, questionText ->
+                    SessionQuestionResultDto(
+                        id = index.toLong() + 1,
+                        sessionId = sessionId,
+                        questionText = questionText,
+                        questionOrder = index + 1,
+                        userTranscript = "This is my fake answer for $questionText. I hope it sounds professional and insightful.",
+                        durationMs = 45000L,
+                        speechRateWpm = 120.0,
+                        avgPauseMs = 300,
+                        silenceRatio = 0.1,
+                        createdAt = "2023-10-27T10:${10 + index}:00Z",
+                        completedAt = "2023-10-27T10:${10 + index}:45Z",
+                        score = ScoreDto(
+                            id = 1000L + index,
+                            sessionQuestionId = index.toLong() + 1,
+                            contentRelevance = (70..95).random(),
+                            clarity = (60..90).random(),
+                            confidence = (75..95).random(),
+                            pacing = (65..85).random(),
+                            fillerWords = (1..5).random(),
+                            overallScore = (75..90).random(),
+                            coachingTip = "Your explanation of the concept was good, but try to provide a more concrete example from a past project.",
+                            createdAt = "2023-10-27T10:${10 + index}:46Z"
+                        )
+                    )
+                }
             )
         )
     }

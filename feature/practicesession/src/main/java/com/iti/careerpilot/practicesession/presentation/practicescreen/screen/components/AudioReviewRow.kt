@@ -52,15 +52,11 @@ fun AudioReviewRow(
         Box(modifier = Modifier.fillMaxWidth()) {
             PracticeIconButton(
                 onClick = onDiscard,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete_recording),
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+                modifier = Modifier.align(Alignment.TopStart),
+                iconId = R.drawable.ic_delete,
+                descriptionId = R.string.delete_recording,
+                tint = MaterialTheme.colorScheme.error
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -69,17 +65,11 @@ fun AudioReviewRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PracticeIconButton(onClick = onTogglePlay) {
-                Icon(
-                    imageVector = if (isPlayingAudio) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlayingAudio) {
-                        stringResource(R.string.pause)
-                    } else {
-                        stringResource(R.string.play)
-                    },
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+            PracticeIconButton(
+                onClick = onTogglePlay,
+                iconId = if (isPlayingAudio) R.drawable.ic_pause else R.drawable.ic_play,
+                descriptionId = if (isPlayingAudio) R.string.pause else R.string.play
+            )
 
             Spacer(Modifier.width(12.dp))
 
@@ -117,26 +107,23 @@ fun AudioReviewRow(
 
             Box(
                 modifier = Modifier
+                    .size(52.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.background, CircleShape)
-                    .drawBehind {
-                        drawRect(
-                            brush = Brush.radialGradient(
-                                0f to extendedColors.radialGradientStart,
-                                1f to extendedColors.radialGradientEnd,
-                                radius = 150f,
-                                center = Offset(75f, 75f)
-                            )
+                    .background(
+                        Brush.radialGradient(
+                            0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
                         )
-                    }
-                    .border(1.dp, extendedColors.actionBorder, CircleShape),
+                    )
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 LargeGradientIconButton(
                     icon = ImageVector.vectorResource(R.drawable.ic_send),
                     contentDescription = stringResource(R.string.submit_answer),
                     onClick = onSubmit,
-                    size = 56.dp
+                    size = 52.dp
                 )
             }
         }

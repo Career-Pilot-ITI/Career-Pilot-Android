@@ -1,6 +1,7 @@
 package com.iti.careerpilot.rootnavigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +36,7 @@ import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBr
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
+import com.iti.onboarding.navigation.OnboardingPagerScreen
 import kotlinx.coroutines.flow.collectLatest
 
 
@@ -101,23 +103,23 @@ fun RootNavDisplay(
                     towards = AnimatedContentTransitionScope.SlideDirection.Left,
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     ),
                 ) + fadeIn(
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     )
                 )) togetherWith (slideOutOfContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Left,
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     ),
                 ) + fadeOut(
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     )
                 ))
             },
@@ -126,23 +128,23 @@ fun RootNavDisplay(
                     towards = AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     ),
                 ) + fadeIn(
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     )
                 )) togetherWith (slideOutOfContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     ),
                 ) + fadeOut(
                     animationSpec = tween(
                         400,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = FastOutSlowInEasing
                     )
                 ))
             },
@@ -237,7 +239,7 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.Onboarding> {
-                    com.iti.onboarding.navigation.OnboardingPagerScreen(
+                    OnboardingPagerScreen(
                         onOnboardingFinished = {
                             rootBackStack.replaceAll(Route.NestedNav)
                         }
