@@ -15,4 +15,14 @@
     <string name="upload_failed">Upload Failed</string>
 
     <string name="back">Back</string>
+
+    <string name="plan_upgrade_required_title">Plan Upgrade Required</string>
+    <string name="plan_upgrade_required_message">Upgrade to %1$s plan to unlock this feature.</string>
+    <string name="upgrade_to_plan">Upgrade to %1$s</string>
+    <string name="quota_reached_title">Monthly Quota Reached</string>
+    <string name="quota_reached_message">You used all free sessions for this month. Unlock an extra session for %1$d coins.</string>
+    <string name="spend_coins_action">Spend %1$d Coins (Balance: %2$d)</string>
+    <string name="get_more_coins_action">Get More Coins (Balance: %1$d / Need: %2$d)</string>
+    <string name="network_required_title">Network Connection Required</string>
+    <string name="network_required_message">Please connect to the internet to verify your subscription access.</string>
 </resources>

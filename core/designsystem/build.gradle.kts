@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
     implementation(libs.extended.icons)
     implementation(libs.androidx.compose.googlefonts)
     api(libs.androidx.compose.material3)

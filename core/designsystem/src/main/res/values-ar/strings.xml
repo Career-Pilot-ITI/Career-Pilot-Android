@@ -15,4 +15,14 @@
     <string name="upload_failed">فشل التحميل</string>
 
     <string name="back">رجوع</string>
+
+    <string name="plan_upgrade_required_title">يلزم ترقية الخطة</string>
+    <string name="plan_upgrade_required_message">قم بالترقية إلى خطة %1$s لفتح هذه الميزة.</string>
+    <string name="upgrade_to_plan">الترقية إلى %1$s</string>
+    <string name="quota_reached_title">تم الوصول إلى الحصة الشهرية</string>
+    <string name="quota_reached_message">لقد استخدمت جميع الجلسات المجانية لهذا الشهر. يمكنك فتح جلسة إضافية مقابل %1$d عملة.</string>
+    <string name="spend_coins_action">إنفاق %1$d عملة (الرصيد: %2$d)</string>
+    <string name="get_more_coins_action">الحصول على المزيد من العملات (الرصيد: %1$d / المطلوب: %2$d)</string>
+    <string name="network_required_title">يلزم الاتصال بالشبكة</string>
+    <string name="network_required_message">يرجى الاتصال بالإنترنت للتحقق من وصول الاشتراك الخاص بك.</string>
 </resources>
