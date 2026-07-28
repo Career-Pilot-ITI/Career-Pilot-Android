@@ -87,7 +87,7 @@ class UploadCvViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 selectedFile = SelectedCvUiModel(
-                                    fileId = response.id.toLong(),
+                                    fileId = response.id,
                                     name = metadata.name,
                                     sizeBytes = metadata.sizeBytes ?: 0L,
                                 ),

@@ -26,9 +26,9 @@
     <string name="profile_info_title">Your profile is set up</string>
     <string name="profile_info_subtitle">Here\'s what we found. You can always update this later.</string>
     <string name="profile_info_full_name_label">FULL NAME</string>
-    <string name="profile_info_full_name_placeholder">e.g. John Doe</string>
+    <string name="profile_info_full_name_placeholder">Enter your name</string>
     <string name="profile_info_email_label">EMAIL</string>
-    <string name="profile_info_email_placeholder">e.g. john@example.com</string>
+    <string name="profile_info_email_placeholder">e.g. email@example.com</string>
     <string name="profile_info_title_role_label">TITLE / CURRENT ROLE</string>
     <string name="profile_info_title_role_placeholder">e.g. Software Engineer</string>
     <string name="profile_info_experience_level_label">EXPERIENCE LEVEL</string>

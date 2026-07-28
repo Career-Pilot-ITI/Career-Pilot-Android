@@ -6,12 +6,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -35,7 +39,6 @@ import com.iti.careerpilot.core.designsystem.components.media.ImageSourcePickerS
 import com.iti.careerpilot.core.designsystem.R as DesignSystemR
 import com.iti.common.media.ImageSource
 import com.iti.common.media.rememberImagePickerLauncher
-import com.iti.common.snackbar.CareerPilotSnackbarController
 import androidx.compose.ui.res.stringResource
 import com.iti.onboarding.R
 import com.iti.onboarding.presentation.screen.profileinfo.view.components.AddSkillDialog
@@ -118,23 +121,20 @@ fun ProfileScreenContent(
         onIntent(ProfileInfoIntent.OnInitDefaultSkills(defaultSkills))
     }
 
-    Box(
+    LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ProfileHeader(modifier = Modifier.align(Alignment.Start))
-            Spacer(modifier = Modifier.height(16.dp))
-            ProfileTitle(modifier = Modifier.align(Alignment.Start))
-            Spacer(modifier = Modifier.height(24.dp))
-
+        item {
+            ProfileHeader(modifier = Modifier.fillMaxWidth())
+        }
+        item {
+            ProfileTitle(modifier = Modifier.fillMaxWidth())
+        }
+        item {
             AvatarImagePicker(
                 imageUrl = data.selectedImageUri ?: data.avatarUrl,
                 isUploading = isImageUploading,
@@ -142,9 +142,8 @@ fun ProfileScreenContent(
                 name = data.name.takeIf { it.isNotBlank() }
                     ?: androidx.compose.ui.res.stringResource(id = R.string.profile_info_full_name_placeholder)
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+        }
+        item {
             ProfileInfoForm(
                 name = data.name,
                 onNameChanged = { onIntent(ProfileInfoIntent.OnNameChanged(it)) },
@@ -157,19 +156,17 @@ fun ProfileScreenContent(
                 onExperienceChanged = { onIntent(ProfileInfoIntent.OnExperienceChanged(it)) },
                 focusManager = focusManager
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+        }
+        item {
             ProfileSkillsSection(
                 skills = data.skills,
                 allSkills = state.allSkills,
                 onSkillsChanged = { onIntent(ProfileInfoIntent.OnSkillsChanged(it)) },
                 onAddSkillClicked = { onIntent(ProfileInfoIntent.OnShowAddSkillDialogChanged(true)) },
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+        }
+        item {
             ProfileBanner()
         }
     }
