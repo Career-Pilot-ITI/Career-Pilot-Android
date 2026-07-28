@@ -1,0 +1,185 @@
+package com.iti.careerpilot.core.access.data
+
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import com.iti.careerpilot.core.access.data.local.AccessLocalDataSource
+import com.iti.careerpilot.core.access.data.remote.AccessRemoteDataSource
+import com.iti.core.datastore.models.UserProfile
+import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class AccessRepositoryTest {
+
+    @get:Rule
+    val tmpFolder: TemporaryFolder = TemporaryFolder()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    private class FakeUserProfileRepo(initial: UserProfile = UserProfile()) : UserProfileRepo {
+        private val _userProfile = MutableStateFlow(initial)
+        override val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
+        override suspend fun readUserProfile(): UserProfile = _userProfile.value
+        override suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile) {
+            _userProfile.update(updateBlock)
+        }
+        override suspend fun clearUserProfile() {
+            _userProfile.value = UserProfile()
+        }
+    }
+
+    @Test
+    fun deductCoins_updatesStateAndSyncsToUserProfileRepo() = runTest(testDispatcher) {
+        val testFile = tmpFolder.newFile("test_access_1.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { testFile }
+        )
+        val localDataSource = AccessLocalDataSource(dataStore)
+        val initialProfile = UserProfile()
+        val userProfileRepo = FakeUserProfileRepo(initialProfile)
+
+        val initialState = AccessState(
+            plan = Plan.PLUS,
+            features = setOf(FeatureKey.VoicePracticeMode),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = null,
+            coinBalance = 100
+        )
+        localDataSource.save(initialState)
+
+        val repository = AccessRepositoryImpl(
+            remote = AccessRemoteDataSource(HttpClient()),
+            local = localDataSource,
+            userProfileRepo = userProfileRepo,
+            ioDispatcher = testDispatcher,
+            scope = backgroundScope
+        )
+
+        assertEquals(100, repository.accessState.value.coinBalance)
+
+        repository.deductCoins(30)
+
+        assertEquals(70, repository.accessState.value.coinBalance)
+
+        val updatedProfile = userProfileRepo.readUserProfile()
+        assertEquals(70, updatedProfile.account.coinBalance)
+    }
+
+    @Test
+    fun deductCoins_coercesToZero_whenDeductingMoreThanBalance() = runTest(testDispatcher) {
+        val testFile = tmpFolder.newFile("test_access_2.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { testFile }
+        )
+        val localDataSource = AccessLocalDataSource(dataStore)
+        val userProfileRepo = FakeUserProfileRepo()
+
+        val initialState = AccessState(
+            plan = Plan.FREE,
+            features = emptySet(),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = null,
+            coinBalance = 10
+        )
+        localDataSource.save(initialState)
+
+        val repository = AccessRepositoryImpl(
+            remote = AccessRemoteDataSource(HttpClient()),
+            local = localDataSource,
+            userProfileRepo = userProfileRepo,
+            ioDispatcher = testDispatcher,
+            scope = backgroundScope
+        )
+
+        repository.deductCoins(20)
+
+        assertEquals(0, repository.accessState.value.coinBalance)
+        assertEquals(0, userProfileRepo.readUserProfile().account.coinBalance)
+    }
+
+    @Test
+    fun hasAccess_returnsCorrectAccessForFeature() = runTest(testDispatcher) {
+        val testFile = tmpFolder.newFile("test_access_3.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { testFile }
+        )
+        val localDataSource = AccessLocalDataSource(dataStore)
+        val userProfileRepo = FakeUserProfileRepo()
+
+        val state = AccessState(
+            plan = Plan.MAX,
+            features = setOf(FeatureKey.VoicePracticeMode, FeatureKey.CvAiAnalysis),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = null,
+            coinBalance = 50
+        )
+        localDataSource.save(state)
+
+        val repository = AccessRepositoryImpl(
+            remote = AccessRemoteDataSource(HttpClient()),
+            local = localDataSource,
+            userProfileRepo = userProfileRepo,
+            ioDispatcher = testDispatcher,
+            scope = backgroundScope
+        )
+
+        assertTrue(repository.hasAccess(FeatureKey.VoicePracticeMode))
+        assertFalse(repository.hasAccess(FeatureKey.AdvancedReports))
+    }
+
+    @Test
+    fun clear_resetsLocalAndUserProfile() = runTest(testDispatcher) {
+        val testFile = tmpFolder.newFile("test_access_4.preferences_pb")
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = backgroundScope,
+            produceFile = { testFile }
+        )
+        val localDataSource = AccessLocalDataSource(dataStore)
+        val userProfileRepo = FakeUserProfileRepo()
+
+        val state = AccessState(
+            plan = Plan.MAX,
+            features = setOf(FeatureKey.VoicePracticeMode),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = null,
+            coinBalance = 50
+        )
+        localDataSource.save(state)
+
+        val repository = AccessRepositoryImpl(
+            remote = AccessRemoteDataSource(HttpClient()),
+            local = localDataSource,
+            userProfileRepo = userProfileRepo,
+            ioDispatcher = testDispatcher,
+            scope = backgroundScope
+        )
+
+        repository.clear()
+
+        assertEquals(AccessState.Free, repository.accessState.value)
+        assertEquals("", userProfileRepo.readUserProfile().account.subscriptionTier)
+        assertEquals(0, userProfileRepo.readUserProfile().account.coinBalance)
+    }
+}
