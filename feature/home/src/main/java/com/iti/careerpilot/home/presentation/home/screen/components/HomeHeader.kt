@@ -2,6 +2,7 @@ package com.iti.careerpilot.home.presentation.home.screen.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +37,7 @@ fun HomeHeader(
     greeting: String,
     userName: String,
     coins: Int?,
+    onCoinsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
@@ -49,7 +52,7 @@ fun HomeHeader(
                 )
                 Text(
                     text = userName,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -57,7 +60,10 @@ fun HomeHeader(
         },
         actions = {
             if (coins != null) {
-                CoinsChip(coins = coins)
+                CoinsChip(
+                    coins = coins,
+                    onClick = onCoinsClick,
+                )
                 Spacer(modifier = Modifier.width(8.dp))
             }
         },
@@ -70,10 +76,15 @@ fun HomeHeader(
 @Composable
 private fun CoinsChip(
     coins: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
+            .clip(CircleShape)
+            .clickable(
+                onClick = onClick,
+            )
             .background(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                 shape = CircleShape,

@@ -15,6 +15,7 @@ import com.iti.core.datastore.sync.UserProfileSync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -57,7 +58,8 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPaywall)
+            HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
+            HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllInterviewsClicked -> sendEvent(HomeEvent.NavigateToInterviews)
@@ -105,55 +107,51 @@ class HomeViewModel @Inject constructor(
         val current = _state.value
         if (current.isLoading || current.isRefreshing) return
 
-        _state.update {
-            it.copy(
-                isLoading = !isRefresh,
-                isRefreshing = isRefresh,
-                error = null,
-            )
-        }
-        loadInterviewTracks()
-        syncAccount()
         viewModelScope.launch {
-            getInterviewSessions()
-                .onSuccess { data ->
-                    applySessions(data)
-                }
-                .onError { error ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            error = error.toUIText(),
-                        )
-                    }
-                    CareerPilotSnackbarController.show(error.toUIText())
-                }
-        }
-    }
-
-    private fun syncAccount() {
-        viewModelScope.launch {
-            userProfileSync.syncWalletBalance()
-        }
-        viewModelScope.launch {
-            userProfileSync.syncSubscriptionTier()
-        }
-    }
-
-    private fun loadInterviewTracks() {
-        viewModelScope.launch {
-            getInterviewTracks().onSuccess { tracks ->
-                _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
+            _state.update {
+                it.copy(
+                    isLoading = !isRefresh,
+                    isRefreshing = isRefresh,
+                )
             }
+            coroutineScope {
+                launch {
+                    userProfileSync.syncWalletBalance()
+                }
+                launch {
+                    userProfileSync.syncSubscriptionTier()
+                }
+                launch {
+                    loadInterviewTracks()
+                }
+                launch {
+                    getInterviewSessions()
+                        .onSuccess { data ->
+                            applySessions(data)
+                        }
+                        .onError { error ->
+                            CareerPilotSnackbarController.show(error.toUIText())
+                        }
+                }
+            }
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                )
+            }
+        }
+    }
+
+    private suspend fun loadInterviewTracks() {
+        getInterviewTracks().onSuccess { tracks ->
+            _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
         }
     }
 
     private fun applySessions(sessions: List<InterviewSession>) {
         _state.update {
             it.copy(
-                isLoading = false,
-                isRefreshing = false,
                 recentSessions = sessions.take(RECENT_SESSIONS_COUNT).toImmutableList(),
                 scoreSummary = getScoreSummary(sessions),
             )

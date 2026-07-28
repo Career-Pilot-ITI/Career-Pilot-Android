@@ -23,7 +23,6 @@ data class HomeState(
 
     val availableInterviews: ImmutableList<InterviewTrack> = persistentListOf(),
     val recentSessions: ImmutableList<InterviewSession> = persistentListOf(),
-    val error: UIText? = null,
 ) {
     val canStartPractice: Boolean get() = practiceTrackId != null
 

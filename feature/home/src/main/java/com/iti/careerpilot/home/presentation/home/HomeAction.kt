@@ -4,6 +4,7 @@ sealed interface HomeAction {
     data object Refresh : HomeAction
     data object PracticeInterviewClicked : HomeAction
     data object UpgradeClicked : HomeAction
+    data object CoinsClicked : HomeAction
     data object ScoreCardClicked : HomeAction
     data object SeeAllSessionsClicked : HomeAction
     data object SeeAllInterviewsClicked : HomeAction
