@@ -2,6 +2,7 @@ package com.iti.careerpilot.editprofile.domain.datasource.remote
 
 
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.TrackDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
 import com.iti.common.error.NetworkError
@@ -23,4 +24,6 @@ interface EditProfileRemoteDataSource {
         file: File,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError>
+
+    suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError>
 }

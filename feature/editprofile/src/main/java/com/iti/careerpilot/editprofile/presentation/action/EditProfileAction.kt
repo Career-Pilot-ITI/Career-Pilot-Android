@@ -2,6 +2,7 @@ package com.iti.careerpilot.editprofile.presentation.action
 
 import android.net.Uri
 import com.iti.common.model.ProfileEditSection
+import com.iti.core.model.Track
 
 
 sealed interface EditProfileAction {
@@ -14,7 +15,7 @@ sealed interface EditProfileAction {
     data class OnTargetRoleChange(val value: String) : EditProfileAction
     data class OnIndustryChange(val value: String) : EditProfileAction
     data class OnExperienceLevelChange(val value: String) : EditProfileAction
-    data class OnTrackChange(val value: String) : EditProfileAction
+    data class OnTrackChange(val value: Track) : EditProfileAction
     data class OnCurrentJobTitleChange(val value: String) : EditProfileAction
     data class OnYearsOfExperienceChange(val value: String) : EditProfileAction
     data class OnEducationLevelChange(val value: String) : EditProfileAction

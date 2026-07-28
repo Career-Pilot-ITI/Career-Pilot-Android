@@ -1,6 +1,7 @@
 package com.iti.careerpilot.editprofile.data.datasource.remote
 
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.FileUploadResponse
+import com.iti.careerpilot.editprofile.data.datasource.remote.models.TrackDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UpdateProfileRequestDto
 import com.iti.careerpilot.editprofile.data.datasource.remote.models.UserProfileDto
 import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
@@ -54,6 +55,21 @@ class FakeEditProfileRemoteDataSource @Inject constructor() : EditProfileRemoteD
                 originalName = file.name,
                 sizeBytes = file.length(),
                 createdAt = "2023-10-01T00:00:00Z"
+            )
+        )
+    }
+
+    override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> {
+        fakeDelay()
+        if (shouldFail()) return CareerPilotResult.Error(NetworkError.FAKE_SERVER_ERROR)
+        return CareerPilotResult.Success(
+            listOf(
+                TrackDto(1, "Android Developer"),
+                TrackDto(2, "Frontend Developer"),
+                TrackDto(3, "Backend Developer"),
+                TrackDto(4, "UI/UX Designer"),
+                TrackDto(5, "Product Manager"),
+                TrackDto(6, "Quality Assurance")
             )
         )
     }

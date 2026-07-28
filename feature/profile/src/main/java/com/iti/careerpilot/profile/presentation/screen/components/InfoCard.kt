@@ -42,6 +42,7 @@ fun InfoCard(
             InfoRow(stringResource(R.string.phone), profile.personal.phoneNumber.ifBlank { stringResource(R.string.not_set) })
             InfoRow(stringResource(R.string.target_role), profile.career.targetRole.ifBlank { stringResource(R.string.not_set) })
             InfoRow(stringResource(R.string.industry), profile.career.industry.ifBlank { stringResource(R.string.not_set) })
+            InfoRow(stringResource(R.string.track), profile.career.trackName.ifBlank { stringResource(R.string.not_set) })
             InfoRow(
                 stringResource(R.string.experience),
                 profile.career.experienceLevel.ifBlank { stringResource(R.string.not_set) },

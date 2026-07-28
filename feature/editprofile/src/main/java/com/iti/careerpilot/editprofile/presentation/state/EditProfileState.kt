@@ -2,6 +2,10 @@ package com.iti.careerpilot.editprofile.presentation.state
 
 import androidx.compose.runtime.Immutable
 
+import com.iti.core.model.Track
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+
 @Immutable
 data class EditProfileState(
     val displayName: String = "",
@@ -14,7 +18,9 @@ data class EditProfileState(
     val targetRole: String = "",
     val industry: String = "",
     val experienceLevel: String = "",
-    val trackName: String = "",  //todo add in ui
+    val trackName: String = "",
+    val trackId: Long? = null,
+    val tracks: ImmutableList<Track> = persistentListOf(),
     val currentJobTitle: String = "",
     val yearsOfExperience: String = "",
     val skills: List<String> = emptyList(),

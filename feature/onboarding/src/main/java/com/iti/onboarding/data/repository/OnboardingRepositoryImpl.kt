@@ -36,7 +36,7 @@ class OnboardingRepositoryImpl @Inject constructor(
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : OnboardingRepository {
 
-    override val userProfile: StateFlow<com.iti.core.datastore.models.UserProfile> = localDataSource.userProfile
+    override val userProfile: StateFlow<UserProfile> = localDataSource.userProfile
 
     override suspend fun uploadFile(
         uri: Uri,

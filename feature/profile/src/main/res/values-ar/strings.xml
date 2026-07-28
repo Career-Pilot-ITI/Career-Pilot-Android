@@ -14,6 +14,7 @@
     <string name="phone">الهاتف</string>
     <string name="target_role">الوظيفة المستهدفة</string>
     <string name="industry">المجال</string>
+    <string name="track">المسار</string>
     <string name="experience">الخبرة</string>
     <string name="settings">الإعدادات</string>
     <string name="logout">تسجيل الخروج</string>

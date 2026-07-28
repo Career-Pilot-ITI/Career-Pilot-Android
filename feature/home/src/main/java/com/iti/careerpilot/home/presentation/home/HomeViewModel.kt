@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
                 sendEvent(
                     HomeEvent.NavigateToReadyToPractice(
                         trackId = trackId,
-                        trackName = current.practiceTrackName,
+                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
                     )
                 )
             }

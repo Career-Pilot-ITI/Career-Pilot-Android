@@ -10,8 +10,10 @@ import com.iti.careerpilot.editprofile.domain.datasource.local.ImageCompressor
 import com.iti.careerpilot.editprofile.domain.datasource.remote.EditProfileRemoteDataSource
 import com.iti.careerpilot.editprofile.domain.models.RequestProfileUpdate
 import com.iti.careerpilot.editprofile.domain.repo.EditProfileRepo
+import com.iti.core.model.Track
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.map
 import com.iti.common.result.mapToEmptyResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
@@ -98,6 +100,12 @@ class EditProfileRepoImpl @Inject constructor(
                     }
                 }
         } ?: CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+
+    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> {
+        return remoteDataSource.getTracks().map { list ->
+            list.map { it.toDomain() }
+        }
     }
 
 }

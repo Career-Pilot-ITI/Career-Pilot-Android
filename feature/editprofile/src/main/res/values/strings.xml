@@ -43,6 +43,7 @@
     <string name="date_of_birth">Date of birth</string>
     <string name="yyyy_mm_dd">YYYY-MM-DD</string>
     <string name="career">Career</string>
+    <string name="track">Track</string>
     <string name="experience_level">Experience level</string>
     <string name="current_job_title">Current job title</string>
     <string name="years_of_experience">Years of experience</string>
