@@ -3,16 +3,13 @@ package com.iti.onboarding.data.remote.datasource
 import com.iti.careerpilot.core.network.model.SkillDto
 import com.iti.careerpilot.core.network.model.UpdateProfileRequestDto
 import com.iti.careerpilot.core.network.model.UserProfileDto
-import com.iti.onboarding.data.remote.dto.TracksResponseDto
-import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
 import com.iti.common.util.fakeDelay
 import com.iti.common.util.shouldFail
+import com.iti.onboarding.data.remote.dto.TracksResponseDto
+import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
+import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
 import java.io.File
 import javax.inject.Inject
-
-import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 
 class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDataSource {
     override suspend fun uploadFile(file: File, onProgress: (Int) -> Unit): UploadFileResponseDto {
@@ -77,25 +74,7 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         if (shouldFail()) {
             throw Exception("Fake network error")
         }
-
-        val progressUpdates = listOf(
-            0,
-            5,
-            12,
-            24,
-            38,
-            51,
-            63,
-            74,
-            86,
-            94,
-            100,
-        )
-
-        progressUpdates.forEach { progress ->
-            delay(250.milliseconds)
-            onProgress(progress)
-        }
+        onProgress(100)
 
         return UserProfileDto(
             id = 1L,
