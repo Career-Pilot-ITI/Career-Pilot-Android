@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:access"))
     implementation(libs.media3.exoplayer)
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))

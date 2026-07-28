@@ -11,7 +11,7 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
-import com.iti.core.datastore.sync.UserProfileSync
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(
     private val getInterviewSessions: GetInterviewSessionsUseCase,
     private val getInterviewTracks: GetTracksUseCase,
     private val getScoreSummary: GetScoreSummaryUseCase,
-    private val userProfileSync: UserProfileSync,
+    private val refreshAccessUseCase: RefreshAccessUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -116,10 +116,7 @@ class HomeViewModel @Inject constructor(
             }
             coroutineScope {
                 launch {
-                    userProfileSync.syncWalletBalance()
-                }
-                launch {
-                    userProfileSync.syncSubscriptionTier()
+                    refreshAccessUseCase()
                 }
                 launch {
                     loadInterviewTracks()

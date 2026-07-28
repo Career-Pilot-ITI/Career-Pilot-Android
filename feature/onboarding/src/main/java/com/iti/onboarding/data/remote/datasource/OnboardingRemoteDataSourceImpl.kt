@@ -8,6 +8,7 @@ import com.iti.onboarding.data.remote.dto.UploadFileResponseDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.onUpload
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
@@ -113,6 +114,10 @@ class OnboardingRemoteDataSourceImpl @Inject constructor(
                 )
             }
         ) {
+            timeout {
+                requestTimeoutMillis = 120_000
+                socketTimeoutMillis = 120_000
+            }
             onUpload { bytesSentTotal, contentLength ->
                 val total = contentLength ?: 0L
                 val progress = if (total > 0) {

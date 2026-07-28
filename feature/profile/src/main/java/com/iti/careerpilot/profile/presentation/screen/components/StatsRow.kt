@@ -14,6 +14,9 @@ import com.iti.careerpilot.profile.R
 import com.iti.core.datastore.models.UserProfile
 
 
+import com.iti.core.model.Plan
+
+
 @Composable
 fun StatsRow(profile: UserProfile) {
     Row(
@@ -28,10 +31,11 @@ fun StatsRow(profile: UserProfile) {
             label = stringResource(R.string.coins),
             value = profile.account.coinBalance.toString()
         )
-        val formattedPlan = when (profile.account.subscriptionTier.uppercase()) {
-            "PRO", "MAX" -> stringResource(R.string.max)
-            "PLUS" -> stringResource(R.string.plus)
-            else -> stringResource(R.string.free)
+        val plan = runCatching { Plan.valueOf(profile.account.subscriptionTier.uppercase()) }.getOrDefault(Plan.FREE)
+        val formattedPlan = when (plan) {
+            Plan.MAX -> stringResource(R.string.max)
+            Plan.PLUS -> stringResource(R.string.plus)
+            Plan.FREE -> stringResource(R.string.free)
         }
         StatPill(
             modifier = Modifier.weight(1f),
