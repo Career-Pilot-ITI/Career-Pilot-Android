@@ -7,13 +7,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,19 +36,16 @@ import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -75,6 +71,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
+import com.iti.careerpilot.core.designsystem.components.BackIconButton
+import com.iti.careerpilot.core.designsystem.components.ButtonVariant
+import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.ScoreRing
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.domain.models.SessionQuestionResult
@@ -111,19 +113,17 @@ fun ResultScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.back),
-                        )
-                    }
+                    BackIconButton(onBack = onBack)
                 },
                 title = {
                     Text(
                         text = stringResource(R.string.session_results),
                         style = MaterialTheme.typography.titleLarge
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         }
     ) { innerPadding ->
@@ -148,11 +148,11 @@ fun ResultScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                        .padding(horizontal = Dimens.SpaceXL),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXXL)
                 ) {
                     item {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Dimens.SpaceS))
                         OverallScoreSection(result.overallScore)
                     }
 
@@ -200,18 +200,18 @@ fun ResultErrorState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(Dimens.SpaceXXL),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_error),
             contentDescription = null,
-            modifier = Modifier.size(80.dp),
+            modifier = Modifier.size(Dimens.ErrorRingSize),
             tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
         
         Text(
             text = stringResource(R.string.no_results_found),
@@ -219,7 +219,7 @@ fun ResultErrorState(
             textAlign = TextAlign.Center
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceS))
         
         Text(
             text = stringResource(R.string.error_creating_results),
@@ -228,21 +228,13 @@ fun ResultErrorState(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceXXXL))
         
-        Button(
+        CareerPilotButton(
+            text = stringResource(R.string.retry),
             onClick = onRetry,
-            shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_refresh),
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(R.string.retry))
-        }
+            modifier = Modifier.padding(horizontal = Dimens.SpaceXXXL)
+        )
     }
 }
 
@@ -271,7 +263,7 @@ fun OverallScoreSection(score: Int) {
     ) {
         Box(
             modifier = Modifier
-                .size(200.dp)
+                .size(Dimens.AnimationBoxSize)
                 .drawBehind {
                     if (isGoodResult) {
                         drawCircle(
@@ -292,7 +284,7 @@ fun OverallScoreSection(score: Int) {
                 progressColor = if (isGoodResult) primaryColor else MaterialTheme.colorScheme.error,
                 trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                 modifier = Modifier.fillMaxSize(),
-                strokeWidthDp = 12.dp,
+                strokeWidthDp = Dimens.SpaceM,
                 centerContent = { animatedProgress ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -318,14 +310,14 @@ fun OverallScoreSection(score: Int) {
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(16.dp)
-                        .size(32.dp),
+                        .padding(Dimens.SpaceL)
+                        .size(Dimens.SpaceXXXL),
                     tint = secondaryColor
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.SpaceL))
 
         Text(
             text = when {
@@ -341,16 +333,12 @@ fun OverallScoreSection(score: Int) {
 
 @Composable
 fun ScoreBreakdownSection(result: SessionResult) {
-    Card(
+    CareerPilotCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        ),
-        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(Dimens.SpaceXL),
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {
             Text(
                 text = stringResource(R.string.performance_breakdown),
@@ -394,20 +382,17 @@ fun ScoreItem(label: String, score: Int, icon: ImageVector) {
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(Dimens.SpaceXXXXL)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
+            GradientIcon(
+                icon = icon
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Dimens.SpaceM))
 
         Column(modifier = Modifier.weight(1f)) {
             Row(
@@ -420,7 +405,7 @@ fun ScoreItem(label: String, score: Int, icon: ImageVector) {
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceXS))
             LinearProgressIndicator(
                 progress = { score / 100f },
                 modifier = Modifier
@@ -437,14 +422,14 @@ fun ScoreItem(label: String, score: Int, icon: ImageVector) {
 
 @Composable
 fun CoachingTipsSection(tips: List<String>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Default.Lightbulb,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Dimens.SpaceS))
             Text(
                 text = stringResource(R.string.coaching_tips),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
@@ -452,23 +437,20 @@ fun CoachingTipsSection(tips: List<String>) {
         }
 
         tips.forEach { tip ->
-            Card(
+            CareerPilotCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(Dimens.SpaceL),
                     verticalAlignment = Alignment.Top
                 ) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(Dimens.SpaceXL)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(Dimens.SpaceM))
                     Text(
                         text = tip,
                         style = MaterialTheme.typography.bodyMedium,
@@ -484,17 +466,16 @@ fun CoachingTipsSection(tips: List<String>) {
 fun QuestionDetailItem(question: SessionQuestionResult) {
     var expanded by remember { mutableStateOf(false) }
 
-    Card(
+    CareerPilotCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { expanded = !expanded },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+            .clickable(
+                onClick = { expanded = !expanded },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(Dimens.SpaceL)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -515,7 +496,7 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
                 }
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimens.SpaceS))
             
             Text(
                 text = question.questionText,
@@ -524,9 +505,9 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
 
             AnimatedVisibility(visible = expanded) {
                 Column {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.SpaceL))
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.SpaceL))
                     
                     Text(
                         text = stringResource(R.string.your_transcript),
@@ -536,17 +517,17 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
                     Text(
                         text = question.userTranscript.ifBlank { stringResource(R.string.no_transcript_available) },
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = Dimens.SpaceXS)
                     )
                     
                     question.score?.let { score ->
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(Dimens.SpaceL))
                         Text(
                             text = stringResource(R.string.analysis),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Dimens.SpaceS))
                         
                         SmallScoreItem(stringResource(R.string.clarity), score.clarity)
                         SmallScoreItem(stringResource(R.string.confidence), score.confidence)
@@ -555,22 +536,22 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
                         SmallScoreItem(stringResource(R.string.content_relevance), score.contentRelevance)
                         
                         if (score.coachingTip.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Dimens.SpaceM))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(Dimens.SpaceS))
                                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f))
-                                    .padding(12.dp)
+                                    .padding(Dimens.SpaceM)
                             ) {
                                 Row {
                                     Icon(
                                         imageVector = Icons.Default.Lightbulb,
                                         contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
+                                        modifier = Modifier.size(Dimens.SpaceL),
                                         tint = MaterialTheme.colorScheme.secondary
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
                                     Text(
                                         text = score.coachingTip,
                                         style = MaterialTheme.typography.bodySmall,
@@ -582,13 +563,24 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
                     }
                 }
             }
-            
-            Icon(
-                imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
+
+            Spacer(modifier = Modifier.height(Dimens.SpaceS))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
+            ) {
+                Text(
+                    text = stringResource(R.string.more_details),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Spacer(modifier = Modifier.height(Dimens.SpaceS))
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
         }
     }
 }
@@ -598,7 +590,7 @@ fun SmallScoreItem(label: String, score: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = Dimens.SpaceXS),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -608,12 +600,12 @@ fun SmallScoreItem(label: String, score: Int) {
                 progress = { score / 100f },
                 modifier = Modifier
                     .width(60.dp)
-                    .height(4.dp)
+                    .height(Dimens.SpaceXS)
                     .clip(CircleShape),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Dimens.SpaceS))
             Text(
                 text = "$score%",
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
