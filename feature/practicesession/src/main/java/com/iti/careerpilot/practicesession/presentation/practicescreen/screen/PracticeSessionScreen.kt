@@ -177,7 +177,9 @@ fun PracticeSessionRoot(
         )
     }
     if (state.isLoadingSession) {
-        LoadingDialog()
+        LoadingDialog(
+            title = stringResource(R.string.loading_session),
+        )
     }
     if (state.isUploadingAndTranscribingAudio ||
         state.isSendingAnswer
@@ -279,9 +281,7 @@ fun PracticeSessionScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CenterStage(
-                            isRecording = state.isRecording,
                             isReadingQuestion = state.isReadingQuestion,
-                            hasRecordedAudio = state.recordedAudioPath != null,
                             onToggleListening = {
                                 if (state.isReadingQuestion) {
                                     onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)

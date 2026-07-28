@@ -52,16 +52,10 @@ fun ActionBottomBar(
     ) {
         PracticeIconButton(
             onClick = onToggleQuestionCard,
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(
-                    if (showQuestionCard) R.drawable.ic_expand_down
-                    else R.drawable.ic_expand_up
-                ),
-                contentDescription = stringResource(R.string.toggle_question_card),
-                modifier = Modifier.size(28.dp)
-            )
-        }
+            iconId = if (showQuestionCard) R.drawable.ic_expand_down
+            else R.drawable.ic_expand_up,
+            descriptionId = R.string.toggle_question_card
+        )
 
         Box(
             modifier = Modifier
@@ -127,12 +121,10 @@ fun ActionBottomBar(
             )
         }
 
-        PracticeIconButton(onClick = onOpenSettings) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_more),
-                contentDescription = stringResource(R.string.session_settings),
-                modifier = Modifier.size(28.dp)
-            )
-        }
+        PracticeIconButton(
+            onClick = onOpenSettings,
+            iconId = R.drawable.ic_more,
+            descriptionId = R.string.session_settings
+        )
     }
 }

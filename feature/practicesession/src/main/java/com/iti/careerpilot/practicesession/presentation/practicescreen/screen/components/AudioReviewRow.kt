@@ -52,15 +52,10 @@ fun AudioReviewRow(
         Box(modifier = Modifier.fillMaxWidth()) {
             PracticeIconButton(
                 onClick = onDiscard,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete_recording),
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+                modifier = Modifier.align(Alignment.TopStart),
+                iconId = R.drawable.ic_delete,
+                descriptionId = R.string.delete_recording
+            )
         }
 
         Spacer(Modifier.height(8.dp))
@@ -69,17 +64,11 @@ fun AudioReviewRow(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PracticeIconButton(onClick = onTogglePlay) {
-                Icon(
-                    imageVector = if (isPlayingAudio) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlayingAudio) {
-                        stringResource(R.string.pause)
-                    } else {
-                        stringResource(R.string.play)
-                    },
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+            PracticeIconButton(
+                onClick = onTogglePlay,
+                iconId = if (isPlayingAudio) R.drawable.ic_pause else R.drawable.ic_play,
+                descriptionId = if (isPlayingAudio) R.string.pause else R.string.play
+            )
 
             Spacer(Modifier.width(12.dp))
 
