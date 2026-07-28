@@ -49,7 +49,7 @@ class HomeViewModel @Inject constructor(
 
             HomeAction.PracticeInterviewClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: return
+                val trackId = current.practiceTrackId ?: 1L
                 sendEvent(
                     HomeEvent.NavigateToReadyToPractice(
                         trackId = trackId,

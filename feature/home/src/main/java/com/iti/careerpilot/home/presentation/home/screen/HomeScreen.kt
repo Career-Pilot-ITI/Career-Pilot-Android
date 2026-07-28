@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -144,8 +145,7 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
-                    top = Dimens.SpaceXXL,
-                    bottom = Dimens.SpaceXXXXL,
+                    vertical = 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
             ) {
@@ -157,7 +157,7 @@ fun HomeScreen(
                         onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
                         modifier = Modifier
                             .padding(
-                                horizontal = Dimens.SpaceXXL
+                                horizontal = 20.dp
                             )
                     )
                 }
@@ -168,7 +168,7 @@ fun HomeScreen(
                         onClick = { onAction(HomeAction.ScoreCardClicked) },
                         modifier = Modifier
                             .padding(
-                                horizontal = Dimens.SpaceXXL
+                                horizontal = 20.dp
                             )
                     )
                 }
@@ -176,11 +176,10 @@ fun HomeScreen(
                 item {
                     PracticeInterviewCard(
                         trackName = state.practiceTrackName,
-                        enabled = state.canStartPractice,
                         onClick = { onAction(HomeAction.PracticeInterviewClicked) },
                         modifier = Modifier
                             .padding(
-                                horizontal = Dimens.SpaceXXL
+                                horizontal = 20.dp
                             )
                     )
                 }
@@ -193,7 +192,7 @@ fun HomeScreen(
                             onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
                             modifier = Modifier
                                 .padding(
-                                    horizontal = Dimens.SpaceXXL
+                                    horizontal = 20.dp
                                 )
                         )
                     }
@@ -203,7 +202,7 @@ fun HomeScreen(
                             horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
                             modifier = Modifier.fillMaxWidth(),
                             contentPadding = PaddingValues(
-                                horizontal = Dimens.SpaceXXL
+                                horizontal = 20.dp
                             )
                         ) {
                             items(
@@ -235,7 +234,7 @@ fun HomeScreen(
                             .takeIf { state.recentSessions.isNotEmpty() },
                         modifier = Modifier
                             .padding(
-                                horizontal = Dimens.SpaceXXL
+                                horizontal = 20.dp
                             )
                     )
                 }
@@ -244,10 +243,9 @@ fun HomeScreen(
                     item {
                         EmptySessionsCard(
                             onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                            isActionEnabled = state.canStartPractice,
                             modifier = Modifier
                                 .padding(
-                                    horizontal = Dimens.SpaceXXL
+                                    horizontal = 20.dp
                                 )
                         )
                     }
@@ -262,7 +260,7 @@ fun HomeScreen(
                             onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
                             modifier = Modifier
                                 .padding(
-                                    horizontal = Dimens.SpaceXXL
+                                    horizontal = 20.dp
                                 )
                         )
                     }
