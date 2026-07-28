@@ -65,18 +65,16 @@ class UploadCvViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     stage = CvUploadStage.UPLOADING,
-                    uploadProgress = 0f,
+                    uploadProgress = 0,
                     selectedFile = null
                 )
             }
 
             val analyzeResult = analyzeCv(uri) { progress ->
-                val normalizedProgress = (progress / 100f)
-                    .coerceIn(0f, 1f)
 
                 _state.update { currentState ->
                     currentState.copy(
-                        uploadProgress = normalizedProgress,
+                        uploadProgress = progress,
                     )
                 }
             }
@@ -92,7 +90,7 @@ class UploadCvViewModel @Inject constructor(
                                     sizeBytes = metadata.sizeBytes ?: 0L,
                                 ),
                                 stage = CvUploadStage.UPLOADED,
-                                uploadProgress = 1f,
+                                uploadProgress = 100,
                             )
                         }
                     }
@@ -101,7 +99,7 @@ class UploadCvViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             stage = CvUploadStage.EMPTY,
-                            uploadProgress = 0f,
+                            uploadProgress = 0,
                         )
                     }
 

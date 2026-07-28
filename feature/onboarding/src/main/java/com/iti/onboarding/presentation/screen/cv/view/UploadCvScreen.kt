@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.iti.careerpilot.core.designsystem.components.UploadProgressDialog
 import com.iti.common.media.pdfpicker.rememberPdfPickerLauncher
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.onboarding.R
@@ -51,7 +53,7 @@ fun UploadCvScreen(
     modifier: Modifier = Modifier,
     viewModel: UploadCvViewModel = hiltViewModel(),
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val pdfPicker = rememberPdfPickerLauncher(
@@ -85,11 +87,17 @@ fun UploadCvScreen(
         onIntent = viewModel::onIntent,
         modifier = modifier,
     )
+    if (state.isSubmitting) {
+        UploadProgressDialog(
+            progress = state.uploadProgress,
+            title = stringResource(R.string.uploading)
+        )
+    }
 }
 
 @Composable
 fun UploadCvScreenContent(
-    state: State<UploadCvUiState>,
+    state: UploadCvUiState,
     onIntent: (UploadCvIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -106,9 +114,9 @@ fun UploadCvScreenContent(
         }
         item {
             UploadCvCard(
-                selectedFile = state.value.selectedFile,
-                stage = state.value.stage,
-                uploadProgress = state.value.uploadProgress,
+                selectedFile = state.selectedFile,
+                stage = state.stage,
+                uploadProgress = state.uploadProgress,
                 onClick = {
                     onIntent(UploadCvIntent.OnUploadAreaClick)
                 },
@@ -117,7 +125,7 @@ fun UploadCvScreenContent(
 
         item {
             AnimatedVisibility(
-                visible = state.value.stage == CvUploadStage.UPLOADED,
+                visible = state.stage == CvUploadStage.UPLOADED,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -145,7 +153,7 @@ fun UploadCvScreenContent(
         }
         item {
             AnimatedVisibility(
-                visible = state.value.stage != CvUploadStage.UPLOADED,
+                visible = state.stage != CvUploadStage.UPLOADED,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -153,7 +161,7 @@ fun UploadCvScreenContent(
                     onClick = {
                         onIntent(UploadCvIntent.OnSkipClick)
                     },
-                    enabled = !state.value.isSubmitting,
+                    enabled = !state.isSubmitting,
                     modifier = Modifier,
                 ) {
                     Text(

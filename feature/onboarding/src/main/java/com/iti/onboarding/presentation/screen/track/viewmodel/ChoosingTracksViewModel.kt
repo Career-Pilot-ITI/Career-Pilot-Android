@@ -33,16 +33,16 @@ class ChoosingTracksViewModel @Inject constructor(
     private val _effects = MutableSharedFlow<ChoosingTracksEffects>()
     val effects = _effects.asSharedFlow()
 
-    init {
-        loadTracks(isRefresh = false)
-    }
-
     fun onIntent(intent: ChoosingTracksIntent) {
         when (intent) {
             is ChoosingTracksIntent.ToggleTrackSelection -> {
                 _state.update {
                     it.copy(selectedTrack = intent.track)
                 }
+            }
+
+            ChoosingTracksIntent.FetchTracks -> {
+                loadTracks(isRefresh = false)
             }
 
             ChoosingTracksIntent.OnRefresh -> {

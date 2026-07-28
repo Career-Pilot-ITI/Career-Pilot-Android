@@ -12,6 +12,7 @@ import javax.inject.Inject
 
 import com.iti.onboarding.presentation.screen.profileinfo.model.ExperienceLevel
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDataSource {
     override suspend fun uploadFile(file: File, onProgress: (Int) -> Unit): UploadFileResponseDto {
@@ -47,7 +48,11 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         return listOf(
             TracksResponseDto(1L, "Android", "Android Development", true, "2023-01-01"),
             TracksResponseDto(2L, "iOS", "iOS Development", true, "2023-01-01"),
-            TracksResponseDto(3L, "Backend", "Backend Development", true, "2023-01-01")
+            TracksResponseDto(3L, "Backend", "Backend Development", true, "2023-01-01"),
+            TracksResponseDto(4L, "Frontend", "Frontend Development", true, "2023-01-01"),
+            TracksResponseDto(5L, "Java", "Java Development", true, "2023-01-01"),
+            TracksResponseDto(6L, "C++", "C++ Development", true, "2023-01-01"),
+            TracksResponseDto(7L, "Python", "Python Development", true, "2023-01-01"),
         )
     }
 
@@ -88,7 +93,7 @@ class FakeOnboardingRemoteDataSource @Inject constructor() : OnboardingRemoteDat
         )
 
         progressUpdates.forEach { progress ->
-            delay(250)
+            delay(250.milliseconds)
             onProgress(progress)
         }
 

@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 data class UploadCvUiState(
     val selectedFile: SelectedCvUiModel? = null,
     val stage: CvUploadStage = CvUploadStage.EMPTY,
-    val uploadProgress: Float = 0f,
+    val uploadProgress: Int = 0,
 ) {
     val isSubmitting: Boolean
         get() = stage == CvUploadStage.PREPARING ||

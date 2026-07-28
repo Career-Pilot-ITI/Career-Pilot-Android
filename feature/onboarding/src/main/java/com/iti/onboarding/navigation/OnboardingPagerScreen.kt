@@ -142,6 +142,7 @@ fun OnboardingPagerScreen(
                     )
 
                     PAGE_CHOOSING_TRACKS -> ChoosingTracksScreen(
+                        isCurrent = pagerState.currentPage == PAGE_CHOOSING_TRACKS,
                         viewModel = tracksViewModel,
                         onNavigateNext =  onOnboardingFinished
                     )

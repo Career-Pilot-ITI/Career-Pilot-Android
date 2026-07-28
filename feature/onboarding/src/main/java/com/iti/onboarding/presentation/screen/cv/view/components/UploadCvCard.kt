@@ -30,7 +30,7 @@ import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
 fun UploadCvCard(
     selectedFile: SelectedCvUiModel?,
     stage: CvUploadStage,
-    uploadProgress: Float,
+    uploadProgress: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -74,7 +74,7 @@ fun UploadCvCard(
 
             CvUploadStage.UPLOADING -> UploadingCvContent(
                 selectedFile = selectedFile,
-                progress = uploadProgress,
+                progress = (uploadProgress / 100f).coerceIn(0f, 1f),
             )
 
             CvUploadStage.UPLOADED -> UploadedCvContent(

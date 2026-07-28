@@ -23,13 +23,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ProfileFieldRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -39,10 +41,16 @@ fun ProfileFieldRow(
     isError: Boolean = false,
     errorMessage: String? = null
 ) {
-    val tintColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-    val labelColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-    val textColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    
+    val tintColor =
+        if (isError) MaterialTheme.colorScheme.error
+        else MaterialTheme.colorScheme.onSurfaceVariant
+    val labelColor =
+        if (isError) MaterialTheme.colorScheme.error
+        else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor =
+        if (isError) MaterialTheme.colorScheme.error
+        else MaterialTheme.colorScheme.onSurface
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -64,9 +72,9 @@ fun ProfileFieldRow(
                 modifier = Modifier.size(20.dp)
             )
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         // Text content
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -99,7 +107,7 @@ fun ProfileFieldRow(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             if (isError && errorMessage != null) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -114,7 +122,7 @@ fun ProfileFieldRow(
 
 @Composable
 fun ProfileDropdownRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String,
     options: ImmutableList<String>,
@@ -122,7 +130,8 @@ fun ProfileDropdownRow(
     placeholder: String
 ) {
     var expanded by remember { mutableStateOf(false) }
-    
+    val focusManager = LocalFocusManager.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -147,9 +156,9 @@ fun ProfileDropdownRow(
                 modifier = Modifier.size(20.dp)
             )
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         // Text content
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -164,8 +173,10 @@ fun ProfileDropdownRow(
                     text = if (value.isEmpty()) placeholder else value,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium,
-                        color = if (value.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) 
-                               else MaterialTheme.colorScheme.onSurface
+                        color = if (value.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.5f
+                        )
+                        else MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.weight(1f)
                 )
@@ -175,10 +186,13 @@ fun ProfileDropdownRow(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
+                onDismissRequest = {
+                    expanded = false
+                    focusManager.clearFocus()
+                },
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
                     .background(MaterialTheme.colorScheme.surface)
@@ -195,6 +209,7 @@ fun ProfileDropdownRow(
                         onClick = {
                             onValueChange(option)
                             expanded = false
+                            focusManager.clearFocus()
                         }
                     )
                 }
