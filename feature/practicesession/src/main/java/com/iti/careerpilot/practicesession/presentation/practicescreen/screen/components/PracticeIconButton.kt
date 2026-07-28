@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -28,31 +29,20 @@ fun PracticeIconButton(
     descriptionId: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.onBackground,
 ) {
-    val extendedColors = CareerPilotTheme.extendedColors
-
-    val backgroundBrush = remember(extendedColors) {
-        Brush.linearGradient(
-            colors = listOf(
-                extendedColors.radialGradientStart,
-                extendedColors.radialGradientEnd,
-            ),
-            start = Offset(0f, 0f),
-        )
-    }
-
     Box(
         modifier = modifier
             .size(52.dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = CircleShape,
-                ambientColor = extendedColors.radialGradientStart,
-                spotColor = extendedColors.radialGradientStart,
-            )
             .clip(CircleShape)
-            .background(backgroundBrush)
-            .border(1.dp, extendedColors.actionBorder.copy(alpha = 0.4f), CircleShape)
+            .background(MaterialTheme.colorScheme.background, CircleShape)
+            .background(
+                Brush.radialGradient(
+                    0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                )
+            )
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
             .clickable(
                 onClick = onClick,
             ),
@@ -61,7 +51,7 @@ fun PracticeIconButton(
         Icon(
             imageVector = ImageVector.vectorResource(iconId),
             contentDescription = stringResource(descriptionId),
-            tint = MaterialTheme.colorScheme.onBackground,
+            tint = tint,
         )
     }
 }

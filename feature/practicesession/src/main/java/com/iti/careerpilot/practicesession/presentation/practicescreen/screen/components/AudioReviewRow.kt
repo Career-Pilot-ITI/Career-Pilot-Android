@@ -54,7 +54,8 @@ fun AudioReviewRow(
                 onClick = onDiscard,
                 modifier = Modifier.align(Alignment.TopStart),
                 iconId = R.drawable.ic_delete,
-                descriptionId = R.string.delete_recording
+                descriptionId = R.string.delete_recording,
+                tint = MaterialTheme.colorScheme.error
             )
         }
 
@@ -106,26 +107,23 @@ fun AudioReviewRow(
 
             Box(
                 modifier = Modifier
+                    .size(52.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.background, CircleShape)
-                    .drawBehind {
-                        drawRect(
-                            brush = Brush.radialGradient(
-                                0f to extendedColors.radialGradientStart,
-                                1f to extendedColors.radialGradientEnd,
-                                radius = 150f,
-                                center = Offset(75f, 75f)
-                            )
+                    .background(
+                        Brush.radialGradient(
+                            0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
                         )
-                    }
-                    .border(1.dp, extendedColors.actionBorder, CircleShape),
+                    )
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 LargeGradientIconButton(
                     icon = ImageVector.vectorResource(R.drawable.ic_send),
                     contentDescription = stringResource(R.string.submit_answer),
                     onClick = onSubmit,
-                    size = 56.dp
+                    size = 52.dp
                 )
             }
         }
