@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -47,6 +48,10 @@ fun SubscriptionPlansScreen(
     modifier: Modifier = Modifier,
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
+    }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     SubscriptionPlansContent(
@@ -151,7 +156,8 @@ fun SubscriptionPlansContent(
             SubscriptionPlanDetailsCard(
                 plan = selectedPlan,
                 selectedPlanName = selectedPlanName,
-                isCurrentPlan = state.selectedLevel == state.currentTierLevel
+                isCurrentPlan = state.selectedLevel == state.currentTierLevel,
+                isLoadingTierPrices = state.isLoadingTierPrices
             )
 
             Spacer(modifier = Modifier.height(Dimens.SpaceL))

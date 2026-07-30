@@ -1,6 +1,8 @@
 package com.iti.careerpilot.features.paywall.presentation.viewmodel
 
 sealed interface PaywallIntent {
+    data object LoadSubscriptionPlans : PaywallIntent
+    data object LoadCoinPacks : PaywallIntent
     data class SelectPlan(val planId: String) : PaywallIntent
     data class SelectCoinPack(val packId: String) : PaywallIntent
     data object CheckoutRequested : PaywallIntent

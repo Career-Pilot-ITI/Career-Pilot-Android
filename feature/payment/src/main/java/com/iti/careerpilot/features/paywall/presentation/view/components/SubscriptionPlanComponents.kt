@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette as CareerPilotColors
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.shimmerLoading
 import com.iti.careerpilot.features.paywall.domain.model.SubscriptionPlan
 import com.iti.careerpilot.payment.R
 
@@ -105,6 +106,7 @@ fun SubscriptionPlanDetailsCard(
     plan: SubscriptionPlan?,
     selectedPlanName: String,
     isCurrentPlan: Boolean,
+    isLoadingTierPrices: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     CareerPilotCard(
@@ -144,7 +146,14 @@ fun SubscriptionPlanDetailsCard(
 
             // Price Section
             Row(verticalAlignment = Alignment.Bottom) {
-                if ((plan?.priceEgp ?: 0) > 0) {
+                if (isLoadingTierPrices && plan?.id != "free") {
+                    Box(
+                        modifier = Modifier
+                            .width(Dimens.OtpCellHeight * 2.5f)
+                            .height(Dimens.SpaceXXXXL)
+                            .shimmerLoading(isLoading = true, shape = RoundedCornerShape(Dimens.SpaceS))
+                    )
+                } else if ((plan?.priceEgp ?: 0) > 0) {
                     Text(
                         text = stringResource(R.string.paywall_currency_egp, plan?.priceEgp ?: 0),
                         style = MaterialTheme.typography.displayMedium,
