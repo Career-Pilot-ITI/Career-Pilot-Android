@@ -2,10 +2,10 @@ package com.iti.careerpilot.reports.data.repository
 
 import com.iti.careerpilot.reports.data.datasource.remote.ReportsRemoteDataSource
 import com.iti.careerpilot.reports.data.mapper.toDomain
-import com.iti.careerpilot.reports.data.mapper.toHistoryDomainOrNull
-import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
+import com.iti.careerpilot.reports.data.mapper.toHistoryDomain
 import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
 import com.iti.careerpilot.reports.domain.model.ReportDetails
+import com.iti.careerpilot.reports.domain.model.SessionHistoryPage
 import com.iti.careerpilot.reports.domain.repository.ReportsRepository
 import com.iti.common.dispatcher.CareerPilotDispatchers
 import com.iti.common.dispatcher.Dispatcher
@@ -22,10 +22,14 @@ class ReportsRepositoryImpl @Inject constructor(
     @param:Dispatcher(CareerPilotDispatchers.IO)
     private val ioDispatcher: CoroutineDispatcher,
 ) : ReportsRepository {
-    override suspend fun getSessionHistory(): CareerPilotResult<List<InterviewSessionSummary>, NetworkError> =
-        mapRemoteResult(remoteDataSource::getSessions) { sessions ->
-            sessions.mapNotNull { it.toHistoryDomainOrNull() }
-        }
+    override suspend fun getSessionHistoryPage(
+        page: Int,
+        size: Int,
+    ): CareerPilotResult<SessionHistoryPage, NetworkError> =
+        mapRemoteResult(
+            call = { remoteDataSource.getSessions(page = page, size = size) },
+            transform = { response -> response.toHistoryDomain() },
+        )
 
     override suspend fun getReportDetails(
         sessionId: Long,

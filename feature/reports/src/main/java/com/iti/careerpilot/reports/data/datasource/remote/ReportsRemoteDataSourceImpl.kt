@@ -4,19 +4,33 @@ import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionsPageDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.ReportsApiResponseDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import javax.inject.Inject
 
 class ReportsRemoteDataSourceImpl @Inject constructor(
     private val client: HttpClient,
 ) : ReportsRemoteDataSource {
-    override suspend fun getSessions(): CareerPilotResult<List<InterviewSessionDto>, NetworkError> =
-        getPayload(Endpoints.INTERVIEW_SESSIONS)
+    override suspend fun getSessions(
+        page: Int,
+        size: Int,
+    ): CareerPilotResult<InterviewSessionsPageDto, NetworkError> = when (
+        val result = safeCall<ReportsApiResponseDto<InterviewSessionsPageDto>> {
+            client.get(Endpoints.INTERVIEW_SESSIONS) {
+                parameter("page", page)
+                parameter("size", size)
+            }
+        }
+    ) {
+        is CareerPilotResult.Success -> CareerPilotResult.Success(result.data.data)
+        is CareerPilotResult.Error -> CareerPilotResult.Error(result.error)
+    }
 
     override suspend fun getSession(
         sessionId: Long,

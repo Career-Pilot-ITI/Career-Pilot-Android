@@ -6,5 +6,8 @@ import javax.inject.Inject
 class GetSessionHistoryUseCase @Inject constructor(
     private val repository: ReportsRepository,
 ) {
-    suspend operator fun invoke() = repository.getSessionHistory()
+    suspend operator fun invoke(
+        page: Int,
+        size: Int,
+    ) = repository.getSessionHistoryPage(page = page, size = size)
 }
