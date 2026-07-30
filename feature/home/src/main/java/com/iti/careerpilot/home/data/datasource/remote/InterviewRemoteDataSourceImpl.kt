@@ -4,6 +4,7 @@ import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.careerpilot.home.data.datasource.remote.dto.ApiEnvelopeDto
 import com.iti.careerpilot.home.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.home.data.datasource.remote.dto.PageResponseDto
 import com.iti.careerpilot.home.data.datasource.remote.dto.TrackDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
@@ -16,9 +17,9 @@ class InterviewRemoteDataSourceImpl @Inject constructor(
 ) : InterviewRemoteDataSource {
 
     override suspend fun getInterviewSessions(): CareerPilotResult<List<InterviewSessionDto>, NetworkError> =
-        safeCall<ApiEnvelopeDto<List<InterviewSessionDto>>> {
+        safeCall<ApiEnvelopeDto<PageResponseDto<InterviewSessionDto>>> {
             httpClient.get(Endpoints.INTERVIEW_SESSIONS)
-        }.unwrap { it ?: emptyList() }
+        }.unwrap { it?.content ?: emptyList() }
 
     override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> =
         safeCall {

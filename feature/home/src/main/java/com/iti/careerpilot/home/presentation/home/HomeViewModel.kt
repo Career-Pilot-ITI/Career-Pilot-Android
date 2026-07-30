@@ -3,10 +3,12 @@ package com.iti.careerpilot.home.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.home.domain.model.InterviewSession
+import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
+import com.iti.common.error.NetworkError
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
@@ -114,50 +116,52 @@ class HomeViewModel @Inject constructor(
                     isRefreshing = isRefresh,
                 )
             }
+
+            var tracksResult: List<InterviewTrack>? = null
+            var sessionsResult: List<InterviewSession>? = null
+            var sessionsError: NetworkError? = null
+
             coroutineScope {
+                launch { userProfileSync.syncWalletBalance() }
+                launch { userProfileSync.syncSubscriptionTier() }
                 launch {
-                    userProfileSync.syncWalletBalance()
-                }
-                launch {
-                    userProfileSync.syncSubscriptionTier()
-                }
-                launch {
-                    loadInterviewTracks()
+                    getInterviewTracks().onSuccess { tracks ->
+                        tracksResult = tracks
+                    }
                 }
                 launch {
                     getInterviewSessions()
                         .onSuccess { data ->
-                            applySessions(data)
+                            sessionsResult = data
                         }
                         .onError { error ->
-                            CareerPilotSnackbarController.show(error.toUIText())
+                            sessionsError = error
                         }
                 }
             }
-            _state.update {
-                it.copy(
+
+            _state.update { state ->
+                var updated = state
+                tracksResult?.let { tracks ->
+                    updated = updated.copy(availableInterviews = tracks.toImmutableList())
+                }
+                sessionsResult?.let { sessions ->
+                    updated = updated.copy(
+                        recentSessions = sessions.take(RECENT_SESSIONS_COUNT).toImmutableList(),
+                        scoreSummary = getScoreSummary(sessions),
+                    )
+                }
+                updated.copy(
                     isLoading = false,
                     isRefreshing = false,
                 )
             }
+
+            sessionsError?.let { error ->
+                CareerPilotSnackbarController.show(error.toUIText())
+            }
         }
     }
-
-    private suspend fun loadInterviewTracks() {
-        getInterviewTracks().onSuccess { tracks ->
-            _state.update { it.copy(availableInterviews = tracks.toImmutableList()) }
-        }
-    }
-
-    private fun applySessions(sessions: List<InterviewSession>) {
-        _state.update {
-            it.copy(
-                recentSessions = sessions.take(RECENT_SESSIONS_COUNT).toImmutableList(),
-                scoreSummary = getScoreSummary(sessions),
-            )
-        }
-    }
-
 
     private fun sendEvent(event: HomeEvent) {
         viewModelScope.launch { _events.send(event) }
@@ -167,3 +171,4 @@ class HomeViewModel @Inject constructor(
         const val RECENT_SESSIONS_COUNT = 3
     }
 }
+
