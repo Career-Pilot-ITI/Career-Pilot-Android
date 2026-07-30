@@ -180,8 +180,9 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `init loads wallet balance from backend`() = runTest {
+    fun `LoadCoinPacks intent loads wallet balance from backend`() = runTest {
         val viewModel = makeViewModel()
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
         testScheduler.advanceUntilIdle()
 
         assertEquals(fakeWalletBalance.balance, viewModel.state.value.coinBalance)
@@ -189,8 +190,9 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `init loads subscription tier from backend`() = runTest {
+    fun `LoadSubscriptionPlans intent loads subscription tier from backend`() = runTest {
         val viewModel = makeViewModel()
+        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
         testScheduler.advanceUntilIdle()
 
         assertEquals(fakeSubscriptionInfo.tier, viewModel.state.value.currentSubscriptionTier)
@@ -223,6 +225,8 @@ class PaywallViewModelTest {
     @Test
     fun `BuyCoinsRequested on success emits NavigateToWebView with checkout url`() = runTest {
         val viewModel = makeViewModel()
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        testScheduler.advanceUntilIdle()
         viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_100"))
 
         val effects = mutableListOf<PaywallEffect>()
@@ -242,7 +246,12 @@ class PaywallViewModelTest {
 
     @Test
     fun `BuyCoinsRequested on error emits ShowSnackbar`() = runTest {
-        val viewModel = makeViewModel(repo = errorRepo(), api = errorApi())
+        val customRepo = object : PaymentRepository by errorRepo() {
+            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(100 to 50.0))
+        }
+        val viewModel = makeViewModel(repo = customRepo, api = errorApi())
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_100"))
         testScheduler.advanceUntilIdle()
 
         val effects = mutableListOf<PaywallEffect>()
@@ -407,12 +416,24 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `init loads subscription tier prices and coin pack prices from backend`() = runTest {
+    fun `init does not load subscription tier prices or coin packs`() = runTest {
+        val viewModel = makeViewModel()
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.coinPacks.isEmpty())
+        assertEquals(false, viewModel.state.value.isLoadingTierPrices)
+        assertEquals(false, viewModel.state.value.isLoadingCoinPacks)
+    }
+
+    @Test
+    fun `LoadSubscriptionPlans and LoadCoinPacks load prices from backend`() = runTest {
         val customRepo = object : PaymentRepository by successRepo() {
             override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 250.0, "PRO" to 600.0))
             override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(100 to 60.0, 500 to 220.0, 1000 to 400.0))
         }
         val viewModel = makeViewModel(repo = customRepo)
+        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
         testScheduler.advanceUntilIdle()
 
         val plusPlan = viewModel.state.value.subscriptionPlans.find { it.id == "plus" }
@@ -422,5 +443,52 @@ class PaywallViewModelTest {
         assertEquals(250, plusPlan?.priceEgp)
         assertEquals(600, proPlan?.priceEgp)
         assertEquals(60, pack100?.priceEgp)
+    }
+
+    @Test
+    fun `LoadSubscriptionPlans intent updates subscription plan prices and sets isLoadingTierPrices to false`() = runTest {
+        val customRepo = object : PaymentRepository by successRepo() {
+            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 299.0))
+        }
+        val viewModel = makeViewModel(repo = customRepo)
+
+        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
+        testScheduler.advanceUntilIdle()
+
+        val plusPlan = viewModel.state.value.subscriptionPlans.find { it.id == "plus" }
+        assertEquals(299, plusPlan?.priceEgp)
+        assertEquals(false, viewModel.state.value.isLoadingTierPrices)
+    }
+
+    @Test
+    fun `LoadSubscriptionPlans intent on error sets isLoadingTierPrices to false`() = runTest {
+        val viewModel = makeViewModel(repo = errorRepo(), api = errorApi())
+
+        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.state.value.isLoadingTierPrices)
+    }
+
+    @Test
+    fun `LoadCoinPacks intent populates coin packs, sets default selected pack, and sets isLoadingCoinPacks to false`() = runTest {
+        val viewModel = makeViewModel()
+
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(3, viewModel.state.value.coinPacks.size)
+        assertEquals("coins_500", viewModel.state.value.selectedCoinPackId)
+        assertEquals(false, viewModel.state.value.isLoadingCoinPacks)
+    }
+
+    @Test
+    fun `LoadCoinPacks intent on error sets isLoadingCoinPacks to false`() = runTest {
+        val viewModel = makeViewModel(repo = errorRepo(), api = errorApi())
+
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(false, viewModel.state.value.isLoadingCoinPacks)
     }
 }

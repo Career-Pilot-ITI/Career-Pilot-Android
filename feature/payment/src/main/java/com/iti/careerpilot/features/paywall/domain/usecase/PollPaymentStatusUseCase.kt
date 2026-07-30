@@ -21,61 +21,75 @@ class PollPaymentStatusUseCase @Inject constructor(
         merchantOrderId: String? = null,
         targetTier: String? = null,
         expectedCoinDelta: Int = 0,
-        maxAttempts: Int = 10,
+        maxAttempts: Int = 3,
         delayMs: Long = 1500L
     ): PollResult {
         var attempts = 0
 
         while (attempts < maxAttempts) {
-            runCatching {
-                userSyncManager.syncWalletBalance()
-                userSyncManager.syncSubscriptionTier()
-            }
-
-            val currentBalance = getCurrentBalance()
-            val currentTier = getCurrentTier()
-
-            // 1. Balance or tier changed
-            if (currentBalance != baselineBalance || currentTier != baselineTier) {
-                return PollResult.Success
-            }
-
-            // 2. Target subscription tier matched
-            if (!targetTier.isNullOrBlank() && currentTier.equals(targetTier, ignoreCase = true)) {
-                return PollResult.Success
-            }
-
-            // 3. Expected coin delta matched
-            if (expectedCoinDelta > 0 && currentBalance >= baselineBalance + expectedCoinDelta) {
-                return PollResult.Success
-            }
-
-            // 4. Query backend transaction status by order ID
+            // 1. Check transaction status by merchantOrderId first (single network request)
             val txStatus = userSyncManager.checkLatestTransactionStatus(merchantOrderId)
-            if ("CONFIRMED".equals(txStatus, ignoreCase = true)) {
-                runCatching {
-                    userSyncManager.syncWalletBalance()
-                    userSyncManager.syncSubscriptionTier()
-                }
+            if (isConfirmedStatus(txStatus)) {
+                syncAll()
                 return PollResult.Success
-            } else if ("FAILED".equals(txStatus, ignoreCase = true)) {
+            } else if (isFailedStatus(txStatus)) {
                 return PollResult.Failed(PaymentFailureReason.DECLINED)
+            }
+
+            // 2. Check balance or tier change if status is pending
+            if (expectedCoinDelta > 0) {
+                val currentBalance = runCatching { userSyncManager.syncWalletBalance() }.getOrElse { getCurrentBalance() }
+                if (currentBalance != baselineBalance || currentBalance >= baselineBalance + expectedCoinDelta) {
+                    return PollResult.Success
+                }
+            } else {
+                val currentTier = runCatching { userSyncManager.syncSubscriptionTier() }.getOrElse { getCurrentTier() }
+                if (currentTier != baselineTier || (!targetTier.isNullOrBlank() && currentTier.equals(targetTier, ignoreCase = true))) {
+                    return PollResult.Success
+                }
             }
 
             delay(delayMs)
             attempts++
         }
 
-        // Final status check after timeout
+        // Final check after loop
+        syncAll()
+        val finalBalance = getCurrentBalance()
+        val finalTier = getCurrentTier()
+        if (finalBalance != baselineBalance || finalTier != baselineTier) {
+            return PollResult.Success
+        }
+
         val finalStatus = userSyncManager.checkLatestTransactionStatus(merchantOrderId)
-        if ("CONFIRMED".equals(finalStatus, ignoreCase = true)) {
-            runCatching {
-                userSyncManager.syncWalletBalance()
-                userSyncManager.syncSubscriptionTier()
-            }
+        if (isConfirmedStatus(finalStatus)) {
             return PollResult.Success
         }
 
         return PollResult.Failed(PaymentFailureReason.VERIFICATION_TIMEOUT)
+    }
+
+    private suspend fun syncAll() {
+        runCatching {
+            userSyncManager.syncWalletBalance()
+            userSyncManager.syncSubscriptionTier()
+        }
+    }
+
+    private fun isConfirmedStatus(status: String?): Boolean {
+        if (status.isNullOrBlank()) return false
+        return status.equals("CONFIRMED", ignoreCase = true) ||
+                status.equals("SUCCESS", ignoreCase = true) ||
+                status.equals("PAID", ignoreCase = true)
+    }
+
+    private fun isFailedStatus(status: String?): Boolean {
+        if (status.isNullOrBlank()) return false
+        return status.equals("FAILED", ignoreCase = true) ||
+                status.equals("DECLINED", ignoreCase = true) ||
+                status.equals("CANCELLED", ignoreCase = true) ||
+                status.equals("CANCELED", ignoreCase = true) ||
+                status.equals("EXPIRED", ignoreCase = true) ||
+                status.equals("REFUNDED", ignoreCase = true)
     }
 }

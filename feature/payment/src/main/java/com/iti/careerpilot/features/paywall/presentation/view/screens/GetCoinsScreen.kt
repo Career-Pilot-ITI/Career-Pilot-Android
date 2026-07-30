@@ -21,7 +21,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.shimmerLoading
 import com.iti.careerpilot.features.paywall.presentation.view.components.CoinPackCard
 import com.iti.careerpilot.features.paywall.presentation.view.components.GetCoinsHeader
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallIntent
@@ -47,6 +50,10 @@ fun GetCoinsScreen(
     modifier: Modifier = Modifier,
     viewModel: PaywallViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+    }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     GetCoinsContent(
@@ -65,9 +72,11 @@ fun GetCoinsContent(
     modifier: Modifier = Modifier
 ) {
     val selectedPack = state.selectedCoinPack
-    val actionLabel = selectedPack?.let {
-        stringResource(R.string.paywall_buy_coins_action, it.coins, it.priceEgp)
-    } ?: ""
+    val actionLabel = if (selectedPack != null) {
+        stringResource(R.string.paywall_buy_coins_action, selectedPack.coins, selectedPack.priceEgp)
+    } else {
+        stringResource(R.string.paywall_get_coins_title)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -106,6 +115,7 @@ fun GetCoinsContent(
                 CareerPilotButton(
                     text = actionLabel,
                     onClick = { onIntent(PaywallIntent.BuyCoinsRequested) },
+                    enabled = selectedPack != null && !state.isLoadingCoinPacks && !state.isCheckoutInProgress,
                     variant = ButtonVariant.PRIMARY,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,13 +138,25 @@ fun GetCoinsContent(
 
             Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
 
-            state.coinPacks.forEach { pack ->
-                key(pack.id) {
-                    CoinPackCard(
-                        pack = pack,
-                        isSelected = pack.id == state.selectedCoinPackId,
-                        onSelect = { onIntent(PaywallIntent.SelectCoinPack(pack.id)) }
+            if (state.isLoadingCoinPacks && state.coinPacks.isEmpty()) {
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(Dimens.QuestionMetricHeight)
+                            .padding(bottom = Dimens.SpaceM)
+                            .shimmerLoading(isLoading = true, shape = RoundedCornerShape(Dimens.SpaceL))
                     )
+                }
+            } else {
+                state.coinPacks.forEach { pack ->
+                    key(pack.id) {
+                        CoinPackCard(
+                            pack = pack,
+                            isSelected = pack.id == state.selectedCoinPackId,
+                            onSelect = { onIntent(PaywallIntent.SelectCoinPack(pack.id)) }
+                        )
+                    }
                 }
             }
 
