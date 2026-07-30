@@ -32,7 +32,7 @@ import com.iti.careerpilot.reports.R
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsAnimatedContent
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsContentPhase
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsErrorContent
-import com.iti.careerpilot.reports.presentation.screen.components.ReportsLoadingContent
+import com.iti.careerpilot.reports.presentation.screen.components.ReportDetailsShimmerContent
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsAction
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsEvent
 import com.iti.careerpilot.reports.presentation.screen.details.contract.ReportDetailsState
@@ -97,8 +97,7 @@ fun ReportDetailsScreen(
             modifier = Modifier.fillMaxSize(),
         ) { animatedState ->
             when (animatedState.phase) {
-                ReportsContentPhase.LOADING -> ReportsLoadingContent(
-                    messageRes = R.string.reports_loading_details,
+                ReportsContentPhase.LOADING -> ReportDetailsShimmerContent(
                     modifier = Modifier.padding(innerPadding),
                 )
 
@@ -112,8 +111,7 @@ fun ReportDetailsScreen(
                             modifier = Modifier.padding(innerPadding),
                         )
                     } else {
-                        ReportsLoadingContent(
-                            messageRes = R.string.reports_loading_details,
+                        ReportDetailsShimmerContent(
                             modifier = Modifier.padding(innerPadding),
                         )
                     }
