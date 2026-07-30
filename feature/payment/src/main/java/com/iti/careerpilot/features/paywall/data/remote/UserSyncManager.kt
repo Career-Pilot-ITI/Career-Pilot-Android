@@ -12,8 +12,8 @@ class UserSyncManager @Inject constructor(
     private val paymentApi: PaymentRemoteDataSource,
     private val userProfileRepo: UserProfileRepo
 ) : UserProfileSync {
-    override suspend fun syncWalletBalance() {
-        try {
+    override suspend fun syncWalletBalance(): Int {
+        return try {
             val balanceResponse = paymentApi.getWalletBalance()
             userProfileRepo.updateUserProfile { profile ->
                 profile.copy(
@@ -22,15 +22,17 @@ class UserSyncManager @Inject constructor(
                     )
                 )
             }
+            balanceResponse.balance
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             runCatching { Log.w(TAG, "syncWalletBalance failed silently: ${e.message}") }
+            userProfileRepo.readUserProfile().account.coinBalance
         }
     }
 
-    override suspend fun syncSubscriptionTier() {
-        try {
+    override suspend fun syncSubscriptionTier(): String {
+        return try {
             val subscriptionResponse = paymentApi.getCurrentSubscription()
             val currentTier = subscriptionResponse.tier
             userProfileRepo.updateUserProfile { profile ->
@@ -40,10 +42,12 @@ class UserSyncManager @Inject constructor(
                     )
                 )
             }
+            currentTier
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             runCatching { Log.w(TAG, "syncSubscriptionTier failed silently: ${e.message}") }
+            userProfileRepo.readUserProfile().account.subscriptionTier
         }
     }
 
