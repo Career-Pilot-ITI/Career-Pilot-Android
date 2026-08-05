@@ -88,14 +88,12 @@ fun UploadCvScreen(
         modifier = modifier,
     )
     if (state.isSubmitting) {
-        val titleRes = if (state.stage == CvUploadStage.PARSING || state.uploadProgress >= 100) {
-            R.string.parsing_cv
-        } else {
-            R.string.uploading
-        }
+        val isParsing = state.stage == CvUploadStage.PARSING || state.uploadProgress >= 100
+        val titleRes = if (isParsing) R.string.parsing_cv else R.string.uploading
         UploadProgressDialog(
             progress = state.uploadProgress,
-            title = stringResource(titleRes)
+            isParsing = isParsing,
+            title = stringResource(titleRes),
         )
     }
 }
