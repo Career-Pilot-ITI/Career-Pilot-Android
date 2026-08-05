@@ -9,5 +9,6 @@ interface ProfileRepo {
 
     val userProfile: StateFlow<UserProfile>
     suspend fun refreshProfile(): CareerPilotResult<Unit, NetworkError>
+    suspend fun downloadMissingFiles()
     suspend fun clearUserProfile()
 }

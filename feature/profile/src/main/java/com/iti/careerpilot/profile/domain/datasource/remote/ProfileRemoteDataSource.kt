@@ -6,4 +6,5 @@ import com.iti.common.result.CareerPilotResult
 
 interface ProfileRemoteDataSource {
     suspend fun getProfile(): CareerPilotResult<UserProfileDto, NetworkError>
+    suspend fun downloadBytes(url: String): ByteArray?
 }

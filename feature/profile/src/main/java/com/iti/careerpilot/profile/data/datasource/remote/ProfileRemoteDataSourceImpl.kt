@@ -8,6 +8,7 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.statement.readBytes
 import javax.inject.Inject
 
 class ProfileRemoteDataSourceImpl @Inject constructor(
@@ -18,4 +19,9 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
         safeApiCall {
             httpClient.get(Endpoints.PROFILE)
         }
+
+    override suspend fun downloadBytes(url: String): ByteArray? =
+        runCatching {
+            httpClient.get(url).readBytes()
+        }.getOrNull()
 }
