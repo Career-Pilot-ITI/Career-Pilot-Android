@@ -12,8 +12,8 @@ import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
 private const val TAG = "FaceLandmarkerEngine"
 private const val MODEL_PATH = "models/face_landmarker.task"
 
-internal class FaceLandmarkerEngine(
-    private val context: Context,
+internal open class FaceLandmarkerEngine(
+    private val context: Context?,
     private val onResult: (FaceLandmarkerResult, Long) -> Unit,
 ) {
     private var landmarker: FaceLandmarker? = null
@@ -42,22 +42,22 @@ internal class FaceLandmarkerEngine(
             .setMinTrackingConfidence(0.5f)
             .setOutputFaceBlendshapes(true)
             .setOutputFacialTransformationMatrixes(true)
-            .setResultListener { result, input ->
-                onResult(result, input.timestamp)
+            .setResultListener { result, _ ->
+                onResult(result, result.timestampMs())
             }
             .setErrorListener { e ->
                 Log.e(TAG, "Face detection error", e)
             }
             .build()
 
-        return FaceLandmarker.createFromOptions(context, options)
+        return FaceLandmarker.createFromOptions(requireNotNull(context), options)
     }
 
-    fun detectAsync(image: MPImage, timestampMs: Long) {
+    open fun detectAsync(image: MPImage, timestampMs: Long) {
         landmarker?.detectAsync(image, timestampMs)
     }
 
-    fun close() {
+    open fun close() {
         landmarker?.close()
         landmarker = null
     }

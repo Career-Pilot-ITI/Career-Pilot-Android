@@ -12,8 +12,8 @@ import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 private const val TAG = "PoseLandmarkerEngine"
 private const val MODEL_PATH = "models/pose_landmarker_lite.task"
 
-internal class PoseLandmarkerEngine(
-    private val context: Context,
+internal open class PoseLandmarkerEngine(
+    private val context: Context?,
     private val onResult: (PoseLandmarkerResult, Long) -> Unit,
 ) {
     private var landmarker: PoseLandmarker? = null
@@ -40,22 +40,22 @@ internal class PoseLandmarkerEngine(
             .setMinPoseDetectionConfidence(0.5f)
             .setMinPosePresenceConfidence(0.5f)
             .setMinTrackingConfidence(0.5f)
-            .setResultListener { result, input ->
-                onResult(result, input.timestamp)
+            .setResultListener { result, _ ->
+                onResult(result, result.timestampMs())
             }
             .setErrorListener { e ->
                 Log.e(TAG, "Pose detection error", e)
             }
             .build()
 
-        return PoseLandmarker.createFromOptions(context, options)
+        return PoseLandmarker.createFromOptions(requireNotNull(context), options)
     }
 
-    fun detectAsync(image: MPImage, timestampMs: Long) {
+    open fun detectAsync(image: MPImage, timestampMs: Long) {
         landmarker?.detectAsync(image, timestampMs)
     }
 
-    fun close() {
+    open fun close() {
         landmarker?.close()
         landmarker = null
     }

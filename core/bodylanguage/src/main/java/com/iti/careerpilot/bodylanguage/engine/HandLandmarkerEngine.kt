@@ -12,8 +12,8 @@ import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 private const val TAG = "HandLandmarkerEngine"
 private const val MODEL_PATH = "models/hand_landmarker.task"
 
-internal class HandLandmarkerEngine(
-    private val context: Context,
+internal open class HandLandmarkerEngine(
+    private val context: Context?,
     private val onResult: (HandLandmarkerResult, Long) -> Unit,
 ) {
     private var landmarker: HandLandmarker? = null
@@ -40,22 +40,22 @@ internal class HandLandmarkerEngine(
             .setMinHandDetectionConfidence(0.5f)
             .setMinHandPresenceConfidence(0.5f)
             .setMinTrackingConfidence(0.5f)
-            .setResultListener { result, input ->
-                onResult(result, input.timestamp)
+            .setResultListener { result, _ ->
+                onResult(result, result.timestampMs())
             }
             .setErrorListener { e ->
                 Log.e(TAG, "Hand detection error", e)
             }
             .build()
 
-        return HandLandmarker.createFromOptions(context, options)
+        return HandLandmarker.createFromOptions(requireNotNull(context), options)
     }
 
-    fun detectAsync(image: MPImage, timestampMs: Long) {
+    open fun detectAsync(image: MPImage, timestampMs: Long) {
         landmarker?.detectAsync(image, timestampMs)
     }
 
-    fun close() {
+    open fun close() {
         landmarker?.close()
         landmarker = null
     }
