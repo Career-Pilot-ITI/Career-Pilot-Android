@@ -21,25 +21,25 @@ internal class FrameScheduler(
     private val poseIntervalMs = 1000L / poseFps
     private val handIntervalMs = 1000L / handFps
 
-    private val lastFaceMs = AtomicLong(0L)
-    private val lastPoseMs = AtomicLong(0L)
-    private val lastHandMs = AtomicLong(0L)
+    private val lastFaceMs = AtomicLong(-1L)
+    private val lastPoseMs = AtomicLong(-1L)
+    private val lastHandMs = AtomicLong(-1L)
 
     fun onFrame(image: MPImage, timestampMs: Long) {
         val lastFace = lastFaceMs.get()
-        if (timestampMs - lastFace >= faceIntervalMs) {
+        if (lastFace == -1L || timestampMs - lastFace >= faceIntervalMs) {
             if (lastFaceMs.compareAndSet(lastFace, timestampMs)) {
                 faceEngine.detectAsync(image, timestampMs)
             }
         }
         val lastPose = lastPoseMs.get()
-        if (timestampMs - lastPose >= poseIntervalMs) {
+        if (lastPose == -1L || timestampMs - lastPose >= poseIntervalMs) {
             if (lastPoseMs.compareAndSet(lastPose, timestampMs)) {
                 poseEngine.detectAsync(image, timestampMs)
             }
         }
         val lastHand = lastHandMs.get()
-        if (timestampMs - lastHand >= handIntervalMs) {
+        if (lastHand == -1L || timestampMs - lastHand >= handIntervalMs) {
             if (lastHandMs.compareAndSet(lastHand, timestampMs)) {
                 handEngine.detectAsync(image, timestampMs)
             }
@@ -47,8 +47,8 @@ internal class FrameScheduler(
     }
 
     fun reset() {
-        lastFaceMs.set(0L)
-        lastPoseMs.set(0L)
-        lastHandMs.set(0L)
+        lastFaceMs.set(-1L)
+        lastPoseMs.set(-1L)
+        lastHandMs.set(-1L)
     }
 }
