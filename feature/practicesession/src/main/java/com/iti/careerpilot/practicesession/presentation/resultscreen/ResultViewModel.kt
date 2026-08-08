@@ -43,8 +43,19 @@ class ResultViewModel @Inject constructor(
         when (action) {
             is ResultAction.UpdateSessionId -> {
                 _state.update {
+                    val metrics = action.bodyLanguageMetricsJson?.let { json ->
+                        try {
+                            kotlinx.serialization.json.Json.decodeFromString(
+                                com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics.serializer(),
+                                json
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
                     it.copy(
-                        sessionId = action.sessionId
+                        sessionId = action.sessionId,
+                        bodyLanguageMetrics = metrics,
                     )
                 }
                 loadResult()

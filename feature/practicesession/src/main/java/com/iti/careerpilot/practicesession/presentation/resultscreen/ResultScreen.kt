@@ -81,15 +81,18 @@ import com.iti.careerpilot.core.designsystem.components.ScoreRing
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.domain.models.SessionQuestionResult
 import com.iti.careerpilot.practicesession.domain.models.SessionResult
+import com.iti.careerpilot.practicesession.presentation.resultscreen.components.BodyLanguageSection
+import com.iti.careerpilot.practicesession.presentation.resultscreen.components.KeyMomentsTimeline
 
 @Composable
 fun ResultRoot(
     sessionId: Long,
+    bodyLanguageMetricsJson: String? = null,
     onBack: () -> Unit,
     viewModel: ResultViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        viewModel.onAction(ResultAction.UpdateSessionId(sessionId))
+        viewModel.onAction(ResultAction.UpdateSessionId(sessionId, bodyLanguageMetricsJson))
     }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -158,6 +161,17 @@ fun ResultScreen(
 
                     item {
                         ScoreBreakdownSection(result)
+                    }
+
+                    state.bodyLanguageMetrics?.let { metrics ->
+                        item {
+                            BodyLanguageSection(metrics = metrics)
+                        }
+                        if (metrics.keyMoments.isNotEmpty()) {
+                            item {
+                                KeyMomentsTimeline(keyMoments = metrics.keyMoments)
+                            }
+                        }
                     }
 
                     if (result.coachingTips.isNotEmpty()) {
