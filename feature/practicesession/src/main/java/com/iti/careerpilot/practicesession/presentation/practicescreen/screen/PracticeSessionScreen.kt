@@ -127,13 +127,13 @@ fun PracticeSessionRoot(
             }
         }
 
-        // Camera preview PiP overlay (top-end corner)
+        // Camera preview PiP overlay (top-end corner, padded below top app bar)
         if (state.isBodyLanguageAnalyzing) {
             CameraPreviewPip(
                 isVisible = state.isCameraPreviewVisible,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp),
+                    .padding(top = 72.dp, end = 16.dp),
                 onSurfaceProviderReady = { surfaceProvider ->
                     viewModel.onAction(PracticeSessionAction.OnSurfaceProviderReady(surfaceProvider))
                 },
