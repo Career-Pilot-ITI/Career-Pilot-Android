@@ -130,6 +130,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.module.whisper.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.WhisperModuleConventionPlugin"
         }
+        register("bodyLanguageModule") {
+            id = libs.plugins.careerpilot.module.bodylanguage.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.BodyLanguageModuleConventionPlugin"
+        }
         register("careerPilotFeaturePracticeSession") {
             id = libs.plugins.careerpilot.feature.practice.session.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.PracticeSessionConventionPlugin"
