@@ -67,7 +67,7 @@ fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
     onBack: () -> Unit,
-    onNavigateToResult: (Long) -> Unit,
+    onNavigateToResult: (Long, String?) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
@@ -78,7 +78,7 @@ fun PracticeSessionRoot(
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
-            is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
+            is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId, newEvent.bodyLanguageMetricsJson)
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
             }
