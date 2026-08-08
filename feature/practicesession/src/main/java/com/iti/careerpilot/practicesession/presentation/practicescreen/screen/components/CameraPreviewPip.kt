@@ -1,5 +1,6 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
+import android.graphics.Matrix
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
@@ -21,9 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.SweepGradientShader
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -60,6 +64,21 @@ fun CameraPreviewPip(
         MaterialTheme.colorScheme.primary,
     )
 
+    val rotatingShaderBrush = remember(angle, gradientColors) {
+        object : ShaderBrush() {
+            override fun createShader(size: Size): Shader {
+                val shader = SweepGradientShader(
+                    center = Offset(size.width / 2f, size.height / 2f),
+                    colors = gradientColors,
+                )
+                val matrix = Matrix()
+                matrix.postRotate(angle, size.width / 2f, size.height / 2f)
+                shader.setLocalMatrix(matrix)
+                return shader
+            }
+        }
+    }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(),
@@ -76,13 +95,11 @@ fun CameraPreviewPip(
                 .clip(RoundedCornerShape(12.dp))
                 .drawWithContent {
                     drawContent()
-                    rotate(degrees = angle, pivot = center) {
-                        drawRoundRect(
-                            brush = Brush.sweepGradient(gradientColors),
-                            cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx()),
-                            style = Stroke(width = 2.5.dp.toPx()),
-                        )
-                    }
+                    drawRoundRect(
+                        brush = rotatingShaderBrush,
+                        cornerRadius = CornerRadius(12.dp.toPx(), 12.dp.toPx()),
+                        style = Stroke(width = 3.dp.toPx()),
+                    )
                 },
         )
     }
