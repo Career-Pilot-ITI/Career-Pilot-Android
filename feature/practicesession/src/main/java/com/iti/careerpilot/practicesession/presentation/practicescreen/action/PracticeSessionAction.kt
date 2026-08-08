@@ -45,4 +45,15 @@ sealed interface PracticeSessionAction {
     data object SubmitAnswerToCurrentQuestion: PracticeSessionAction
     data object DiscardCurrentAnswer: PracticeSessionAction
     data object ToggleQuestionCard: PracticeSessionAction
+
+    // Body language actions
+    data object AcceptBodyLanguageConsent : PracticeSessionAction
+    data object DeclineBodyLanguageConsent : PracticeSessionAction
+    data class ToggleCameraPreview(val visible: Boolean) : PracticeSessionAction
+    data class OnCameraPermissionResult(val granted: Boolean) : PracticeSessionAction
+    data class OnCameraProviderReady(
+        val cameraProvider: androidx.camera.lifecycle.ProcessCameraProvider,
+        val lifecycleOwner: androidx.lifecycle.LifecycleOwner,
+        val surfaceProvider: androidx.camera.core.Preview.SurfaceProvider?,
+    ) : PracticeSessionAction
 }

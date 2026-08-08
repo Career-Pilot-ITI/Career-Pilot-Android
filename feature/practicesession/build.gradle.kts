@@ -13,4 +13,6 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:datastore"))
     implementation(project(":core:whisper"))
+    implementation(project(":core:bodylanguage"))
+    implementation(libs.bundles.camerax)
 }

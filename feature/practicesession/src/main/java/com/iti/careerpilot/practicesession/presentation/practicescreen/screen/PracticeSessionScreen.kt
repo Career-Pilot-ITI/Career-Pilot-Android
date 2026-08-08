@@ -65,12 +65,16 @@ fun PracticeSessionRoot(
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
+    var shouldRequestCameraPermission by remember { mutableStateOf(false) }
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
+            }
+            is PracticeSessionEvent.RequestCameraPermission -> {
+                shouldRequestCameraPermission = true
             }
         }
     }
@@ -174,6 +178,25 @@ fun PracticeSessionRoot(
                 viewModel.onAction(PracticeSessionAction.StartRecordingAnswer)
             },
             neededPermissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+        )
+    }
+
+    if (shouldRequestCameraPermission) {
+        PermissionsDialog(
+            title = stringResource(R.string.camera_permission),
+            text = stringResource(R.string.please_allow_camera_permission_for_body_language),
+            icon = ImageVector.vectorResource(R.drawable.ic_camera),
+            cancel = stringResource(R.string.cancel),
+            allow = stringResource(R.string.allow),
+            onDismiss = {
+                shouldRequestCameraPermission = false
+                viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(false))
+            },
+            onGranted = {
+                shouldRequestCameraPermission = false
+                viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
+            },
+            neededPermissions = arrayOf(Manifest.permission.CAMERA)
         )
     }
     if (state.isLoadingSession) {

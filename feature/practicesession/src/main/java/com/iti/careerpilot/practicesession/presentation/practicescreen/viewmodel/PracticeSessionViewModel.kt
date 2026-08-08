@@ -1,55 +1,63 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel
 
+import android.speech.tts.UtteranceProgressListener
+import android.util.Log
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
-import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction.*
+import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
+import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
+import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
+import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
+import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
+import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
+import com.iti.careerpilot.practicesession.domain.models.Session
 import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
+import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction.*
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
 import com.iti.careerpilot.whisper.domain.WhisperEngine
+import com.iti.common.error.NetworkError
+import com.iti.common.error.TranscriptionError
+import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
+import com.iti.common.util.toUIText
+import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
-import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
-import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
-import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
-import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
-import com.iti.common.result.CareerPilotResult
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.async
-import java.io.File
-import kotlin.time.Duration.Companion.minutes
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import android.speech.tts.UtteranceProgressListener
-import android.util.Log
-import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
-import com.iti.careerpilot.practicesession.domain.models.Session
-import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
-import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
-import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
-import com.iti.common.error.NetworkError
-import com.iti.common.error.TranscriptionError
-import com.iti.common.result.onError
-import com.iti.common.result.onSuccess
-import com.iti.common.util.toUIText
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import java.io.File
+import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sin
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 const val QUESTION_COUNT = 10
 const val SESSION_DURATION = 20
@@ -63,6 +71,8 @@ class PracticeSessionViewModel @Inject constructor(
     private val whisperEngine: WhisperEngine,
     private val textToSpeechManager: TextToSpeechManager,
     private val amplitudeNormalizer: AmplitudeNormalizer,
+    private val bodyLanguageAnalyzer: BodyLanguageAnalyzer,
+    private val userProfileRepo: UserProfileRepo,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -236,6 +246,14 @@ class PracticeSessionViewModel @Inject constructor(
 
             is ToggleAutoReadQuestion -> toggleAutoReadQuestion(action.enabled)
 
+            // Body language
+            is AcceptBodyLanguageConsent -> acceptBodyLanguageConsent()
+            is DeclineBodyLanguageConsent -> declineBodyLanguageConsent()
+            is ToggleCameraPreview -> toggleCameraPreview(action.visible)
+            is OnCameraPermissionResult -> handleCameraPermissionResult(action.granted)
+            is OnCameraProviderReady -> startBodyLanguageAnalysis(
+                action.cameraProvider, action.lifecycleOwner, action.surfaceProvider
+            )
         }
     }
 
@@ -384,6 +402,7 @@ class PracticeSessionViewModel @Inject constructor(
         if (_state.value.autoReadQuestion) {
             readQuestion()
         }
+        checkBodyLanguageAccess()
     }
 
     private suspend fun handleSessionLoadError(error: NetworkError) {
@@ -500,7 +519,14 @@ class PracticeSessionViewModel @Inject constructor(
         answerResponse: AnswerResponse
     ) {
         if (answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true)) {
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
+            // Finalize body language if running
+            val metricsJson = if (bodyLanguageAnalyzer.isRunning) {
+                bodyLanguageAnalyzer.stop()
+                val metrics = bodyLanguageAnalyzer.finalizeSession()
+                Json.encodeToString(BodyLanguageMetrics.serializer(), metrics)
+            } else null
+
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
             return
         }
         answerResponse.nextQuestion?.let {
@@ -529,9 +555,80 @@ class PracticeSessionViewModel @Inject constructor(
         }
     }
 
+    // region Body language
+
+    private fun checkBodyLanguageAccess() {
+        viewModelScope.launch {
+            userProfileRepo.userProfile.first().let { profile ->
+                val tier = profile.account.subscriptionTier.uppercase()
+                val isPaid = tier in setOf("PLUS", "PRO", "MAX")
+                val consentGiven = profile.account.bodyLanguageConsentGiven
+
+                _state.update {
+                    it.copy(
+                        bodyLanguageEnabled = isPaid,
+                        bodyLanguageConsentGiven = consentGiven,
+                    )
+                }
+
+                if (isPaid && !consentGiven) {
+                    _state.update { it.copy(showBodyLanguageConsentDialog = true) }
+                } else if (isPaid && consentGiven) {
+                    _event.send(PracticeSessionEvent.RequestCameraPermission)
+                }
+            }
+        }
+    }
+
+    private fun acceptBodyLanguageConsent() {
+        viewModelScope.launch {
+            userProfileRepo.setBodyLanguageConsent(true)
+            _state.update {
+                it.copy(
+                    bodyLanguageConsentGiven = true,
+                    showBodyLanguageConsentDialog = false,
+                )
+            }
+            _event.send(PracticeSessionEvent.RequestCameraPermission)
+        }
+    }
+
+    private fun declineBodyLanguageConsent() {
+        _state.update {
+            it.copy(
+                showBodyLanguageConsentDialog = false,
+                bodyLanguageEnabled = false,
+            )
+        }
+    }
+
+    private fun handleCameraPermissionResult(granted: Boolean) {
+        if (!granted) {
+            _state.update { it.copy(bodyLanguageEnabled = false) }
+        }
+        // Camera provider will be obtained by the Composable and sent via OnCameraProviderReady
+    }
+
+    private fun startBodyLanguageAnalysis(
+        cameraProvider: ProcessCameraProvider,
+        lifecycleOwner: LifecycleOwner,
+        surfaceProvider: Preview.SurfaceProvider?,
+    ) {
+        if (bodyLanguageAnalyzer.isRunning) return
+        bodyLanguageAnalyzer.start(cameraProvider, lifecycleOwner, surfaceProvider)
+        _state.update { it.copy(isBodyLanguageAnalyzing = true) }
+    }
+
+    private fun toggleCameraPreview(visible: Boolean) {
+        _state.update { it.copy(isCameraPreviewVisible = visible) }
+    }
+
+    // endregion
+
     override fun onCleared() {
         textToSpeechManager.shutdown()
         voiceRecorder.cancel()
         audioPlayer.stop()
+        bodyLanguageAnalyzer.stop()
     }
 }

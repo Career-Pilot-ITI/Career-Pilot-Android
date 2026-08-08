@@ -68,4 +68,8 @@
     <string name="loading_session">تحميل الجلسة</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="more_details">المزيد من التفاصيل</string>
-</resources>
+
+    <!-- Body language / camera -->
+    <string name="camera_permission">إذن الكاميرا</string>
+    <string name="please_allow_camera_permission_for_body_language">اسمح بالوصول إلى الكاميرا لتفعيل تحليل لغة الجسد أثناء جلسة التدريب.</string>
+</resources>
