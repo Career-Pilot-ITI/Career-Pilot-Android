@@ -27,8 +27,12 @@ class FrameSchedulerTest {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun dummyImage(): MPImage = null as MPImage
+    private fun dummyImage(): MPImage {
+        val field = sun.misc.Unsafe::class.java.getDeclaredField("theUnsafe")
+        field.isAccessible = true
+        val unsafe = field.get(null) as sun.misc.Unsafe
+        return unsafe.allocateInstance(MPImage::class.java) as MPImage
+    }
 
     @Test
     fun `onFrame throttles face pose and hand calls according to fps intervals`() {
