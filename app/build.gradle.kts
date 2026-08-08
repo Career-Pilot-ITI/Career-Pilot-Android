@@ -25,6 +25,10 @@ android {
             }
         }
     }
+
+    androidResources {
+        noCompress.add("task")
+    }
 }
 
 dependencies {

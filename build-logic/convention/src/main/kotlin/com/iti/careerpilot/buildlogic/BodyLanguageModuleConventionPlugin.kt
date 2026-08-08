@@ -14,6 +14,10 @@ class BodyLanguageModuleConventionPlugin : Plugin<Project> {
 
         extensions.configure<LibraryExtension> {
             namespace = "com.iti.careerpilot.bodylanguage"
+
+            androidResources {
+                noCompress.add("task")
+            }
         }
 
         addLibrary("implementation", "mediapipe-tasks-vision")
