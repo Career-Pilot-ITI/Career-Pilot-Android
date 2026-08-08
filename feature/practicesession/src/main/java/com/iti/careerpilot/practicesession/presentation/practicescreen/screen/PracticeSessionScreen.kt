@@ -2,6 +2,7 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
 import androidx.activity.compose.BackHandler
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -28,10 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
@@ -40,6 +44,8 @@ import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.AmbientStageBackdrop
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.BodyLanguageConsentDialog
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CameraPreviewPip
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CenterStage
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ConfirmationDialog
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.PracticeSessionBottomSection
@@ -66,6 +72,9 @@ fun PracticeSessionRoot(
 ) {
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
     var shouldRequestCameraPermission by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
@@ -117,12 +126,26 @@ fun PracticeSessionRoot(
                 )
             }
         }
+
+        // Camera preview PiP overlay (top-end corner)
+        if (state.isBodyLanguageAnalyzing) {
+            CameraPreviewPip(
+                isVisible = state.isCameraPreviewVisible,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                onSurfaceProviderReady = { /* Surface already provided during camera bind */ },
+            )
+        }
     }
 
     if (state.showSettingsBottomSheet) {
         PracticeSessionSettingsBottomSheet(
             autoReadQuestion = state.autoReadQuestion,
+            showCameraPreviewToggle = state.isBodyLanguageAnalyzing,
+            isCameraPreviewVisible = state.isCameraPreviewVisible,
             onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
+            onCameraPreviewToggle = { viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(it)) },
             onDismiss = {
                 viewModel.onAction(
                     PracticeSessionAction.ShowOrHideSettingsBottomSheet(
@@ -195,10 +218,35 @@ fun PracticeSessionRoot(
             onGranted = {
                 shouldRequestCameraPermission = false
                 viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
+
+                // Obtain camera provider and send to ViewModel for body language analysis
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture.addListener(
+                    {
+                        val cameraProvider = cameraProviderFuture.get()
+                        viewModel.onAction(
+                            PracticeSessionAction.OnCameraProviderReady(
+                                cameraProvider = cameraProvider,
+                                lifecycleOwner = lifecycleOwner,
+                                surfaceProvider = null, // Surface provided later by CameraPreviewPip
+                            )
+                        )
+                    },
+                    ContextCompat.getMainExecutor(context)
+                )
             },
             neededPermissions = arrayOf(Manifest.permission.CAMERA)
         )
     }
+
+    // Body language consent dialog
+    if (state.showBodyLanguageConsentDialog) {
+        BodyLanguageConsentDialog(
+            onAccept = { viewModel.onAction(PracticeSessionAction.AcceptBodyLanguageConsent) },
+            onDecline = { viewModel.onAction(PracticeSessionAction.DeclineBodyLanguageConsent) },
+        )
+    }
+
     if (state.isLoadingSession) {
         LoadingDialog(
             title = stringResource(R.string.loading_session),

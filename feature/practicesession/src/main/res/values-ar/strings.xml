@@ -72,4 +72,10 @@
     <!-- Body language / camera -->
     <string name="camera_permission">إذن الكاميرا</string>
     <string name="please_allow_camera_permission_for_body_language">اسمح بالوصول إلى الكاميرا لتفعيل تحليل لغة الجسد أثناء جلسة التدريب.</string>
+    <string name="body_language_consent_title">تحليل لغة الجسد</string>
+    <string name="body_language_consent_message">سنستخدم الكاميرا الأمامية لتحليل وضعية الجسم والتواصل البصري والإيماءات أثناء المقابلة. تتم جميع المعالجة على جهازك — لا يغادر أي فيديو هاتفك أبدًا.</string>
+    <string name="no_thanks">لا شكرًا</string>
+    <string name="enable_body_language">حسنًا، فعّل</string>
+    <string name="camera_preview">معاينة الكاميرا</string>
+    <string name="show_camera_during_session">إظهار معاينة الكاميرا أثناء الجلسة</string>
 </resources>

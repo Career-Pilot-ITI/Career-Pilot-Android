@@ -70,4 +70,10 @@
     <!-- Body language / camera -->
     <string name="camera_permission">Camera Permission</string>
     <string name="please_allow_camera_permission_for_body_language">Allow camera access to enable body language analysis during your practice session.</string>
+    <string name="body_language_consent_title">Body Language Analysis</string>
+    <string name="body_language_consent_message">We\'ll use your front camera to analyze posture, eye contact, and gestures during the interview. All processing happens on your device — no video ever leaves your phone.</string>
+    <string name="no_thanks">No thanks</string>
+    <string name="enable_body_language">Got it, enable</string>
+    <string name="camera_preview">Camera Preview</string>
+    <string name="show_camera_during_session">Show camera preview during the session</string>
 </resources>
