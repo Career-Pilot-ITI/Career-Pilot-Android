@@ -26,6 +26,9 @@ interface BodyLanguageAnalyzer {
         surfaceProvider: Preview.SurfaceProvider? = null,
     )
 
+    /** Dynamically binds or unbinds the camera preview surface UI while analysis is running. */
+    fun bindPreview(surfaceProvider: Preview.SurfaceProvider?)
+
     /** Stops analysis and releases all GPU/native resources. */
     fun stop()
 

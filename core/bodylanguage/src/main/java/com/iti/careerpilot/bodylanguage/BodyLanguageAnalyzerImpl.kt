@@ -58,6 +58,9 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     private var lastFaceCenterNorm: Pair<Float, Float>? = null
 
     private var cameraProvider: ProcessCameraProvider? = null
+    private var currentLifecycleOwner: LifecycleOwner? = null
+    private var currentImageAnalysis: ImageAnalysis? = null
+    private var currentSurfaceProvider: Preview.SurfaceProvider? = null
 
     @Suppress("DEPRECATION")
     override fun start(
@@ -68,6 +71,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         if (_isRunning.getAndSet(true)) return
 
         this.cameraProvider = cameraProvider
+        this.currentLifecycleOwner = lifecycleOwner
         aggregator.reset()
         keyMomentDetector.reset()
         postureExtractor.reset()
@@ -127,23 +131,36 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
             imageProxy.close()
         }
 
-        // Optional camera preview
-        val preview = surfaceProvider?.let { provider ->
+        this.currentImageAnalysis = imageAnalysis
+        bindPreview(surfaceProvider)
+
+        Log.d(TAG, "Body language analysis started")
+    }
+
+    override fun bindPreview(surfaceProvider: Preview.SurfaceProvider?) {
+        this.currentSurfaceProvider = surfaceProvider
+        val provider = cameraProvider ?: return
+        val lifecycle = currentLifecycleOwner ?: return
+        val analysis = currentImageAnalysis ?: return
+
+        val preview = surfaceProvider?.let { sp ->
             Preview.Builder().build().also { previewUseCase ->
-                previewUseCase.setSurfaceProvider(provider)
+                previewUseCase.setSurfaceProvider(sp)
             }
         }
 
-        cameraProvider.unbindAll()
-
-        val useCases = listOfNotNull(imageAnalysis, preview).toTypedArray()
-        cameraProvider.bindToLifecycle(
-            lifecycleOwner,
-            CameraSelector.DEFAULT_FRONT_CAMERA,
-            *useCases,
-        )
-
-        Log.d(TAG, "Body language analysis started")
+        try {
+            provider.unbindAll()
+            val useCases = listOfNotNull(analysis, preview).toTypedArray()
+            provider.bindToLifecycle(
+                lifecycle,
+                CameraSelector.DEFAULT_FRONT_CAMERA,
+                *useCases,
+            )
+            Log.d(TAG, "Bound camera use cases (preview attached: ${surfaceProvider != null})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to bind camera preview/analysis use cases", e)
+        }
     }
 
     override fun stop() {
@@ -151,6 +168,9 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
 
         cameraProvider?.unbindAll()
         cameraProvider = null
+        currentLifecycleOwner = null
+        currentImageAnalysis = null
+        currentSurfaceProvider = null
 
         faceEngine?.close()
         poseEngine?.close()

@@ -134,7 +134,9 @@ fun PracticeSessionRoot(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(16.dp),
-                onSurfaceProviderReady = { /* Surface already provided during camera bind */ },
+                onSurfaceProviderReady = { surfaceProvider ->
+                    viewModel.onAction(PracticeSessionAction.OnSurfaceProviderReady(surfaceProvider))
+                },
             )
         }
     }

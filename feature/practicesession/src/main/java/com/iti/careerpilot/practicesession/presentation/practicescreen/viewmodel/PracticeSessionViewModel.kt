@@ -254,6 +254,7 @@ class PracticeSessionViewModel @Inject constructor(
             is OnCameraProviderReady -> startBodyLanguageAnalysis(
                 action.cameraProvider, action.lifecycleOwner, action.surfaceProvider
             )
+            is OnSurfaceProviderReady -> bodyLanguageAnalyzer.bindPreview(action.surfaceProvider)
         }
     }
 

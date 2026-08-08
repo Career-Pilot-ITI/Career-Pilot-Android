@@ -56,4 +56,7 @@ sealed interface PracticeSessionAction {
         val lifecycleOwner: androidx.lifecycle.LifecycleOwner,
         val surfaceProvider: androidx.camera.core.Preview.SurfaceProvider?,
     ) : PracticeSessionAction
+    data class OnSurfaceProviderReady(
+        val surfaceProvider: androidx.camera.core.Preview.SurfaceProvider?,
+    ) : PracticeSessionAction
 }
