@@ -10,6 +10,7 @@ class BodyLanguageModuleConventionPlugin : Plugin<Project> {
         pluginManager.apply("careerpilot.android.library")
         pluginManager.apply("careerpilot.android.hilt")
         pluginManager.apply("careerpilot.testing")
+        pluginManager.apply("careerpilot.kotlin.serialization")
 
         extensions.configure<LibraryExtension> {
             namespace = "com.iti.careerpilot.bodylanguage"
