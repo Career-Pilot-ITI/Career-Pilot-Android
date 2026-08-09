@@ -28,7 +28,14 @@ class ReportsRemoteDataSourceImpl @Inject constructor(
             }
         }
     ) {
-        is CareerPilotResult.Success -> CareerPilotResult.Success(result.data.data)
+        is CareerPilotResult.Success -> {
+            val pageDto = result.data.data
+            if (pageDto != null) {
+                CareerPilotResult.Success(pageDto)
+            } else {
+                CareerPilotResult.Error(NetworkError.EMPTY_RESULT)
+            }
+        }
         is CareerPilotResult.Error -> CareerPilotResult.Error(result.error)
     }
 
@@ -52,7 +59,14 @@ class ReportsRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<T, NetworkError> = when (
         val result = safeCall<ReportsApiResponseDto<T>> { client.get(endpoint) }
     ) {
-        is CareerPilotResult.Success -> CareerPilotResult.Success(result.data.data)
+        is CareerPilotResult.Success -> {
+            val payload = result.data.data
+            if (payload != null) {
+                CareerPilotResult.Success(payload)
+            } else {
+                CareerPilotResult.Error(NetworkError.EMPTY_RESULT)
+            }
+        }
         is CareerPilotResult.Error -> CareerPilotResult.Error(result.error)
     }
 }

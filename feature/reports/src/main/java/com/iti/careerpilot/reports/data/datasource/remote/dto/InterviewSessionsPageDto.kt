@@ -5,52 +5,52 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InterviewSessionsPageDto(
-    @SerialName("totalElements")
-    val totalElements: Long,
-    @SerialName("totalPages")
-    val totalPages: Int,
-    @SerialName("pageable")
-    val pageable: PageableDto,
-    @SerialName("last")
-    val last: Boolean,
-    @SerialName("first")
-    val first: Boolean,
-    @SerialName("numberOfElements")
-    val numberOfElements: Int,
-    @SerialName("size")
-    val size: Int,
     @SerialName("content")
-    val content: List<InterviewSessionDto>,
+    val content: List<InterviewSessionDto> = emptyList(),
+    @SerialName("pageable")
+    val pageable: PageableDto? = null,
+    @SerialName("last")
+    val last: Boolean = true,
+    @SerialName("totalPages")
+    val totalPages: Int = 0,
+    @SerialName("totalElements")
+    val totalElements: Long = 0L,
+    @SerialName("first")
+    val first: Boolean = true,
+    @SerialName("numberOfElements")
+    val numberOfElements: Int = 0,
+    @SerialName("size")
+    val size: Int = 10,
     @SerialName("number")
-    val number: Int,
+    val number: Int = 0,
     @SerialName("sort")
-    val sort: SortDto,
+    val sort: SortDto? = null,
     @SerialName("empty")
-    val empty: Boolean,
+    val empty: Boolean = false,
 )
 
 @Serializable
 data class PageableDto(
-    @SerialName("unpaged")
-    val unpaged: Boolean,
-    @SerialName("paged")
-    val paged: Boolean,
     @SerialName("pageNumber")
-    val pageNumber: Int,
+    val pageNumber: Int = 0,
     @SerialName("pageSize")
-    val pageSize: Int,
-    @SerialName("offset")
-    val offset: Long,
+    val pageSize: Int = 10,
     @SerialName("sort")
-    val sort: SortDto,
+    val sort: SortDto? = null,
+    @SerialName("offset")
+    val offset: Long = 0L,
+    @SerialName("paged")
+    val paged: Boolean = true,
+    @SerialName("unpaged")
+    val unpaged: Boolean = false,
 )
 
 @Serializable
 data class SortDto(
-    @SerialName("unsorted")
-    val unsorted: Boolean,
     @SerialName("sorted")
-    val sorted: Boolean,
+    val sorted: Boolean = false,
+    @SerialName("unsorted")
+    val unsorted: Boolean = true,
     @SerialName("empty")
-    val empty: Boolean,
+    val empty: Boolean = true,
 )
