@@ -26,6 +26,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -175,10 +176,12 @@ private fun SessionHistoryContent(
     modifier: Modifier = Modifier,
 ) {
     val loadedSessions = sessions.itemSnapshotList.items
-    val averageScore = if (loadedSessions.isEmpty()) {
-        0
-    } else {
-        loadedSessions.sumOf(SessionSummaryUiModel::score) / loadedSessions.size
+    val averageScore = remember {
+        if (loadedSessions.isEmpty()) {
+            0
+        } else {
+            loadedSessions.sumOf(SessionSummaryUiModel::score) / loadedSessions.size
+        }
     }
 
     LazyColumn(
