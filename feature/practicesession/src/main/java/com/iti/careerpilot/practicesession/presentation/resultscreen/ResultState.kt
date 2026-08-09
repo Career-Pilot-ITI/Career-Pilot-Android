@@ -34,8 +34,6 @@ data class ResultState(
                 BodyLanguageUiState.FallbackUsed(bodyLanguageEvaluation, bodyLanguageFallbackReason)
             bodyLanguageEvaluation != null ->
                 BodyLanguageUiState.Success(bodyLanguageEvaluation)
-            bodyLanguageMetrics != null ->
-                BodyLanguageUiState.Loading
             else ->
                 BodyLanguageUiState.Idle
         }
