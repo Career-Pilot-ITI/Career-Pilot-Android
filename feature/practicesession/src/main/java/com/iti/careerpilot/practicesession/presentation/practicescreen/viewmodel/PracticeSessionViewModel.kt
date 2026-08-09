@@ -119,6 +119,8 @@ class PracticeSessionViewModel @Inject constructor(
                 val wasRecording = _state.value.isRecording
                 val isRecordingNow = details.isRecording
 
+                bodyLanguageAnalyzer.setRecordingActive(isRecordingNow)
+
                 _state.update {
                     val normalizedAmps = amplitudeNormalizer.remapAmplitudes(details.amplitudes)
                     val currentBars = it.volumeBars.toMutableList()

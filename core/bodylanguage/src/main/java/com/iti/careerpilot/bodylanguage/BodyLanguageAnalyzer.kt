@@ -37,4 +37,10 @@ interface BodyLanguageAnalyzer {
 
     /** Whether the analyzer is currently running. */
     val isRunning: Boolean
+
+    /** Controls whether frame signals are actively recorded for evaluation (e.g. only while candidate is answering). */
+    fun setRecordingActive(active: Boolean)
+
+    /** Whether telemetry recording is currently active. */
+    val isRecordingActive: Boolean
 }

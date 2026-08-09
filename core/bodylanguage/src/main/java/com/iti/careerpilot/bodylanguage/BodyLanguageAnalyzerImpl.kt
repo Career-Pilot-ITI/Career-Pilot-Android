@@ -41,6 +41,13 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     private val _isRunning = AtomicBoolean(false)
     override val isRunning: Boolean get() = _isRunning.get()
 
+    private val _isRecordingActive = AtomicBoolean(true)
+    override val isRecordingActive: Boolean get() = _isRecordingActive.get()
+
+    override fun setRecordingActive(active: Boolean) {
+        _isRecordingActive.set(active)
+    }
+
     private var analyzerScope: CoroutineScope? = null
 
     // Engines — created asynchronously on start(), closed on stop()
@@ -78,6 +85,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
 
         this.cameraProvider = cameraProvider
         this.currentLifecycleOwner = lifecycleOwner
+        _isRecordingActive.set(true)
         aggregator.reset()
         keyMomentDetector.reset()
         postureExtractor.reset()
@@ -92,8 +100,10 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
             try {
                 val face = FaceLandmarkerEngine(context) { result, ts ->
                     val signal = faceExtractor.extract(result, ts)
-                    aggregator.addFace(signal)
-                    keyMomentDetector.onFaceFrame(signal)
+                    if (_isRecordingActive.get()) {
+                        aggregator.addFace(signal)
+                        keyMomentDetector.onFaceFrame(signal)
+                    }
 
                     // Track face center for hand-to-face detection
                     if (result.faceLandmarks().isNotEmpty()) {
@@ -106,14 +116,18 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
 
                 val pose = PoseLandmarkerEngine(context) { result, ts ->
                     val signal = postureExtractor.extract(result, ts)
-                    aggregator.addPosture(signal)
-                    keyMomentDetector.onPostureFrame(signal)
+                    if (_isRecordingActive.get()) {
+                        aggregator.addPosture(signal)
+                        keyMomentDetector.onPostureFrame(signal)
+                    }
                 }
 
                 val hand = HandLandmarkerEngine(context) { result, ts ->
                     val signal = handExtractor.extract(result, ts, lastFaceCenterNorm)
-                    aggregator.addHand(signal)
-                    keyMomentDetector.onHandFrame(signal)
+                    if (_isRecordingActive.get()) {
+                        aggregator.addHand(signal)
+                        keyMomentDetector.onHandFrame(signal)
+                    }
                 }
 
                 face.initialize()
