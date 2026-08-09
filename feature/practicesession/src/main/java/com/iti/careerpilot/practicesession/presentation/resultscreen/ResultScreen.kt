@@ -163,13 +163,18 @@ fun ResultScreen(
                         ScoreBreakdownSection(result)
                     }
 
-                    state.bodyLanguageMetrics?.let { metrics ->
+                    if (state.bodyLanguageUiState !is BodyLanguageUiState.Idle || state.bodyLanguageMetrics != null) {
                         item {
-                            BodyLanguageSection(metrics = metrics)
+                            BodyLanguageSection(
+                                uiState = state.bodyLanguageUiState,
+                                metrics = state.bodyLanguageMetrics,
+                            )
                         }
-                        if (metrics.keyMoments.isNotEmpty()) {
-                            item {
-                                KeyMomentsTimeline(keyMoments = metrics.keyMoments)
+                        state.bodyLanguageMetrics?.keyMoments?.let { keyMoments ->
+                            if (keyMoments.isNotEmpty()) {
+                                item {
+                                    KeyMomentsTimeline(keyMoments = keyMoments)
+                                }
                             }
                         }
                     }
