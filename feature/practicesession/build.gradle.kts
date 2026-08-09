@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:whisper"))
     implementation(project(":core:bodylanguage"))
+    implementation(project(":core:model"))
     implementation(libs.bundles.camerax)
     implementation(libs.rive.android)
     implementation(libs.androidx.startup)

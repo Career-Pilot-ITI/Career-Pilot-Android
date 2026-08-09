@@ -46,7 +46,7 @@ class ResultViewModel @Inject constructor(
                     val metrics = action.bodyLanguageMetricsJson?.let { json ->
                         try {
                             kotlinx.serialization.json.Json.decodeFromString(
-                                com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics.serializer(),
+                                com.iti.core.model.bodylanguage.BodyLanguageMetrics.serializer(),
                                 json
                             )
                         } catch (e: Exception) {
