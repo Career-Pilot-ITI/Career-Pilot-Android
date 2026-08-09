@@ -64,6 +64,13 @@
     <string name="error_creating_results">An error occurred while creating your results. Please try again.</string>
     <string name="no_transcript_available">No transcript available</string>
     <string name="loading_session">Loading Session</string>
+    <string name="loading_session_message">Restoring your practice session and preparing the next question…</string>
+    <string name="processing_answer_title">Preparing your answer</string>
+    <string name="submitting_answer_title">Saving your answer</string>
+    <string name="uploading_recording_progress">Uploading recording: %1$d%%</string>
+    <string name="transcribing_on_device">Analyzing speech on your device while the recording uploads…</string>
+    <string name="empty_answer_detected">No speech detected. Whisper was skipped and this answer will be marked as unanswered.</string>
+    <string name="submitting_answer_message">Your answer is uploaded. Saving it and preparing the next question…</string>
     <string name="retry">Retry</string>
     <string name="more_details">More details</string>
 </resources>

@@ -35,7 +35,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
-import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
@@ -48,6 +47,7 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.co
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.QuestionCard
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.RecordingDurationCard
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.RecordingWave
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.SessionLoadingDialog
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.TopErrorNotification
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
@@ -177,14 +177,16 @@ fun PracticeSessionRoot(
         )
     }
     if (state.isLoadingSession) {
-        LoadingDialog(
-            title = stringResource(R.string.loading_session),
-        )
+        SessionLoadingDialog()
     }
     if (state.isUploadingAndTranscribingAudio ||
         state.isSendingAnswer
     ) {
-        ProcessingDialog()
+        ProcessingDialog(
+            uploadProgress = state.uploadProgress,
+            isSendingAnswer = state.isSendingAnswer,
+            isEmptyAnswer = state.isEmptyAnswer,
+        )
     }
 }
 
