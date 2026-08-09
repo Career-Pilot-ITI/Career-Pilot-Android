@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class SessionHistoryViewModel @Inject constructor(
@@ -46,18 +47,20 @@ class SessionHistoryViewModel @Inject constructor(
         .map { isOnline -> SessionHistoryState(isOnline = isOnline) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5_000L),
+            started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = SessionHistoryState(isOnline = networkMonitor.isOnline.value),
         )
 
-    private val eventChannel = Channel<SessionHistoryEvent>(Channel.Factory.BUFFERED)
+    private val eventChannel = Channel<SessionHistoryEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
     fun onAction(action: SessionHistoryAction) {
         when (action) {
             is SessionHistoryAction.SessionClicked -> {
                 if (action.sessionId > 0L) {
-                    eventChannel.trySend(SessionHistoryEvent.NavigateToSessionDetails(action.sessionId))
+                    viewModelScope.launch {
+                        eventChannel.send(SessionHistoryEvent.NavigateToSessionDetails(action.sessionId))
+                    }
                 }
             }
         }
