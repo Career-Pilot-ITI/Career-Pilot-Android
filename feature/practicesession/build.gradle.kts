@@ -5,6 +5,7 @@ plugins {
 android {
     namespace = "com.iti.careerpilot.practicesession"
 }
+
 dependencies {
     implementation(libs.media3.exoplayer)
     implementation(project(":core:designsystem"))
@@ -13,6 +14,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:whisper"))
     implementation(project(":core:bodylanguage"))
+    implementation(project(":core:ai"))
     implementation(project(":core:model"))
     implementation(libs.bundles.camerax)
     implementation(libs.rive.android)

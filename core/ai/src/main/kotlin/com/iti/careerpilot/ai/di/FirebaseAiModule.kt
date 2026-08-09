@@ -9,6 +9,7 @@ import com.google.firebase.vertexai.type.generationConfig
 import com.google.firebase.vertexai.vertexAI
 import com.iti.careerpilot.ai.evaluator.AiContentGenerator
 import com.iti.careerpilot.ai.prompt.BodyLanguagePromptBuilder
+import com.iti.careerpilot.ai.domain.BodyLanguageAiFeatureToggle
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,5 +58,17 @@ object FirebaseAiModule {
         }
         config.setConfigSettingsAsync(settings)
         return config
+    }
+
+    @Provides
+    @Singleton
+    fun provideBodyLanguageAiFeatureToggle(remoteConfig: FirebaseRemoteConfig): BodyLanguageAiFeatureToggle {
+        return BodyLanguageAiFeatureToggle {
+            try {
+                remoteConfig.getBoolean("body_language_ai_enabled")
+            } catch (e: Exception) {
+                true
+            }
+        }
     }
 }
