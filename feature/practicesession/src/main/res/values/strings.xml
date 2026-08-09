@@ -63,14 +63,14 @@
     <string name="no_results_found">No results, yet</string>
     <string name="error_creating_results">An error occurred while creating your results. Please try again.</string>
     <string name="no_transcript_available">No transcript available</string>
-    <string name="loading_session">Loading Session</string>
-    <string name="loading_session_message">Restoring your practice session and preparing the next question…</string>
-    <string name="processing_answer_title">Preparing your answer</string>
-    <string name="submitting_answer_title">Saving your answer</string>
-    <string name="uploading_recording_progress">Uploading recording: %1$d%%</string>
-    <string name="transcribing_on_device">Analyzing speech on your device while the recording uploads…</string>
-    <string name="empty_answer_detected">No speech detected. Whisper was skipped and this answer will be marked as unanswered.</string>
-    <string name="submitting_answer_message">Your answer is uploaded. Saving it and preparing the next question…</string>
+    <string name="loading_session">Getting your session ready</string>
+    <string name="loading_session_message">Just a moment — we’re bringing back your practice session and getting the next question ready for you.</string>
+    <string name="processing_answer_title">Nice work — we’re saving your answer</string>
+    <string name="submitting_answer_title">Almost there</string>
+    <string name="uploading_recording_progress">Uploading your recording… %1$d%%</string>
+    <string name="transcribing_on_device">We’re turning your voice into text on your device. This should only take a moment.</string>
+    <string name="empty_answer_detected">We didn’t hear an answer this time, so we’ll mark this question as unanswered and keep going.</string>
+    <string name="submitting_answer_message">Your answer is ready. We’re saving it now and getting the next question ready for you.</string>
     <string name="retry">Retry</string>
     <string name="more_details">More details</string>
 </resources>

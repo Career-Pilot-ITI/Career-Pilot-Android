@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.SecureFlagPolicy
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.practicesession.R
 
@@ -31,6 +32,7 @@ fun SessionLoadingDialog() {
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
             usePlatformDefaultWidth = false,
+            securePolicy = SecureFlagPolicy.SecureOn,
         )
     ) {
         CareerPilotCard(useShadow = false) {
@@ -40,16 +42,9 @@ fun SessionLoadingDialog() {
                     .padding(horizontal = 24.dp, vertical = 28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = stringResource(R.string.loading_session),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -63,17 +58,19 @@ fun SessionLoadingDialog() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
             }
         }
     }
 }
 
-/**
- * A progress-oriented processing surface instead of an unexplained looping animation.
- *
- * Upload progress is determinate while local transcription / backend submission remain clearly
- * labelled, so users can tell what the app is actually waiting for.
- */
 @Composable
 fun ProcessingDialog(
     uploadProgress: Int,
@@ -86,6 +83,7 @@ fun ProcessingDialog(
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
             usePlatformDefaultWidth = false,
+            securePolicy = SecureFlagPolicy.SecureOn,
         )
     ) {
         CareerPilotCard(useShadow = false) {
@@ -95,19 +93,12 @@ fun ProcessingDialog(
                     .padding(horizontal = 24.dp, vertical = 28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = stringResource(
                         if (isSendingAnswer) R.string.submitting_answer_title
                         else R.string.processing_answer_title
                     ),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
@@ -122,32 +113,42 @@ fun ProcessingDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
-                } else {
-                    val safeProgress = uploadProgress.coerceIn(0, 100)
-                    Text(
-                        text = stringResource(R.string.uploading_recording_progress, safeProgress),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     LinearProgressIndicator(
-                        progress = { safeProgress / 100f },
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
+                } else {
+                    val safeProgress = uploadProgress.coerceIn(0, 100)
 
                     Text(
                         text = stringResource(
                             if (isEmptyAnswer) R.string.empty_answer_detected
                             else R.string.transcribing_on_device
                         ),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LinearWavyProgressIndicator(
+                        progress = { safeProgress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.uploading_recording_progress, safeProgress),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
                     )
                 }
