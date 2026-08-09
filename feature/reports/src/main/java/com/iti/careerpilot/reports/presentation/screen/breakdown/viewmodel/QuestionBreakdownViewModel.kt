@@ -16,7 +16,6 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,6 +24,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class QuestionBreakdownViewModel @Inject constructor(
@@ -44,11 +44,11 @@ class QuestionBreakdownViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5_000L),
+            started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = _state.value,
         )
 
-    private val eventChannel = Channel<QuestionBreakdownEvent>(Channel.Factory.BUFFERED)
+    private val eventChannel = Channel<QuestionBreakdownEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
     fun onAction(action: QuestionBreakdownAction) {
@@ -57,7 +57,11 @@ class QuestionBreakdownViewModel @Inject constructor(
             QuestionBreakdownAction.Retry -> _state.value.sessionId?.let {
                 loadBreakdown(it, force = true)
             }
-            QuestionBreakdownAction.BackClicked -> eventChannel.trySend(QuestionBreakdownEvent.NavigateBack)
+
+            QuestionBreakdownAction.BackClicked -> viewModelScope.launch {
+                eventChannel.send(QuestionBreakdownEvent.NavigateBack)
+            }
+
             is QuestionBreakdownAction.QuestionSelected -> selectQuestion(action.questionId)
         }
     }
@@ -90,7 +94,7 @@ class QuestionBreakdownViewModel @Inject constructor(
                     content = if (isNewSession) null else state.content,
                     selectedQuestionId = if (isNewSession) null else state.selectedQuestionId,
                     error = null,
-                    phase = if (isNewSession || state.content == null) {
+                    phase = if (isNewSession) {
                         ReportsContentPhase.LOADING
                     } else {
                         state.phase
