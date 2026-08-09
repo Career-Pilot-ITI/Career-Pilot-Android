@@ -8,7 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer

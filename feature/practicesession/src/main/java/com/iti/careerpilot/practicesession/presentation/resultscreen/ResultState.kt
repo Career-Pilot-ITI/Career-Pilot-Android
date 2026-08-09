@@ -1,7 +1,7 @@
 package com.iti.careerpilot.practicesession.presentation.resultscreen
 
 import androidx.compose.runtime.Immutable
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.practicesession.domain.models.SessionResult
 
 @Immutable

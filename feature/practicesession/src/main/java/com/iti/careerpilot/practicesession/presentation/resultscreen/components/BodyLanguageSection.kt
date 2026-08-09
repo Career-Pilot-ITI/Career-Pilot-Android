@@ -14,7 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ScoreItem

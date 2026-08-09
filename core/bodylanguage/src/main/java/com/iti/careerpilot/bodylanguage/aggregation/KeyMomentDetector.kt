@@ -2,9 +2,9 @@ package com.iti.careerpilot.bodylanguage.aggregation
 
 import com.iti.careerpilot.bodylanguage.model.FaceFrameSignal
 import com.iti.careerpilot.bodylanguage.model.HandFrameSignal
-import com.iti.careerpilot.bodylanguage.model.KeyMoment
-import com.iti.careerpilot.bodylanguage.model.KeyMomentType
 import com.iti.careerpilot.bodylanguage.model.PostureFrameSignal
+import com.iti.core.model.bodylanguage.KeyMoment
+import com.iti.core.model.bodylanguage.KeyMomentType
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -47,7 +47,7 @@ internal class KeyMomentDetector @Inject constructor() {
                 moments.add(
                     KeyMoment(
                         timestampMs = lookAwayStartMs!!,
-                        type = KeyMomentType.LOOKED_AWAY,
+                        type = KeyMomentType.EYE_CONTACT_LOST,
                         durationMs = duration,
                     )
                 )
@@ -77,12 +77,12 @@ internal class KeyMomentDetector @Inject constructor() {
         signal.smileScore?.let { score ->
             if (score > 0.7f) {
                 // Only add if last smile moment was >5s ago
-                val lastSmile = moments.lastOrNull { it.type == KeyMomentType.SMILED }
+                val lastSmile = moments.lastOrNull { it.type == KeyMomentType.SMILE_PEAK }
                 if (lastSmile == null || signal.timestampMs - lastSmile.timestampMs > 5000L) {
                     moments.add(
                         KeyMoment(
                             timestampMs = signal.timestampMs,
-                            type = KeyMomentType.SMILED,
+                            type = KeyMomentType.SMILE_PEAK,
                         )
                     )
                 }
@@ -102,7 +102,7 @@ internal class KeyMomentDetector @Inject constructor() {
                 moments.add(
                     KeyMoment(
                         timestampMs = slouchStartMs!!,
-                        type = KeyMomentType.SLOUCHED,
+                        type = KeyMomentType.SLOUCH_START,
                         durationMs = duration,
                     )
                 )
@@ -123,7 +123,7 @@ internal class KeyMomentDetector @Inject constructor() {
                 moments.add(
                     KeyMoment(
                         timestampMs = handToFaceStartMs!!,
-                        type = KeyMomentType.HAND_TO_FACE,
+                        type = KeyMomentType.HAND_FIDGET_SPIKE,
                         durationMs = duration,
                     )
                 )
@@ -134,12 +134,12 @@ internal class KeyMomentDetector @Inject constructor() {
         // Fidget detection
         signal.handMovementScore?.let { score ->
             if (score > 0.7f) {
-                val lastFidget = moments.lastOrNull { it.type == KeyMomentType.FIDGETED }
+                val lastFidget = moments.lastOrNull { it.type == KeyMomentType.HAND_FIDGET_SPIKE }
                 if (lastFidget == null || signal.timestampMs - lastFidget.timestampMs > 3000L) {
                     moments.add(
                         KeyMoment(
                             timestampMs = signal.timestampMs,
-                            type = KeyMomentType.FIDGETED,
+                            type = KeyMomentType.HAND_FIDGET_SPIKE,
                         )
                     )
                 }

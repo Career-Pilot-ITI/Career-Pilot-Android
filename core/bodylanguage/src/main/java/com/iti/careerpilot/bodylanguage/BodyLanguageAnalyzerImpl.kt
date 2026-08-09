@@ -15,7 +15,7 @@ import com.iti.careerpilot.bodylanguage.engine.FaceLandmarkerEngine
 import com.iti.careerpilot.bodylanguage.engine.FrameScheduler
 import com.iti.careerpilot.bodylanguage.engine.HandLandmarkerEngine
 import com.iti.careerpilot.bodylanguage.engine.PoseLandmarkerEngine
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.bodylanguage.signal.EyeContactApproximator
 import com.iti.careerpilot.bodylanguage.signal.FaceSignalExtractor
 import com.iti.careerpilot.bodylanguage.signal.HandSignalExtractor

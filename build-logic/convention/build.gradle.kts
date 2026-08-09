@@ -138,6 +138,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.practice.session.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.PracticeSessionConventionPlugin"
         }
+        register("careerPilotModuleAi") {
+            id = libs.plugins.careerpilot.module.ai.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.AiModuleConventionPlugin"
+        }
     }
 }
 

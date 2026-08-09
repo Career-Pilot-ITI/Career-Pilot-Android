@@ -3,7 +3,7 @@ package com.iti.careerpilot.bodylanguage
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.lifecycle.LifecycleOwner
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 
 /**
  * Public entry point for body language analysis.

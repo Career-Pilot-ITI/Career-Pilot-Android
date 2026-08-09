@@ -1,4 +1,4 @@
-package com.iti.careerpilot.bodylanguage.model
+package com.iti.core.model.bodylanguage
 
 import kotlinx.serialization.Serializable
 

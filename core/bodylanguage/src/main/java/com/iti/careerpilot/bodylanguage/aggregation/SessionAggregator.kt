@@ -1,6 +1,6 @@
 package com.iti.careerpilot.bodylanguage.aggregation
 
-import com.iti.careerpilot.bodylanguage.model.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.bodylanguage.model.FaceFrameSignal
 import com.iti.careerpilot.bodylanguage.model.HandFrameSignal
 import com.iti.careerpilot.bodylanguage.model.PostureFrameSignal

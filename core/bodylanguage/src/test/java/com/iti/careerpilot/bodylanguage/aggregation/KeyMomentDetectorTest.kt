@@ -2,8 +2,8 @@ package com.iti.careerpilot.bodylanguage.aggregation
 
 import com.iti.careerpilot.bodylanguage.model.FaceFrameSignal
 import com.iti.careerpilot.bodylanguage.model.HandFrameSignal
-import com.iti.careerpilot.bodylanguage.model.KeyMomentType
 import com.iti.careerpilot.bodylanguage.model.PostureFrameSignal
+import com.iti.core.model.bodylanguage.KeyMomentType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -37,7 +37,7 @@ class KeyMomentDetectorTest {
 
         val moments = detector.getKeyMoments()
         assertEquals(1, moments.size)
-        assertEquals(KeyMomentType.LOOKED_AWAY, moments[0].type)
+        assertEquals(KeyMomentType.EYE_CONTACT_LOST, moments[0].type)
         assertEquals(0L, moments[0].timestampMs)
         assertEquals(2000L, moments[0].durationMs)
     }
@@ -61,7 +61,7 @@ class KeyMomentDetectorTest {
 
         val moments = detector.getKeyMoments()
         assertEquals(1, moments.size)
-        assertEquals(KeyMomentType.SLOUCHED, moments[0].type)
+        assertEquals(KeyMomentType.SLOUCH_START, moments[0].type)
         assertEquals(4000L, moments[0].durationMs)
     }
 
@@ -81,7 +81,7 @@ class KeyMomentDetectorTest {
 
         val moments = detector.getKeyMoments()
         assertEquals(1, moments.size)
-        assertEquals(KeyMomentType.HAND_TO_FACE, moments[0].type)
+        assertEquals(KeyMomentType.HAND_FIDGET_SPIKE, moments[0].type)
     }
 
     @Test

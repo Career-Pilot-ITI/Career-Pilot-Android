@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.bodylanguage.model.KeyMoment
-import com.iti.careerpilot.bodylanguage.model.KeyMomentType
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.core.model.bodylanguage.KeyMoment
+import com.iti.core.model.bodylanguage.KeyMomentType
 
 @Composable
 fun KeyMomentsTimeline(
@@ -52,12 +52,12 @@ fun KeyMomentsTimeline(
 @Composable
 private fun KeyMomentItem(moment: KeyMoment) {
     val (label, color) = when (moment.type) {
-        KeyMomentType.LOOKED_AWAY -> "Looked away" to MaterialTheme.colorScheme.error
-        KeyMomentType.SLOUCHED -> "Slouched" to MaterialTheme.colorScheme.error
-        KeyMomentType.HAND_TO_FACE -> "Hand to face" to MaterialTheme.colorScheme.tertiary
-        KeyMomentType.FIDGETED -> "Fidgeting" to MaterialTheme.colorScheme.tertiary
+        KeyMomentType.EYE_CONTACT_LOST -> "Looked away" to MaterialTheme.colorScheme.error
+        KeyMomentType.SLOUCH_START -> "Slouched" to MaterialTheme.colorScheme.error
+        KeyMomentType.HAND_FIDGET_SPIKE -> "Hand fidget / touch" to MaterialTheme.colorScheme.tertiary
         KeyMomentType.FACE_LOST -> "Face not visible" to MaterialTheme.colorScheme.error
-        KeyMomentType.SMILED -> "Smiled 😊" to MaterialTheme.colorScheme.primary
+        KeyMomentType.SMILE_PEAK -> "Smiled 😊" to MaterialTheme.colorScheme.primary
+        KeyMomentType.POSTURE_SHIFT -> "Posture shift" to MaterialTheme.colorScheme.secondary
     }
 
     Row(
@@ -81,10 +81,10 @@ private fun KeyMomentItem(moment: KeyMoment) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        moment.durationMs?.let { dur ->
+        if (moment.durationMs > 0) {
             Spacer(modifier = Modifier.width(Dimens.SpaceS))
             Text(
-                text = "${dur / 1000}s",
+                text = "${moment.durationMs / 1000}s",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
