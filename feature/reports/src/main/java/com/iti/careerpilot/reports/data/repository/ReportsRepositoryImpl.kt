@@ -7,20 +7,14 @@ import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
 import com.iti.careerpilot.reports.domain.model.ReportDetails
 import com.iti.careerpilot.reports.domain.model.SessionHistoryPage
 import com.iti.careerpilot.reports.domain.repository.ReportsRepository
-import com.iti.common.dispatcher.CareerPilotDispatchers
-import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import kotlinx.serialization.SerializationException
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerializationException
 
 class ReportsRepositoryImpl @Inject constructor(
-    private val remoteDataSource: ReportsRemoteDataSource,
-    @param:Dispatcher(CareerPilotDispatchers.IO)
-    private val ioDispatcher: CoroutineDispatcher,
+    private val remoteDataSource: ReportsRemoteDataSource
 ) : ReportsRepository {
     override suspend fun getSessionHistoryPage(
         page: Int,
@@ -33,7 +27,7 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun getReportDetails(
         sessionId: Long,
-    ): CareerPilotResult<ReportDetails, NetworkError> = withContext(ioDispatcher) {
+    ): CareerPilotResult<ReportDetails, NetworkError> =
         when (val sessionResult = remoteDataSource.getSession(sessionId)) {
             is CareerPilotResult.Error -> CareerPilotResult.Error(sessionResult.error)
             is CareerPilotResult.Success -> {
@@ -42,7 +36,6 @@ class ReportsRepositoryImpl @Inject constructor(
                 }
             }
         }
-    }
 
     override suspend fun getQuestionBreakdown(
         sessionId: Long,
@@ -54,7 +47,7 @@ class ReportsRepositoryImpl @Inject constructor(
     private suspend fun <Remote, Domain> mapRemoteResult(
         call: suspend () -> CareerPilotResult<Remote, NetworkError>,
         transform: (Remote) -> Domain,
-    ): CareerPilotResult<Domain, NetworkError> = withContext(ioDispatcher) {
+    ): CareerPilotResult<Domain, NetworkError> =
         when (val result = call()) {
             is CareerPilotResult.Error -> CareerPilotResult.Error(result.error)
             is CareerPilotResult.Success -> try {
@@ -67,5 +60,4 @@ class ReportsRepositoryImpl @Inject constructor(
                 CareerPilotResult.Error(NetworkError.UNKNOWN)
             }
         }
-    }
 }
