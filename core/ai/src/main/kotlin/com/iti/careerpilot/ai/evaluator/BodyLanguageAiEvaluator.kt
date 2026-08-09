@@ -65,6 +65,8 @@ class BodyLanguageAiEvaluator @Inject constructor(
             }
         } catch (e: TimeoutCancellationException) {
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.TIMEOUT)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: SerializationException) {
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.PARSE_FAILURE)
         } catch (e: IOException) {
