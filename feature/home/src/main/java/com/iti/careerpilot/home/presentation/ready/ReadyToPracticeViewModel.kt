@@ -3,6 +3,7 @@ package com.iti.careerpilot.home.presentation.ready
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadyToPracticeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReadyToPracticeState())
@@ -29,6 +31,22 @@ class ReadyToPracticeViewModel @Inject constructor(
     init {
         savedStateHandle.get<String>(KEY_TRACK_NAME)?.let { savedTrackName ->
             _state.update { it.copy(trackName = savedTrackName) }
+        }
+        observeUserProfile()
+    }
+
+    private fun observeUserProfile() {
+        viewModelScope.launch {
+            getUserProfileUseCase().collect { profile ->
+                val tier = profile.account.subscriptionTier.uppercase()
+                val isPaid = tier in PAID_TIERS
+                _state.update {
+                    it.copy(
+                        isPaidPlan = isPaid,
+                        isVideoMode = if (isPaid) it.isVideoMode else false
+                    )
+                }
+            }
         }
     }
 
@@ -48,6 +66,18 @@ class ReadyToPracticeViewModel @Inject constructor(
                 )
             }
 
+            ReadyToPracticeAction.SelectAudioMode -> _state.update {
+                it.copy(isVideoMode = false)
+            }
+
+            ReadyToPracticeAction.SelectVideoMode -> {
+                if (_state.value.isPaidPlan) {
+                    _state.update { it.copy(isVideoMode = true) }
+                } else {
+                    sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                }
+            }
+
             ReadyToPracticeAction.MicrophoneRowClicked -> _state.update {
                 if (it.isMicrophoneGranted) it else it.copy(isPermissionDialogVisible = true)
             }
@@ -65,7 +95,7 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun beginInterview() {
         val id = trackId ?: return
         if (!_state.value.canBegin) return
-        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id))
+        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id, isVideo = _state.value.isVideoMode))
     }
 
     private fun sendEvent(event: ReadyToPracticeEvent) {
@@ -75,5 +105,6 @@ class ReadyToPracticeViewModel @Inject constructor(
     private companion object {
         const val KEY_TRACK_ID = "ready_track_id"
         const val KEY_TRACK_NAME = "ready_track_name"
+        val PAID_TIERS = setOf("PLUS", "PRO", "MAX")
     }
 }

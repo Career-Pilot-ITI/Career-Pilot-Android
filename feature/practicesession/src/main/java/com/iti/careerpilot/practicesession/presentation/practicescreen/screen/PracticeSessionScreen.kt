@@ -66,6 +66,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
+    isVideoSession: Boolean = false,
     onBack: () -> Unit,
     onNavigateToResult: (Long, String?) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
@@ -97,9 +98,9 @@ fun PracticeSessionRoot(
 
     LaunchedEffect(Unit) {
         if (sessionId != null && sessionId != 0L) {
-            viewModel.onAction(PracticeSessionAction.RestartPracticeSession(sessionId))
+            viewModel.onAction(PracticeSessionAction.RestartPracticeSession(sessionId, isVideoSession))
         } else {
-            viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId))
+            viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId, isVideoSession))
         }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -355,6 +356,9 @@ fun PracticeSessionScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CenterStage(
                             isReadingQuestion = state.isReadingQuestion,
+                            isRecording = state.isRecording,
+                            isVideoInterview = state.isVideoSessionSelected &&
+                                (state.bodyLanguageEnabled || state.isBodyLanguageAnalyzing || state.isCameraPreviewVisible),
                             onToggleListening = {
                                 if (state.isReadingQuestion) {
                                     onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)

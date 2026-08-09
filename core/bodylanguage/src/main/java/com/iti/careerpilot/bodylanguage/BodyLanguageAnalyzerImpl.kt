@@ -7,7 +7,6 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-
 import androidx.lifecycle.LifecycleOwner
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.iti.careerpilot.bodylanguage.aggregation.KeyMomentDetector
@@ -22,8 +21,13 @@ import com.iti.careerpilot.bodylanguage.signal.FaceSignalExtractor
 import com.iti.careerpilot.bodylanguage.signal.HandSignalExtractor
 import com.iti.careerpilot.bodylanguage.signal.PostureSignalExtractor
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -37,11 +41,13 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     private val _isRunning = AtomicBoolean(false)
     override val isRunning: Boolean get() = _isRunning.get()
 
-    // Engines — created on start(), closed on stop()
-    private var faceEngine: FaceLandmarkerEngine? = null
-    private var poseEngine: PoseLandmarkerEngine? = null
-    private var handEngine: HandLandmarkerEngine? = null
-    private var frameScheduler: FrameScheduler? = null
+    private var analyzerScope: CoroutineScope? = null
+
+    // Engines — created asynchronously on start(), closed on stop()
+    @Volatile private var faceEngine: FaceLandmarkerEngine? = null
+    @Volatile private var poseEngine: PoseLandmarkerEngine? = null
+    @Volatile private var handEngine: HandLandmarkerEngine? = null
+    @Volatile private var frameScheduler: FrameScheduler? = null
 
     // Signal extractors
     private val eyeContactApproximator = EyeContactApproximator()
@@ -78,43 +84,54 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         handExtractor.reset()
         lastFaceCenterNorm = null
 
-        // Initialize engines
-        val face = FaceLandmarkerEngine(context) { result, ts ->
-            val signal = faceExtractor.extract(result, ts)
-            aggregator.addFace(signal)
-            keyMomentDetector.onFaceFrame(signal)
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        this.analyzerScope = scope
 
-            // Track face center for hand-to-face detection
-            if (result.faceLandmarks().isNotEmpty()) {
-                val nose = result.faceLandmarks().first()[1] // Nose tip
-                lastFaceCenterNorm = nose.x() to nose.y()
-            } else {
-                lastFaceCenterNorm = null
+        // Initialize heavy ML models asynchronously on background thread to prevent UI freezing
+        scope.launch {
+            try {
+                val face = FaceLandmarkerEngine(context) { result, ts ->
+                    val signal = faceExtractor.extract(result, ts)
+                    aggregator.addFace(signal)
+                    keyMomentDetector.onFaceFrame(signal)
+
+                    // Track face center for hand-to-face detection
+                    if (result.faceLandmarks().isNotEmpty()) {
+                        val nose = result.faceLandmarks().first()[1] // Nose tip
+                        lastFaceCenterNorm = nose.x() to nose.y()
+                    } else {
+                        lastFaceCenterNorm = null
+                    }
+                }
+
+                val pose = PoseLandmarkerEngine(context) { result, ts ->
+                    val signal = postureExtractor.extract(result, ts)
+                    aggregator.addPosture(signal)
+                    keyMomentDetector.onPostureFrame(signal)
+                }
+
+                val hand = HandLandmarkerEngine(context) { result, ts ->
+                    val signal = handExtractor.extract(result, ts, lastFaceCenterNorm)
+                    aggregator.addHand(signal)
+                    keyMomentDetector.onHandFrame(signal)
+                }
+
+                face.initialize()
+                pose.initialize()
+                hand.initialize()
+
+                faceEngine = face
+                poseEngine = pose
+                handEngine = hand
+                frameScheduler = FrameScheduler(face, pose, hand)
+
+                Log.d(TAG, "MediaPipe body language engines initialized in background")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error initializing MediaPipe engines", e)
             }
         }
 
-        val pose = PoseLandmarkerEngine(context) { result, ts ->
-            val signal = postureExtractor.extract(result, ts)
-            aggregator.addPosture(signal)
-            keyMomentDetector.onPostureFrame(signal)
-        }
-
-        val hand = HandLandmarkerEngine(context) { result, ts ->
-            val signal = handExtractor.extract(result, ts, lastFaceCenterNorm)
-            aggregator.addHand(signal)
-            keyMomentDetector.onHandFrame(signal)
-        }
-
-        face.initialize()
-        pose.initialize()
-        hand.initialize()
-
-        faceEngine = face
-        poseEngine = pose
-        handEngine = hand
-        frameScheduler = FrameScheduler(face, pose, hand)
-
-        // CameraX ImageAnalysis
+        // CameraX ImageAnalysis (non-blocking)
         @Suppress("DEPRECATION")
         val imageAnalysis = ImageAnalysis.Builder()
             .setTargetResolution(Size(480, 640))
@@ -123,18 +140,25 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
             .build()
 
         imageAnalysis.setAnalyzer(Dispatchers.Default.asExecutor()) { imageProxy ->
-            val bitmap = imageProxy.toBitmap()
-            val mpImage = BitmapImageBuilder(bitmap).build()
-            val timestampMs = imageProxy.imageInfo.timestamp / 1_000 // Convert µs to ms
-
-            frameScheduler?.onFrame(mpImage, timestampMs)
-            imageProxy.close()
+            try {
+                val scheduler = frameScheduler
+                if (scheduler != null) {
+                    val bitmap = imageProxy.toBitmap()
+                    val mpImage = BitmapImageBuilder(bitmap).build()
+                    val timestampMs = imageProxy.imageInfo.timestamp / 1_000 // Convert µs to ms
+                    scheduler.onFrame(mpImage, timestampMs)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error processing camera frame", e)
+            } finally {
+                imageProxy.close()
+            }
         }
 
         this.currentImageAnalysis = imageAnalysis
         bindPreview(surfaceProvider)
 
-        Log.d(TAG, "Body language analysis started")
+        Log.d(TAG, "Body language camera analysis pipeline started")
     }
 
     override fun bindPreview(surfaceProvider: Preview.SurfaceProvider?) {
@@ -166,20 +190,33 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     override fun stop() {
         if (!_isRunning.getAndSet(false)) return
 
+        analyzerScope?.cancel()
+        analyzerScope = null
+
         cameraProvider?.unbindAll()
         cameraProvider = null
         currentLifecycleOwner = null
         currentImageAnalysis = null
         currentSurfaceProvider = null
 
-        faceEngine?.close()
-        poseEngine?.close()
-        handEngine?.close()
+        val currentFace = faceEngine
+        val currentPose = poseEngine
+        val currentHand = handEngine
 
         faceEngine = null
         poseEngine = null
         handEngine = null
         frameScheduler = null
+
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                currentFace?.close()
+                currentPose?.close()
+                currentHand?.close()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error closing engines", e)
+            }
+        }
 
         Log.d(TAG, "Body language analysis stopped")
     }

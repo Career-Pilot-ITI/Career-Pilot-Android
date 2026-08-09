@@ -205,9 +205,9 @@ class PracticeSessionViewModel @Inject constructor(
 
     fun onAction(action: PracticeSessionAction) {
         when (action) {
-            is CreateNewPracticeSession -> createNewSession(action.trackId)
+            is CreateNewPracticeSession -> createNewSession(action.trackId, action.isVideoSession)
 
-            is RestartPracticeSession -> restartOldSession(action.sessionId)
+            is RestartPracticeSession -> restartOldSession(action.sessionId, action.isVideoSession)
 
             is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
@@ -347,14 +347,16 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update { it.copy(showLeaveConfirm = show) }
     }
 
-    private fun restartOldSession(sessionId: Long) {
+    private fun restartOldSession(sessionId: Long, isVideoSession: Boolean = false) {
+        _state.update { it.copy(isVideoSessionSelected = isVideoSession) }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.restartOldSession(sessionId)
         }
     }
 
-    private fun createNewSession(trackId: Long) {
+    private fun createNewSession(trackId: Long, isVideoSession: Boolean = false) {
+        _state.update { it.copy(isVideoSessionSelected = isVideoSession) }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.createNewSession(
@@ -403,7 +405,11 @@ class PracticeSessionViewModel @Inject constructor(
         if (_state.value.autoReadQuestion) {
             readQuestion()
         }
-        checkBodyLanguageAccess()
+        if (_state.value.isVideoSessionSelected) {
+            checkBodyLanguageAccess()
+        } else {
+            _state.update { it.copy(bodyLanguageEnabled = false) }
+        }
     }
 
     private suspend fun handleSessionLoadError(error: NetworkError) {
@@ -559,6 +565,7 @@ class PracticeSessionViewModel @Inject constructor(
     // region Body language
 
     private fun checkBodyLanguageAccess() {
+        if (!_state.value.isVideoSessionSelected) return
         viewModelScope.launch {
             userProfileRepo.userProfile.first().let { profile ->
                 val tier = profile.account.subscriptionTier.uppercase()

@@ -3,25 +3,40 @@ package com.iti.careerpilot.home.presentation.ready.screen
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,7 +59,8 @@ fun ReadyToPracticeRoot(
     trackId: Long,
     trackName: String,
     onBack: () -> Unit,
-    openPractice: (trackId: Long) -> Unit,
+    openPractice: (trackId: Long, isVideo: Boolean) -> Unit,
+    openPaywall: () -> Unit = {},
     viewModel: ReadyToPracticeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -67,7 +83,8 @@ fun ReadyToPracticeRoot(
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(event.trackId)
+            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(event.trackId, event.isVideo)
+            ReadyToPracticeEvent.NavigateToPaywall -> openPaywall()
             ReadyToPracticeEvent.NavigateBack -> onBack()
         }
     }
@@ -119,10 +136,10 @@ fun ReadyToPracticeScreen(
                     text = state.trackName,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = CareerPilotPalette.gray600,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(CareerPilotPalette.gray100)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = Dimens.SpaceL, vertical = Dimens.SpaceS),
                 )
             }
@@ -136,8 +153,116 @@ fun ReadyToPracticeScreen(
             Text(
                 text = stringResource(R.string.ready_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
-                color = CareerPilotPalette.gray600,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            // High-Contrast Interview Mode Selection (Audio vs Video)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
+            ) {
+                // Audio Mode Card
+                val isAudioSelected = !state.isVideoMode
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (isAudioSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        )
+                        .border(
+                            width = if (isAudioSelected) 2.dp else 1.dp,
+                            color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onAction(ReadyToPracticeAction.SelectAudioMode) }
+                        .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceL),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.VolumeUp,
+                            contentDescription = null,
+                            tint = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                            modifier = Modifier.size(26.dp)
+                        )
+                        Text(
+                            text = "Audio Session",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = if (isAudioSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                        )
+                    }
+                }
+
+                // Video Mode Card
+                val isVideoSelected = state.isVideoMode
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (isVideoSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        )
+                        .border(
+                            width = if (isVideoSelected) 2.dp else 1.dp,
+                            color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clickable { onAction(ReadyToPracticeAction.SelectVideoMode) }
+                        .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceL),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Videocam,
+                                contentDescription = null,
+                                tint = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                                modifier = Modifier.size(26.dp)
+                            )
+                            if (!state.isPaidPlan) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Pro",
+                                    tint = Color(0xFFFF9F12),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Video Session",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (isVideoSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                            )
+                            if (!state.isPaidPlan) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "PRO",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFFF9F12),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(Color(0xFFFF9F12).copy(alpha = 0.15f))
+                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
             TipsCard()
 

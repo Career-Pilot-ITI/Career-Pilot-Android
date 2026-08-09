@@ -4,6 +4,8 @@ data class ReadyToPracticeState(
     val trackName: String = "",
     val isMicrophoneGranted: Boolean = false,
     val isPermissionDialogVisible: Boolean = false,
+    val isVideoMode: Boolean = false,
+    val isPaidPlan: Boolean = false,
 ) {
     val canBegin: Boolean get() = isMicrophoneGranted
 }

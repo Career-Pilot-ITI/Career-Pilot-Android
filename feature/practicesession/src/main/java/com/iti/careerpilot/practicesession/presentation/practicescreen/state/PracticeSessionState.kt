@@ -35,6 +35,7 @@ data class PracticeSessionState(
     val autoReadQuestion: Boolean = true,
 
     // Body language
+    val isVideoSessionSelected: Boolean = false,
     val bodyLanguageEnabled: Boolean = false,
     val bodyLanguageConsentGiven: Boolean = false,
     val showBodyLanguageConsentDialog: Boolean = false,

@@ -28,6 +28,7 @@ android {
 
     androidResources {
         noCompress.add("task")
+        noCompress.add("riv")
     }
 }
 

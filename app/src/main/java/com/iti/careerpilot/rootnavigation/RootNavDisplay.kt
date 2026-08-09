@@ -250,6 +250,7 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
+                        isVideoSession = it.isVideoSession,
                         onNavigateToResult = { sessionId, bodyLanguageJson ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(
@@ -338,13 +339,17 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
                         },
-                        openPractice = { trackId ->
+                        openPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall())
+                        },
+                        openPractice = { trackId, isVideo ->
                             rootBackStack.apply {
                                 popIfCurrentIs<Route.ReadyToPractice>()
                                 navigateSingleTop(
                                     Route.PracticeSession(
                                         trackId = trackId,
                                         sessionId = null,
+                                        isVideoSession = isVideo,
                                     ),
                                 )
                             }
