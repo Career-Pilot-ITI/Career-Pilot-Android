@@ -1,25 +1,14 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,37 +24,37 @@ fun RecordingWave(
     barWidth: Dp = Dimens.WaveformBarWidth,
     barGap: Dp = Dimens.WaveformBarGap,
 ) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(barGap, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-        userScrollEnabled = false,
+    Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
     ) {
-        itemsIndexed(
-            items = volumeBars,
-            key = { _, bar -> bar.id }
-        ) { index, bar ->
-            val al by animateFloatAsState(
-                if (index >= volumeBars.size - 2 || index < 2) 0f
-                else 1f
-            )
-            Box(
-                modifier = Modifier
-                    .animateItem(
-                        fadeInSpec = null,
-                        fadeOutSpec = null,
-                        placementSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        )
-                    )
-                    .alpha(al)
-                    .width(barWidth)
-                    .heightIn(min = 4.dp)
-                    .fillMaxHeight(bar.value)
-                    .background(color = color, shape = CircleShape)
+        if (volumeBars.isEmpty()) return@Canvas
+
+        val barWidthPx = barWidth.toPx()
+        val barGapPx = barGap.toPx()
+        val minBarHeightPx = 4.dp.toPx()
+        val totalBars = volumeBars.size
+
+        val totalWaveformWidth = totalBars * barWidthPx + (totalBars - 1) * barGapPx
+        val startX = (size.width - totalWaveformWidth) / 2f
+
+        volumeBars.forEachIndexed { index, bar ->
+            val alpha = when {
+                index == 0 || index == totalBars - 1 -> 0.2f
+                index == 1 || index == totalBars - 2 -> 0.6f
+                else -> 1f
+            }
+
+            val barHeight = (bar.value * size.height).coerceIn(minBarHeightPx, size.height)
+            val x = startX + index * (barWidthPx + barGapPx)
+            val y = (size.height - barHeight) / 2f
+
+            drawRoundRect(
+                color = color.copy(alpha = alpha),
+                topLeft = Offset(x, y),
+                size = Size(barWidthPx, barHeight),
+                cornerRadius = CornerRadius(barWidthPx / 2f, barWidthPx / 2f)
             )
         }
     }
