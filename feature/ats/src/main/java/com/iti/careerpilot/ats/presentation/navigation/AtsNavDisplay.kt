@@ -18,6 +18,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
+import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
 
 @Composable
 fun AtsNavDisplay(
@@ -60,9 +61,13 @@ fun AtsNavDisplay(
                 )
             }
             entry<AtsRoute.Score> { route ->
-                AtsPlaceholder(
-                    title = stringResource(R.string.match_score),
-                    onContinue = { backStack.add(AtsRoute.CoverLetter(route.workspaceId)) },
+                ScoringRoot(
+                    workspaceId = route.workspaceId,
+                    onBack = { backStack.removeLastOrNull() },
+                    openCoinsPaywall = openCoinsPaywall,
+                    openCoverLetter = { workspaceId -> backStack.add(AtsRoute.CoverLetter(workspaceId)) },
+                    openOptimizedCv = { workspaceId -> backStack.add(AtsRoute.OptimizedCv(workspaceId)) },
+                    openPracticeSession = openPracticeSession,
                 )
             }
             entry<AtsRoute.CoverLetter> {
