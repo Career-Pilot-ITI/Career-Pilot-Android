@@ -33,6 +33,7 @@ class SherpaOnnxWhisperEngine @Inject constructor(
 
     private var recognizer: OfflineRecognizer? = null
     private val mutex = Mutex()
+    private val inferenceThreadCount = Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
 
     private suspend fun getRecognizer(): OfflineRecognizer = mutex.withLock {
         recognizer ?: createRecognizer().also { recognizer = it }
@@ -49,7 +50,7 @@ class SherpaOnnxWhisperEngine @Inject constructor(
                 ),
                 tokens = "models/tiny.en-tokens.txt",
                 modelType = "whisper",
-                numThreads = 1,
+                numThreads = inferenceThreadCount,
                 debug = false
             )
         )
@@ -58,7 +59,7 @@ class SherpaOnnxWhisperEngine @Inject constructor(
 
     override suspend fun transcribe(
         filePath: String,
-    ): Result<String> = withContext(Dispatchers.IO) {
+    ): Result<String> = withContext(Dispatchers.Default) {
         runCatching {
             val decoded =
                 decodeAudio(filePath) ?: throw IllegalStateException("Failed to decode audio")
