@@ -2,6 +2,7 @@ package com.iti.careerpilot.reports.data.mapper
 
 import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionsPageDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
 import com.iti.careerpilot.reports.domain.model.CoachingImpact
 import com.iti.careerpilot.reports.domain.model.CoachingSuggestion
@@ -11,6 +12,7 @@ import com.iti.careerpilot.reports.domain.model.PerformanceTier
 import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
 import com.iti.careerpilot.reports.domain.model.QuestionReport
 import com.iti.careerpilot.reports.domain.model.ReportDetails
+import com.iti.careerpilot.reports.domain.model.SessionHistoryPage
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -27,6 +29,26 @@ internal fun InterviewSessionDto.toHistoryDomainOrNull(): InterviewSessionSummar
         completedAt = parseBackendTimestamp(completedAt ?: createdAt),
         durationMinutes = durationMinutes,
         questionCount = maxQuestions?.coerceAtLeast(0) ?: 0,
+    )
+}
+
+internal fun InterviewSessionsPageDto.toHistoryDomain(): SessionHistoryPage {
+    if (
+        number < 0 ||
+        size <= 0 ||
+        totalPages < 0 ||
+        totalElements < 0L ||
+        numberOfElements < 0
+    ) {
+        throw SerializationException("Invalid session history page metadata")
+    }
+    return SessionHistoryPage(
+        sessions = content.mapNotNull(InterviewSessionDto::toHistoryDomainOrNull),
+        pageNumber = number,
+        totalPages = totalPages,
+        totalElements = totalElements,
+        isFirst = first,
+        isLast = last,
     )
 }
 
