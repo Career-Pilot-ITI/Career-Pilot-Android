@@ -39,21 +39,23 @@ class ReportDetailsViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5_000L),
+            started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = _state.value,
         )
 
-    private val eventChannel = Channel<ReportDetailsEvent>(Channel.Factory.BUFFERED)
+    private val eventChannel = Channel<ReportDetailsEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
     fun onAction(action: ReportDetailsAction) {
         when (action) {
             is ReportDetailsAction.Load -> loadReport(action.sessionId)
             ReportDetailsAction.Retry -> _state.value.sessionId?.let { loadReport(it, force = true) }
-            ReportDetailsAction.BackClicked -> eventChannel.trySend(ReportDetailsEvent.NavigateBack)
-            ReportDetailsAction.QuestionBreakdownClicked -> {
+            ReportDetailsAction.BackClicked -> viewModelScope.launch {
+                eventChannel.send(ReportDetailsEvent.NavigateBack)
+            }
+            ReportDetailsAction.QuestionBreakdownClicked -> viewModelScope.launch {
                 _state.value.content?.sessionId?.let { sessionId ->
-                    eventChannel.trySend(
+                    eventChannel.send(
                         ReportDetailsEvent.NavigateToQuestionBreakdown(sessionId),
                     )
                 }
@@ -87,7 +89,7 @@ class ReportDetailsViewModel @Inject constructor(
                     isLoading = true,
                     content = if (isNewSession) null else state.content,
                     error = null,
-                    phase = if (isNewSession || state.content == null) {
+                    phase = if (isNewSession) {
                         ReportsContentPhase.LOADING
                     } else {
                         state.phase
