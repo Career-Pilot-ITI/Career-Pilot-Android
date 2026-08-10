@@ -77,19 +77,17 @@ internal class PostureSignalExtractor @Inject constructor() {
     }
 
     /**
-     * Angle between vector (mid-hip → mid-shoulder) and vertical.
+     * Angle between vector (mid-hip → mid-shoulder) and vertical in sagittal plane (Z-Y).
      * Positive = leaning forward, negative = leaning back.
      */
     private fun computeTorsoLeanDeg(landmarks: List<Landmark>): Float {
-        val midHipX = (landmarks[LEFT_HIP].x() + landmarks[RIGHT_HIP].x()) / 2f
+        val midHipZ = (landmarks[LEFT_HIP].z() + landmarks[RIGHT_HIP].z()) / 2f
         val midHipY = (landmarks[LEFT_HIP].y() + landmarks[RIGHT_HIP].y()) / 2f
-        val midShoulderX = (landmarks[LEFT_SHOULDER].x() + landmarks[RIGHT_SHOULDER].x()) / 2f
+        val midShoulderZ = (landmarks[LEFT_SHOULDER].z() + landmarks[RIGHT_SHOULDER].z()) / 2f
         val midShoulderY = (landmarks[LEFT_SHOULDER].y() + landmarks[RIGHT_SHOULDER].y()) / 2f
-
-        val dx = midShoulderX - midHipX
+        val dz = midShoulderZ - midHipZ
         val dy = midShoulderY - midHipY
-        // atan2(dx, -dy) gives angle from vertical
-        return Math.toDegrees(atan2(dx.toDouble(), (-dy).toDouble())).toFloat()
+        return Math.toDegrees(atan2(dz.toDouble(), (-dy).toDouble())).toFloat()
     }
 
     /**

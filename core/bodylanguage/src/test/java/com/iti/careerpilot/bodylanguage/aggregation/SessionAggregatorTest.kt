@@ -96,12 +96,67 @@ class SessionAggregatorTest {
     }
 
     @Test
+    fun `pause and resume calculates cumulative active answering duration`() {
+        // Window 1: 1000ms -> 5000ms (duration = 4000ms)
+        aggregator.addFace(faceSignal(timestampMs = 1000))
+        aggregator.addFace(faceSignal(timestampMs = 3000))
+        aggregator.pauseRecording(timestampMs = 5000)
+
+        // Signals arriving while paused should be ignored
+        aggregator.addFace(faceSignal(timestampMs = 7000, smileScore = 1.0f))
+
+        // Window 2: 10000ms -> 16000ms (duration = 6000ms)
+        aggregator.resumeRecording(timestampMs = 10000)
+        aggregator.addFace(faceSignal(timestampMs = 12000))
+        aggregator.addFace(faceSignal(timestampMs = 16000))
+
+        val metrics = aggregator.finalize()
+        // Total active duration = 4000ms + 6000ms = 10000ms (vs wall clock 15000ms)
+        assertEquals(10000L, metrics.sessionDurationMs)
+        assertEquals(0f, metrics.averageSmile, 0.01f) // Ignored smile during pause
+    }
+
+    @Test
+    fun `pause closes open look-away span up to pause timestamp`() {
+        aggregator.addFace(faceSignal(timestampMs = 1000, lookingAtCamera = true))
+        aggregator.addFace(faceSignal(timestampMs = 2000, lookingAtCamera = false)) // look-away start
+        aggregator.pauseRecording(timestampMs = 5000) // look-away closed at 5000 (duration = 3000ms)
+
+        aggregator.resumeRecording(timestampMs = 8000)
+        aggregator.addFace(faceSignal(timestampMs = 9000, lookingAtCamera = true))
+
+        val metrics = aggregator.finalize()
+        assertEquals(3000L, metrics.timeLookingAwayMs)
+    }
+
+    @Test
+    fun `multiple pause and resume cycles accumulate active duration accurately`() {
+        // Window 1: 0 -> 2000 (2000ms)
+        aggregator.addFace(faceSignal(timestampMs = 0))
+        aggregator.pauseRecording(timestampMs = 2000)
+
+        // Window 2: 5000 -> 8000 (3000ms)
+        aggregator.resumeRecording(timestampMs = 5000)
+        aggregator.addFace(faceSignal(timestampMs = 6000))
+        aggregator.pauseRecording(timestampMs = 8000)
+
+        // Window 3: 12000 -> 15000 (3000ms)
+        aggregator.resumeRecording(timestampMs = 12000)
+        aggregator.addFace(faceSignal(timestampMs = 15000))
+
+        val metrics = aggregator.finalize()
+        // 2000 + 3000 + 3000 = 8000ms
+        assertEquals(8000L, metrics.sessionDurationMs)
+    }
+
+    @Test
     fun `reset clears all accumulators`() {
         aggregator.addFace(faceSignal(timestampMs = 0, smileScore = 0.8f))
         aggregator.reset()
         val metrics = aggregator.finalize()
         assertEquals(0f, metrics.averageSmile, 0.01f)
         assertEquals(0, metrics.faceLostCount)
+        assertEquals(0L, metrics.sessionDurationMs)
     }
 
     // --- Helpers ---

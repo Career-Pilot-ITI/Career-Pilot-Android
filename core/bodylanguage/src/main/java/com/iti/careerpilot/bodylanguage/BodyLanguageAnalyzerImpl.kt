@@ -29,6 +29,7 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -45,7 +46,15 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     override val isRecordingActive: Boolean get() = _isRecordingActive.get()
 
     override fun setRecordingActive(active: Boolean) {
-        _isRecordingActive.set(active)
+        val wasActive = _isRecordingActive.getAndSet(active)
+        if (wasActive != active) {
+            val nowMs = System.currentTimeMillis()
+            if (active) {
+                aggregator.resumeRecording(nowMs)
+            } else {
+                aggregator.pauseRecording(nowMs)
+            }
+        }
     }
 
     private var analyzerScope: CoroutineScope? = null
@@ -159,7 +168,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                 if (scheduler != null) {
                     val bitmap = imageProxy.toBitmap()
                     val mpImage = BitmapImageBuilder(bitmap).build()
-                    val timestampMs = imageProxy.imageInfo.timestamp / 1_000 // Convert µs to ms
+                    val timestampMs = TimeUnit.NANOSECONDS.toMillis(imageProxy.imageInfo.timestamp)
                     scheduler.onFrame(mpImage, timestampMs)
                 }
             } catch (e: Exception) {

@@ -16,6 +16,9 @@ internal class KeyMomentDetector @Inject constructor() {
 
     private val moments = mutableListOf<KeyMoment>()
 
+    private var sessionStartTimestampMs: Long? = null
+    private var lastTimestampMs: Long = 0L
+
     // Look-away state machine
     private var lookAwayStartMs: Long? = null
     private val lookAwayMinDurationMs = 1500L
@@ -36,6 +39,8 @@ internal class KeyMomentDetector @Inject constructor() {
 
     @Synchronized
     fun onFaceFrame(signal: FaceFrameSignal) {
+        trackSessionTime(signal.timestampMs)
+
         // Look-away detection
         val isAway = signal.headYawDeg?.let { abs(it) > lookAwayYawThreshold } ?: false
         if (isAway && lookAwayStartMs == null) {
@@ -46,7 +51,7 @@ internal class KeyMomentDetector @Inject constructor() {
             if (duration >= lookAwayMinDurationMs) {
                 moments.add(
                     KeyMoment(
-                        timestampMs = lookAwayStartMs!!,
+                        timestampMs = toRelative(lookAwayStartMs!!),
                         type = KeyMomentType.EYE_CONTACT_LOST,
                         durationMs = duration,
                     )
@@ -64,7 +69,7 @@ internal class KeyMomentDetector @Inject constructor() {
             if (duration >= faceLostMinDurationMs) {
                 moments.add(
                     KeyMoment(
-                        timestampMs = faceLostStartMs!!,
+                        timestampMs = toRelative(faceLostStartMs!!),
                         type = KeyMomentType.FACE_LOST,
                         durationMs = duration,
                     )
@@ -76,12 +81,13 @@ internal class KeyMomentDetector @Inject constructor() {
         // Smile detection (point event, not duration-based)
         signal.smileScore?.let { score ->
             if (score > 0.7f) {
+                val relTs = toRelative(signal.timestampMs)
                 // Only add if last smile moment was >5s ago
                 val lastSmile = moments.lastOrNull { it.type == KeyMomentType.SMILE_PEAK }
-                if (lastSmile == null || signal.timestampMs - lastSmile.timestampMs > 5000L) {
+                if (lastSmile == null || relTs - lastSmile.timestampMs > 5000L) {
                     moments.add(
                         KeyMoment(
-                            timestampMs = signal.timestampMs,
+                            timestampMs = relTs,
                             type = KeyMomentType.SMILE_PEAK,
                         )
                     )
@@ -92,6 +98,8 @@ internal class KeyMomentDetector @Inject constructor() {
 
     @Synchronized
     fun onPostureFrame(signal: PostureFrameSignal) {
+        trackSessionTime(signal.timestampMs)
+
         val isSlouching = signal.slouchScore?.let { it > slouchScoreThreshold } ?: false
         if (isSlouching && slouchStartMs == null) {
             slouchStartMs = signal.timestampMs
@@ -101,7 +109,7 @@ internal class KeyMomentDetector @Inject constructor() {
             if (duration >= slouchMinDurationMs) {
                 moments.add(
                     KeyMoment(
-                        timestampMs = slouchStartMs!!,
+                        timestampMs = toRelative(slouchStartMs!!),
                         type = KeyMomentType.SLOUCH_START,
                         durationMs = duration,
                     )
@@ -113,6 +121,8 @@ internal class KeyMomentDetector @Inject constructor() {
 
     @Synchronized
     fun onHandFrame(signal: HandFrameSignal) {
+        trackSessionTime(signal.timestampMs)
+
         // Hand-to-face
         if (signal.handToFaceTouch && handToFaceStartMs == null) {
             handToFaceStartMs = signal.timestampMs
@@ -122,7 +132,7 @@ internal class KeyMomentDetector @Inject constructor() {
             if (duration >= handToFaceMinDurationMs) {
                 moments.add(
                     KeyMoment(
-                        timestampMs = handToFaceStartMs!!,
+                        timestampMs = toRelative(handToFaceStartMs!!),
                         type = KeyMomentType.HAND_FIDGET_SPIKE,
                         durationMs = duration,
                     )
@@ -134,11 +144,12 @@ internal class KeyMomentDetector @Inject constructor() {
         // Fidget detection
         signal.handMovementScore?.let { score ->
             if (score > 0.7f) {
+                val relTs = toRelative(signal.timestampMs)
                 val lastFidget = moments.lastOrNull { it.type == KeyMomentType.HAND_FIDGET_SPIKE }
-                if (lastFidget == null || signal.timestampMs - lastFidget.timestampMs > 3000L) {
+                if (lastFidget == null || relTs - lastFidget.timestampMs > 3000L) {
                     moments.add(
                         KeyMoment(
-                            timestampMs = signal.timestampMs,
+                            timestampMs = relTs,
                             type = KeyMomentType.HAND_FIDGET_SPIKE,
                         )
                     )
@@ -148,7 +159,79 @@ internal class KeyMomentDetector @Inject constructor() {
     }
 
     @Synchronized
-    fun getKeyMoments(): List<KeyMoment> = moments.toList()
+    fun getKeyMoments(): List<KeyMoment> {
+        val endMs = lastTimestampMs
+
+        lookAwayStartMs?.let { start ->
+            val duration = endMs - start
+            if (duration >= lookAwayMinDurationMs) {
+                moments.add(
+                    KeyMoment(
+                        timestampMs = toRelative(start),
+                        type = KeyMomentType.EYE_CONTACT_LOST,
+                        durationMs = duration,
+                    )
+                )
+            }
+            lookAwayStartMs = null
+        }
+
+        faceLostStartMs?.let { start ->
+            val duration = endMs - start
+            if (duration >= faceLostMinDurationMs) {
+                moments.add(
+                    KeyMoment(
+                        timestampMs = toRelative(start),
+                        type = KeyMomentType.FACE_LOST,
+                        durationMs = duration,
+                    )
+                )
+            }
+            faceLostStartMs = null
+        }
+
+        slouchStartMs?.let { start ->
+            val duration = endMs - start
+            if (duration >= slouchMinDurationMs) {
+                moments.add(
+                    KeyMoment(
+                        timestampMs = toRelative(start),
+                        type = KeyMomentType.SLOUCH_START,
+                        durationMs = duration,
+                    )
+                )
+            }
+            slouchStartMs = null
+        }
+
+        handToFaceStartMs?.let { start ->
+            val duration = endMs - start
+            if (duration >= handToFaceMinDurationMs) {
+                moments.add(
+                    KeyMoment(
+                        timestampMs = toRelative(start),
+                        type = KeyMomentType.HAND_FIDGET_SPIKE,
+                        durationMs = duration,
+                    )
+                )
+            }
+            handToFaceStartMs = null
+        }
+
+        return moments.sortedBy { it.timestampMs }
+    }
+
+    private fun trackSessionTime(timestampMs: Long) {
+        if (sessionStartTimestampMs == null) {
+            sessionStartTimestampMs = timestampMs
+        }
+        lastTimestampMs = maxOf(lastTimestampMs, timestampMs)
+    }
+
+    private fun toRelative(timestampMs: Long): Long {
+        val start = sessionStartTimestampMs ?: 0L
+        return (timestampMs - start).coerceAtLeast(0L)
+    }
 
     @Synchronized
     fun reset() {
@@ -157,5 +240,7 @@ internal class KeyMomentDetector @Inject constructor() {
         slouchStartMs = null
         handToFaceStartMs = null
         faceLostStartMs = null
+        sessionStartTimestampMs = null
+        lastTimestampMs = 0L
     }
 }

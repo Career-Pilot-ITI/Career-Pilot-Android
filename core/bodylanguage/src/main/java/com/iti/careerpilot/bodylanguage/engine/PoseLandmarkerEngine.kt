@@ -19,16 +19,8 @@ internal open class PoseLandmarkerEngine(
     private var landmarker: PoseLandmarker? = null
 
     fun initialize() {
-        landmarker = try {
-            createLandmarker(Delegate.GPU)
-        } catch (e: Exception) {
-            Log.w(TAG, "GPU delegate failed, falling back to CPU", e)
-            try {
-                createLandmarker(Delegate.CPU)
-            } catch (e2: Exception) {
-                Log.e(TAG, "CPU initialization also failed", e2)
-                null
-            }
+        landmarker = safeCreateLandmarker(TAG) { delegate ->
+            createLandmarker(delegate)
         }
     }
 

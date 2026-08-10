@@ -39,11 +39,61 @@ internal class SessionAggregator @Inject constructor() {
     private var fidgetScoreSum = 0.0
     private var fidgetCount = 0
 
+    // Session time & active recording tracking
     private var sessionStartMs: Long? = null
     private var sessionEndMs: Long? = null
+    private var isRecordingActive = true
+    private var activeWindowStartMs: Long? = null
+    private var lastActiveTimestampMs: Long? = null
+    private var cumulativeActiveDurationMs = 0L
+
+    @Synchronized
+    fun pauseRecording(timestampMs: Long) {
+        if (!isRecordingActive) return
+
+        // Accumulate active duration for the current answering window
+        activeWindowStartMs?.let { start ->
+            cumulativeActiveDurationMs += (timestampMs - start).coerceAtLeast(0L)
+            activeWindowStartMs = null
+        }
+
+        // Close any open look-away span up to pause time
+        lookAwayStartMs?.let { start ->
+            totalLookAwayMs += (timestampMs - start).coerceAtLeast(0L)
+            lookAwayStartMs = null
+        }
+
+        // Reset edge-triggered states across pause boundary
+        lastSlouchAboveThreshold = false
+        lastHandToFace = false
+        lastFaceDetected = true
+
+        sessionEndMs = maxOf(sessionEndMs ?: timestampMs, timestampMs)
+        isRecordingActive = false
+    }
+
+    @Synchronized
+    fun resumeRecording(timestampMs: Long) {
+        if (isRecordingActive) return
+
+        isRecordingActive = true
+        activeWindowStartMs = timestampMs
+        lastActiveTimestampMs = timestampMs
+
+        if (sessionStartMs == null) {
+            sessionStartMs = timestampMs
+        }
+        sessionEndMs = maxOf(sessionEndMs ?: timestampMs, timestampMs)
+
+        lookAwayStartMs = null
+        lastSlouchAboveThreshold = false
+        lastHandToFace = false
+        lastFaceDetected = true
+    }
 
     @Synchronized
     fun addFace(signal: FaceFrameSignal) {
+        if (!isRecordingActive) return
         trackSessionTime(signal.timestampMs)
         faceFrameCount++
 
@@ -77,6 +127,7 @@ internal class SessionAggregator @Inject constructor() {
 
     @Synchronized
     fun addPosture(signal: PostureFrameSignal) {
+        if (!isRecordingActive) return
         trackSessionTime(signal.timestampMs)
         if (!signal.poseDetected) return
         postureFrameCount++
@@ -95,6 +146,7 @@ internal class SessionAggregator @Inject constructor() {
 
     @Synchronized
     fun addHand(signal: HandFrameSignal) {
+        if (!isRecordingActive) return
         trackSessionTime(signal.timestampMs)
         handFrameCount++
 
@@ -114,17 +166,21 @@ internal class SessionAggregator @Inject constructor() {
 
     @Synchronized
     fun finalize(): BodyLanguageMetrics {
-        val durationMs = if (sessionStartMs != null && sessionEndMs != null) {
-            sessionEndMs!! - sessionStartMs!!
-        } else 0L
-
         // Close any open look-away span
         lookAwayStartMs?.let { start ->
-            sessionEndMs?.let { end -> totalLookAwayMs += end - start }
+            val end = sessionEndMs ?: start
+            totalLookAwayMs += (end - start).coerceAtLeast(0L)
+            lookAwayStartMs = null
         }
 
+        val currentActiveDelta = if (isRecordingActive && activeWindowStartMs != null) {
+            val end = sessionEndMs ?: activeWindowStartMs!!
+            (end - activeWindowStartMs!!).coerceAtLeast(0L)
+        } else 0L
+        val totalActiveDurationMs = cumulativeActiveDurationMs + currentActiveDelta
+
         return BodyLanguageMetrics(
-            sessionDurationMs = durationMs,
+            sessionDurationMs = totalActiveDurationMs,
 
             averageSmile = if (smileCount > 0) (smileSum / smileCount).toFloat() else 0f,
             maxSmile = maxSmile,
@@ -158,8 +214,16 @@ internal class SessionAggregator @Inject constructor() {
     }
 
     private fun trackSessionTime(timestampMs: Long) {
-        if (sessionStartMs == null) sessionStartMs = timestampMs
-        sessionEndMs = timestampMs
+        if (sessionStartMs == null) {
+            sessionStartMs = timestampMs
+        }
+        sessionEndMs = maxOf(sessionEndMs ?: timestampMs, timestampMs)
+        if (isRecordingActive) {
+            if (activeWindowStartMs == null) {
+                activeWindowStartMs = timestampMs
+            }
+            lastActiveTimestampMs = timestampMs
+        }
     }
 
     @Synchronized
@@ -172,5 +236,9 @@ internal class SessionAggregator @Inject constructor() {
         handsVisibleFrames = 0; handFrameCount = 0; handToFaceTouchCount = 0
         lastHandToFace = false; fidgetScoreSum = 0.0; fidgetCount = 0
         sessionStartMs = null; sessionEndMs = null
+        isRecordingActive = true
+        activeWindowStartMs = null
+        lastActiveTimestampMs = null
+        cumulativeActiveDurationMs = 0L
     }
 }

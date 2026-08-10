@@ -19,7 +19,7 @@ internal class HandSignalExtractor @Inject constructor() {
         private const val TOUCH_DISTANCE_THRESHOLD = 0.12f
     }
 
-    private var previousWristPositions: List<Pair<Float, Float>>? = null
+    private val previousWristPositions = mutableMapOf<String, Pair<Float, Float>>()
 
     /**
      * @param faceCenterNorm normalized (x, y) of face center from face landmarks.
@@ -30,10 +30,11 @@ internal class HandSignalExtractor @Inject constructor() {
         timestampMs: Long,
         faceCenterNorm: Pair<Float, Float>?,
     ): HandFrameSignal {
-        val handCount = result.landmarks().size
+        val landmarks = result.landmarks()
+        val handCount = landmarks.size
 
         if (handCount == 0) {
-            previousWristPositions = null
+            previousWristPositions.clear()
             return HandFrameSignal(
                 timestampMs = timestampMs,
                 handsVisible = 0,
@@ -42,7 +43,6 @@ internal class HandSignalExtractor @Inject constructor() {
             )
         }
 
-        val landmarks = result.landmarks()
         var touchDetected = false
 
         if (faceCenterNorm != null) {
@@ -60,23 +60,36 @@ internal class HandSignalExtractor @Inject constructor() {
             }
         }
 
-        // Movement score: average wrist displacement across hands
-        val currentWrists = landmarks.map { it[WRIST].x() to it[WRIST].y() }
-        val movementScore = previousWristPositions?.let { prev ->
-            val paired = currentWrists.zip(prev)
-            if (paired.isEmpty()) 0f
-            else {
-                val avgDisp = paired.map { (cur, prv) ->
-                    val dx = cur.first - prv.first
-                    val dy = cur.second - prv.second
-                    sqrt((dx * dx + dy * dy).toDouble()).toFloat()
-                }.average().toFloat()
-                // Normalize: normal gesturing ~0.02, fidgeting ~0.06+
-                (avgDisp / 0.06f).coerceIn(0f, 1f)
-            }
-        } ?: 0f
+        // Movement score: average wrist displacement tracked by handedness
+        val handednesses = result.handedness()
+        val currentWrists = mutableMapOf<String, Pair<Float, Float>>()
+        val displacements = mutableListOf<Float>()
 
-        previousWristPositions = currentWrists
+        for (i in 0 until handCount) {
+            val handLandmarks = landmarks[i]
+            val handednessLabel = handednesses.getOrNull(i)?.firstOrNull()?.categoryName()
+                ?: if (i == 0) "Left" else "Right"
+            val wrist = handLandmarks[WRIST]
+            val currentPos = wrist.x() to wrist.y()
+            currentWrists[handednessLabel] = currentPos
+
+            previousWristPositions[handednessLabel]?.let { prevPos ->
+                val dx = currentPos.first - prevPos.first
+                val dy = currentPos.second - prevPos.second
+                displacements.add(sqrt((dx * dx + dy * dy).toDouble()).toFloat())
+            }
+        }
+
+        previousWristPositions.clear()
+        previousWristPositions.putAll(currentWrists)
+
+        val movementScore = if (displacements.isNotEmpty()) {
+            val avgDisp = displacements.average().toFloat()
+            // Normalize: normal gesturing ~0.02, fidgeting ~0.06+
+            (avgDisp / 0.06f).coerceIn(0f, 1f)
+        } else {
+            0f
+        }
 
         return HandFrameSignal(
             timestampMs = timestampMs,
@@ -96,6 +109,6 @@ internal class HandSignalExtractor @Inject constructor() {
     }
 
     fun reset() {
-        previousWristPositions = null
+        previousWristPositions.clear()
     }
 }
