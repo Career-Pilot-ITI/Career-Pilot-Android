@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,13 +54,14 @@ fun CoverLetterRoot(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val copiedMessage = stringResource(R.string.ats_copied)
+    val clipboardLabel = stringResource(R.string.cover_letter)
     val missingEmailClient = stringResource(R.string.ats_no_email_client)
 
     LaunchedEffect(workspaceId) { viewModel.loadWorkspace(workspaceId) }
     ObserveEvent(viewModel.effects) { effect ->
         when (effect) {
             is CoverLetterEffect.CopyText -> {
-                copyText(context, effect.value)
+                copyText(context, clipboardLabel, effect.value)
                 snackbarHostState.showSnackbar(copiedMessage)
             }
             is CoverLetterEffect.ComposeEmail -> if (!composeEmail(context, effect.draft)) {
@@ -204,7 +206,9 @@ private fun CoverLetterContent(
                     }
                 }
             }
-            state.coinCost?.let { cost -> item { Text(stringResource(R.string.ats_coins_used, cost)) } }
+            state.coinCost?.let { cost ->
+                item { Text(pluralStringResource(R.plurals.ats_coins_used, cost, cost)) }
+            }
             item {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_send_email),
@@ -222,9 +226,9 @@ private fun CoverLetterContent(
     }
 }
 
-private fun copyText(context: Context, value: String) {
+private fun copyText(context: Context, label: String, value: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.cover_letter), value))
+    clipboard.setPrimaryClip(ClipData.newPlainText(label, value))
 }
 
 private fun composeEmail(context: Context, draft: EmailDraft): Boolean {

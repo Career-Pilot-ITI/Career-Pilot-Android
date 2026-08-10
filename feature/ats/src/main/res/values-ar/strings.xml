@@ -63,7 +63,14 @@
     <string name="ats_start_practice">ابدأ جلسة تدريب</string>
     <string name="ats_practice_track_required">اختر مسارًا مهنيًا في ملفك الشخصي لبدء جلسة تدريب.</string>
     <string name="ats_match_score_value">تطابق %1$d%%</string>
-    <string name="ats_coins_used">تم استخدام %1$d عملات</string>
+    <plurals name="ats_coins_used">
+        <item quantity="zero">لم تُستخدم أي عملات</item>
+        <item quantity="one">تم استخدام عملة واحدة</item>
+        <item quantity="two">تم استخدام عملتين</item>
+        <item quantity="few">تم استخدام %1$d عملات</item>
+        <item quantity="many">تم استخدام %1$d عملة</item>
+        <item quantity="other">تم استخدام %1$d عملة</item>
+    </plurals>
     <string name="ats_group_count">%1$s · %2$d</string>
     <string name="ats_lowest">الأدنى</string>
     <string name="ats_cover_letter_email_subject">خطاب تقديم لوظيفة</string>

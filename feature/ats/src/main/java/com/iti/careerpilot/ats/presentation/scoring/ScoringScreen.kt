@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -254,7 +255,10 @@ private fun ScoreSummary(score: AtsScore) {
                 Text(stringResource(R.string.match_score).uppercase(), style = MaterialTheme.typography.labelSmall)
                 Text(stringResource(R.string.ats_match_score_value, score.matchPercentage), fontWeight = FontWeight.Bold)
                 score.coinCost?.let {
-                    Text(stringResource(R.string.ats_coins_used, it), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        pluralStringResource(R.plurals.ats_coins_used, it, it),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
             }
         }

@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -49,12 +50,13 @@ fun OptimizedCvRoot(
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val copied = stringResource(R.string.ats_copied)
+    val clipboardLabel = stringResource(R.string.optimized_cv)
     LaunchedEffect(workspaceId) { viewModel.loadWorkspace(workspaceId) }
     ObserveEvent(viewModel.effects) { effect ->
         when (effect) {
             is OptimizedCvEffect.CopyText -> {
                 val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                manager.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.optimized_cv), effect.value))
+                manager.setPrimaryClip(ClipData.newPlainText(clipboardLabel, effect.value))
                 snackbar.showSnackbar(copied)
             }
             OptimizedCvEffect.OpenCoinsPaywall -> openCoinsPaywall()
@@ -159,7 +161,9 @@ private fun OptimizedCvContent(
                     }
                 }
             }
-            state.coinCost?.let { item { Text(stringResource(R.string.ats_coins_used, it)) } }
+            state.coinCost?.let { cost ->
+                item { Text(pluralStringResource(R.plurals.ats_coins_used, cost, cost)) }
+            }
             item {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_copy_optimized_cv),
