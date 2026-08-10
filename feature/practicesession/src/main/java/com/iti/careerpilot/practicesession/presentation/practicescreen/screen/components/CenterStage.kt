@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 fun CenterStage(
     isReadingQuestion: Boolean,
     isRecording: Boolean,
-    isVideoInterview: Boolean,
     onToggleListening: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -19,19 +18,9 @@ fun CenterStage(
         modifier = modifier.size(260.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (isVideoInterview) {
-            // Animated AI Interviewer Robot character for video interviews
-            AiInterviewerAvatar(
-                isReadingQuestion = isReadingQuestion,
-                isRecording = isRecording,
-                onClick = onToggleListening
-            )
-        } else {
-            // Classic AI Pulsing Sphere for audio interviews
-            AiTalkingAnimation(
-                isPulsing = isReadingQuestion,
-                onClick = onToggleListening
-            )
-        }
+        AiTalkingAnimation(
+            isPulsing = isReadingQuestion || isRecording,
+            onClick = onToggleListening
+        )
     }
 }

@@ -34,9 +34,7 @@ fun QuestionCard(
 ) {
     CareerPilotCard(
         elevation = 8.dp,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
