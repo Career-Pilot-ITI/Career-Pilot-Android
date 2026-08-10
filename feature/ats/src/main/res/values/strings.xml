@@ -21,4 +21,23 @@
     <string name="ats_importing_job">Importing job…</string>
     <string name="ats_invalid_shared_link">The shared content doesn’t contain a valid HTTPS job link.</string>
     <string name="ats_cv_updated">Your CV is synchronized and ready to compare.</string>
+    <string name="ats_back">Back</string>
+    <string name="ats_retry">Retry</string>
+    <string name="ats_open_job">Open</string>
+    <string name="ats_job_overview">Job Overview</string>
+    <string name="ats_employment_type">Employment type</string>
+    <string name="ats_seniority">Seniority</string>
+    <string name="ats_experience">Experience</string>
+    <string name="ats_experience_years">%1$d+ years</string>
+    <string name="ats_work_arrangement">Work arrangement</string>
+    <string name="ats_remote">Remote</string>
+    <string name="ats_hybrid">Hybrid</string>
+    <string name="ats_on_site">On-site</string>
+    <string name="ats_description">Description</string>
+    <string name="ats_required_skills">Required skills</string>
+    <string name="ats_preferred_skills">Preferred skills</string>
+    <string name="ats_technologies">Technologies</string>
+    <string name="ats_responsibilities">Responsibilities</string>
+    <string name="ats_qualifications">Qualifications</string>
+    <string name="ats_start_scoring">Start Scoring</string>
 </resources>

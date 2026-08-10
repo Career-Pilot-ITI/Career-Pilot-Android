@@ -21,4 +21,23 @@
     <string name="ats_importing_job">جارٍ استيراد الوظيفة…</string>
     <string name="ats_invalid_shared_link">لا يحتوي المحتوى المشارك على رابط وظيفة HTTPS صالح.</string>
     <string name="ats_cv_updated">تمت مزامنة سيرتك الذاتية وأصبحت جاهزة للمقارنة.</string>
+    <string name="ats_back">رجوع</string>
+    <string name="ats_retry">إعادة المحاولة</string>
+    <string name="ats_open_job">فتح</string>
+    <string name="ats_job_overview">نظرة عامة على الوظيفة</string>
+    <string name="ats_employment_type">نوع التوظيف</string>
+    <string name="ats_seniority">المستوى الوظيفي</string>
+    <string name="ats_experience">الخبرة</string>
+    <string name="ats_experience_years">%1$d+ سنوات</string>
+    <string name="ats_work_arrangement">نظام العمل</string>
+    <string name="ats_remote">عن بُعد</string>
+    <string name="ats_hybrid">هجين</string>
+    <string name="ats_on_site">من مقر العمل</string>
+    <string name="ats_description">الوصف</string>
+    <string name="ats_required_skills">المهارات المطلوبة</string>
+    <string name="ats_preferred_skills">المهارات المفضلة</string>
+    <string name="ats_technologies">التقنيات</string>
+    <string name="ats_responsibilities">المسؤوليات</string>
+    <string name="ats_qualifications">المؤهلات</string>
+    <string name="ats_start_scoring">ابدأ التقييم</string>
 </resources>
