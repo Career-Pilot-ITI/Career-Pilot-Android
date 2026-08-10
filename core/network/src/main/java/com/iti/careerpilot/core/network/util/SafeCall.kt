@@ -84,6 +84,7 @@ suspend inline fun <reified T> HttpResponse.toResult(): CareerPilotResult<T, Net
 fun ResponseException.toNetworkError(): NetworkError = when (response.status.value) {
     400 -> NetworkError.BAD_REQUEST
     401 -> NetworkError.UNAUTHORIZED
+    402 -> NetworkError.INSUFFICIENT_COINS
     403 -> NetworkError.FORBIDDEN
     404 -> NetworkError.NOT_FOUND
     409 -> NetworkError.CONFLICT

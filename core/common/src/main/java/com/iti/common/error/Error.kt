@@ -8,6 +8,7 @@ enum class NetworkError : IError {
     SERIALIZATION,
     EMPTY_RESULT,
     BAD_REQUEST,
+    INSUFFICIENT_COINS,
     UNAUTHORIZED,
     FORBIDDEN,
     NOT_FOUND,

@@ -12,6 +12,7 @@
     <string name="error_serialization">The server returned an invalid response.</string>
     <string name="error_empty_result">No results were found.</string>
     <string name="error_bad_request">The request is invalid. Please check your information and try again.</string>
+    <string name="error_insufficient_coins">You don\'t have enough coins for this action.</string>
     <string name="error_unauthorized">Your session has expired. Please sign in again.</string>
     <string name="error_forbidden">You can\'t access this right now.</string>
     <string name="error_not_found">We couldn\'t find what you were looking for.</string>
