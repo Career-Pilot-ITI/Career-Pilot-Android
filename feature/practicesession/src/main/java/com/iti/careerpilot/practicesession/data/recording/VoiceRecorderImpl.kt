@@ -113,7 +113,7 @@ class VoiceRecorderImpl @Inject constructor(
         durationJob = applicationScope.launch {
             var lastTime = System.currentTimeMillis()
             while (isRecording && !isPaused) {
-                delay(10L.milliseconds)
+                delay(100L.milliseconds)
                 val currentTime = System.currentTimeMillis()
                 val elapsedTime = currentTime - lastTime
 
