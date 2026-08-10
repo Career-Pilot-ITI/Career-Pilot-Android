@@ -12,6 +12,7 @@ class AiModuleConventionPlugin : Plugin<Project> {
         pluginManager.apply("careerpilot.android.hilt")
         pluginManager.apply("careerpilot.testing")
         pluginManager.apply("careerpilot.kotlin.serialization")
+        pluginManager.apply("careerpilot.android.ktor")
 
         extensions.configure<LibraryExtension> {
             namespace = "com.iti.careerpilot.ai"
@@ -24,7 +25,7 @@ class AiModuleConventionPlugin : Plugin<Project> {
         dependencies {
             val bom = libs.findLibrary("firebase-bom").get()
             add("implementation", platform(bom))
-            add("implementation", libs.findLibrary("firebase-vertexai").get())
+            add("implementation", libs.findLibrary("firebase-ai").get())
             add("implementation", libs.findLibrary("firebase-appcheck-playintegrity").get())
             add("implementation", libs.findLibrary("firebase-appcheck-debug").get())
             add("implementation", libs.findLibrary("firebase-config").get())

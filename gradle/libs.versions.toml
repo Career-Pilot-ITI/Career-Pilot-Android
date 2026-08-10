@@ -40,7 +40,7 @@ mediapipe = "0.10.35"
 camerax = "1.6.1"
 rive-android = "11.7.2"
 androidx-startup = "1.1.1"
-firebaseBom = "33.10.0"
+firebaseBom = "34.17.0"
 googleServices = "4.4.2"
 
 
@@ -151,7 +151,7 @@ camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "ca
 camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai" }
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
