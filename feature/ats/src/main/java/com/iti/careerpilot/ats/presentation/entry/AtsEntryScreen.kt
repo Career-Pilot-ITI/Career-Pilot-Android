@@ -23,11 +23,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -36,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import kotlinx.coroutines.delay
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 
 @Composable
@@ -81,6 +87,25 @@ fun AtsEntryScreen(
     snackbarHostState: androidx.compose.material3.SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
+    val jobUrlDescription = stringResource(R.string.ats_job_posting_link)
+    val importMessages = listOf(
+        stringResource(R.string.ats_importing_job),
+        stringResource(R.string.ats_importing_details),
+        stringResource(R.string.ats_preparing_workspace),
+    )
+    var importMessageIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    LaunchedEffect(state.isImporting) {
+        if (!state.isImporting) {
+            importMessageIndex = 0
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(1_600)
+            importMessageIndex = (importMessageIndex + 1) % importMessages.size
+        }
+    }
+
     androidx.compose.material3.Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -126,7 +151,8 @@ fun AtsEntryScreen(
                         onValueChange = { onAction(AtsEntryAction.JobUrlChanged(it)) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
+                            .padding(top = 8.dp)
+                            .semantics { contentDescription = jobUrlDescription },
                         placeholder = { Text(stringResource(R.string.ats_job_url_hint)) },
                         singleLine = true,
                         enabled = !state.isBusy,
@@ -174,7 +200,7 @@ fun AtsEntryScreen(
                 }
             }
             CareerPilotButton(
-                text = if (state.isImporting) stringResource(R.string.ats_importing_job)
+                text = if (state.isImporting) importMessages[importMessageIndex]
                 else stringResource(R.string.ats_compare_now),
                 onClick = { onAction(AtsEntryAction.CompareClicked) },
                 enabled = state.canCompare,

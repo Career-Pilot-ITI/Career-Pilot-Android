@@ -1,21 +1,14 @@
 package com.iti.careerpilot.ats.presentation.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
@@ -88,21 +81,4 @@ fun AtsNavDisplay(
             }
         },
     )
-}
-
-@Composable
-private fun AtsPlaceholder(
-    title: String,
-    onContinue: (() -> Unit)? = null,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(title)
-        onContinue?.let { action ->
-            Button(onClick = action) { Text(stringResource(R.string.continue_action)) }
-        }
-    }
 }

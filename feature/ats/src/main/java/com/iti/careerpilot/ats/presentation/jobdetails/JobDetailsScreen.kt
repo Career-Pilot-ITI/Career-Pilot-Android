@@ -217,7 +217,9 @@ private fun DetailsSection(title: String, content: @Composable () -> Unit) {
 
 @Composable
 private fun ListSection(title: String, values: List<String>) = DetailsSection(title) {
-    values.forEach { Text("• $it", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    values.forEach {
+        Text(stringResource(R.string.ats_list_item, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 @Composable

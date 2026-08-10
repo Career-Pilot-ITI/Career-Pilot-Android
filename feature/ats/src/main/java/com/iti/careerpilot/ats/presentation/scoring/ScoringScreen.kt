@@ -33,6 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -271,16 +275,25 @@ private fun SkillGroup(title: String, skills: List<String>) = CareerPilotCard(Mo
 private fun FeedbackList(title: String, values: List<String>) = CareerPilotCard(Modifier.fillMaxWidth()) {
     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(title, fontWeight = FontWeight.Bold)
-        values.forEach { Text("• $it", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        values.forEach {
+            Text(stringResource(R.string.ats_list_item, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
 @Composable
 private fun SectionScoreRow(section: AtsSectionScore, lowestScore: Int) {
     var expanded by rememberSaveable(section.section) { mutableStateOf(false) }
+    val expansionState = stringResource(
+        if (expanded) R.string.ats_expanded else R.string.ats_collapsed,
+    )
     CareerPilotCard(
         modifier = Modifier
             .fillMaxWidth()
+            .semantics {
+                role = Role.Button
+                stateDescription = expansionState
+            }
             .clickable { expanded = !expanded }
             .animateContentSize(),
     ) {

@@ -19,6 +19,8 @@
     <string name="ats_share_tip">Faster: In LinkedIn or any job app, tap Share → CareerPilot. The link is captured automatically.</string>
     <string name="ats_compare_now">Compare Now</string>
     <string name="ats_importing_job">Importing job…</string>
+    <string name="ats_importing_details">Reading job details…</string>
+    <string name="ats_preparing_workspace">Preparing your workspace…</string>
     <string name="ats_invalid_shared_link">The shared content doesn’t contain a valid HTTPS job link.</string>
     <string name="ats_cv_updated">Your CV is synchronized and ready to compare.</string>
     <string name="ats_back">Back</string>
@@ -76,4 +78,7 @@
     <string name="ats_optimized_text">Optimized CV text</string>
     <string name="ats_recommended_tracks">Recommended tracks</string>
     <string name="ats_copy_optimized_cv">Copy Optimized CV</string>
+    <string name="ats_list_item">• %1$s</string>
+    <string name="ats_expanded">Expanded</string>
+    <string name="ats_collapsed">Collapsed</string>
 </resources>

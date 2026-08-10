@@ -19,6 +19,8 @@
     <string name="ats_share_tip">أسرع: من LinkedIn أو أي تطبيق وظائف اضغط مشاركة ← CareerPilot وسيُلتقط الرابط تلقائيًا.</string>
     <string name="ats_compare_now">قارن الآن</string>
     <string name="ats_importing_job">جارٍ استيراد الوظيفة…</string>
+    <string name="ats_importing_details">جارٍ قراءة تفاصيل الوظيفة…</string>
+    <string name="ats_preparing_workspace">جارٍ تجهيز مساحة العمل…</string>
     <string name="ats_invalid_shared_link">لا يحتوي المحتوى المشارك على رابط وظيفة HTTPS صالح.</string>
     <string name="ats_cv_updated">تمت مزامنة سيرتك الذاتية وأصبحت جاهزة للمقارنة.</string>
     <string name="ats_back">رجوع</string>
@@ -76,4 +78,7 @@
     <string name="ats_optimized_text">نص السيرة الذاتية المحسّن</string>
     <string name="ats_recommended_tracks">المسارات المقترحة</string>
     <string name="ats_copy_optimized_cv">نسخ السيرة الذاتية المحسّنة</string>
+    <string name="ats_list_item">• %1$s</string>
+    <string name="ats_expanded">موسّع</string>
+    <string name="ats_collapsed">مطوي</string>
 </resources>
