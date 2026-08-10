@@ -45,6 +45,8 @@ fun RootNavDisplay(
     startRoute: Route,
     isOnline: Boolean,
     isLoggedIn: Boolean?,
+    pendingSharedText: String?,
+    onSharedTextConsumed: () -> Unit,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -236,6 +238,8 @@ fun RootNavDisplay(
                                 Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
+                        pendingSharedText = pendingSharedText,
+                        onSharedTextConsumed = onSharedTextConsumed,
                     )
                 }
                 entry<Route.Onboarding> {

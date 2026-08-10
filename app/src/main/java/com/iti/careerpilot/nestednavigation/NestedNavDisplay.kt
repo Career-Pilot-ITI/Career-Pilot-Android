@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -43,10 +44,22 @@ fun NestedNavDisplay(
     openEditProfile: (ProfileEditSection) -> Unit,
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
+    pendingSharedText: String?,
+    onSharedTextConsumed: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
     var atsShowsBottomBar by rememberSaveable { mutableStateOf(true) }
+
+    LaunchedEffect(pendingSharedText) {
+        if (pendingSharedText != null) {
+            nestedBackStack.apply {
+                clear()
+                add(Route.NestedNav.Home)
+                add(Route.NestedNav.Ats)
+            }
+        }
+    }
 
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
@@ -123,8 +136,8 @@ fun NestedNavDisplay(
                 }
                 entry<Route.NestedNav.Ats> {
                     AtsNavDisplay(
-                        initialSharedText = null,
-                        onSharedTextConsumed = {},
+                        initialSharedText = pendingSharedText,
+                        onSharedTextConsumed = onSharedTextConsumed,
                         onBottomBarVisibilityChanged = { atsShowsBottomBar = it },
                         openCoinsPaywall = { openPaywall(true) },
                         openPracticeSession = { trackId -> openPracticeSession(trackId, null) },

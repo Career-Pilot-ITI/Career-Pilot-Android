@@ -12,6 +12,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.common.network.NetworkMonitor
+import com.iti.careerpilot.share.toPendingSharedText
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,16 +25,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        viewModel.acceptSharedText(intent.toPendingSharedText())
         enableEdgeToEdge()
         setContent {
             val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
             val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
+            val pendingSharedText by viewModel.pendingSharedText.collectAsStateWithLifecycle()
 
             CareerPilotTheme {
                 RootNavDisplay(
                     startRoute = Route.Splash,
                     isOnline = isOnline,
                     isLoggedIn = isLoggedIn,
+                    pendingSharedText = pendingSharedText,
+                    onSharedTextConsumed = viewModel::consumeSharedText,
                 )
             }
         }
@@ -42,5 +47,6 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        viewModel.acceptSharedText(intent.toPendingSharedText())
     }
 }
