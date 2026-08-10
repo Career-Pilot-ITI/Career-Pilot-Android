@@ -57,4 +57,5 @@ dependencies {
     implementation(project(":feature:home"))
     implementation(project(":feature:practicesession"))
     implementation(project(":feature:reports"))
+    implementation(project(":feature:ats"))
 }

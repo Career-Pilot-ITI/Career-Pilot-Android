@@ -126,6 +126,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.reports.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.ReportsFeatureConvention"
         }
+        register("careerPilotFeatureAts") {
+            id = libs.plugins.careerpilot.feature.ats.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.features.AtsFeatureConventionPlugin"
+        }
         register("whisperModule") {
             id = libs.plugins.careerpilot.module.whisper.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.WhisperModuleConventionPlugin"
