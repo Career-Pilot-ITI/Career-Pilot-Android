@@ -502,6 +502,8 @@ class PracticeSessionViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isUploadingAndTranscribingAudio = true,
+                    isSendingAnswer = false,
+                    isLoadingSession = false,
                     isEmptyAnswer = isEmptyAnswer,
                     uploadProgress = 0,
                 )
@@ -530,12 +532,24 @@ class PracticeSessionViewModel @Inject constructor(
                             uploadAnswer(sessionId, audioAttachment.url, safeTranscript)
                         }
                         .onError { error ->
-                            _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                            _state.update {
+                                it.copy(
+                                    isUploadingAndTranscribingAudio = false,
+                                    isSendingAnswer = false,
+                                    isLoadingSession = false,
+                                )
+                            }
                             _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
                         }
                 }
                 .onFailure { _ ->
-                    _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                    _state.update {
+                        it.copy(
+                            isUploadingAndTranscribingAudio = false,
+                            isSendingAnswer = false,
+                            isLoadingSession = false,
+                        )
+                    }
                     _event.send(PracticeSessionEvent.ShowError(TranscriptionError.UNKNOWN.toUIText()))
                 }
         }
@@ -573,7 +587,8 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update {
             it.copy(
                 isUploadingAndTranscribingAudio = false,
-                isSendingAnswer = true
+                isSendingAnswer = true,
+                isLoadingSession = false,
             )
         }
         val elapsedSeconds = sessionStartedAtMs?.let {
@@ -600,7 +615,9 @@ class PracticeSessionViewModel @Inject constructor(
         }.onError {
             _state.update {
                 it.copy(
-                    isSendingAnswer = false
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
                 )
             }
             _event.send(PracticeSessionEvent.ShowError(it.toUIText()))
@@ -611,7 +628,11 @@ class PracticeSessionViewModel @Inject constructor(
         sessionId: Long,
         answerResponse: AnswerResponse
     ) {
-        if (answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true)) {
+        val isReadyToComplete = answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true) ||
+                answerResponse.sessionStatus.contains("COMPLETED", ignoreCase = true) ||
+                (answerResponse.nextQuestion == null && answerResponse.score != null)
+
+        if (isReadyToComplete) {
             // Finalize body language if running
             val metricsJson = if (bodyLanguageAnalyzer.isRunning) {
                 bodyLanguageAnalyzer.stop()
@@ -622,15 +643,27 @@ class PracticeSessionViewModel @Inject constructor(
             timerJob?.cancel()
             savedStateHandle.remove<Long>(KEY_ACTIVE_SESSION_ID)
             sessionStartedAtMs = null
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
-            return
-        }
-        answerResponse.nextQuestion?.let {
             _state.update {
                 it.copy(
                     isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                    recordedAudioPath = null
+                )
+            }
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
+            return
+        }
+
+        val nextQuestion = answerResponse.nextQuestion
+        if (nextQuestion != null) {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
                     currentSession = it.currentSession?.copy(
-                        currentQuestion = answerResponse.nextQuestion
+                        currentQuestion = nextQuestion
                     ),
                     recordedAudioPath = null,
                     transcription = null,
@@ -649,6 +682,14 @@ class PracticeSessionViewModel @Inject constructor(
                         showQuestionCard = true
                     )
                 }
+            }
+        } else {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                )
             }
         }
     }
