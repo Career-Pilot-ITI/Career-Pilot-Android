@@ -73,4 +73,7 @@
     <string name="ats_copy">Copy</string>
     <string name="ats_approach_tips">Approach tips</string>
     <string name="ats_send_email">Send Email</string>
+    <string name="ats_optimized_text">Optimized CV text</string>
+    <string name="ats_recommended_tracks">Recommended tracks</string>
+    <string name="ats_copy_optimized_cv">Copy Optimized CV</string>
 </resources>

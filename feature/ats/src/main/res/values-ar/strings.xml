@@ -73,4 +73,7 @@
     <string name="ats_copy">نسخ</string>
     <string name="ats_approach_tips">نصائح التقديم</string>
     <string name="ats_send_email">إرسال بريد إلكتروني</string>
+    <string name="ats_optimized_text">نص السيرة الذاتية المحسّن</string>
+    <string name="ats_recommended_tracks">المسارات المقترحة</string>
+    <string name="ats_copy_optimized_cv">نسخ السيرة الذاتية المحسّنة</string>
 </resources>

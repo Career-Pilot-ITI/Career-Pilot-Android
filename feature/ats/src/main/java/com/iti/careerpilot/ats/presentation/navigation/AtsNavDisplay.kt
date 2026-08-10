@@ -20,6 +20,7 @@ import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterRoot
+import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvRoot
 
 @Composable
 fun AtsNavDisplay(
@@ -78,8 +79,12 @@ fun AtsNavDisplay(
                     openCoinsPaywall = openCoinsPaywall,
                 )
             }
-            entry<AtsRoute.OptimizedCv> {
-                AtsPlaceholder(title = stringResource(R.string.optimized_cv))
+            entry<AtsRoute.OptimizedCv> { route ->
+                OptimizedCvRoot(
+                    workspaceId = route.workspaceId,
+                    onBack = { backStack.removeLastOrNull() },
+                    openCoinsPaywall = openCoinsPaywall,
+                )
             }
         },
     )
