@@ -64,4 +64,13 @@
     <string name="ats_coins_used">تم استخدام %1$d عملات</string>
     <string name="ats_group_count">%1$s · %2$d</string>
     <string name="ats_lowest">الأدنى</string>
+    <string name="ats_cover_letter_email_subject">خطاب تقديم لوظيفة</string>
+    <string name="ats_copied">تم النسخ إلى الحافظة.</string>
+    <string name="ats_no_email_client">لا يتوفر تطبيق بريد إلكتروني.</string>
+    <string name="ats_generation_interrupted">ربما تمت مقاطعة عملية الإنشاء السابقة. تم تحديث حالة مساحة العمل؛ أعد المحاولة فقط إذا اخترت ذلك.</string>
+    <string name="ats_done">تم</string>
+    <string name="ats_edit">تعديل</string>
+    <string name="ats_copy">نسخ</string>
+    <string name="ats_approach_tips">نصائح التقديم</string>
+    <string name="ats_send_email">إرسال بريد إلكتروني</string>
 </resources>

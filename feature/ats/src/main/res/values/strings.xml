@@ -64,4 +64,13 @@
     <string name="ats_coins_used">%1$d coins used</string>
     <string name="ats_group_count">%1$s · %2$d</string>
     <string name="ats_lowest">LOWEST</string>
+    <string name="ats_cover_letter_email_subject">Job application cover letter</string>
+    <string name="ats_copied">Copied to clipboard.</string>
+    <string name="ats_no_email_client">No email app is available.</string>
+    <string name="ats_generation_interrupted">The previous generation may have been interrupted. Workspace state was refreshed; retry only if you choose.</string>
+    <string name="ats_done">Done</string>
+    <string name="ats_edit">Edit</string>
+    <string name="ats_copy">Copy</string>
+    <string name="ats_approach_tips">Approach tips</string>
+    <string name="ats_send_email">Send Email</string>
 </resources>

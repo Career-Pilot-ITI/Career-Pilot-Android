@@ -19,6 +19,7 @@ import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
+import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterRoot
 
 @Composable
 fun AtsNavDisplay(
@@ -70,8 +71,12 @@ fun AtsNavDisplay(
                     openPracticeSession = openPracticeSession,
                 )
             }
-            entry<AtsRoute.CoverLetter> {
-                AtsPlaceholder(title = stringResource(R.string.cover_letter))
+            entry<AtsRoute.CoverLetter> { route ->
+                CoverLetterRoot(
+                    workspaceId = route.workspaceId,
+                    onBack = { backStack.removeLastOrNull() },
+                    openCoinsPaywall = openCoinsPaywall,
+                )
             }
             entry<AtsRoute.OptimizedCv> {
                 AtsPlaceholder(title = stringResource(R.string.optimized_cv))
