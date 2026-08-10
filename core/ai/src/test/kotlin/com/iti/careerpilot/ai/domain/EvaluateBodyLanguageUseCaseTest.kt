@@ -43,10 +43,12 @@ class EvaluateBodyLanguageUseCaseTest {
         assertEquals(82, result.overallScore)
         assertEquals(1, callCount.get())
         assertEquals(result, cache.get(100L))
+        assertEquals(Pair(result, null), cache.getEvaluation(100L))
+        assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(100L))
     }
 
     @Test
-    fun `returns cached result on subsequent calls without re-evaluating`() = runTest {
+    fun `returns cached result on subsequent calls without re-evaluating and preserves fallback reason`() = runTest {
         val callCount = AtomicInteger(0)
         val generator = AiContentGenerator {
             callCount.incrementAndGet()
@@ -55,18 +57,24 @@ class EvaluateBodyLanguageUseCaseTest {
         val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, Dispatchers.Unconfined)
         val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { true }
 
-        // Prepopulate cache
-        cache.put(200L, FakeBodyLanguageData.sampleEvaluation)
+        // Prepopulate cache with fallback reason and metrics
+        cache.put(
+            sessionId = 200L,
+            evaluation = FakeBodyLanguageData.sampleEvaluation,
+            fallbackReason = FallbackReason.TIMEOUT,
+            metrics = FakeBodyLanguageData.sampleMetrics,
+        )
 
         val (result, fallback) = useCase.invoke(200L, FakeBodyLanguageData.sampleMetrics)
 
         assertEquals(FakeBodyLanguageData.sampleEvaluation, result)
-        assertNull(fallback)
+        assertEquals(FallbackReason.TIMEOUT, fallback)
         assertEquals(0, callCount.get())
+        assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(200L))
     }
 
     @Test
-    fun `kill switch disabled produces fallback and caches result`() = runTest {
+    fun `kill switch disabled produces fallback and caches result with fallback reason`() = runTest {
         val generator = AiContentGenerator { FakeBodyLanguageData.sampleEvaluationJson }
         val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, Dispatchers.Unconfined)
         val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { false }
@@ -76,5 +84,12 @@ class EvaluateBodyLanguageUseCaseTest {
         assertEquals(FallbackReason.KILL_SWITCH_DISABLED, fallback)
         assertNotNull(result)
         assertEquals(result, cache.get(300L))
+        assertEquals(Pair(result, FallbackReason.KILL_SWITCH_DISABLED), cache.getEvaluation(300L))
+        assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(300L))
+
+        // Subsequent call should return cached fallback reason
+        val (cachedResult, cachedFallback) = useCase.invoke(300L, FakeBodyLanguageData.sampleMetrics)
+        assertEquals(result, cachedResult)
+        assertEquals(FallbackReason.KILL_SWITCH_DISABLED, cachedFallback)
     }
 }

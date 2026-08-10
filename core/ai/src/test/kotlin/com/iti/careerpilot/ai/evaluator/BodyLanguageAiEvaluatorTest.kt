@@ -40,6 +40,42 @@ class BodyLanguageAiEvaluatorTest {
     }
 
     @Test
+    fun `AI response with leading and trailing whitespace and markdown fences parses correctly`() = runTest {
+        val wrappedJson = "  \n\n  ```json\n${FakeBodyLanguageData.sampleEvaluationJson}\n```\n  \n"
+        val generator = AiContentGenerator { wrappedJson }
+        val evaluator = BodyLanguageAiEvaluator(
+            contentGenerator = generator,
+            fallbackEngine = fallbackEngine,
+            ioDispatcher = Dispatchers.Unconfined,
+        )
+
+        val (evaluation, fallbackReason) = evaluator.evaluate(FakeBodyLanguageData.sampleMetrics)
+
+        assertNull(fallbackReason)
+        assertNotNull(evaluation)
+        assertEquals(82, evaluation.overallScore)
+        assertEquals(80, evaluation.eyeContact.score)
+    }
+
+    @Test
+    fun `AI response wrapped in raw markdown fence without json tag parses correctly`() = runTest {
+        val wrappedJson = " \n```\n${FakeBodyLanguageData.sampleEvaluationJson}\n``` "
+        val generator = AiContentGenerator { wrappedJson }
+        val evaluator = BodyLanguageAiEvaluator(
+            contentGenerator = generator,
+            fallbackEngine = fallbackEngine,
+            ioDispatcher = Dispatchers.Unconfined,
+        )
+
+        val (evaluation, fallbackReason) = evaluator.evaluate(FakeBodyLanguageData.sampleMetrics)
+
+        assertNull(fallbackReason)
+        assertNotNull(evaluation)
+        assertEquals(82, evaluation.overallScore)
+        assertEquals(80, evaluation.eyeContact.score)
+    }
+
+    @Test
     fun `kill switch disabled immediately returns heuristic fallback`() = runTest {
         val generator = AiContentGenerator { FakeBodyLanguageData.sampleEvaluationJson }
         val evaluator = BodyLanguageAiEvaluator(

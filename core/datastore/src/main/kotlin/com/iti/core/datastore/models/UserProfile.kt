@@ -16,6 +16,9 @@ data class UserProfile(
         get() = onboardingCompleted ?: personal.displayName.isNotBlank()
 }
 
+fun UserProfile.isPaidSubscriber(): Boolean =
+    account.subscriptionTier.uppercase() in setOf("PLUS", "PRO", "MAX")
+
 @Serializable
 data class AccountInfo(
     val username: String = "",

@@ -1,6 +1,7 @@
 package com.iti.careerpilot.ai.cache
 
 import com.iti.careerpilot.ai.testing.FakeBodyLanguageData
+import com.iti.core.model.bodylanguage.FallbackReason
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -30,8 +31,39 @@ class InMemorySessionCacheTest {
     }
 
     @Test
+    fun `put with fallback reason and metrics returns them in getEvaluation and getMetrics`() {
+        val eval = FakeBodyLanguageData.sampleEvaluation
+        val metrics = FakeBodyLanguageData.sampleMetrics
+        cache.put(100L, eval, FallbackReason.OFFLINE, metrics)
+
+        val cachedEvaluation = cache.getEvaluation(100L)
+        assertNotNull(cachedEvaluation)
+        assertEquals(eval, cachedEvaluation?.first)
+        assertEquals(FallbackReason.OFFLINE, cachedEvaluation?.second)
+
+        val cachedMetrics = cache.getMetrics(100L)
+        assertNotNull(cachedMetrics)
+        assertEquals(metrics, cachedMetrics)
+    }
+
+    @Test
+    fun `putMetrics updates metrics on existing cached session`() {
+        val eval = FakeBodyLanguageData.sampleEvaluation
+        val metrics = FakeBodyLanguageData.sampleMetrics
+        cache.put(100L, eval)
+
+        assertNull(cache.getMetrics(100L))
+
+        cache.putMetrics(100L, metrics)
+        assertEquals(metrics, cache.getMetrics(100L))
+        assertEquals(eval, cache.get(100L))
+    }
+
+    @Test
     fun `get returns null when key does not exist`() {
         assertNull(cache.get(999L))
+        assertNull(cache.getEvaluation(999L))
+        assertNull(cache.getMetrics(999L))
     }
 
     @Test

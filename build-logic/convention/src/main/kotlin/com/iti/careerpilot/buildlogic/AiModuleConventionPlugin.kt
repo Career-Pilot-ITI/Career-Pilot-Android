@@ -12,7 +12,6 @@ class AiModuleConventionPlugin : Plugin<Project> {
         pluginManager.apply("careerpilot.android.hilt")
         pluginManager.apply("careerpilot.testing")
         pluginManager.apply("careerpilot.kotlin.serialization")
-        pluginManager.apply("careerpilot.android.ktor")
 
         extensions.configure<LibraryExtension> {
             namespace = "com.iti.careerpilot.ai"

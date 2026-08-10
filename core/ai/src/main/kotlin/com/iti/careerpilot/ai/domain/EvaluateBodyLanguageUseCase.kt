@@ -28,14 +28,19 @@ class EvaluateBodyLanguageUseCase @Inject constructor(
         sessionId: Long,
         metrics: BodyLanguageMetrics,
     ): Pair<BodyLanguageEvaluation, FallbackReason?> {
-        val cached = cache.get(sessionId)
+        val cached = cache.getEvaluation(sessionId)
         if (cached != null) {
-            return Pair(cached, null)
+            return cached
         }
 
         val isAiEnabled = featureToggle.isAiEvaluationEnabled()
         val result = evaluator.evaluate(metrics, isAiEnabled)
-        cache.put(sessionId, result.first)
+        cache.put(
+            sessionId = sessionId,
+            evaluation = result.first,
+            fallbackReason = result.second,
+            metrics = metrics,
+        )
         return result
     }
 }

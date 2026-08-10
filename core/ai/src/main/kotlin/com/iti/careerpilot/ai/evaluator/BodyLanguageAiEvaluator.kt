@@ -54,7 +54,7 @@ class BodyLanguageAiEvaluator @Inject constructor(
                 val responseText = contentGenerator.generateContent(prompt)
 
                 // Clean potential markdown wrappers if model emitted them
-                val cleanedJson = responseText
+                val cleanedJson = responseText.trim()
                     .removePrefix("```json")
                     .removePrefix("```")
                     .removeSuffix("```")

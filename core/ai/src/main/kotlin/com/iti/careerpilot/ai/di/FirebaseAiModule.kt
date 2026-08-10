@@ -33,6 +33,7 @@ abstract class FirebaseAiModule {
                 minimumFetchIntervalInSeconds = 3600L
             }
             config.setConfigSettingsAsync(settings)
+            config.setDefaultsAsync(mapOf("body_language_ai_enabled" to true))
             return config
         }
 
