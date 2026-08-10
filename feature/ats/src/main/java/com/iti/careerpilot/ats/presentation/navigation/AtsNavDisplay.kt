@@ -16,6 +16,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
 
 @Composable
 fun AtsNavDisplay(
@@ -42,7 +43,13 @@ fun AtsNavDisplay(
         ),
         entryProvider = entryProvider {
             entry<AtsRoute.Entry> {
-                AtsPlaceholder(title = stringResource(R.string.ats_job_match))
+                AtsEntryRoot(
+                    initialSharedText = initialSharedText,
+                    onSharedTextConsumed = onSharedTextConsumed,
+                    onWorkspaceImported = { workspaceId ->
+                        backStack.add(AtsRoute.JobDetails(workspaceId))
+                    },
+                )
             }
             entry<AtsRoute.JobDetails> { route ->
                 AtsPlaceholder(

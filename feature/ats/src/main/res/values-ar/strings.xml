@@ -5,4 +5,20 @@
     <string name="cover_letter">خطاب التقديم</string>
     <string name="optimized_cv">السيرة الذاتية المحسّنة</string>
     <string name="continue_action">متابعة</string>
+    <string name="ats_compare_title">قارن سيرتك بالوظيفة</string>
+    <string name="ats_compare_subtitle">ألصق رابط إعلان وظيفة وسنقيّم مدى تطابق سيرتك معه.</string>
+    <string name="ats_job_posting_link">رابط إعلان الوظيفة</string>
+    <string name="ats_job_url_hint">https://linkedin.com/jobs/view/…</string>
+    <string name="ats_supported_job_sites">يدعم LinkedIn وIndeed وWuzzuf وGlassdoor وروابط صفحات الوظائف المباشرة.</string>
+    <string name="ats_cv_on_file">السيرة الذاتية الحالية</string>
+    <string name="ats_current_cv">السيرة الذاتية الحالية</string>
+    <string name="ats_cv_size">%1$d كيلوبايت · متزامنة</string>
+    <string name="ats_replace_cv">استبدال</string>
+    <string name="ats_upload_your_cv">ارفع سيرتك الذاتية</string>
+    <string name="ats_pdf_limit">PDF · بحد أقصى 10 ميبيبايت</string>
+    <string name="ats_share_tip">أسرع: من LinkedIn أو أي تطبيق وظائف اضغط مشاركة ← CareerPilot وسيُلتقط الرابط تلقائيًا.</string>
+    <string name="ats_compare_now">قارن الآن</string>
+    <string name="ats_importing_job">جارٍ استيراد الوظيفة…</string>
+    <string name="ats_invalid_shared_link">لا يحتوي المحتوى المشارك على رابط وظيفة HTTPS صالح.</string>
+    <string name="ats_cv_updated">تمت مزامنة سيرتك الذاتية وأصبحت جاهزة للمقارنة.</string>
 </resources>
