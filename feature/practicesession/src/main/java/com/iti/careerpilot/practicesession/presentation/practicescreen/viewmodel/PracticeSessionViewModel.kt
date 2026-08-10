@@ -19,6 +19,7 @@ import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
 import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
 import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
 import com.iti.careerpilot.practicesession.domain.models.Session
+import com.iti.careerpilot.practicesession.domain.recording.RecordingAnswerClassifier
 import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
 import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
@@ -34,6 +35,7 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,28 +56,14 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+
 import kotlin.time.Duration
-import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
-import com.iti.careerpilot.practicesession.domain.models.Session
-import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
-import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
-import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
-import com.iti.common.error.NetworkError
-import com.iti.common.error.TranscriptionError
-import com.iti.common.result.onError
-import com.iti.common.result.onSuccess
-import com.iti.common.util.toUIText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sin
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
+
 
 const val QUESTION_COUNT = 10
 const val SESSION_DURATION = 20
@@ -634,7 +622,7 @@ class PracticeSessionViewModel @Inject constructor(
             timerJob?.cancel()
             savedStateHandle.remove<Long>(KEY_ACTIVE_SESSION_ID)
             sessionStartedAtMs = null
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
             return
         }
         answerResponse.nextQuestion?.let {
