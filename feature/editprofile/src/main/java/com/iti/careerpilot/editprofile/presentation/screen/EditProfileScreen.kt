@@ -372,7 +372,7 @@ fun EditProfileScreen(
                     }
                 }
 
-                if (state.tracks.isNotEmpty()) {
+                if ((section == ProfileEditSection.ALL || section == ProfileEditSection.CAREER) && state.tracks.isNotEmpty()) {
                     item {
                         Text(
                             text = stringResource(R.string.track),

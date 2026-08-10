@@ -48,7 +48,15 @@ class ProfileViewModel @Inject constructor(
     val events = _events.receiveAsFlow()
 
     init {
-        refreshProfile()
+        viewModelScope.launch {
+            // Always ensure local avatar/CV files exist (re-download from server URLs if missing).
+            // This is a fast, local-first check — it only makes network calls if files are absent.
+            profileRepo.downloadMissingFiles()
+        }
+        if (profileRepo.userProfile.value.id == 0L) {
+            // No cached data yet — do a full network refresh (which also downloads files).
+            refreshProfile()
+        }
     }
 
     fun onAction(action: ProfileAction) {
