@@ -150,7 +150,7 @@ class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSourc
                         userTranscript = "This is my fake answer for $questionText. I hope it sounds professional and insightful.",
                         durationMs = 45000L,
                         speechRateWpm = 120.0,
-                        avgPauseMs = 300,
+                        avgPauseMs = 300.0,
                         silenceRatio = 0.1,
                         createdAt = "2023-10-27T10:${10 + index}:00Z",
                         completedAt = "2023-10-27T10:${10 + index}:45Z",
