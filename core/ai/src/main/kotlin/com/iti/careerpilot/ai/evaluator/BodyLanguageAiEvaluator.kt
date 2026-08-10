@@ -64,15 +64,35 @@ class BodyLanguageAiEvaluator @Inject constructor(
                 Pair(evaluation, null)
             }
         } catch (e: TimeoutCancellationException) {
+            safeLogW("BodyLanguageAI", "AI evaluation timed out (>20s), using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.TIMEOUT)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: SerializationException) {
+            safeLogE("BodyLanguageAI", "AI evaluation failed to parse JSON, using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.PARSE_FAILURE)
         } catch (e: IOException) {
+            safeLogE("BodyLanguageAI", "AI evaluation network error: ${e.message}, using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.OFFLINE)
         } catch (e: Exception) {
+            safeLogE("BodyLanguageAI", "AI evaluation unexpected error: ${e.message}, using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.OFFLINE)
+        }
+    }
+
+    private fun safeLogW(tag: String, msg: String, tr: Throwable? = null) {
+        try {
+            android.util.Log.w(tag, msg, tr)
+        } catch (_: Throwable) {
+            // No-op for unit tests where android.util.Log is unmocked
+        }
+    }
+
+    private fun safeLogE(tag: String, msg: String, tr: Throwable? = null) {
+        try {
+            android.util.Log.e(tag, msg, tr)
+        } catch (_: Throwable) {
+            // No-op for unit tests where android.util.Log is unmocked
         }
     }
 }
