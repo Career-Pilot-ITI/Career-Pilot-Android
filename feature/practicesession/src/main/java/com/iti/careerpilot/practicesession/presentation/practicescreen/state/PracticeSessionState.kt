@@ -19,6 +19,7 @@ data class PracticeSessionState(
     val recordingDuration: Duration = Duration.ZERO,
     val isUploadingAndTranscribingAudio: Boolean = false,
     val isSendingAnswer: Boolean = false,
+    val isEmptyAnswer: Boolean = false,
     val uploadProgress: Int = 0,
     val playbackDurationMs: Long = 0,
     val playbackPositionMs: Long = 0,

@@ -65,7 +65,14 @@
     <string name="no_results_found">لا يوجد نتائج</string>
     <string name="error_creating_results">حدث خطأ أثناء إنشاء نتائجك. يرجى المحاولة مرة أخرى.</string>
     <string name="no_transcript_available">لا يوجد نص متاح</string>
-    <string name="loading_session">تحميل الجلسة</string>
+    <string name="loading_session">نجهّز جلستك</string>
+    <string name="loading_session_message">لحظات قليلة، نستعيد جلسة التدريب ونحضّر لك السؤال التالي.</string>
+    <string name="processing_answer_title">رائع، نجهّز إجابتك</string>
+    <string name="submitting_answer_title">أوشكنا على الانتهاء</string>
+    <string name="uploading_recording_progress">نرفع تسجيلك… %1$d%%</string>
+    <string name="transcribing_on_device">نحوّل صوتك إلى نص على جهازك. لن يستغرق الأمر سوى لحظات.</string>
+    <string name="empty_answer_detected">لم نسمع إجابة هذه المرة، لذلك سنسجّل السؤال كـ «بدون إجابة» ونكمل.</string>
+    <string name="submitting_answer_message">إجابتك جاهزة. نحفظها الآن ونحضّر لك السؤال التالي.</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="more_details">المزيد من التفاصيل</string>
 
@@ -78,4 +85,4 @@
     <string name="enable_body_language">حسنًا، فعّل</string>
     <string name="camera_preview">معاينة الكاميرا</string>
     <string name="show_camera_during_session">إظهار معاينة الكاميرا أثناء الجلسة</string>
-</resources>
+</resources>

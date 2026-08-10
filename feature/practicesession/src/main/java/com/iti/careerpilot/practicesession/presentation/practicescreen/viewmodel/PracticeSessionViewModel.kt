@@ -1,14 +1,15 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel
 
+import android.os.SystemClock
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
-import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
@@ -51,6 +52,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
+import com.iti.careerpilot.practicesession.domain.models.Session
+import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
+import com.iti.common.error.NetworkError
+import com.iti.common.error.TranscriptionError
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
+import com.iti.common.util.toUIText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sin
@@ -65,6 +83,7 @@ const val WAVE_BAR_COUNT = 32
 
 @HiltViewModel
 class PracticeSessionViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val sessionRepo: SessionRepo,
     private val voiceRecorder: VoiceRecorder,
     private val audioPlayer: AudioPlayer,
@@ -75,10 +94,25 @@ class PracticeSessionViewModel @Inject constructor(
     private val userProfileRepo: UserProfileRepo,
 ) : ViewModel() {
 
+    private companion object {
+        const val TAG = "PracticeSessionVM"
+        const val KEY_ACTIVE_SESSION_ID = "practice_active_session_id"
+        const val KEY_SESSION_STARTED_AT_MS = "practice_session_started_at_ms"
+        const val MAX_RESTORABLE_SESSION_AGE_MS = 24L * 60L * 60L * 1000L
+    }
+
     private var hasLoadedInitialData = false
     private var autoStopTriggered = false
 
-    private var sessionStartedAtMs: Long? = null
+    private var sessionStartedAtMs: Long?
+        get() = savedStateHandle[KEY_SESSION_STARTED_AT_MS]
+        set(value) {
+            if (value == null) {
+                savedStateHandle.remove<Long>(KEY_SESSION_STARTED_AT_MS)
+            } else {
+                savedStateHandle[KEY_SESSION_STARTED_AT_MS] = value
+            }
+        }
     private var timerJob: Job? = null
     private var volumeBarIdCounter = 0L
     private var lastWaveUpdateMs = 0L
@@ -138,7 +172,7 @@ class PracticeSessionViewModel @Inject constructor(
                     it.copy(
                         isRecording = details.isRecording,
                         recordedAudioPath = details.filePath,
-                        amplitudes = normalizedAmps,
+                        amplitudes = details.amplitudes,
                         volumeBars = currentBars,
                         recordingDuration = details.duration
                     )
@@ -182,12 +216,16 @@ class PracticeSessionViewModel @Inject constructor(
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (true) {
+                refreshSessionTimer()
                 delay(1000.milliseconds)
-                _state.update {
-                    it.copy(totalSessionDuration = it.totalSessionDuration + 1.seconds)
-                }
             }
         }
+    }
+
+    private fun refreshSessionTimer() {
+        val startedAt = sessionStartedAtMs ?: return
+        val elapsedMs = (SystemClock.elapsedRealtime() - startedAt).coerceAtLeast(0L)
+        _state.update { it.copy(totalSessionDuration = elapsedMs.milliseconds) }
     }
 
     private fun observePlayer() {
@@ -315,6 +353,8 @@ class PracticeSessionViewModel @Inject constructor(
             it.copy(
                 recordedAudioPath = null,
                 transcription = null,
+                isEmptyAnswer = false,
+                uploadProgress = 0,
                 recordingDuration = Duration.ZERO,
                 amplitudes = emptyList(),
                 volumeBars = createInitialVolumeBars(),
@@ -325,10 +365,6 @@ class PracticeSessionViewModel @Inject constructor(
 
     private fun startRecordingAnswer() {
         stopReadingQuestion()
-        if (sessionStartedAtMs == null) {
-            sessionStartedAtMs = System.currentTimeMillis()
-            startSessionTimer()
-        }
         voiceRecorder.start()
     }
 
@@ -360,6 +396,13 @@ class PracticeSessionViewModel @Inject constructor(
     private fun createNewSession(trackId: Long, isVideoSession: Boolean = false) {
         _state.update { it.copy(isVideoSessionSelected = isVideoSession) }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
+
+        val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
+        if (restoredSessionId != null && restoredSessionId > 0L) {
+            restartOldSession(restoredSessionId)
+            return
+        }
+
         loadSession {
             sessionRepo.createNewSession(
                 CreateSessionRequest(
@@ -391,6 +434,12 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun handleSessionLoadSuccess(session: Session) {
+        savedStateHandle[KEY_ACTIVE_SESSION_ID] = session.sessionId
+        if (sessionStartedAtMs == null) {
+            sessionStartedAtMs = resolveSessionStartMs(session.startedAt)
+        }
+        startSessionTimer()
+
         _state.update {
             it.copy(
                 isLoadingSession = false,
@@ -398,12 +447,15 @@ class PracticeSessionViewModel @Inject constructor(
                 sessionId = session.sessionId,
                 recordedAudioPath = null,
                 transcription = null,
+                isEmptyAnswer = false,
+                uploadProgress = 0,
                 recordingDuration = Duration.ZERO,
                 amplitudes = emptyList(),
                 volumeBars = createInitialVolumeBars(),
                 showQuestionCard = true
             )
         }
+        refreshSessionTimer()
         if (_state.value.autoReadQuestion) {
             readQuestion()
         }
@@ -411,6 +463,20 @@ class PracticeSessionViewModel @Inject constructor(
             checkBodyLanguageAccess()
         } else {
             _state.update { it.copy(bodyLanguageEnabled = false) }
+        }
+    }
+
+    private fun resolveSessionStartMs(serverStartedAt: String): Long {
+        val nowWallClock = System.currentTimeMillis()
+        val nowElapsedRealtime = SystemClock.elapsedRealtime()
+        val serverStart = runCatching { Instant.parse(serverStartedAt).toEpochMilli() }.getOrNull()
+            ?: return nowElapsedRealtime
+        val age = nowWallClock - serverStart
+
+        return if (age in 0..MAX_RESTORABLE_SESSION_AGE_MS) {
+            (nowElapsedRealtime - age).coerceAtLeast(0L)
+        } else {
+            nowElapsedRealtime
         }
     }
 
@@ -435,6 +501,10 @@ class PracticeSessionViewModel @Inject constructor(
         val audioPath = _state.value.recordedAudioPath ?: return
         val session = _state.value.currentSession ?: return
         val sessionId = session.sessionId
+        val isEmptyAnswer = RecordingAnswerClassifier.isLikelyEmpty(
+            durationMs = _state.value.recordingDuration.inWholeMilliseconds,
+            rawAmplitudes = _state.value.amplitudes,
+        )
 
         stopReadingQuestion()
         voiceRecorder.stop()
@@ -443,22 +513,33 @@ class PracticeSessionViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isUploadingAndTranscribingAudio = true
+                    isUploadingAndTranscribingAudio = true,
+                    isEmptyAnswer = isEmptyAnswer,
+                    uploadProgress = 0,
                 )
             }
 
             val uploadDeferred = async { uploadAudio(audioPath) }
-            val transcribeDeferred = async { transcribeAudio(audioPath) }
+            val transcribeDeferred = if (isEmptyAnswer) {
+                Log.d(TAG, "No meaningful speech detected; skipping local Whisper transcription")
+                null
+            } else {
+                async { transcribeAudio(audioPath) }
+            }
 
             val uploadResult = uploadDeferred.await()
-            val transcriptionResult = transcribeDeferred.await()
+            val transcriptionResult = transcribeDeferred?.await()
+                ?: Result.success(RecordingAnswerClassifier.NO_ANSWER_TRANSCRIPT)
 
             transcriptionResult
                 .onSuccess { transcript ->
-                    _state.update { it.copy(transcription = transcript) }
+                    val safeTranscript = transcript.ifBlank {
+                        RecordingAnswerClassifier.NO_ANSWER_TRANSCRIPT
+                    }
+                    _state.update { it.copy(transcription = safeTranscript) }
                     uploadResult
                         .onSuccess { audioAttachment ->
-                            uploadAnswer(sessionId, audioAttachment.url, transcript)
+                            uploadAnswer(sessionId, audioAttachment.url, safeTranscript)
                         }
                         .onError { error ->
                             _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
@@ -472,17 +553,29 @@ class PracticeSessionViewModel @Inject constructor(
         }
     }
 
-    private suspend fun uploadAudio(audioPath: String): CareerPilotResult<AudioAttachment, NetworkError> =
-        sessionRepo.uploadAudio(File(audioPath)) { progress ->
+    private suspend fun uploadAudio(audioPath: String): CareerPilotResult<AudioAttachment, NetworkError> {
+        val file = File(audioPath)
+        val startedAt = SystemClock.elapsedRealtime()
+        val result = sessionRepo.uploadAudio(file) { progress ->
             _state.update { it.copy(uploadProgress = progress) }
         }
+        Log.d(
+            TAG,
+            "Audio upload finished in ${SystemClock.elapsedRealtime() - startedAt} ms; size=${file.length()} bytes",
+        )
+        return result
+    }
 
-    private suspend fun transcribeAudio(audioPath: String): Result<String> =
-        withContext(Dispatchers.Default) {
-            whisperEngine.transcribe(audioPath).onSuccess {
-                Log.d("CareerPilot", "transcription success: $it")
-            }
+    private suspend fun transcribeAudio(audioPath: String): Result<String> {
+        val startedAt = SystemClock.elapsedRealtime()
+        val result = withContext(Dispatchers.Default) {
+            whisperEngine.transcribe(audioPath)
         }
+        Log.d(TAG, "Local transcription finished in ${SystemClock.elapsedRealtime() - startedAt} ms")
+        return result.onSuccess {
+            Log.d(TAG, "Transcription success: $it")
+        }
+    }
 
     private suspend fun uploadAnswer(
         sessionId: Long,
@@ -496,9 +589,10 @@ class PracticeSessionViewModel @Inject constructor(
             )
         }
         val elapsedSeconds = sessionStartedAtMs?.let {
-            ((System.currentTimeMillis() - it) / 1000).toInt()
+            ((SystemClock.elapsedRealtime() - it) / 1000).toInt()
         } ?: 0
 
+        val submitStartedAt = SystemClock.elapsedRealtime()
         sessionRepo.submitAnswer(
             sessionId = sessionId,
             request = AnswerRequest(
@@ -508,7 +602,9 @@ class PracticeSessionViewModel @Inject constructor(
                 sessionElapsedSeconds = elapsedSeconds,
                 words = emptyList()
             )
-        ).onSuccess { response ->
+        ).also {
+            Log.d(TAG, "Answer submit finished in ${SystemClock.elapsedRealtime() - submitStartedAt} ms")
+        }.onSuccess { response ->
             handleAnswerSubmissionSuccess(
                 sessionId,
                 response
@@ -535,7 +631,10 @@ class PracticeSessionViewModel @Inject constructor(
                 Json.encodeToString(BodyLanguageMetrics.serializer(), metrics)
             } else null
 
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
+            timerJob?.cancel()
+            savedStateHandle.remove<Long>(KEY_ACTIVE_SESSION_ID)
+            sessionStartedAtMs = null
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
             return
         }
         answerResponse.nextQuestion?.let {
@@ -547,6 +646,8 @@ class PracticeSessionViewModel @Inject constructor(
                     ),
                     recordedAudioPath = null,
                     transcription = null,
+                    isEmptyAnswer = false,
+                    uploadProgress = 0,
                     recordingDuration = Duration.ZERO,
                     amplitudes = emptyList(),
                     volumeBars = createInitialVolumeBars()
