@@ -1,0 +1,8 @@
+<resources>
+    <string name="ats_job_match">مطابقة الوظائف</string>
+    <string name="job_details">تفاصيل الوظيفة</string>
+    <string name="match_score">درجة المطابقة</string>
+    <string name="cover_letter">خطاب التقديم</string>
+    <string name="optimized_cv">السيرة الذاتية المحسّنة</string>
+    <string name="continue_action">متابعة</string>
+</resources>

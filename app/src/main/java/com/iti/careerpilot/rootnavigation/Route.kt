@@ -25,6 +25,9 @@ sealed interface Route : NavKey {
         data object SessionHistory : Route
 
         @Serializable
+        data object Ats : Route
+
+        @Serializable
         data object Profile : Route
 
     }

@@ -1,0 +1,8 @@
+<resources>
+    <string name="ats_job_match">ATS Job Match</string>
+    <string name="job_details">Job Details</string>
+    <string name="match_score">Match score</string>
+    <string name="cover_letter">Cover Letter</string>
+    <string name="optimized_cv">Optimized CV</string>
+    <string name="continue_action">Continue</string>
+</resources>

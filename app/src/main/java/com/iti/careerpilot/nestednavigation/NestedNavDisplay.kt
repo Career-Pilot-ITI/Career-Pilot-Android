@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -18,6 +22,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
+import com.iti.careerpilot.ats.presentation.navigation.AtsNavDisplay
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
@@ -41,11 +46,13 @@ fun NestedNavDisplay(
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
+    var atsShowsBottomBar by rememberSaveable { mutableStateOf(true) }
 
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
-            CareerPilotBottomNavBar(
+            if (nestedBackStack.lastOrNull() != Route.NestedNav.Ats || atsShowsBottomBar) {
+                CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
             ) {
@@ -66,6 +73,7 @@ fun NestedNavDisplay(
                         label = stringResource(destination.title),
                     )
                 }
+            }
             }
         }
     ) { innerPadding ->
@@ -113,6 +121,15 @@ fun NestedNavDisplay(
                         openSessionDetails = openSessionDetails,
                     )
                 }
+                entry<Route.NestedNav.Ats> {
+                    AtsNavDisplay(
+                        initialSharedText = null,
+                        onSharedTextConsumed = {},
+                        onBottomBarVisibilityChanged = { atsShowsBottomBar = it },
+                        openCoinsPaywall = { openPaywall(true) },
+                        openPracticeSession = { trackId -> openPracticeSession(trackId, null) },
+                    )
+                }
                 entry<Route.NestedNav.Profile> {
                     ProfileRoot(
                         openSettings = openSettings,
@@ -133,11 +150,15 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
             }
 
             Route.NestedNav.SessionHistory -> {
+                2
+            }
+
+            Route.NestedNav.Ats -> {
                 1
             }
 
             else -> {
-                2
+                3
             }
         }
     } ?: 0
