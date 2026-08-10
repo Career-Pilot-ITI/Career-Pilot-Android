@@ -209,18 +209,39 @@ class OnboardingRepositoryImpl @Inject constructor(
             } catch (exception: ClientRequestException) {
                 logClientRequestException(exception)
 
-                val error = when (exception.response.status) {
-                    HttpStatusCode.Unauthorized -> NetworkError.UNAUTHORIZED
-                    HttpStatusCode.Forbidden -> NetworkError.FORBIDDEN
+                val responseBody = runCatching {
+                    exception.response.bodyAsText()
+                }.getOrNull()
+
+                val isEmailConflict = isEmailAlreadyRegisteredError(responseBody)
+
+                val error = when {
+                    isEmailConflict || exception.response.status == HttpStatusCode.Conflict -> NetworkError.CONFLICT
+                    exception.response.status == HttpStatusCode.Unauthorized -> NetworkError.UNAUTHORIZED
+                    exception.response.status == HttpStatusCode.Forbidden -> NetworkError.FORBIDDEN
                     else -> NetworkError.BAD_REQUEST
                 }
 
                 CareerPilotResult.Error(
                     error = error,
                 )
-            } catch (_: ServerResponseException) {
+            } catch (exception: ServerResponseException) {
+                val responseBody = runCatching {
+                    exception.response.bodyAsText()
+                }.getOrNull()
+
+                Log.e(TAG, "Server error on onboarding call: $responseBody", exception)
+
+                val isEmailConflict = isEmailAlreadyRegisteredError(responseBody)
+
+                val error = if (isEmailConflict) {
+                    NetworkError.CONFLICT
+                } else {
+                    NetworkError.SERVER
+                }
+
                 CareerPilotResult.Error(
-                    error = NetworkError.SERVER,
+                    error = error,
                 )
             } catch (_: SerializationException) {
                 CareerPilotResult.Error(
@@ -242,6 +263,20 @@ class OnboardingRepositoryImpl @Inject constructor(
                 )
             }
         }
+
+    private fun isEmailAlreadyRegisteredError(responseBody: String?): Boolean {
+        if (responseBody.isNullOrBlank()) return false
+        val lower = responseBody.lowercase()
+        return lower.contains("email") && (
+            lower.contains("registered") ||
+            lower.contains("exist") ||
+            lower.contains("already") ||
+            lower.contains("taken") ||
+            lower.contains("duplicate") ||
+            lower.contains("use") ||
+            lower.contains("belong")
+        )
+    }
 
     private suspend fun logClientRequestException(
         exception: ClientRequestException,

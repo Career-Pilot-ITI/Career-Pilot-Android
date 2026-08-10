@@ -57,7 +57,8 @@ fun UploadCvCard(
             )
             .clickable(
                 enabled = stage != CvUploadStage.PREPARING &&
-                    stage != CvUploadStage.UPLOADING,
+                    stage != CvUploadStage.UPLOADING &&
+                    stage != CvUploadStage.PARSING,
                 onClick = onClick,
             ),
         contentAlignment = Alignment.Center,
@@ -72,9 +73,10 @@ fun UploadCvCard(
                 statusText = stringResource(R.string.cv_ready_to_upload),
             )
 
-            CvUploadStage.UPLOADING -> UploadingCvContent(
+            CvUploadStage.UPLOADING, CvUploadStage.PARSING -> UploadingCvContent(
                 selectedFile = selectedFile,
                 progress = (uploadProgress / 100f).coerceIn(0f, 1f),
+                isParsing = stage == CvUploadStage.PARSING || uploadProgress >= 100,
             )
 
             CvUploadStage.UPLOADED -> UploadedCvContent(
