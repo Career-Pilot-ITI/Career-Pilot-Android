@@ -63,6 +63,21 @@ fun RootNavDisplay(
     val context = LocalContext.current
     val currentRootRoute = rootBackStack.lastOrNull()
 
+    LaunchedEffect(pendingSharedText, isLoggedIn, currentRootRoute) {
+        val authOrSetupRoute = currentRootRoute == Route.Splash ||
+            currentRootRoute == Route.Login ||
+            currentRootRoute is Route.OTP ||
+            currentRootRoute == Route.Onboarding
+        if (
+            pendingSharedText != null &&
+            isLoggedIn == true &&
+            currentRootRoute != Route.NestedNav &&
+            !authOrSetupRoute
+        ) {
+            rootBackStack.replaceAll(Route.NestedNav)
+        }
+    }
+
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
     LaunchedEffect(snackbarHostState) {
