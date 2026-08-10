@@ -234,7 +234,7 @@ fun ReadyToPracticeScreen(
                                 Icon(
                                     imageVector = Icons.Default.Lock,
                                     contentDescription = "Pro",
-                                    tint = Color(0xFFFF9F12),
+                                    tint = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -252,10 +252,10 @@ fun ReadyToPracticeScreen(
                                     text = "PRO",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFFFF9F12),
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(Color(0xFFFF9F12).copy(alpha = 0.15f))
+                                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f))
                                         .padding(horizontal = 4.dp, vertical = 1.dp)
                                 )
                             }

@@ -2,8 +2,6 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
 import androidx.activity.compose.BackHandler
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -34,13 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
@@ -80,9 +75,6 @@ fun PracticeSessionRoot(
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
     var shouldRequestCameraPermission by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId, newEvent.bodyLanguageMetricsJson)
@@ -120,9 +112,6 @@ fun PracticeSessionRoot(
                 viewModel.onAction(PracticeSessionAction.ShowOrHideLeaveConfirmDialog(true))
             },
             onAction = viewModel::onAction,
-            onSurfaceProviderReady = { surfaceProvider ->
-                viewModel.onAction(PracticeSessionAction.OnSurfaceProviderReady(surfaceProvider))
-            },
         )
 
         AnimatedVisibility(
@@ -219,22 +208,6 @@ fun PracticeSessionRoot(
             onGranted = {
                 shouldRequestCameraPermission = false
                 viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
-
-                // Obtain camera provider and send to ViewModel for body language analysis
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                cameraProviderFuture.addListener(
-                    {
-                        val cameraProvider = cameraProviderFuture.get()
-                        viewModel.onAction(
-                            PracticeSessionAction.OnCameraProviderReady(
-                                cameraProvider = cameraProvider,
-                                lifecycleOwner = lifecycleOwner,
-                                surfaceProvider = null, // Surface provided later by the camera preview.
-                            )
-                        )
-                    },
-                    ContextCompat.getMainExecutor(context)
-                )
             },
             neededPermissions = arrayOf(Manifest.permission.CAMERA)
         )
@@ -267,7 +240,6 @@ fun PracticeSessionScreen(
     state: PracticeSessionState,
     onBack: () -> Unit,
     onAction: (PracticeSessionAction) -> Unit,
-    onSurfaceProviderReady: (Preview.SurfaceProvider) -> Unit = {},
 ) {
     BackHandler { onBack() }
     val isCameraPreviewVisible = state.isBodyLanguageAnalyzing && state.isCameraPreviewVisible
@@ -322,6 +294,9 @@ fun PracticeSessionScreen(
                     if (isCameraPreviewVisible) {
                         CameraPreviewPip(
                             isVisible = true,
+                            onFrame = { imageProxy ->
+                                onAction(PracticeSessionAction.OnFrame(imageProxy))
+                            },
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -329,7 +304,6 @@ fun PracticeSessionScreen(
                             shape = RoundedCornerShape(24.dp),
                             borderCornerRadius = 24.dp,
                             showAnimatedBorder = true,
-                            onSurfaceProviderReady = onSurfaceProviderReady,
                         )
                     } else {
                         CenterStage(

@@ -2,12 +2,7 @@ package com.iti.careerpilot.bodylanguage
 
 import android.content.Context
 import android.util.Log
-import android.util.Size
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.lifecycle.LifecycleOwner
+import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.iti.careerpilot.bodylanguage.aggregation.KeyMomentDetector
 import com.iti.careerpilot.bodylanguage.aggregation.SessionAggregator
@@ -15,17 +10,18 @@ import com.iti.careerpilot.bodylanguage.engine.FaceLandmarkerEngine
 import com.iti.careerpilot.bodylanguage.engine.FrameScheduler
 import com.iti.careerpilot.bodylanguage.engine.HandLandmarkerEngine
 import com.iti.careerpilot.bodylanguage.engine.PoseLandmarkerEngine
-import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.careerpilot.bodylanguage.signal.EyeContactApproximator
 import com.iti.careerpilot.bodylanguage.signal.FaceSignalExtractor
 import com.iti.careerpilot.bodylanguage.signal.HandSignalExtractor
 import com.iti.careerpilot.bodylanguage.signal.PostureSignalExtractor
+import com.iti.common.dispatcher.CareerPilotDispatchers.Default
+import com.iti.common.dispatcher.CareerPilotDispatchers.IO
+import com.iti.common.dispatcher.Dispatcher
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,6 +33,8 @@ private const val TAG = "BodyLanguageAnalyzer"
 
 internal class BodyLanguageAnalyzerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
+    @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
+    @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : BodyLanguageAnalyzer {
 
     private val _isRunning = AtomicBoolean(false)
@@ -55,6 +53,16 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                 aggregator.pauseRecording(nowMs)
             }
         }
+    }
+
+    override fun pauseRecording(timestampMs: Long) {
+        _isRecordingActive.set(false)
+        aggregator.pauseRecording(timestampMs)
+    }
+
+    override fun resumeRecording(timestampMs: Long) {
+        _isRecordingActive.set(true)
+        aggregator.resumeRecording(timestampMs)
     }
 
     private var analyzerScope: CoroutineScope? = null
@@ -79,21 +87,9 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     @Volatile
     private var lastFaceCenterNorm: Pair<Float, Float>? = null
 
-    private var cameraProvider: ProcessCameraProvider? = null
-    private var currentLifecycleOwner: LifecycleOwner? = null
-    private var currentImageAnalysis: ImageAnalysis? = null
-    private var currentSurfaceProvider: Preview.SurfaceProvider? = null
-
-    @Suppress("DEPRECATION")
-    override fun start(
-        cameraProvider: ProcessCameraProvider,
-        lifecycleOwner: LifecycleOwner,
-        surfaceProvider: Preview.SurfaceProvider?,
-    ) {
+    override fun start() {
         if (_isRunning.getAndSet(true)) return
 
-        this.cameraProvider = cameraProvider
-        this.currentLifecycleOwner = lifecycleOwner
         _isRecordingActive.set(true)
         aggregator.reset()
         keyMomentDetector.reset()
@@ -101,11 +97,11 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         handExtractor.reset()
         lastFaceCenterNorm = null
 
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val scope = CoroutineScope(SupervisorJob() + defaultDispatcher)
         this.analyzerScope = scope
 
         // Initialize heavy ML models asynchronously on background thread to prevent UI freezing
-        scope.launch {
+        scope.launch(ioDispatcher) {
             try {
                 val face = FaceLandmarkerEngine(context) { result, ts ->
                     val signal = faceExtractor.extract(result, ts)
@@ -154,59 +150,26 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
             }
         }
 
-        // CameraX ImageAnalysis (non-blocking)
-        @Suppress("DEPRECATION")
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setTargetResolution(Size(480, 640))
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-            .build()
-
-        imageAnalysis.setAnalyzer(Dispatchers.Default.asExecutor()) { imageProxy ->
-            try {
-                val scheduler = frameScheduler
-                if (scheduler != null) {
-                    val bitmap = imageProxy.toBitmap()
-                    val mpImage = BitmapImageBuilder(bitmap).build()
-                    val timestampMs = TimeUnit.NANOSECONDS.toMillis(imageProxy.imageInfo.timestamp)
-                    scheduler.onFrame(mpImage, timestampMs)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error processing camera frame", e)
-            } finally {
-                imageProxy.close()
-            }
-        }
-
-        this.currentImageAnalysis = imageAnalysis
-        bindPreview(surfaceProvider)
-
         Log.d(TAG, "Body language camera analysis pipeline started")
     }
 
-    override fun bindPreview(surfaceProvider: Preview.SurfaceProvider?) {
-        this.currentSurfaceProvider = surfaceProvider
-        val provider = cameraProvider ?: return
-        val lifecycle = currentLifecycleOwner ?: return
-        val analysis = currentImageAnalysis ?: return
-
-        val preview = surfaceProvider?.let { sp ->
-            Preview.Builder().build().also { previewUseCase ->
-                previewUseCase.setSurfaceProvider(sp)
-            }
+    override fun processImage(imageProxy: ImageProxy) {
+        if (!_isRunning.get()) {
+            imageProxy.close()
+            return
         }
-
         try {
-            provider.unbindAll()
-            val useCases = listOfNotNull(analysis, preview).toTypedArray()
-            provider.bindToLifecycle(
-                lifecycle,
-                CameraSelector.DEFAULT_FRONT_CAMERA,
-                *useCases,
-            )
-            Log.d(TAG, "Bound camera use cases (preview attached: ${surfaceProvider != null})")
+            val scheduler = frameScheduler
+            if (scheduler != null) {
+                val bitmap = imageProxy.toBitmap()
+                val mpImage = BitmapImageBuilder(bitmap).build()
+                val timestampMs = TimeUnit.NANOSECONDS.toMillis(imageProxy.imageInfo.timestamp)
+                scheduler.onFrame(mpImage, timestampMs)
+            }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to bind camera preview/analysis use cases", e)
+            Log.e(TAG, "Error processing camera frame", e)
+        } finally {
+            imageProxy.close()
         }
     }
 
@@ -215,12 +178,6 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
 
         analyzerScope?.cancel()
         analyzerScope = null
-
-        cameraProvider?.unbindAll()
-        cameraProvider = null
-        currentLifecycleOwner = null
-        currentImageAnalysis = null
-        currentSurfaceProvider = null
 
         val currentFace = faceEngine
         val currentPose = poseEngine
@@ -231,7 +188,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         handEngine = null
         frameScheduler = null
 
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(ioDispatcher).launch {
             try {
                 currentFace?.close()
                 currentPose?.close()
@@ -245,7 +202,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     }
 
     override suspend fun finalizeSession(): BodyLanguageMetrics =
-        withContext(Dispatchers.Default) {
+        withContext(defaultDispatcher) {
             val baseMetrics = aggregator.finalize()
             val keyMoments = keyMomentDetector.getKeyMoments()
             baseMetrics.copy(keyMoments = keyMoments)

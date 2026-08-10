@@ -3,10 +3,8 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmode
 import android.os.SystemClock
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import androidx.camera.core.ImageProxy
 import androidx.lifecycle.SavedStateHandle
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
@@ -28,15 +26,19 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.event.Pra
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
 import com.iti.careerpilot.whisper.domain.WhisperEngine
+import com.iti.common.dispatcher.CareerPilotDispatchers.Default
+import com.iti.common.dispatcher.Dispatcher
 import com.iti.common.error.NetworkError
 import com.iti.common.error.TranscriptionError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
+import com.iti.core.datastore.models.isPaidSubscriber
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -80,6 +82,7 @@ class PracticeSessionViewModel @Inject constructor(
     private val amplitudeNormalizer: AmplitudeNormalizer,
     private val bodyLanguageAnalyzer: BodyLanguageAnalyzer,
     private val userProfileRepo: UserProfileRepo,
+    @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private companion object {
@@ -279,10 +282,7 @@ class PracticeSessionViewModel @Inject constructor(
             is DeclineBodyLanguageConsent -> declineBodyLanguageConsent()
             is ToggleCameraPreview -> toggleCameraPreview(action.visible)
             is OnCameraPermissionResult -> handleCameraPermissionResult(action.granted)
-            is OnCameraProviderReady -> startBodyLanguageAnalysis(
-                action.cameraProvider, action.lifecycleOwner, action.surfaceProvider
-            )
-            is OnSurfaceProviderReady -> bodyLanguageAnalyzer.bindPreview(action.surfaceProvider)
+            is OnFrame -> handleOnFrame(action.imageProxy)
         }
     }
 
@@ -570,7 +570,7 @@ class PracticeSessionViewModel @Inject constructor(
 
     private suspend fun transcribeAudio(audioPath: String): Result<String> {
         val startedAt = SystemClock.elapsedRealtime()
-        val result = withContext(Dispatchers.Default) {
+        val result = withContext(defaultDispatcher) {
             whisperEngine.transcribe(audioPath)
         }
         Log.d(TAG, "Local transcription finished in ${SystemClock.elapsedRealtime() - startedAt} ms")
@@ -700,8 +700,7 @@ class PracticeSessionViewModel @Inject constructor(
         if (!_state.value.isVideoSessionSelected) return
         viewModelScope.launch {
             userProfileRepo.userProfile.first().let { profile ->
-                val tier = profile.account.subscriptionTier.uppercase()
-                val isPaid = tier in setOf("PLUS", "PRO", "MAX")
+                val isPaid = profile.isPaidSubscriber()
                 val consentGiven = profile.account.bodyLanguageConsentGiven
 
                 _state.update {
@@ -743,20 +742,18 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun handleCameraPermissionResult(granted: Boolean) {
-        if (!granted) {
-            _state.update { it.copy(bodyLanguageEnabled = false) }
+        if (granted) {
+            if (!bodyLanguageAnalyzer.isRunning) {
+                bodyLanguageAnalyzer.start()
+            }
+            _state.update { it.copy(isBodyLanguageAnalyzing = true) }
+        } else {
+            _state.update { it.copy(bodyLanguageEnabled = false, isBodyLanguageAnalyzing = false) }
         }
-        // Camera provider will be obtained by the Composable and sent via OnCameraProviderReady
     }
 
-    private fun startBodyLanguageAnalysis(
-        cameraProvider: ProcessCameraProvider,
-        lifecycleOwner: LifecycleOwner,
-        surfaceProvider: Preview.SurfaceProvider?,
-    ) {
-        if (bodyLanguageAnalyzer.isRunning) return
-        bodyLanguageAnalyzer.start(cameraProvider, lifecycleOwner, surfaceProvider)
-        _state.update { it.copy(isBodyLanguageAnalyzing = true) }
+    private fun handleOnFrame(imageProxy: ImageProxy) {
+        bodyLanguageAnalyzer.processImage(imageProxy)
     }
 
     private fun toggleCameraPreview(visible: Boolean) {

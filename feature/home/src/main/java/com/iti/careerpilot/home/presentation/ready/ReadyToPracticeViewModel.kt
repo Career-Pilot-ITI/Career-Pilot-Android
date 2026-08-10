@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
+import com.iti.core.datastore.models.isPaidSubscriber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,8 +39,7 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun observeUserProfile() {
         viewModelScope.launch {
             getUserProfileUseCase().collect { profile ->
-                val tier = profile.account.subscriptionTier.uppercase()
-                val isPaid = tier in PAID_TIERS
+                val isPaid = profile.isPaidSubscriber()
                 _state.update {
                     it.copy(
                         isPaidPlan = isPaid,
@@ -105,6 +105,5 @@ class ReadyToPracticeViewModel @Inject constructor(
     private companion object {
         const val KEY_TRACK_ID = "ready_track_id"
         const val KEY_TRACK_NAME = "ready_track_name"
-        val PAID_TIERS = setOf("PLUS", "PRO", "MAX")
     }
 }

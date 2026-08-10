@@ -1,45 +1,55 @@
 package com.iti.careerpilot.bodylanguage
 
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.lifecycle.LifecycleOwner
+import androidx.camera.core.ImageProxy
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 
 /**
  * Public entry point for body language analysis.
- * Consumers call [start] with a camera provider and lifecycle owner,
- * then [finalizeSession] when the session ends.
+ * Consumers call [start] to initialize analysis engines,
+ * forward camera frames via [processImage], and call [finalizeSession]
+ * when the session ends.
  *
- * All MediaPipe tasks, CameraX ImageAnalysis, and signal processing
- * are managed internally.
+ * All MediaPipe tasks and signal processing are managed internally.
  */
 interface BodyLanguageAnalyzer {
     /**
-     * Starts camera analysis. Binds ImageAnalysis + optional Preview use cases.
-     * @param cameraProvider obtained from ProcessCameraProvider.getInstance()
-     * @param lifecycleOwner for CameraX lifecycle binding
-     * @param surfaceProvider optional surface provider for camera preview UI
+     * Starts the analysis pipeline and initializes ML models in background.
      */
-    fun start(
-        cameraProvider: ProcessCameraProvider,
-        lifecycleOwner: LifecycleOwner,
-        surfaceProvider: Preview.SurfaceProvider? = null,
-    )
+    fun start()
 
-    /** Dynamically binds or unbinds the camera preview surface UI while analysis is running. */
-    fun bindPreview(surfaceProvider: Preview.SurfaceProvider?)
+    /**
+     * Processes an incoming camera frame for body language analysis.
+     * Implementations are responsible for closing [imageProxy].
+     */
+    fun processImage(imageProxy: ImageProxy)
 
-    /** Stops analysis and releases all GPU/native resources. */
+    /**
+     * Controls whether frame signals are actively recorded for evaluation (e.g. only while candidate is answering).
+     */
+    fun setRecordingActive(active: Boolean)
+
+    /**
+     * Pauses recording telemetry at the given timestamp.
+     */
+    fun pauseRecording(timestampMs: Long)
+
+    /**
+     * Resumes recording telemetry at the given timestamp.
+     */
+    fun resumeRecording(timestampMs: Long)
+
+    /**
+     * Stops analysis and releases all GPU/native resources.
+     */
     fun stop()
 
-    /** Returns aggregated metrics for the session. Call after [stop]. */
+    /**
+     * Returns aggregated metrics for the session. Call after [stop].
+     */
     suspend fun finalizeSession(): BodyLanguageMetrics
 
     /** Whether the analyzer is currently running. */
     val isRunning: Boolean
-
-    /** Controls whether frame signals are actively recorded for evaluation (e.g. only while candidate is answering). */
-    fun setRecordingActive(active: Boolean)
 
     /** Whether telemetry recording is currently active. */
     val isRecordingActive: Boolean

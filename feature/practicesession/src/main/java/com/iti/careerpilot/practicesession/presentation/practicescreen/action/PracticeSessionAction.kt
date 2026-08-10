@@ -53,12 +53,5 @@ sealed interface PracticeSessionAction {
     data object DeclineBodyLanguageConsent : PracticeSessionAction
     data class ToggleCameraPreview(val visible: Boolean) : PracticeSessionAction
     data class OnCameraPermissionResult(val granted: Boolean) : PracticeSessionAction
-    data class OnCameraProviderReady(
-        val cameraProvider: androidx.camera.lifecycle.ProcessCameraProvider,
-        val lifecycleOwner: androidx.lifecycle.LifecycleOwner,
-        val surfaceProvider: androidx.camera.core.Preview.SurfaceProvider?,
-    ) : PracticeSessionAction
-    data class OnSurfaceProviderReady(
-        val surfaceProvider: androidx.camera.core.Preview.SurfaceProvider?,
-    ) : PracticeSessionAction
+    data class OnFrame(val imageProxy: androidx.camera.core.ImageProxy) : PracticeSessionAction
 }
