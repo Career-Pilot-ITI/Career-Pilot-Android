@@ -36,7 +36,7 @@ import com.iti.careerpilot.reports.presentation.screen.components.ReportsAnimate
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsContentPhase
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsEmptyContent
 import com.iti.careerpilot.reports.presentation.screen.components.ReportsErrorContent
-import com.iti.careerpilot.reports.presentation.screen.components.ReportsLoadingContent
+import com.iti.careerpilot.reports.presentation.screen.components.QuestionBreakdownShimmerContent
 
 @Composable
 fun QuestionBreakdownRoot(
@@ -88,8 +88,7 @@ fun QuestionBreakdownScreen(
             modifier = Modifier.fillMaxSize(),
         ) { animatedState ->
             when (animatedState.phase) {
-                ReportsContentPhase.LOADING -> ReportsLoadingContent(
-                    messageRes = R.string.reports_loading_questions,
+                ReportsContentPhase.LOADING -> QuestionBreakdownShimmerContent(
                     modifier = Modifier.padding(innerPadding),
                 )
 
@@ -103,8 +102,7 @@ fun QuestionBreakdownScreen(
                             modifier = Modifier.padding(innerPadding),
                         )
                     } else {
-                        ReportsLoadingContent(
-                            messageRes = R.string.reports_loading_questions,
+                        QuestionBreakdownShimmerContent(
                             modifier = Modifier.padding(innerPadding),
                         )
                     }

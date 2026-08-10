@@ -5,12 +5,6 @@ import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
 import java.time.Instant
 
 @Immutable
-data class SessionHistoryUiModel(
-    val sessions: List<SessionSummaryUiModel>,
-    val averageScore: Int,
-)
-
-@Immutable
 data class SessionSummaryUiModel(
     val id: Long,
     val score: Int,
@@ -20,17 +14,12 @@ data class SessionSummaryUiModel(
     val questionCount: Int,
 )
 
-fun List<InterviewSessionSummary>.toUiModel(): SessionHistoryUiModel =
-    SessionHistoryUiModel(
-        sessions = map { session ->
-            SessionSummaryUiModel(
-                id = session.id,
-                score = session.score,
-                category = session.category,
-                completedAt = session.completedAt,
-                durationMinutes = session.durationMinutes,
-                questionCount = session.questionCount,
-            )
-        },
-        averageScore = if (isEmpty()) 0 else sumOf(InterviewSessionSummary::score) / size,
+fun InterviewSessionSummary.toUiModel(): SessionSummaryUiModel =
+    SessionSummaryUiModel(
+        id = id,
+        score = score,
+        category = category,
+        completedAt = completedAt,
+        durationMinutes = durationMinutes,
+        questionCount = questionCount,
     )

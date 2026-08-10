@@ -17,5 +17,7 @@ class ReportsFeatureConvention : Plugin<Project> {
         }
 
         addLibrary("implementation", "extended-icons")
+        addLibrary("implementation", "androidx-paging-runtime")
+        addLibrary("implementation", "androidx-paging-compose")
     }
 }

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,30 +18,6 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.NoNetworkConnectionAnimation
 import com.iti.careerpilot.reports.R
 import com.iti.common.util.UIText
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun ReportsLoadingContent(
-    @StringRes messageRes: Int,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(Dimens.SpaceXXL),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        LoadingIndicator(color = MaterialTheme.colorScheme.primary)
-        Text(
-            text = stringResource(messageRes),
-            modifier = Modifier.padding(top = Dimens.SpaceL),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.72f),
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 @Composable
 fun ReportsEmptyContent(
