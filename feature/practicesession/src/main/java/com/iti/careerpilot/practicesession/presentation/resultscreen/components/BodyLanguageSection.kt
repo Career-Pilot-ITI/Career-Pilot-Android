@@ -189,16 +189,14 @@ private fun EvaluationBodyLanguageCard(
 
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
-            modifier = Modifier
-                .padding(Dimens.SpaceXL)
-                .semantics(mergeDescendants = true) {
-                    contentDescription = cardContentDesc
-                },
+            modifier = Modifier.padding(Dimens.SpaceXL),
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {
             // Header Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = cardContentDesc },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -443,11 +441,7 @@ private fun MetricBreakdownCard(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier
-                .padding(Dimens.SpaceM)
-                .semantics(mergeDescendants = true) {
-                    contentDescription = "$label metric: score ${metric.score} percent. Observation: ${metric.observation}. Tip: ${metric.tip}"
-                },
+            modifier = Modifier.padding(Dimens.SpaceM),
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceS)
         ) {
             Row(
@@ -503,7 +497,7 @@ private fun MetricBreakdownCard(
                         imageVector = Icons.Default.Lightbulb,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(Dimens.SpaceL)
                     )
                     Spacer(modifier = Modifier.width(Dimens.SpaceXS))
                     Text(
@@ -526,13 +520,14 @@ private fun RawMetricsBodyLanguageCard(
     val postureScore = (100 - metrics.slouchPercentage).toInt().coerceIn(0, 100)
     val handGesturesScore = ((1f - metrics.fidgetScore) * 100).toInt().coerceIn(0, 100)
     val facialExpressionScore = (metrics.averageSmile * 100).toInt().coerceIn(0, 100)
+    val telemetryMetricsDesc = stringResource(R.string.body_language_telemetry_metrics_desc)
 
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .padding(Dimens.SpaceXL)
                 .semantics(mergeDescendants = true) {
-                    contentDescription = "Body language telemetry metrics"
+                    contentDescription = telemetryMetricsDesc
                 },
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {

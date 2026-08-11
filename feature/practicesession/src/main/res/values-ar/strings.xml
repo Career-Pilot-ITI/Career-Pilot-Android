@@ -126,4 +126,5 @@
     <string name="audio_session">جلسة صوتية</string>
     <string name="video_session">جلسة فيديو</string>
     <string name="pro_badge">احترافي</string>
+    <string name="body_language_telemetry_metrics_desc">مقاييس لغة الجسد الأولية</string>
 </resources>
