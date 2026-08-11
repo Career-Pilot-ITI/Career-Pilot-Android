@@ -69,9 +69,11 @@ fun JobUrlTextField(
             cursorColor = MaterialTheme.colorScheme.primary,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
             errorContainerColor = MaterialTheme.colorScheme.surface,
             focusedIndicatorColor = MaterialTheme.colorScheme.surface,
             unfocusedIndicatorColor = MaterialTheme.colorScheme.surface,
+            disabledIndicatorColor = MaterialTheme.colorScheme.surface,
             errorIndicatorColor = MaterialTheme.colorScheme.surface,
         )
     )

@@ -25,7 +25,10 @@ fun MissingCvCard(
         onClick = onUpload,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+        ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
     ) {
         Column(
