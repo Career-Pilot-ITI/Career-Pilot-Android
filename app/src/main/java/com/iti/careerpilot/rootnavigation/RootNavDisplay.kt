@@ -265,6 +265,7 @@ fun RootNavDisplay(
 
                 entry<Route.PracticeResult> {
                     ResultRoot(
+                        sessionId = it.sessionId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }

@@ -86,9 +86,16 @@ import com.iti.careerpilot.practicesession.presentation.resultscreen.components.
 
 @Composable
 fun ResultRoot(
+    sessionId: Long? = null,
     onBack: () -> Unit,
     viewModel: ResultViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(sessionId) {
+        if (sessionId != null && sessionId > 0L) {
+            viewModel.initialise(sessionId)
+        }
+    }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ResultScreen(

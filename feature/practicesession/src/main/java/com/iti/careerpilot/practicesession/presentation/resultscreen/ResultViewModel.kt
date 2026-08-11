@@ -26,12 +26,20 @@ class ResultViewModel @Inject constructor(
     private val sessionCache: InMemorySessionCache,
 ) : ViewModel() {
 
-    private val sessionId: Long? = savedStateHandle.get<Long>("sessionId")
+    private val sessionId: Long? get() = savedStateHandle.get<Long>("sessionId")
 
     private val _state = MutableStateFlow(ResultState(sessionId = sessionId))
     val state = _state.asStateFlow()
 
     init {
+        loadResult()
+        loadBodyLanguage()
+    }
+
+    fun initialise(id: Long) {
+        if (savedStateHandle.contains("sessionId") && savedStateHandle.get<Long>("sessionId") == id) return
+        savedStateHandle["sessionId"] = id
+        _state.update { it.copy(sessionId = id) }
         loadResult()
         loadBodyLanguage()
     }
