@@ -13,12 +13,14 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import kotlinx.serialization.json.Json
 import java.util.concurrent.atomic.AtomicInteger
 
 class EvaluateBodyLanguageUseCaseTest {
 
     private lateinit var cache: InMemorySessionCache
     private lateinit var fallbackEngine: LocalBodyLanguageFallbackEngine
+    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
     @Before
     fun setup() {
@@ -33,7 +35,7 @@ class EvaluateBodyLanguageUseCaseTest {
             callCount.incrementAndGet()
             FakeBodyLanguageData.sampleEvaluationJson
         }
-        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, Dispatchers.Unconfined)
+        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
         val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { true }
 
         val (result, fallback) = useCase.invoke(100L, FakeBodyLanguageData.sampleMetrics)
@@ -42,7 +44,7 @@ class EvaluateBodyLanguageUseCaseTest {
         assertNull(fallback)
         assertEquals(82, result.overallScore)
         assertEquals(1, callCount.get())
-        assertEquals(result, cache.get(100L))
+        assertEquals(result, cache.getEvaluation(100L)?.first)
         assertEquals(Pair(result, null), cache.getEvaluation(100L))
         assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(100L))
     }
@@ -54,7 +56,7 @@ class EvaluateBodyLanguageUseCaseTest {
             callCount.incrementAndGet()
             FakeBodyLanguageData.sampleEvaluationJson
         }
-        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, Dispatchers.Unconfined)
+        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
         val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { true }
 
         // Prepopulate cache with fallback reason and metrics
@@ -76,14 +78,14 @@ class EvaluateBodyLanguageUseCaseTest {
     @Test
     fun `kill switch disabled produces fallback and caches result with fallback reason`() = runTest {
         val generator = AiContentGenerator { FakeBodyLanguageData.sampleEvaluationJson }
-        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, Dispatchers.Unconfined)
+        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
         val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { false }
 
         val (result, fallback) = useCase.invoke(300L, FakeBodyLanguageData.sampleMetrics)
 
         assertEquals(FallbackReason.KILL_SWITCH_DISABLED, fallback)
         assertNotNull(result)
-        assertEquals(result, cache.get(300L))
+        assertEquals(result, cache.getEvaluation(300L)?.first)
         assertEquals(Pair(result, FallbackReason.KILL_SWITCH_DISABLED), cache.getEvaluation(300L))
         assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(300L))
 

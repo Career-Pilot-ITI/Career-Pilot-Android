@@ -24,7 +24,7 @@ class InMemorySessionCacheTest {
         val eval = FakeBodyLanguageData.sampleEvaluation
         cache.put(100L, eval)
 
-        val retrieved = cache.get(100L)
+        val retrieved = cache.getEvaluation(100L)?.first
         assertNotNull(retrieved)
         assertEquals(82, retrieved?.overallScore)
         assertEquals(eval, retrieved)
@@ -56,12 +56,11 @@ class InMemorySessionCacheTest {
 
         cache.putMetrics(100L, metrics)
         assertEquals(metrics, cache.getMetrics(100L))
-        assertEquals(eval, cache.get(100L))
+        assertEquals(eval, cache.getEvaluation(100L)?.first)
     }
 
     @Test
     fun `get returns null when key does not exist`() {
-        assertNull(cache.get(999L))
         assertNull(cache.getEvaluation(999L))
         assertNull(cache.getMetrics(999L))
     }
@@ -74,8 +73,8 @@ class InMemorySessionCacheTest {
 
         cache.clear(101L)
 
-        assertNull(cache.get(101L))
-        assertNotNull(cache.get(102L))
+        assertNull(cache.getEvaluation(101L))
+        assertNotNull(cache.getEvaluation(102L))
     }
 
     @Test
@@ -86,8 +85,8 @@ class InMemorySessionCacheTest {
 
         cache.clearAll()
 
-        assertNull(cache.get(101L))
-        assertNull(cache.get(102L))
+        assertNull(cache.getEvaluation(101L))
+        assertNull(cache.getEvaluation(102L))
     }
 
     @Test
@@ -99,7 +98,7 @@ class InMemorySessionCacheTest {
             val sessionId = i.toLong()
             executor.submit {
                 cache.put(sessionId, eval)
-                assertEquals(eval, cache.get(sessionId))
+                assertEquals(eval, cache.getEvaluation(sessionId)?.first)
             }
         }
 

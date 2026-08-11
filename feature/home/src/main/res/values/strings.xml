@@ -82,5 +82,8 @@
     <string name="ready_permission_allow">Allow</string>
     <string name="ready_permission_cancel">Not now</string>
     <string name="getting_ready">Getting Ready</string>
+    <string name="audio_session">Audio Session</string>
+    <string name="video_session">Video Session</string>
+    <string name="pro_badge">PRO</string>
 
 </resources>

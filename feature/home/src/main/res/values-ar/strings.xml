@@ -86,5 +86,8 @@
     <string name="ready_permission_allow">السماح</string>
     <string name="ready_permission_cancel">ليس الآن</string>
     <string name="getting_ready">جاري الاستعداد</string>
+    <string name="audio_session">جلسة صوتية</string>
+    <string name="video_session">جلسة فيديو</string>
+    <string name="pro_badge">احترافي</string>
 
 </resources>

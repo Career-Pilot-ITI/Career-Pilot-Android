@@ -11,11 +11,13 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import kotlinx.serialization.json.Json
 import java.io.IOException
 
 class BodyLanguageAiEvaluatorTest {
 
     private lateinit var fallbackEngine: LocalBodyLanguageFallbackEngine
+    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
     @Before
     fun setup() {
@@ -28,6 +30,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -46,6 +49,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -64,6 +68,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -81,6 +86,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -99,6 +105,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -114,6 +121,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 
@@ -132,6 +140,7 @@ class BodyLanguageAiEvaluatorTest {
         val evaluator = BodyLanguageAiEvaluator(
             contentGenerator = generator,
             fallbackEngine = fallbackEngine,
+            json = json,
             ioDispatcher = Dispatchers.Unconfined,
         )
 

@@ -191,7 +191,7 @@ fun ReadyToPracticeScreen(
                             modifier = Modifier.size(26.dp)
                         )
                         Text(
-                            text = "Audio Session",
+                            text = stringResource(R.string.audio_session),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = if (isAudioSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
@@ -233,7 +233,7 @@ fun ReadyToPracticeScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Lock,
-                                    contentDescription = "Pro",
+                                    contentDescription = stringResource(R.string.pro_badge),
                                     tint = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -241,7 +241,7 @@ fun ReadyToPracticeScreen(
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Video Session",
+                                text = stringResource(R.string.video_session),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = if (isVideoSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
@@ -249,7 +249,7 @@ fun ReadyToPracticeScreen(
                             if (!state.isPaidPlan) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "PRO",
+                                    text = stringResource(R.string.pro_badge),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = MaterialTheme.colorScheme.tertiary,

@@ -10,6 +10,7 @@ enum class KeyMomentType {
     HAND_FIDGET_SPIKE,
     FACE_LOST,
     POSTURE_SHIFT,
+    HAND_TO_FACE_TOUCH,
 }
 
 @Serializable

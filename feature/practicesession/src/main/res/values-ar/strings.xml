@@ -85,4 +85,44 @@
     <string name="enable_body_language">حسنًا، فعّل</string>
     <string name="camera_preview">معاينة الكاميرا</string>
     <string name="show_camera_during_session">إظهار معاينة الكاميرا أثناء الجلسة</string>
+
+    <!-- Radar Chart & Body Language Evaluation -->
+    <string name="radar_eye_contact">التواصل البصري</string>
+    <string name="radar_posture">وضعية الجسم</string>
+    <string name="radar_hand_stability">ثبات اليدين</string>
+    <string name="radar_facial_expressions">تعبيرات الوجه</string>
+    <string name="body_language_evaluation">تقييم لغة الجسد</string>
+    <string name="body_language_analyzing">جارٍ تحليل لغة الجسد بالذكاء الاصطناعي...</string>
+    <string name="body_language_metrics">مقاييس لغة الجسد</string>
+    <string name="metric_breakdown">تفاصيل المقاييس</string>
+    <string name="actionable_coaching_tips">نصائح التدريب العملية</string>
+    <string name="key_moments">اللحظات الرئيسية</string>
+    <string name="strengths">نقاط القوة</string>
+    <string name="areas_for_improvement">مجالات التحسين</string>
+    <string name="fallback_disclaimer">تقييم الذكاء الاصطناعي غير متاح — يتم عرض التوجيه بناءً على مقاييس الجهاز</string>
+    <string name="eye_contact">التواصل البصري</string>
+    <string name="posture">وضعية الجسم</string>
+    <string name="facial_expression">تعبيرات الوجه</string>
+    <string name="hand_gestures">إيماءات اليدين</string>
+    <string name="smile">الابتسامة</string>
+    <string name="good_posture">الوضعية الجيدة</string>
+    <string name="hand_composure">هدوء اليدين</string>
+
+    <!-- Key Moment Types -->
+    <string name="moment_looked_away">النظر بعيدًا</string>
+    <string name="moment_slouched">الانحناء</string>
+    <string name="moment_hand_fidget">حركة اليدين / اللمس</string>
+    <string name="moment_face_lost">الوجه غير ظاهر</string>
+    <string name="moment_smiled">ابتسامة</string>
+    <string name="moment_posture_shift">تغير الوضعية</string>
+
+    <!-- Additional localized badges & formatters -->
+    <string name="body_language_evaluation_score_desc">تقييم لغة الجسد %1$d/100</string>
+    <string name="confidence_high">عالي</string>
+    <string name="confidence_moderate">متوسط</string>
+    <string name="confidence_low">منخفض</string>
+    <string name="seconds_short">%1$dث</string>
+    <string name="audio_session">جلسة صوتية</string>
+    <string name="video_session">جلسة فيديو</string>
+    <string name="pro_badge">احترافي</string>
 </resources>

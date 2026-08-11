@@ -1,7 +1,9 @@
 package com.iti.careerpilot.practicesession.presentation.resultscreen
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.ai.domain.EvaluateBodyLanguageUseCase
 import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
 import com.iti.common.result.onError
@@ -11,62 +13,57 @@ import com.iti.common.util.toUIText
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ResultViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val sessionRepo: SessionRepo,
     private val evaluateBodyLanguageUseCase: EvaluateBodyLanguageUseCase,
+    private val sessionCache: InMemorySessionCache,
 ) : ViewModel() {
 
-    private var hasLoadedInitialData = false
+    private val sessionId: Long? = savedStateHandle.get<Long>("sessionId")
 
-    private val _state = MutableStateFlow(ResultState())
-    val state = _state
-        .onStart {
-            if (!hasLoadedInitialData) {
-                loadResult()
-                hasLoadedInitialData = true
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = ResultState()
-        )
+    private val _state = MutableStateFlow(ResultState(sessionId = sessionId))
+    val state = _state.asStateFlow()
+
+    init {
+        loadResult()
+        loadBodyLanguage()
+    }
 
     fun onAction(action: ResultAction) {
         when (action) {
-            is ResultAction.UpdateSessionId -> {
-                val metrics = action.bodyLanguageMetricsJson?.let { json ->
-                    try {
-                        kotlinx.serialization.json.Json.decodeFromString(
-                            BodyLanguageMetrics.serializer(),
-                            json
-                        )
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-                _state.update {
-                    it.copy(
-                        sessionId = action.sessionId,
-                        bodyLanguageMetrics = metrics,
-                    )
-                }
+            ResultAction.RefreshResult -> {
                 loadResult()
-
-                if (metrics != null) {
-                    evaluateBodyLanguage(action.sessionId, metrics)
-                }
+                loadBodyLanguage()
             }
+        }
+    }
 
-            ResultAction.RefreshResult -> loadResult()
+    private fun loadBodyLanguage() {
+        val id = sessionId ?: return
+        val cachedEval = sessionCache.getEvaluation(id)
+        val metrics = sessionCache.getMetrics(id)
+
+        _state.update { it.copy(bodyLanguageMetrics = metrics) }
+
+        if (cachedEval != null) {
+            val (evaluation, fallbackReason) = cachedEval
+            val uiState = if (fallbackReason != null) {
+                BodyLanguageUiState.FallbackUsed(evaluation, fallbackReason)
+            } else {
+                BodyLanguageUiState.Success(evaluation)
+            }
+            _state.update { it.copy(bodyLanguageUiState = uiState) }
+        } else if (metrics != null) {
+            evaluateBodyLanguage(id, metrics)
+        } else {
+            _state.update { it.copy(bodyLanguageUiState = BodyLanguageUiState.Idle) }
         }
     }
 
@@ -75,45 +72,38 @@ class ResultViewModel @Inject constructor(
         metrics: BodyLanguageMetrics,
     ) {
         viewModelScope.launch {
-            _state.update { it.copy(isEvaluatingBodyLanguage = true) }
+            _state.update { it.copy(bodyLanguageUiState = BodyLanguageUiState.Loading) }
             val (evaluation, fallbackReason) = evaluateBodyLanguageUseCase(sessionId, metrics)
+            val uiState = if (fallbackReason != null) {
+                BodyLanguageUiState.FallbackUsed(evaluation, fallbackReason)
+            } else {
+                BodyLanguageUiState.Success(evaluation)
+            }
             _state.update {
-                it.copy(
-                    isEvaluatingBodyLanguage = false,
-                    bodyLanguageEvaluation = evaluation,
-                    bodyLanguageFallbackReason = fallbackReason,
-                )
+                it.copy(bodyLanguageUiState = uiState)
             }
         }
     }
 
     private fun loadResult() {
+        val id = sessionId ?: return
         viewModelScope.launch {
-            val currentState = state.value
-            currentState.sessionId?.let { sessionId ->
-                _state.update {
-                    it.copy(
-                        isLoading = true
-                    )
+            _state.update { it.copy(isLoading = true) }
+            sessionRepo.getSessionFeedback(id)
+                .onSuccess { sessionResult ->
+                    _state.update {
+                        it.copy(
+                            sessionResult = sessionResult,
+                            isLoading = false
+                        )
+                    }
                 }
-                sessionRepo.getSessionFeedback(sessionId)
-                    .onSuccess { sessionResult ->
-                        _state.update {
-                            it.copy(
-                                sessionResult = sessionResult,
-                                isLoading = false
-                            )
-                        }
+                .onError { error ->
+                    _state.update {
+                        it.copy(isLoading = false)
                     }
-                    .onError { error ->
-                        _state.update {
-                            it.copy(
-                                isLoading = false
-                            )
-                        }
-                        CareerPilotSnackbarController.show(error.toUIText())
-                    }
-            }
+                    CareerPilotSnackbarController.show(error.toUIText())
+                }
         }
     }
 }

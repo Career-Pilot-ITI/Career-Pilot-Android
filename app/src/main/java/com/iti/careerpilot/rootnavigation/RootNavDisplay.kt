@@ -251,10 +251,10 @@ fun RootNavDisplay(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
                         isVideoSession = it.isVideoSession,
-                        onNavigateToResult = { sessionId, bodyLanguageJson ->
+                        onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(
-                                Route.PracticeResult(sessionId, bodyLanguageJson)
+                                Route.PracticeResult(sessionId)
                             )
                         },
                         onBack = {
@@ -265,8 +265,6 @@ fun RootNavDisplay(
 
                 entry<Route.PracticeResult> {
                     ResultRoot(
-                        sessionId = it.sessionId,
-                        bodyLanguageMetricsJson = it.bodyLanguageMetricsJson,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }

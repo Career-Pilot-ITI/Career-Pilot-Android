@@ -23,18 +23,5 @@ data class ResultState(
     val sessionId: Long? = null,
     val sessionResult: SessionResult? = null,
     val bodyLanguageMetrics: BodyLanguageMetrics? = null,
-    val isEvaluatingBodyLanguage: Boolean = false,
-    val bodyLanguageEvaluation: BodyLanguageEvaluation? = null,
-    val bodyLanguageFallbackReason: FallbackReason? = null,
-) {
-    val bodyLanguageUiState: BodyLanguageUiState
-        get() = when {
-            isEvaluatingBodyLanguage -> BodyLanguageUiState.Loading
-            bodyLanguageEvaluation != null && bodyLanguageFallbackReason != null ->
-                BodyLanguageUiState.FallbackUsed(bodyLanguageEvaluation, bodyLanguageFallbackReason)
-            bodyLanguageEvaluation != null ->
-                BodyLanguageUiState.Success(bodyLanguageEvaluation)
-            else ->
-                BodyLanguageUiState.Idle
-        }
-}
+    val bodyLanguageUiState: BodyLanguageUiState = BodyLanguageUiState.Idle,
+)

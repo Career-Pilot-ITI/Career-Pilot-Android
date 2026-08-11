@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.resultscreen.BodyLanguageUiState
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ScoreItem
 import com.iti.core.model.bodylanguage.BodyLanguageEvaluation
@@ -97,12 +100,13 @@ fun BodyLanguageSection(
 
 @Composable
 private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
+    val loadingText = stringResource(R.string.body_language_analyzing)
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .padding(Dimens.SpaceXL)
                 .semantics(mergeDescendants = true) {
-                    contentDescription = "Analyzing video body language with AI..."
+                    contentDescription = loadingText
                 },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
@@ -118,7 +122,7 @@ private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
                 )
                 Spacer(modifier = Modifier.width(Dimens.SpaceM))
                 Text(
-                    text = "Analyzing video body language with AI...",
+                    text = loadingText,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -141,12 +145,17 @@ private fun EvaluationBodyLanguageCard(
     fallbackReason: FallbackReason?,
     modifier: Modifier = Modifier,
 ) {
+    val cardContentDesc = stringResource(
+        R.string.body_language_evaluation_score_desc,
+        evaluation.overallScore
+    )
+
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .padding(Dimens.SpaceXL)
                 .semantics(mergeDescendants = true) {
-                    contentDescription = "Body Language AI Evaluation overall score ${evaluation.overallScore} out of 100"
+                    contentDescription = cardContentDesc
                 },
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {
@@ -165,93 +174,85 @@ private fun EvaluationBodyLanguageCard(
                     )
                     Spacer(modifier = Modifier.width(Dimens.SpaceS))
                     Text(
-                        text = "Body Language Evaluation",
+                        text = stringResource(R.string.body_language_evaluation),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         )
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceS)
-                ) {
-                    ConfidenceBandBadge(confidenceBand = evaluation.confidenceBand)
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        shape = CircleShape
-                    ) {
-                        Text(
-                            text = "${evaluation.overallScore}/100",
-                            modifier = Modifier.padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceXS),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                ConfidenceBandBadge(evaluation.confidenceBand)
             }
 
-            // Fallback Banner if fallbackReason != null
+            // Fallback Banner if on-device heuristic engine was used
             if (fallbackReason != null) {
                 FallbackDisclaimerBanner()
             }
 
-            // AI Summary
-            if (evaluation.summary.isNotBlank()) {
+            // Radar Chart Summary
+            BodyLanguageRadarChart(
+                eyeContactScore = evaluation.eyeContact.score,
+                postureScore = evaluation.posture.score,
+                handGesturesScore = evaluation.handGestures.score,
+                facialExpressionScore = evaluation.facialExpression.score,
+            )
+
+            // Overall Score Summary Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.overall_score),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${evaluation.overallScore}/100",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
                 Text(
                     text = evaluation.summary,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f).padding(start = Dimens.SpaceL),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-
-            // 4 Metric Breakdown Cards
-            Text(
-                text = "Metric Breakdown",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+            // All Metric Items
+            val allMetricsList = listOf(
+                R.string.eye_contact to evaluation.eyeContact,
+                R.string.posture to evaluation.posture,
+                R.string.facial_expression to evaluation.facialExpression,
+                R.string.hand_gestures to evaluation.handGestures
             )
 
-            MetricBreakdownCard(
-                label = "Eye Contact",
-                icon = Icons.Default.RemoveRedEye,
-                metric = evaluation.eyeContact
-            )
-            MetricBreakdownCard(
-                label = "Posture",
-                icon = Icons.Default.Accessibility,
-                metric = evaluation.posture
-            )
-            MetricBreakdownCard(
-                label = "Facial Expression",
-                icon = Icons.Default.Face,
-                metric = evaluation.facialExpression
-            )
-            MetricBreakdownCard(
-                label = "Hand Gestures",
-                icon = Icons.Default.TouchApp,
-                metric = evaluation.handGestures
-            )
+            // Strengths Cards Section
+            val strengthsList = allMetricsList.filter { it.second.score >= 70 }
 
-            // Actionable Coaching Tips
-            if (evaluation.actionableTips.isNotEmpty()) {
+            if (strengthsList.isNotEmpty()) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Lightbulb,
+                        imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(Dimens.SpaceL)
                     )
                     Spacer(modifier = Modifier.width(Dimens.SpaceS))
                     Text(
-                        text = "Actionable Coaching Tips",
+                        text = stringResource(R.string.strengths),
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                     )
                 }
 
-                evaluation.actionableTips.forEach { tip ->
+                strengthsList.forEach { (labelRes, item) ->
                     Row(
                         verticalAlignment = Alignment.Top,
                         modifier = Modifier.padding(start = Dimens.SpaceS)
@@ -265,10 +266,107 @@ private fun EvaluationBodyLanguageCard(
                                 .padding(top = 2.dp)
                         )
                         Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                        Column {
+                            Text(
+                                text = stringResource(labelRes) + " (${item.score}%)",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (item.observation.isNotBlank()) {
+                                Text(
+                                    text = item.observation,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Areas for Improvement Cards Section
+            val improvementsList = allMetricsList.filter { it.second.score < 70 }
+
+            if (improvementsList.isNotEmpty()) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(Dimens.SpaceL)
+                    )
+                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                    Text(
+                        text = stringResource(R.string.areas_for_improvement),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+
+                improvementsList.forEach { (labelRes, item) ->
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.padding(start = Dimens.SpaceS)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lightbulb,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .size(Dimens.SpaceL)
+                                .padding(top = 2.dp)
+                        )
+                        Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                        Column {
+                            Text(
+                                text = stringResource(labelRes) + " (${item.score}%)",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (item.observation.isNotBlank()) {
+                                Text(
+                                    text = item.observation,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            if (item.tip.isNotBlank()) {
+                                Text(
+                                    text = item.tip,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // General Actionable Tips
+            if (evaluation.actionableTips.isNotEmpty()) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                Text(
+                    text = stringResource(R.string.actionable_coaching_tips),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                )
+                evaluation.actionableTips.forEach { tip ->
+                    Row(
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.padding(start = Dimens.SpaceS)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(Dimens.SpaceL)
+                                .padding(top = 2.dp)
+                        )
+                        Spacer(modifier = Modifier.width(Dimens.SpaceS))
                         Text(
                             text = tip,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -283,17 +381,17 @@ private fun ConfidenceBandBadge(confidenceBand: ConfidenceBand) {
         ConfidenceBand.HIGH -> Triple(
             MaterialTheme.colorScheme.primaryContainer,
             MaterialTheme.colorScheme.onPrimaryContainer,
-            "HIGH"
+            stringResource(R.string.confidence_high)
         )
         ConfidenceBand.MODERATE -> Triple(
             MaterialTheme.colorScheme.tertiaryContainer,
             MaterialTheme.colorScheme.onTertiaryContainer,
-            "MODERATE"
+            stringResource(R.string.confidence_moderate)
         )
         ConfidenceBand.LOW -> Triple(
             MaterialTheme.colorScheme.errorContainer,
             MaterialTheme.colorScheme.onErrorContainer,
-            "LOW"
+            stringResource(R.string.confidence_low)
         )
     }
 
@@ -329,7 +427,7 @@ private fun FallbackDisclaimerBanner() {
             )
             Spacer(modifier = Modifier.width(Dimens.SpaceS))
             Text(
-                text = "AI evaluation unavailable — showing guidance based on on-device metrics",
+                text = stringResource(R.string.fallback_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
             )
@@ -429,6 +527,11 @@ private fun RawMetricsBodyLanguageCard(
     metrics: BodyLanguageMetrics,
     modifier: Modifier = Modifier,
 ) {
+    val eyeContactScore = metrics.eyeContactPercentage.toInt().coerceIn(0, 100)
+    val postureScore = (100 - metrics.slouchPercentage).toInt().coerceIn(0, 100)
+    val handGesturesScore = ((1f - metrics.fidgetScore) * 100).toInt().coerceIn(0, 100)
+    val facialExpressionScore = (metrics.averageSmile * 100).toInt().coerceIn(0, 100)
+
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -439,30 +542,37 @@ private fun RawMetricsBodyLanguageCard(
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
         ) {
             Text(
-                text = "Body Language Metrics",
+                text = stringResource(R.string.body_language_metrics),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold
                 )
             )
 
+            BodyLanguageRadarChart(
+                eyeContactScore = eyeContactScore,
+                postureScore = postureScore,
+                handGesturesScore = handGesturesScore,
+                facialExpressionScore = facialExpressionScore
+            )
+
             ScoreItem(
-                label = "Eye Contact",
-                score = metrics.eyeContactPercentage.toInt().coerceIn(0, 100),
+                label = stringResource(R.string.eye_contact),
+                score = eyeContactScore,
                 icon = Icons.Default.RemoveRedEye,
             )
             ScoreItem(
-                label = "Smile",
-                score = (metrics.averageSmile * 100).toInt().coerceIn(0, 100),
+                label = stringResource(R.string.smile),
+                score = facialExpressionScore,
                 icon = Icons.Default.Face,
             )
             ScoreItem(
-                label = "Good Posture",
-                score = (100 - metrics.slouchPercentage).toInt().coerceIn(0, 100),
+                label = stringResource(R.string.good_posture),
+                score = postureScore,
                 icon = Icons.Default.Accessibility,
             )
             ScoreItem(
-                label = "Hand Composure",
-                score = ((1f - metrics.fidgetScore) * 100).toInt().coerceIn(0, 100),
+                label = stringResource(R.string.hand_composure),
+                score = handGesturesScore,
                 icon = Icons.Default.TouchApp,
             )
         }

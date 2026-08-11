@@ -258,10 +258,10 @@ class PracticeSessionViewModelTest {
     }
 
     private fun createDummyContext(): Context {
-        return Proxy.newProxyInstance(
-            Context::class.java.classLoader,
-            arrayOf(Context::class.java)
-        ) { _, _, _ -> null } as Context
+        return object : android.content.ContextWrapper(null) {
+            override fun getApplicationContext(): Context = this
+            override fun getPackageName(): String = "com.iti.careerpilot"
+        }
     }
 
     @Before
@@ -282,6 +282,7 @@ class PracticeSessionViewModelTest {
         whisperEngine: WhisperEngine = FakeWhisperEngine(),
         bodyLanguageAnalyzer: BodyLanguageAnalyzer = FakeBodyLanguageAnalyzer(),
         userProfileRepo: UserProfileRepo = FakeUserProfileRepo(),
+        sessionCache: com.iti.careerpilot.ai.cache.InMemorySessionCache = com.iti.careerpilot.ai.cache.InMemorySessionCache(),
     ): PracticeSessionViewModel {
         val ttsManager = TextToSpeechManager(createDummyContext())
         val amplitudeNormalizer = AmplitudeNormalizer()
@@ -295,6 +296,7 @@ class PracticeSessionViewModelTest {
             amplitudeNormalizer = amplitudeNormalizer,
             bodyLanguageAnalyzer = bodyLanguageAnalyzer,
             userProfileRepo = userProfileRepo,
+            sessionCache = sessionCache,
             defaultDispatcher = testDispatcher
         )
     }
@@ -525,7 +527,6 @@ class PracticeSessionViewModelTest {
         val navigateEvent = events.filterIsInstance<PracticeSessionEvent.NavigateToResult>().firstOrNull()
         assertNotNull("Expected NavigateToResult event", navigateEvent)
         assertEquals(dummySession.sessionId, navigateEvent!!.sessionId)
-        assertNotNull(navigateEvent.bodyLanguageMetricsJson)
 
         job.cancel()
     }

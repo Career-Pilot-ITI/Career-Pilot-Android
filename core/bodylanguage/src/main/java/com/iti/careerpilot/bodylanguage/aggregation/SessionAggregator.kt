@@ -168,13 +168,13 @@ internal class SessionAggregator @Inject constructor() {
     fun finalize(): BodyLanguageMetrics {
         // Close any open look-away span
         lookAwayStartMs?.let { start ->
-            val end = sessionEndMs ?: start
+            val end = maxOf(sessionEndMs ?: 0L, lastActiveTimestampMs ?: 0L, start)
             totalLookAwayMs += (end - start).coerceAtLeast(0L)
             lookAwayStartMs = null
         }
 
         val currentActiveDelta = if (isRecordingActive && activeWindowStartMs != null) {
-            val end = sessionEndMs ?: activeWindowStartMs!!
+            val end = maxOf(sessionEndMs ?: 0L, lastActiveTimestampMs ?: 0L, activeWindowStartMs!!)
             (end - activeWindowStartMs!!).coerceAtLeast(0L)
         } else 0L
         val totalActiveDurationMs = cumulativeActiveDurationMs + currentActiveDelta

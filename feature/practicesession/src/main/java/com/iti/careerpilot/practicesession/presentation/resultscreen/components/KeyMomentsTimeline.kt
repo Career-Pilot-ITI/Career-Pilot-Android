@@ -17,10 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.practicesession.R
+import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
 import com.iti.core.model.bodylanguage.KeyMoment
 import com.iti.core.model.bodylanguage.KeyMomentType
 
@@ -34,7 +37,7 @@ fun KeyMomentsTimeline(
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(Dimens.SpaceXL)) {
             Text(
-                text = "Key Moments",
+                text = stringResource(R.string.key_moments),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -52,12 +55,13 @@ fun KeyMomentsTimeline(
 @Composable
 private fun KeyMomentItem(moment: KeyMoment) {
     val (label, color) = when (moment.type) {
-        KeyMomentType.EYE_CONTACT_LOST -> "Looked away" to MaterialTheme.colorScheme.error
-        KeyMomentType.SLOUCH_START -> "Slouched" to MaterialTheme.colorScheme.error
-        KeyMomentType.HAND_FIDGET_SPIKE -> "Hand fidget / touch" to MaterialTheme.colorScheme.tertiary
-        KeyMomentType.FACE_LOST -> "Face not visible" to MaterialTheme.colorScheme.error
-        KeyMomentType.SMILE_PEAK -> "Smiled 😊" to MaterialTheme.colorScheme.primary
-        KeyMomentType.POSTURE_SHIFT -> "Posture shift" to MaterialTheme.colorScheme.secondary
+        KeyMomentType.EYE_CONTACT_LOST -> stringResource(R.string.moment_looked_away) to MaterialTheme.colorScheme.error
+        KeyMomentType.SLOUCH_START -> stringResource(R.string.moment_slouched) to MaterialTheme.colorScheme.error
+        KeyMomentType.HAND_FIDGET_SPIKE -> stringResource(R.string.moment_hand_fidget) to MaterialTheme.colorScheme.tertiary
+        KeyMomentType.HAND_TO_FACE_TOUCH -> stringResource(R.string.moment_hand_fidget) to MaterialTheme.colorScheme.tertiary
+        KeyMomentType.FACE_LOST -> stringResource(R.string.moment_face_lost) to MaterialTheme.colorScheme.error
+        KeyMomentType.SMILE_PEAK -> stringResource(R.string.moment_smiled) to MaterialTheme.colorScheme.primary
+        KeyMomentType.POSTURE_SHIFT -> stringResource(R.string.moment_posture_shift) to MaterialTheme.colorScheme.secondary
     }
 
     Row(
@@ -77,24 +81,17 @@ private fun KeyMomentItem(moment: KeyMoment) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = formatTimestamp(moment.timestampMs),
+            text = formatDuration(moment.timestampMs),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (moment.durationMs > 0) {
             Spacer(modifier = Modifier.width(Dimens.SpaceS))
             Text(
-                text = "${moment.durationMs / 1000}s",
+                text = stringResource(R.string.seconds_short, moment.durationMs / 1000),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
-}
-
-private fun formatTimestamp(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "%d:%02d".format(minutes, seconds)
 }

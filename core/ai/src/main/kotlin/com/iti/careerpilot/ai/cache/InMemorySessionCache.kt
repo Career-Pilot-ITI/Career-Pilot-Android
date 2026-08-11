@@ -8,7 +8,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 data class CachedSessionResult(
-    val evaluation: BodyLanguageEvaluation,
+    val evaluation: BodyLanguageEvaluation? = null,
     val fallbackReason: FallbackReason? = null,
     val metrics: BodyLanguageMetrics? = null,
 )
@@ -25,11 +25,10 @@ class InMemorySessionCache @Inject constructor() {
 
     private val cache = ConcurrentHashMap<Long, CachedSessionResult>()
 
-    fun get(sessionId: Long): BodyLanguageEvaluation? = cache[sessionId]?.evaluation
-
     fun getEvaluation(sessionId: Long): Pair<BodyLanguageEvaluation, FallbackReason?>? {
         val entry = cache[sessionId] ?: return null
-        return Pair(entry.evaluation, entry.fallbackReason)
+        val eval = entry.evaluation ?: return null
+        return Pair(eval, entry.fallbackReason)
     }
 
     fun getMetrics(sessionId: Long): BodyLanguageMetrics? = cache[sessionId]?.metrics
@@ -52,6 +51,12 @@ class InMemorySessionCache @Inject constructor() {
         val existing = cache[sessionId]
         if (existing != null) {
             cache[sessionId] = existing.copy(metrics = metrics)
+        } else {
+            cache[sessionId] = CachedSessionResult(
+                evaluation = null,
+                fallbackReason = null,
+                metrics = metrics,
+            )
         }
     }
 

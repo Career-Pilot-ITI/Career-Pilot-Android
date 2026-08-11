@@ -108,7 +108,7 @@ class KeyMomentDetectorTest {
 
         val moments = detector.getKeyMoments()
         assertEquals(1, moments.size)
-        assertEquals(KeyMomentType.HAND_FIDGET_SPIKE, moments[0].type)
+        assertEquals(KeyMomentType.HAND_TO_FACE_TOUCH, moments[0].type)
     }
 
     @Test
@@ -119,7 +119,7 @@ class KeyMomentDetectorTest {
 
         val moments = detector.getKeyMoments()
         assertEquals(1, moments.size)
-        assertEquals(KeyMomentType.HAND_FIDGET_SPIKE, moments[0].type)
+        assertEquals(KeyMomentType.HAND_TO_FACE_TOUCH, moments[0].type)
         assertEquals(1000L, moments[0].timestampMs) // 2000 - 1000
         assertEquals(1000L, moments[0].durationMs)
     }

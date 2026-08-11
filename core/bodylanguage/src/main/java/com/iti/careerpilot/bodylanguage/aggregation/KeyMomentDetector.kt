@@ -133,7 +133,7 @@ internal class KeyMomentDetector @Inject constructor() {
                 moments.add(
                     KeyMoment(
                         timestampMs = toRelative(handToFaceStartMs!!),
-                        type = KeyMomentType.HAND_FIDGET_SPIKE,
+                        type = KeyMomentType.HAND_TO_FACE_TOUCH,
                         durationMs = duration,
                     )
                 )
@@ -210,7 +210,7 @@ internal class KeyMomentDetector @Inject constructor() {
                 moments.add(
                     KeyMoment(
                         timestampMs = toRelative(start),
-                        type = KeyMomentType.HAND_FIDGET_SPIKE,
+                        type = KeyMomentType.HAND_TO_FACE_TOUCH,
                         durationMs = duration,
                     )
                 )

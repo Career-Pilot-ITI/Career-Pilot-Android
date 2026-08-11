@@ -7,6 +7,7 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
 import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
@@ -39,7 +40,6 @@ import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -82,6 +82,7 @@ class PracticeSessionViewModel @Inject constructor(
     private val amplitudeNormalizer: AmplitudeNormalizer,
     private val bodyLanguageAnalyzer: BodyLanguageAnalyzer,
     private val userProfileRepo: UserProfileRepo,
+    private val sessionCache: InMemorySessionCache,
     @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -634,11 +635,11 @@ class PracticeSessionViewModel @Inject constructor(
 
         if (isReadyToComplete) {
             // Finalize body language if running
-            val metricsJson = if (bodyLanguageAnalyzer.isRunning) {
-                bodyLanguageAnalyzer.stop()
+            if (bodyLanguageAnalyzer.isRunning) {
                 val metrics = bodyLanguageAnalyzer.finalizeSession()
-                Json.encodeToString(BodyLanguageMetrics.serializer(), metrics)
-            } else null
+                sessionCache.putMetrics(sessionId, metrics)
+                bodyLanguageAnalyzer.stop()
+            }
 
             timerJob?.cancel()
             savedStateHandle.remove<Long>(KEY_ACTIVE_SESSION_ID)
@@ -651,7 +652,7 @@ class PracticeSessionViewModel @Inject constructor(
                     recordedAudioPath = null
                 )
             }
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId, metricsJson))
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
             return
         }
 

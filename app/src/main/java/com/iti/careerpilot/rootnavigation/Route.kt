@@ -40,10 +40,7 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data class PracticeResult(
-        val sessionId: Long,
-        val bodyLanguageMetricsJson: String? = null,
-    ) : Route
+    data class PracticeResult(val sessionId: Long) : Route
 
     @Serializable
     data class QuestionBreakdown(val sessionId: Long) : Route

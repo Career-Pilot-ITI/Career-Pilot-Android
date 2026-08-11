@@ -19,6 +19,8 @@ import com.iti.common.dispatcher.CareerPilotDispatchers.IO
 import com.iti.common.dispatcher.Dispatcher
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.iti.common.dispatcher.di.ApplicationScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -35,6 +37,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
+    @ApplicationScope private val appScope: CoroutineScope,
 ) : BodyLanguageAnalyzer {
 
     private val _isRunning = AtomicBoolean(false)
@@ -139,6 +142,17 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                 pose.initialize()
                 hand.initialize()
 
+                if (!_isRunning.get()) {
+                    try {
+                        face.close()
+                        pose.close()
+                        hand.close()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error closing engines initialized after stop", e)
+                    }
+                    return@launch
+                }
+
                 faceEngine = face
                 poseEngine = pose
                 handEngine = hand
@@ -146,6 +160,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
 
                 Log.d(TAG, "MediaPipe body language engines initialized in background")
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 Log.e(TAG, "Error initializing MediaPipe engines", e)
             }
         }
@@ -188,7 +203,7 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         handEngine = null
         frameScheduler = null
 
-        CoroutineScope(ioDispatcher).launch {
+        appScope.launch(ioDispatcher) {
             try {
                 currentFace?.close()
                 currentPose?.close()

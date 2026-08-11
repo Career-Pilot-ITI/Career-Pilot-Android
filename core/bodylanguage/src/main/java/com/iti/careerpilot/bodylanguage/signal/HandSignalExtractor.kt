@@ -60,28 +60,44 @@ internal class HandSignalExtractor @Inject constructor() {
             }
         }
 
-        // Movement score: average wrist displacement tracked by handedness
-        val handednesses = result.handedness()
-        val currentWrists = mutableMapOf<String, Pair<Float, Float>>()
+        // Movement score: average wrist displacement tracked by spatial proximity matching
+        val currentWristsList = mutableListOf<Pair<Float, Float>>()
         val displacements = mutableListOf<Float>()
+        val previousWristList = previousWristPositions.values.toList()
+        val usedPreviousIndices = mutableSetOf<Int>()
 
         for (i in 0 until handCount) {
             val handLandmarks = landmarks[i]
-            val handednessLabel = handednesses.getOrNull(i)?.firstOrNull()?.categoryName()
-                ?: if (i == 0) "Left" else "Right"
             val wrist = handLandmarks[WRIST]
             val currentPos = wrist.x() to wrist.y()
-            currentWrists[handednessLabel] = currentPos
+            currentWristsList.add(currentPos)
 
-            previousWristPositions[handednessLabel]?.let { prevPos ->
-                val dx = currentPos.first - prevPos.first
-                val dy = currentPos.second - prevPos.second
-                displacements.add(sqrt((dx * dx + dy * dy).toDouble()).toFloat())
+            // Find closest matching wrist from previous frame within max spatial threshold (0.35)
+            var minDistance = Float.MAX_VALUE
+            var bestPrevIndex = -1
+
+            previousWristList.forEachIndexed { prevIdx, prevPos ->
+                if (prevIdx !in usedPreviousIndices) {
+                    val dx = currentPos.first - prevPos.first
+                    val dy = currentPos.second - prevPos.second
+                    val dist = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+                    if (dist < minDistance && dist < 0.35f) {
+                        minDistance = dist
+                        bestPrevIndex = prevIdx
+                    }
+                }
+            }
+
+            if (bestPrevIndex != -1) {
+                usedPreviousIndices.add(bestPrevIndex)
+                displacements.add(minDistance)
             }
         }
 
         previousWristPositions.clear()
-        previousWristPositions.putAll(currentWrists)
+        currentWristsList.forEachIndexed { idx, pos ->
+            previousWristPositions["hand_$idx"] = pos
+        }
 
         val movementScore = if (displacements.isNotEmpty()) {
             val avgDisp = displacements.average().toFloat()

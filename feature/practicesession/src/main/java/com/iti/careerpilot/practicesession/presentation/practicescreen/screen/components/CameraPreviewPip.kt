@@ -108,9 +108,10 @@ fun CameraPreviewPip(
     }
 
     val borderModifier = if (showAnimatedBorder) {
+        val currentAngle = angle.value
         Modifier.drawWithContent {
             drawContent()
-            rotatingBrush.currentAngle = angle.value
+            rotatingBrush.currentAngle = currentAngle
             drawRoundRect(
                 brush = rotatingBrush,
                 cornerRadius = CornerRadius(borderCornerRadius.toPx(), borderCornerRadius.toPx()),
@@ -126,10 +127,13 @@ fun CameraPreviewPip(
         val cameraExecutor = Executors.newSingleThreadExecutor()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         var cameraProvider: ProcessCameraProvider? = null
+        var isDisposed = false
 
         val listener = Runnable {
+            if (isDisposed) return@Runnable
             try {
                 val provider = cameraProviderFuture.get()
+                if (isDisposed) return@Runnable
                 cameraProvider = provider
 
                 val previewUseCase = Preview.Builder()
@@ -146,16 +150,22 @@ fun CameraPreviewPip(
                     .build()
 
                 imageAnalysisUseCase.setAnalyzer(cameraExecutor) { imageProxy ->
-                    onFrame(imageProxy)
+                    if (!isDisposed) {
+                        onFrame(imageProxy)
+                    } else {
+                        imageProxy.close()
+                    }
                 }
 
                 provider.unbindAll()
-                provider.bindToLifecycle(
-                    lifecycleOwner,
-                    CameraSelector.DEFAULT_FRONT_CAMERA,
-                    previewUseCase,
-                    imageAnalysisUseCase,
-                )
+                if (!isDisposed) {
+                    provider.bindToLifecycle(
+                        lifecycleOwner,
+                        CameraSelector.DEFAULT_FRONT_CAMERA,
+                        previewUseCase,
+                        imageAnalysisUseCase,
+                    )
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to bind camera use cases", e)
             }
@@ -164,6 +174,7 @@ fun CameraPreviewPip(
         cameraProviderFuture.addListener(listener, ContextCompat.getMainExecutor(context))
 
         onDispose {
+            isDisposed = true
             try {
                 cameraProvider?.unbindAll()
             } catch (e: Exception) {
