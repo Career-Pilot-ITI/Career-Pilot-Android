@@ -9,7 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.ats.presentation.entry.AtsEntryRoot
+import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterRoot
