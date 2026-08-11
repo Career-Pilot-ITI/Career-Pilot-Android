@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.entry
+package com.iti.careerpilot.ats.presentation.entry.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,12 +7,14 @@ import com.iti.careerpilot.ats.domain.usecase.ImportJobUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ReplaceCurrentCvUseCase
 import com.iti.careerpilot.ats.domain.util.JobUrlParser
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AtsEntryViewModel @Inject constructor(
@@ -31,7 +34,7 @@ class AtsEntryViewModel @Inject constructor(
     private val _state = MutableStateFlow(AtsEntryUiState())
     val state = _state.asStateFlow()
 
-    private val effectChannel = Channel<AtsEntryEffect>(Channel.BUFFERED)
+    private val effectChannel = Channel<AtsEntryEffect>(Channel.Factory.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
 
     private var activeOperation: Job? = null
