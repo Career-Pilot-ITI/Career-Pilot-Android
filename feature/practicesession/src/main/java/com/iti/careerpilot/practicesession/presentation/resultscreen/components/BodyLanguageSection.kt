@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,33 +56,51 @@ import com.iti.core.model.bodylanguage.ConfidenceBand
 import com.iti.core.model.bodylanguage.FallbackReason
 import com.iti.core.model.bodylanguage.MetricEvaluation
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+
 @Composable
 fun BodyLanguageSection(
     uiState: BodyLanguageUiState,
     metrics: BodyLanguageMetrics? = null,
     modifier: Modifier = Modifier,
 ) {
-    when (uiState) {
-        BodyLanguageUiState.Loading -> {
-            LoadingBodyLanguageCard(modifier = modifier)
-        }
-        is BodyLanguageUiState.Success -> {
-            EvaluationBodyLanguageCard(
-                evaluation = uiState.evaluation,
-                fallbackReason = null,
-                modifier = modifier
-            )
-        }
-        is BodyLanguageUiState.FallbackUsed -> {
-            EvaluationBodyLanguageCard(
-                evaluation = uiState.evaluation,
-                fallbackReason = uiState.reason,
-                modifier = modifier
-            )
-        }
-        BodyLanguageUiState.Idle -> {
-            if (metrics != null) {
-                RawMetricsBodyLanguageCard(metrics = metrics, modifier = modifier)
+    AnimatedContent(
+        targetState = uiState,
+        modifier = modifier,
+        transitionSpec = {
+            (fadeIn(animationSpec = tween(500)) + slideInVertically(animationSpec = tween(500)) { it / 6 })
+                .togetherWith(fadeOut(animationSpec = tween(300)))
+        },
+        label = "body_language_section_state"
+    ) { state ->
+        when (state) {
+            BodyLanguageUiState.Loading -> {
+                LoadingBodyLanguageCard()
+            }
+            is BodyLanguageUiState.Success -> {
+                EvaluationBodyLanguageCard(
+                    evaluation = state.evaluation,
+                    fallbackReason = null
+                )
+            }
+            is BodyLanguageUiState.FallbackUsed -> {
+                EvaluationBodyLanguageCard(
+                    evaluation = state.evaluation,
+                    fallbackReason = state.reason
+                )
+            }
+            BodyLanguageUiState.Idle -> {
+                if (metrics != null) {
+                    RawMetricsBodyLanguageCard(metrics = metrics)
+                }
             }
         }
     }
@@ -152,6 +171,12 @@ private fun EvaluationBodyLanguageCard(
         evaluation.overallScore
     )
 
+    val animatedOverallScore by animateIntAsState(
+        targetValue = evaluation.overallScore,
+        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        label = "hero_overall_score"
+    )
+
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -215,7 +240,7 @@ private fun EvaluationBodyLanguageCard(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    text = "${evaluation.overallScore}",
+                                    text = "$animatedOverallScore",
                                     style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
@@ -389,6 +414,17 @@ private fun MetricBreakdownCard(
     metric: MetricEvaluation,
     modifier: Modifier = Modifier,
 ) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = metric.score / 100f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "metric_progress_anim"
+    )
+    val animatedScoreInt by animateIntAsState(
+        targetValue = metric.score,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "metric_score_text_anim"
+    )
+
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         shape = RoundedCornerShape(Dimens.SpaceM),
@@ -422,14 +458,14 @@ private fun MetricBreakdownCard(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "${metric.score}%",
+                    text = "$animatedScoreInt%",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
             }
 
             LinearProgressIndicator(
-                progress = { metric.score / 100f },
+                progress = { animatedProgress },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
