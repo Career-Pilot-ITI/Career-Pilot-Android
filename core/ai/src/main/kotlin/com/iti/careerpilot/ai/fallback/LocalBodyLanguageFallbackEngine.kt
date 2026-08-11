@@ -12,6 +12,46 @@ import javax.inject.Singleton
 class LocalBodyLanguageFallbackEngine @Inject constructor() {
 
     fun evaluate(metrics: BodyLanguageMetrics): BodyLanguageEvaluation {
+        val hasNoDetectedLandmarks = metrics.sessionDurationMs > 0L &&
+            metrics.eyeContactPercentage == 0f &&
+            metrics.slouchPercentage == 0f &&
+            metrics.handsVisiblePercentage == 0f &&
+            metrics.averageSmile == 0f
+
+        if (hasNoDetectedLandmarks) {
+            return BodyLanguageEvaluation(
+                schemaVersion = 1,
+                overallScore = 15,
+                eyeContact = MetricEvaluation(
+                    score = 0,
+                    observation = "Candidate out of camera view. Eye contact could not be tracked.",
+                    tip = "Align your camera at eye level and face the lens directly."
+                ),
+                posture = MetricEvaluation(
+                    score = 0,
+                    observation = "No body posture detected during recording.",
+                    tip = "Sit upright in front of the camera so head and shoulders are visible."
+                ),
+                facialExpression = MetricEvaluation(
+                    score = 0,
+                    observation = "Facial features out of frame.",
+                    tip = "Ensure consistent lighting on your face."
+                ),
+                handGestures = MetricEvaluation(
+                    score = 0,
+                    observation = "Hands out of camera view.",
+                    tip = "Position hands in upper chest frame for natural gestures."
+                ),
+                confidenceBand = ConfidenceBand.LOW,
+                summary = "Candidate was out of camera view for the recording. Position your webcam at eye level.",
+                actionableTips = listOf(
+                    "Position webcam at eye level to keep your head and shoulders visible.",
+                    "Ensure adequate front lighting so facial features are recognized.",
+                    "Face the camera directly while speaking to maximize non-verbal presence."
+                ),
+            )
+        }
+
         val eyeContact = evaluateEyeContact(metrics)
         val posture = evaluatePosture(metrics)
         val facial = evaluateFacialExpression(metrics)

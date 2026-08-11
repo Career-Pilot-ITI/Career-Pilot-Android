@@ -82,4 +82,35 @@ class LocalBodyLanguageFallbackEngineTest {
         assertNotNull(eval)
         assertTrue(eval.overallScore in 0..100)
     }
+
+    @Test
+    fun `session with zero detected landmarks evaluates as candidate out of camera view`() {
+        val metrics = BodyLanguageMetrics(
+            schemaVersion = 1,
+            sessionDurationMs = 30_000L,
+            averageSmile = 0f,
+            maxSmile = 0f,
+            eyeContactPercentage = 0f,
+            timeLookingAwayMs = 0L,
+            faceLostCount = 1,
+            averageTorsoLeanDeg = 0f,
+            averageShoulderTiltDeg = 0f,
+            slouchPercentage = 0f,
+            postureChanges = 0,
+            handsVisiblePercentage = 0f,
+            handToFaceTouchCount = 0,
+            fidgetScore = 0f,
+            keyMoments = emptyList(),
+        )
+
+        val eval = engine.evaluate(metrics)
+
+        assertEquals(15, eval.overallScore)
+        assertEquals(0, eval.eyeContact.score)
+        assertEquals(0, eval.posture.score)
+        assertEquals(0, eval.facialExpression.score)
+        assertEquals(0, eval.handGestures.score)
+        assertEquals(ConfidenceBand.LOW, eval.confidenceBand)
+        assertTrue(eval.summary.contains("out of camera view", ignoreCase = true))
+    }
 }
