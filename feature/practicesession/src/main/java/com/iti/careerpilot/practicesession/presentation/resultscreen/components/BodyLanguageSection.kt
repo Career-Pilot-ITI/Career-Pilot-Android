@@ -32,7 +32,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -171,9 +176,14 @@ private fun EvaluationBodyLanguageCard(
         evaluation.overallScore
     )
 
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
     val animatedOverallScore by animateIntAsState(
-        targetValue = evaluation.overallScore,
-        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        targetValue = if (startAnimation) evaluation.overallScore else 0,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
         label = "hero_overall_score"
     )
 
@@ -414,16 +424,18 @@ private fun MetricBreakdownCard(
     metric: MetricEvaluation,
     modifier: Modifier = Modifier,
 ) {
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    val normalizedScore = metric.score.coerceIn(0, 100)
     val animatedProgress by animateFloatAsState(
-        targetValue = metric.score / 100f,
+        targetValue = if (startAnimation) normalizedScore / 100f else 0f,
         animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
         label = "metric_progress_anim"
     )
-    val animatedScoreInt by animateIntAsState(
-        targetValue = metric.score,
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-        label = "metric_score_text_anim"
-    )
+    val animatedScoreInt = (animatedProgress * 100).roundToInt()
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
