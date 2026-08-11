@@ -1,6 +1,8 @@
 package com.iti.careerpilot.quiz.presentation.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -30,6 +32,8 @@ fun QuizRoot(
     }
 
     QuizScreen(
+        trackId = trackId,
+        trackName = trackName,
         state = state,
         onAction = viewModel::onAction
     )
@@ -37,17 +41,22 @@ fun QuizRoot(
 
 @Composable
 fun QuizScreen(
+    trackId: Long,
+    trackName: String,
     state: QuizState,
     onAction: (QuizAction) -> Unit
 ) {
     Scaffold { innerPadding ->
-        Box(
+        Column (
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "Quiz Screen")
+            Text(text = "id: $trackId")
+            Text(text = "name: $trackName")
         }
     }
 }

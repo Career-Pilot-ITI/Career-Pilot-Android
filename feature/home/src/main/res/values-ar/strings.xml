@@ -42,7 +42,7 @@
     <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
 
     <!-- Available interviews -->
-    <string name="home_available_interviews">المقابلات المتاحة</string>
+    <string name="home_available_interviews">المقابلات</string>
     <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
 
     <!-- Recent sessions -->

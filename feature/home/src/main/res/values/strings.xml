@@ -38,7 +38,7 @@
     <string name="home_start_practice">Start practice interview</string>
 
     <!-- Available interviews -->
-    <string name="home_available_interviews">Available Interviews</string>
+    <string name="home_available_interviews">Interviews</string>
     <string name="home_available_interviews_subtitle">Pick a track and start practising</string>
 
     <!-- Recent sessions -->

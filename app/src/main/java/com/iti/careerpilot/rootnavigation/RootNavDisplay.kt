@@ -200,6 +200,14 @@ fun RootNavDisplay(
                                 ),
                             )
                         },
+                        openQuiz = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Quiz(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
                         openInterviews = {
                             rootBackStack.navigateSingleTop(Route.Interviews)
                         },
