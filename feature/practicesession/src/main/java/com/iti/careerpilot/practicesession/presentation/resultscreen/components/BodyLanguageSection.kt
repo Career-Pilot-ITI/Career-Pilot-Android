@@ -23,10 +23,11 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -98,6 +99,7 @@ fun BodyLanguageSection(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
     val loadingText = stringResource(R.string.body_language_analyzing)
@@ -115,25 +117,25 @@ private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.5.dp,
-                    color = MaterialTheme.colorScheme.primary
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(Dimens.SpaceXL)
                 )
-                Spacer(modifier = Modifier.width(Dimens.SpaceM))
+                Spacer(modifier = Modifier.width(Dimens.SpaceS))
                 Text(
                     text = loadingText,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(CircleShape),
+                    .height(6.dp),
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
         }
     }
