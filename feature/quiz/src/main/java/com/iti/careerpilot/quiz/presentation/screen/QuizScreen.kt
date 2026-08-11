@@ -18,6 +18,9 @@ import com.iti.careerpilot.quiz.presentation.viewmodel.QuizViewModel
 
 @Composable
 fun QuizRoot(
+    trackId: Long,
+    trackName: String,
+    onBack: () -> Unit,
     viewModel: QuizViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

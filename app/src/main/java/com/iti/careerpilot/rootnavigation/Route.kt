@@ -47,6 +47,9 @@ sealed interface Route : NavKey {
     data class QuestionBreakdown(val sessionId: Long) : Route
 
     @Serializable
+    data class Quiz(val trackId: Long, val trackName: String)  : Route
+
+    @Serializable
     data object Settings : Route
 
     @Serializable

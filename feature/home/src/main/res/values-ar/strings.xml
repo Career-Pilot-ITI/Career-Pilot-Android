@@ -86,5 +86,7 @@
     <string name="ready_permission_allow">السماح</string>
     <string name="ready_permission_cancel">ليس الآن</string>
     <string name="getting_ready">جاري الاستعداد</string>
+    <string name="start_interview">ابدأ الانترفيو</string>
+    <string name="see_lessons">الدروس</string>
 
 </resources>
