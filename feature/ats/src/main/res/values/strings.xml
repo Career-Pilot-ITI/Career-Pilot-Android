@@ -13,10 +13,11 @@
     <string name="ats_cv_on_file">CV on File</string>
     <string name="ats_current_cv">Current CV</string>
     <string name="ats_cv_size">%1$d KB · synchronized</string>
-    <string name="ats_replace_cv">Replace</string>
+    <string name="ats_check_cv_icon">Check CV Icon</string>
     <string name="ats_upload_your_cv">Upload your CV</string>
     <string name="ats_pdf_limit">PDF · Max 10 MiB</string>
-    <string name="ats_share_tip">Faster: In LinkedIn or any job app, tap Share → CareerPilot. The link is captured automatically.</string>
+    <string name="ats_share_icon">Fast Share Icon</string>
+    <string name="ats_share_tip"><b>Faster</b>: In LinkedIn or any job app, <b>tap Share → CareerPilot</b>. The link is captured automatically.</string>
     <string name="ats_compare_now">Compare Now</string>
     <string name="ats_importing_job">Importing job…</string>
     <string name="ats_importing_details">Reading job details…</string>
