@@ -22,4 +22,6 @@ class FakeProfileRemoteDataSource @Inject constructor() : ProfileRemoteDataSourc
             )
         )
     }
+
+    override suspend fun downloadBytes(url: String): ByteArray? = null
 }

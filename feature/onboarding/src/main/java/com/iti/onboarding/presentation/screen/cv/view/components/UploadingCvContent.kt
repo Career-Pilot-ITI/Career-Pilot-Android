@@ -17,7 +17,17 @@ import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
 fun UploadingCvContent(
     selectedFile: SelectedCvUiModel?,
     progress: Float,
+    isParsing: Boolean = false,
 ) {
+    val statusText = if (isParsing || progress >= 1f) {
+        stringResource(R.string.parsing_cv)
+    } else {
+        stringResource(
+            R.string.cv_upload_progress,
+            (progress * 100).toInt(),
+        )
+    }
+
     FileDetails(
         selectedFile = selectedFile,
         icon = {
@@ -26,9 +36,6 @@ fun UploadingCvContent(
                 modifier = Modifier.size(48.dp),
             )
         },
-        statusText = stringResource(
-            R.string.cv_upload_progress,
-            (progress * 100).toInt(),
-        ),
+        statusText = statusText,
     )
 }

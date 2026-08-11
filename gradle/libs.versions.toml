@@ -36,6 +36,7 @@ exifinterface = "1.4.2"
 media3 = "1.10.1"
 sherpaOnnx = "v1.13.4"
 browser = "1.9.0"
+paging = "3.5.0"
 mediapipe = "0.10.35"
 camerax = "1.6.1"
 rive-android = "11.7.2"
@@ -97,6 +98,9 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+#paging
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 #collect as state with lifecycle
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 #viewmodel scoping per NavEntry (Navigation 3)

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,10 +21,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.iti.careerpilot.core.designsystem.R
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UploadProgressDialog(
     progress: Int,
     title: String,
+    isParsing: Boolean = false,
     error: String? = null
 ) {
     val animatedProgress by animateFloatAsState(
@@ -55,7 +58,7 @@ fun UploadProgressDialog(
                     color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 if (error != null) {
                     Text(
                         text = error,
@@ -63,7 +66,24 @@ fun UploadProgressDialog(
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
+                } else if (isParsing) {
+                    // Indeterminate indicator — upload done, server is parsing
+                    LinearWavyProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.parsing_cv_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 } else {
+                    // Determinate indicator — uploading in progress
                     LinearWavyProgressIndicator(
                         progress = { animatedProgress },
                         modifier = Modifier

@@ -39,7 +39,7 @@ fun NetworkError.toUIText(): UIText {
                 R.string.error_not_found
 
             NetworkError.CONFLICT ->
-                R.string.error_conflict
+                R.string.error_email_already_in_use
 
             NetworkError.GONE ->
                 R.string.error_gone

@@ -10,7 +10,8 @@ data class UploadCvUiState(
 ) {
     val isSubmitting: Boolean
         get() = stage == CvUploadStage.PREPARING ||
-            stage == CvUploadStage.UPLOADING
+            stage == CvUploadStage.UPLOADING ||
+            stage == CvUploadStage.PARSING
 
     val canAnalyze: Boolean
         get() = stage == CvUploadStage.UPLOADED
@@ -31,5 +32,6 @@ enum class CvUploadStage {
     PREPARING,
     SELECTED,
     UPLOADING,
+    PARSING,
     UPLOADED,
 }

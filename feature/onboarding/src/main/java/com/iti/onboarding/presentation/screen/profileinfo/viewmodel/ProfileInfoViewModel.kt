@@ -117,7 +117,7 @@ class ProfileInfoViewModel @Inject constructor(
 
             is ProfileInfoIntent.OnEmailChanged ->
                 updateProfile {
-                    updateData { it.copy(email = intent.email) }
+                    updateData { it.copy(email = intent.email) }.copy(isEmailInvalid = false)
                 }
 
             is ProfileInfoIntent.OnTitleChanged ->
@@ -373,6 +373,9 @@ class ProfileInfoViewModel @Inject constructor(
                     _effect.emit(ProfileInfoEffect.NavigateToNextScreen)
                 }
                 .onError { error ->
+                    if (error == NetworkError.CONFLICT) {
+                        _state.update { it.copy(isEmailInvalid = true) }
+                    }
                     viewModelScope.launch {
                         CareerPilotSnackbarController.show(error.toUIText())
                     }
