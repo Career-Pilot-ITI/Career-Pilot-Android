@@ -60,18 +60,18 @@ class BodyLanguageAiEvaluator @Inject constructor(
                 Pair(evaluation, null)
             }
         } catch (e: TimeoutCancellationException) {
-            println("BodyLanguageAI: AI evaluation timed out (>20s), using on-device fallback")
+            android.util.Log.w("BodyLanguageAI", "AI evaluation timed out (>20s), using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.TIMEOUT)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: SerializationException) {
-            println("BodyLanguageAI: AI evaluation failed to parse JSON: ${e.message}, using on-device fallback")
+            android.util.Log.e("BodyLanguageAI", "AI evaluation failed to parse JSON: ${e.message}", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.PARSE_FAILURE)
         } catch (e: IOException) {
-            println("BodyLanguageAI: AI evaluation network error: ${e.message}, using on-device fallback")
+            android.util.Log.e("BodyLanguageAI", "AI evaluation network error: ${e.message}", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.OFFLINE)
         } catch (e: Exception) {
-            println("BodyLanguageAI: AI evaluation unexpected error: ${e.message}, using on-device fallback")
+            android.util.Log.e("BodyLanguageAI", "AI evaluation unexpected error: ${e.message}", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.OFFLINE)
         }
     }

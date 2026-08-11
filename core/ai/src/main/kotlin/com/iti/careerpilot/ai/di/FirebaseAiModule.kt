@@ -34,6 +34,7 @@ abstract class FirebaseAiModule {
             }
             config.setConfigSettingsAsync(settings)
             config.setDefaultsAsync(mapOf("body_language_ai_enabled" to true))
+            config.fetchAndActivate()
             return config
         }
 
@@ -42,7 +43,12 @@ abstract class FirebaseAiModule {
         fun provideBodyLanguageAiFeatureToggle(remoteConfig: FirebaseRemoteConfig): BodyLanguageAiFeatureToggle {
             return BodyLanguageAiFeatureToggle {
                 try {
-                    remoteConfig.getBoolean("body_language_ai_enabled")
+                    val value = remoteConfig.getValue("body_language_ai_enabled")
+                    if (value.source == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_STATIC) {
+                        true
+                    } else {
+                        remoteConfig.getBoolean("body_language_ai_enabled")
+                    }
                 } catch (e: Exception) {
                     true
                 }
