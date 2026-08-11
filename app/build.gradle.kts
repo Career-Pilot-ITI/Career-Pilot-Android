@@ -56,5 +56,6 @@ dependencies {
     implementation(project(":feature:editprofile"))
     implementation(project(":feature:home"))
     implementation(project(":feature:practicesession"))
+    implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))
 }
