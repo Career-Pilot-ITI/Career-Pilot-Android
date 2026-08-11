@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.theme.CareerPilotTheme
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.resultscreen.BodyLanguageUiState
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ScoreItem
@@ -572,50 +573,62 @@ private fun RawMetricsBodyLanguageCard(
 @Preview
 @Composable
 private fun BodyLanguageSectionLoadingPreview() {
-    BodyLanguageSection(uiState = BodyLanguageUiState.Loading)
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(uiState = BodyLanguageUiState.Loading)
+        }
+    }
 }
 
 @Preview
 @Composable
 private fun BodyLanguageSectionSuccessPreview() {
-    BodyLanguageSection(
-        uiState = BodyLanguageUiState.Success(
-            evaluation = BodyLanguageEvaluation(
-                overallScore = 85,
-                eyeContact = MetricEvaluation(80, "Maintained consistent eye contact.", "Look at camera when speaking."),
-                posture = MetricEvaluation(90, "Excellent upright posture.", "Keep shoulders relaxed."),
-                facialExpression = MetricEvaluation(85, "Warm and engaging smile.", "Nod occasionally to show engagement."),
-                handGestures = MetricEvaluation(80, "Natural hand gestures.", "Avoid tapping or fidgeting."),
-                confidenceBand = ConfidenceBand.HIGH,
-                summary = "Candidate demonstrates confident body language with strong posture and eye contact.",
-                actionableTips = listOf(
-                    "Maintain eye contact especially during key summary statements.",
-                    "Keep hands visible in upper chest frame for better engagement."
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(
+                uiState = BodyLanguageUiState.Success(
+                    evaluation = BodyLanguageEvaluation(
+                        overallScore = 85,
+                        eyeContact = MetricEvaluation(80, "Maintained consistent eye contact.", "Look at camera when speaking."),
+                        posture = MetricEvaluation(90, "Excellent upright posture.", "Keep shoulders relaxed."),
+                        facialExpression = MetricEvaluation(85, "Warm and engaging smile.", "Nod occasionally to show engagement."),
+                        handGestures = MetricEvaluation(80, "Natural hand gestures.", "Avoid tapping or fidgeting."),
+                        confidenceBand = ConfidenceBand.HIGH,
+                        summary = "Candidate demonstrates confident body language with strong posture and eye contact.",
+                        actionableTips = listOf(
+                            "Maintain eye contact especially during key summary statements.",
+                            "Keep hands visible in upper chest frame for better engagement."
+                        )
+                    )
                 )
             )
-        )
-    )
+        }
+    }
 }
 
 @Preview
 @Composable
 private fun BodyLanguageSectionFallbackPreview() {
-    BodyLanguageSection(
-        uiState = BodyLanguageUiState.FallbackUsed(
-            evaluation = BodyLanguageEvaluation(
-                overallScore = 72,
-                eyeContact = MetricEvaluation(70, "Eye contact percentage 70%.", "Focus on screen center."),
-                posture = MetricEvaluation(75, "Slouch percentage 25%.", "Sit up straight."),
-                facialExpression = MetricEvaluation(70, "Average smile 0.4.", "Smile more at beginning."),
-                handGestures = MetricEvaluation(75, "Fidget score 0.25.", "Keep hands steady."),
-                confidenceBand = ConfidenceBand.MODERATE,
-                summary = "Guidance generated from on-device posture and face tracking data.",
-                actionableTips = listOf(
-                    "Practice speaking to camera directly.",
-                    "Ensure good lighting on your face."
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(
+                uiState = BodyLanguageUiState.FallbackUsed(
+                    evaluation = BodyLanguageEvaluation(
+                        overallScore = 72,
+                        eyeContact = MetricEvaluation(70, "Eye contact percentage 70%.", "Focus on screen center."),
+                        posture = MetricEvaluation(75, "Slouch percentage 25%.", "Sit up straight."),
+                        facialExpression = MetricEvaluation(70, "Average smile 0.4.", "Smile more at beginning."),
+                        handGestures = MetricEvaluation(75, "Fidget score 0.25.", "Keep hands steady."),
+                        confidenceBand = ConfidenceBand.MODERATE,
+                        summary = "Guidance generated from on-device posture and face tracking data.",
+                        actionableTips = listOf(
+                            "Practice speaking to camera directly.",
+                            "Ensure good lighting on your face."
+                        )
+                    ),
+                    reason = FallbackReason.OFFLINE
                 )
-            ),
-            reason = FallbackReason.OFFLINE
-        )
-    )
+            )
+        }
+    }
 }
