@@ -701,19 +701,18 @@ class PracticeSessionViewModel @Inject constructor(
         if (!_state.value.isVideoSessionSelected) return
         viewModelScope.launch {
             userProfileRepo.userProfile.first().let { profile ->
-                val isPaid = profile.isPaidSubscriber()
                 val consentGiven = profile.account.bodyLanguageConsentGiven
 
                 _state.update {
                     it.copy(
-                        bodyLanguageEnabled = isPaid,
+                        bodyLanguageEnabled = true,
                         bodyLanguageConsentGiven = consentGiven,
                     )
                 }
 
-                if (isPaid && !consentGiven) {
+                if (!consentGiven) {
                     _state.update { it.copy(showBodyLanguageConsentDialog = true) }
-                } else if (isPaid && consentGiven) {
+                } else {
                     _event.send(PracticeSessionEvent.RequestCameraPermission)
                 }
             }

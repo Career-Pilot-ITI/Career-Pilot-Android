@@ -1,6 +1,7 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -32,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
@@ -72,6 +75,7 @@ fun PracticeSessionRoot(
     onNavigateToResult: (Long) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
     var shouldRequestCameraPermission by remember { mutableStateOf(false) }
 
@@ -82,7 +86,15 @@ fun PracticeSessionRoot(
                 errorMessage = newEvent.message
             }
             is PracticeSessionEvent.RequestCameraPermission -> {
-                shouldRequestCameraPermission = true
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+                if (hasPermission) {
+                    viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
+                } else {
+                    shouldRequestCameraPermission = true
+                }
             }
         }
     }
