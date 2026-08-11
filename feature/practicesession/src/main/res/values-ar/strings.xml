@@ -70,7 +70,8 @@
     <string name="processing_answer_title">رائع، نجهّز إجابتك</string>
     <string name="submitting_answer_title">أوشكنا على الانتهاء</string>
     <string name="uploading_recording_progress">نرفع تسجيلك… %1$d%%</string>
-    <string name="transcribing_on_device">نحوّل صوتك إلى نص على جهازك. لن يستغرق الأمر سوى لحظات.</string>
+    <string name="transcribing_on_device">نقوم بتحليل صوتك وإجابتك مباشرة على جهازك. لن يستغرق الأمر سوى لحظات.</string>
+    <string name="transcribing_answer_title">نحلل صوتك وإجابتك</string>
     <string name="empty_answer_detected">لم نسمع إجابة هذه المرة، لذلك سنسجّل السؤال كـ «بدون إجابة» ونكمل.</string>
     <string name="submitting_answer_message">إجابتك جاهزة. نحفظها الآن ونحضّر لك السؤال التالي.</string>
     <string name="retry">إعادة المحاولة</string>
