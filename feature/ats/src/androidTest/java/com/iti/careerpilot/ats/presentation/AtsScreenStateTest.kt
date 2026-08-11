@@ -15,9 +15,9 @@ import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterScreen
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterUiState
-import com.iti.careerpilot.ats.presentation.entry.AtsEntryAction
-import com.iti.careerpilot.ats.presentation.entry.AtsEntryScreen
-import com.iti.careerpilot.ats.presentation.entry.AtsEntryUiState
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsScreen
 import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvScreen

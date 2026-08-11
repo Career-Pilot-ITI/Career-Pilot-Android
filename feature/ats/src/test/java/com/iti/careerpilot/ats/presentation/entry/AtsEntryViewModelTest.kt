@@ -10,6 +10,8 @@ import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.ImportJobUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ReplaceCurrentCvUseCase
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.viewmodel.AtsEntryViewModel
 import com.iti.common.error.NetworkError
 import com.iti.common.error.StorageError
 import com.iti.common.media.pdfpicker.PdfOperations
