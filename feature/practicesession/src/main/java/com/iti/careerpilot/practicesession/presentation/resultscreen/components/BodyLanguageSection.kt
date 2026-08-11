@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
-import com.iti.careerpilot.core.designsystem.theme.CareerPilotTheme
+import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.resultscreen.BodyLanguageUiState
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ScoreItem
