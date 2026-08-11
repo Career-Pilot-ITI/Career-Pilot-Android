@@ -171,13 +171,6 @@ fun ResultScreen(
                                 metrics = state.bodyLanguageMetrics,
                             )
                         }
-                        state.bodyLanguageMetrics?.keyMoments?.let { keyMoments ->
-                            if (keyMoments.isNotEmpty()) {
-                                item {
-                                    KeyMomentsTimeline(keyMoments = keyMoments)
-                                }
-                            }
-                        }
                     }
 
                     if (result.coachingTips.isNotEmpty()) {

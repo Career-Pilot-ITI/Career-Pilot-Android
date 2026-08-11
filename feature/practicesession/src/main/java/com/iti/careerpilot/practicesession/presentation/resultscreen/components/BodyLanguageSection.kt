@@ -189,7 +189,50 @@ private fun EvaluationBodyLanguageCard(
                 FallbackDisclaimerBanner()
             }
 
-            // Radar Chart Summary
+            // Hero Score Box
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(Dimens.SpaceM),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(Dimens.SpaceL),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.overall_score),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXS))
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape,
+                            modifier = Modifier.size(56.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "${evaluation.overallScore}",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(Dimens.SpaceL))
+                    Text(
+                        text = evaluation.summary,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            // Radar Chart Visual Summary
             BodyLanguageRadarChart(
                 eyeContactScore = evaluation.eyeContact.score,
                 postureScore = evaluation.posture.score,
@@ -197,177 +240,79 @@ private fun EvaluationBodyLanguageCard(
                 facialExpressionScore = evaluation.facialExpression.score,
             )
 
-            // Overall Score Summary Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.overall_score),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${evaluation.overallScore}/100",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Text(
-                    text = evaluation.summary,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f).padding(start = Dimens.SpaceL),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
 
-            // All Metric Items
-            val allMetricsList = listOf(
-                R.string.eye_contact to evaluation.eyeContact,
-                R.string.posture to evaluation.posture,
-                R.string.facial_expression to evaluation.facialExpression,
-                R.string.hand_gestures to evaluation.handGestures
+            Text(
+                text = stringResource(R.string.body_language_metrics),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
             )
 
-            // Strengths Cards Section
-            val strengthsList = allMetricsList.filter { it.second.score >= 70 }
+            // 4 Detailed Metric Breakdown Cards
+            MetricBreakdownCard(
+                label = stringResource(R.string.eye_contact),
+                icon = Icons.Default.RemoveRedEye,
+                metric = evaluation.eyeContact
+            )
 
-            if (strengthsList.isNotEmpty()) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(Dimens.SpaceL)
-                    )
-                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
-                    Text(
-                        text = stringResource(R.string.strengths),
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
+            MetricBreakdownCard(
+                label = stringResource(R.string.posture),
+                icon = Icons.Default.Accessibility,
+                metric = evaluation.posture
+            )
 
-                strengthsList.forEach { (labelRes, item) ->
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        modifier = Modifier.padding(start = Dimens.SpaceS)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
-                                .size(Dimens.SpaceL)
-                                .padding(top = 2.dp)
-                        )
-                        Spacer(modifier = Modifier.width(Dimens.SpaceS))
-                        Column {
-                            Text(
-                                text = stringResource(labelRes) + " (${item.score}%)",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            if (item.observation.isNotBlank()) {
-                                Text(
-                                    text = item.observation,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            MetricBreakdownCard(
+                label = stringResource(R.string.facial_expression),
+                icon = Icons.Default.Face,
+                metric = evaluation.facialExpression
+            )
 
-            // Areas for Improvement Cards Section
-            val improvementsList = allMetricsList.filter { it.second.score < 70 }
+            MetricBreakdownCard(
+                label = stringResource(R.string.hand_gestures),
+                icon = Icons.Default.TouchApp,
+                metric = evaluation.handGestures
+            )
 
-            if (improvementsList.isNotEmpty()) {
+            // Actionable Coaching Tips
+            if (evaluation.actionableTips.isNotEmpty()) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Lightbulb,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(Dimens.SpaceL)
                     )
                     Spacer(modifier = Modifier.width(Dimens.SpaceS))
                     Text(
-                        text = stringResource(R.string.areas_for_improvement),
+                        text = stringResource(R.string.actionable_coaching_tips),
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                     )
                 }
-
-                improvementsList.forEach { (labelRes, item) ->
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        modifier = Modifier.padding(start = Dimens.SpaceS)
+                evaluation.actionableTips.forEach { tip ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(Dimens.SpaceS),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Lightbulb,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier
-                                .size(Dimens.SpaceL)
-                                .padding(top = 2.dp)
-                        )
-                        Spacer(modifier = Modifier.width(Dimens.SpaceS))
-                        Column {
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(Dimens.SpaceM)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(Dimens.SpaceL)
+                                    .padding(top = 2.dp)
+                            )
+                            Spacer(modifier = Modifier.width(Dimens.SpaceS))
                             Text(
-                                text = stringResource(labelRes) + " (${item.score}%)",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                text = tip,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            if (item.observation.isNotBlank()) {
-                                Text(
-                                    text = item.observation,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            if (item.tip.isNotBlank()) {
-                                Text(
-                                    text = item.tip,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
-                            }
                         }
-                    }
-                }
-            }
-
-            // General Actionable Tips
-            if (evaluation.actionableTips.isNotEmpty()) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                Text(
-                    text = stringResource(R.string.actionable_coaching_tips),
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                )
-                evaluation.actionableTips.forEach { tip ->
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        modifier = Modifier.padding(start = Dimens.SpaceS)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(Dimens.SpaceL)
-                                .padding(top = 2.dp)
-                        )
-                        Spacer(modifier = Modifier.width(Dimens.SpaceS))
-                        Text(
-                            text = tip,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
                     }
                 }
             }
