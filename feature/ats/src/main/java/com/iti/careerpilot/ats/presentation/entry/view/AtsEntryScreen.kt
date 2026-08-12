@@ -50,7 +50,7 @@ private const val PDF_MIME_TYPE = "application/pdf"
 fun AtsEntryRoot(
     initialSharedText: String?,
     onSharedTextConsumed: () -> Unit,
-    onScoreRequested: (Long) -> Unit,
+    onJobDetailsRequested: (Long) -> Unit,
     viewModel: AtsEntryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -76,7 +76,7 @@ fun AtsEntryRoot(
             viewModel.effects.collect { effect ->
                 when (effect) {
                     AtsEntryEffect.OpenPdfPicker -> launcher.launch(PDF_MIME_TYPE)
-                    is AtsEntryEffect.NavigateToScore -> onScoreRequested(effect.workspaceId)
+                    is AtsEntryEffect.NavigateToJobDetails -> onJobDetailsRequested(effect.workspaceId)
                     is AtsEntryEffect.ShowMessage -> CareerPilotSnackbarController.show(effect.message)
                 }
             }

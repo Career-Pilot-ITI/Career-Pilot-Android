@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -48,6 +49,7 @@ fun NestedNavDisplay(
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
+    val uriHandler = LocalUriHandler.current
 
     LaunchedEffect(pendingSharedText) {
         if (pendingSharedText != null) {
@@ -138,7 +140,7 @@ fun NestedNavDisplay(
                     AtsEntryRoot(
                         initialSharedText = pendingSharedText,
                         onSharedTextConsumed = onSharedTextConsumed,
-                        onScoreRequested = { workspaceId ->
+                        onJobDetailsRequested = { workspaceId ->
                             nestedBackStack.navigateSingleTop(
                                 Route.NestedNav.AtsWorkspace(workspaceId),
                             )
@@ -161,6 +163,7 @@ fun NestedNavDisplay(
                             )
                         },
                         openReadyToPractice = openReadyToPractice,
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
                     )
                 }
                 entry<Route.NestedNav.AtsCoverLetter> { route ->

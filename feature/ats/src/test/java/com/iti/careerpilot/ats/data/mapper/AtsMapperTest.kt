@@ -4,6 +4,7 @@ import com.iti.careerpilot.ats.data.dto.AtsScoreDto
 import com.iti.careerpilot.ats.data.dto.AtsSectionScoreDto
 import com.iti.careerpilot.ats.data.dto.JobDto
 import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -39,5 +40,29 @@ class AtsMapperTest {
         assertEquals(listOf("Kotlin"), mapped.matchedSkills)
         assertEquals(0, mapped.sections.single().score)
         assertEquals(0, mapped.coinCost)
+    }
+
+    @Test
+    fun `job response accepts text sections and maps display metadata`() {
+        val dto = Json.decodeFromString<JobDto>(
+            """
+            {
+              "id": 9,
+              "responsibilities": "Build accessible products",
+              "qualifications": ["Five years experience"],
+              "companyLogoUrl": "https://example.com/logo.png",
+              "postedLabel": "2 days ago",
+              "applicantsLabel": "1000+ Person"
+            }
+            """.trimIndent(),
+        )
+
+        val mapped = dto.toDomain()
+
+        assertEquals(listOf("Build accessible products"), mapped.responsibilities)
+        assertEquals(listOf("Five years experience"), mapped.qualifications)
+        assertEquals("https://example.com/logo.png", mapped.companyLogoUrl)
+        assertEquals("2 days ago", mapped.postedLabel)
+        assertEquals("1000+ Person", mapped.applicantsLabel)
     }
 }

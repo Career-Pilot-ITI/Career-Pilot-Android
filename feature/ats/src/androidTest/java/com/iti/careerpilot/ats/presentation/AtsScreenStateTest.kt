@@ -20,6 +20,7 @@ import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvScreen
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringScreen
 import org.junit.Assert.assertEquals
@@ -108,6 +109,30 @@ class AtsScreenStateTest {
         composeRule.onNodeWithText("Projects").performClick()
         composeRule.onNodeWithText("Add impact.").assertExists()
         composeRule.onNodeWithContentDescription("Collapse section").assertExists()
+    }
+
+    @Test
+    fun importedWorkspaceRendersJobDetailsAndStartsScoring() {
+        var action: ScoringAction? = null
+        composeRule.setContent {
+            MaterialTheme {
+                ScoringScreen(
+                    state = ScoringUiState(
+                        isLoading = false,
+                        workspace = workspace(),
+                    ),
+                    onAction = { action = it },
+                    onBack = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Job Description").assertExists()
+        composeRule.onNodeWithText("Senior Android Engineer").assertExists()
+        composeRule.onNodeWithText("Build accessible Android products.").assertExists()
+        composeRule.onNodeWithText("Kotlin").assertExists()
+        composeRule.onNodeWithText("Start Scoring").performClick()
+        composeRule.runOnIdle { assertEquals(ScoringAction.RequestScore, action) }
     }
 
     @Test

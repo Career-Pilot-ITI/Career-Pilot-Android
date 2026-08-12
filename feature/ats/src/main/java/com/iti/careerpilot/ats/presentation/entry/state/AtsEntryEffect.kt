@@ -4,6 +4,6 @@ import com.iti.common.util.UIText
 
 sealed interface AtsEntryEffect {
     data object OpenPdfPicker : AtsEntryEffect
-    data class NavigateToScore(val workspaceId: Long) : AtsEntryEffect
+    data class NavigateToJobDetails(val workspaceId: Long) : AtsEntryEffect
     data class ShowMessage(val message: UIText) : AtsEntryEffect
 }

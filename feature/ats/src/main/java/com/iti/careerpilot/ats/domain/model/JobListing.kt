@@ -21,4 +21,7 @@ data class JobListing(
     val applicationUrl: String?,
     val sourceUrl: String?,
     val sourceType: String?,
+    val companyLogoUrl: String? = null,
+    val postedLabel: String? = null,
+    val applicantsLabel: String? = null,
 )

@@ -14,7 +14,9 @@ data class JobDto(
     @SerialName("seniorityLevel") val seniorityLevel: String? = null,
     @SerialName("requiredSkills") val requiredSkills: List<String> = emptyList(),
     @SerialName("preferredSkills") val preferredSkills: List<String> = emptyList(),
+    @Serializable(with = FlexibleStringListSerializer::class)
     @SerialName("responsibilities") val responsibilities: List<String> = emptyList(),
+    @Serializable(with = FlexibleStringListSerializer::class)
     @SerialName("qualifications") val qualifications: List<String> = emptyList(),
     @SerialName("technologies") val technologies: List<String> = emptyList(),
     @SerialName("salaryMin") val salaryMin: Int? = null,
@@ -27,4 +29,7 @@ data class JobDto(
     @SerialName("sourceType") val sourceType: String? = null,
     @SerialName("createdAt") val createdAt: String? = null,
     @SerialName("updatedAt") val updatedAt: String? = null,
+    @SerialName("companyLogoUrl") val companyLogoUrl: String? = null,
+    @SerialName("postedLabel") val postedLabel: String? = null,
+    @SerialName("applicantsLabel") val applicantsLabel: String? = null,
 )

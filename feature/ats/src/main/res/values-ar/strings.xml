@@ -91,4 +91,12 @@
     <string name="ats_collapsed">مطوي</string>
     <string name="ats_expand_section">توسيع القسم</string>
     <string name="ats_collapse_section">طي القسم</string>
+    <string name="ats_experience_level">مستوى الخبرة</string>
+    <string name="ats_posted">تاريخ النشر</string>
+    <string name="ats_applied">المتقدمون</string>
+    <string name="ats_requirements">المتطلبات</string>
+    <string name="ats_skills_count">المهارات (%1$d)</string>
+    <string name="ats_preferred_skills_count">المهارات المفضلة (%1$d)</string>
+    <string name="ats_technologies_count">التقنيات (%1$d)</string>
+    <string name="ats_job_description_title">وصف الوظيفة</string>
 </resources>

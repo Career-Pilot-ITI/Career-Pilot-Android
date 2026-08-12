@@ -46,6 +46,9 @@ internal fun JobDto.toDomain() = JobListing(
     applicationUrl = applicationUrl.nonBlankOrNull(),
     sourceUrl = sourceUrl.nonBlankOrNull(),
     sourceType = sourceType.nonBlankOrNull(),
+    companyLogoUrl = companyLogoUrl.nonBlankOrNull(),
+    postedLabel = postedLabel.nonBlankOrNull(),
+    applicantsLabel = applicantsLabel.nonBlankOrNull(),
 )
 
 internal fun AtsScoreDto.toDomain() = AtsScore(
