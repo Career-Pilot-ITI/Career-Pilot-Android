@@ -77,7 +77,7 @@ fun TrackRow(
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.see_lessons)
+                    text = stringResource(R.string.start_lessons)
                 )
             }
         }
