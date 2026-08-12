@@ -82,7 +82,7 @@ class LocalBodyLanguageFallbackEngineTest {
 
         val eval = engine.evaluate(metrics)
 
-        assertEquals(68, eval.eyeContact.score)
+        assertEquals(74, eval.eyeContact.score)
         assertTrue(eval.eyeContact.observation.contains("focus", ignoreCase = true) || eval.eyeContact.observation.contains("staring", ignoreCase = true))
         assertTrue(eval.eyeContact.tip.contains("breaks", ignoreCase = true) || eval.eyeContact.tip.contains("Blink", ignoreCase = true))
     }
@@ -98,7 +98,7 @@ class LocalBodyLanguageFallbackEngineTest {
             totalFramesAnalyzed = 400,
             averageSmile = 0f,
             maxSmile = 0f,
-            eyeContactPercentage = 25.0f,
+            eyeContactPercentage = 15.0f,
             timeLookingAwayMs = 45_000L,
             faceLostCount = 3,
             averageTorsoLeanDeg = 0f,
@@ -210,4 +210,90 @@ class LocalBodyLanguageFallbackEngineTest {
         assertEquals(ConfidenceBand.LOW, eval.confidenceBand)
         assertTrue(eval.summary.contains("out of camera view", ignoreCase = true))
     }
+
+    @Test
+    fun `eye contact continuous piecewise scoring maintains continuity at boundaries`() {
+        val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
+            faceDetectionPercentage = 100f,
+            poseDetectionPercentage = 100f,
+        )
+
+        // E = 0% -> 30
+        assertEquals(30, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 0f)).eyeContact.score)
+
+        // Boundary around 40%: E = 39.99% -> 70, E = 40.0% -> 70, E = 40.01% -> 70
+        assertEquals(70, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 39.99f)).eyeContact.score)
+        assertEquals(70, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 40.0f)).eyeContact.score)
+        assertEquals(70, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 40.01f)).eyeContact.score)
+
+        // Boundary around 50%: E = 49.99% -> 88, E = 50.0% -> 88, E = 50.01% -> 88
+        assertEquals(88, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 49.99f)).eyeContact.score)
+        assertEquals(88, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 50.0f)).eyeContact.score)
+        assertEquals(88, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 50.01f)).eyeContact.score)
+
+        // Boundary around 75%: E = 74.99% -> 98, E = 75.0% -> 98, E = 75.01% -> 98
+        assertEquals(98, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 74.99f)).eyeContact.score)
+        assertEquals(98, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 75.0f)).eyeContact.score)
+        assertEquals(98, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 75.01f)).eyeContact.score)
+
+        // E = 100% -> 70
+        assertEquals(70, engine.evaluate(baseMetrics.copy(eyeContactPercentage = 100.0f)).eyeContact.score)
+    }
+
+    @Test
+    fun `hand gesture scoring follows continuous visibility formula and penalties`() {
+        val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
+            faceDetectionPercentage = 100f,
+            poseDetectionPercentage = 100f,
+        )
+
+        // V = 0% -> 65
+        assertEquals(65, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 0f)).handGestures.score)
+        // V = 25% -> 92
+        assertEquals(92, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 25f)).handGestures.score)
+        // V = 40% -> 92
+        assertEquals(92, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 40f)).handGestures.score)
+        // V = 50% -> 92
+        assertEquals(92, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 50f)).handGestures.score)
+        // V = 100% -> 75
+        assertEquals(75, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 100f)).handGestures.score)
+
+        // Fidget penalty > 0.30f: deduct (fidgetScore * 35).toInt()
+        // V = 50f (base 92), fidget = 0.40f -> deduction = (0.40 * 35).toInt() = 14 -> score = 78
+        assertEquals(78, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 50f, fidgetScore = 0.40f)).handGestures.score)
+
+        // Clamping to min 15: V = 0f (base 65), touches = 10 (penalty 120) -> 65 - 120 = -55 -> clamped to 15
+        assertEquals(15, engine.evaluate(baseMetrics.copy(handsVisiblePercentage = 0f, handToFaceTouchCount = 10)).handGestures.score)
+    }
+
+    @Test
+    fun `confidence band coverage maps HIGH, MODERATE, and LOW deterministically`() {
+        val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
+            faceDetectionPercentage = 100f,
+            poseDetectionPercentage = 100f,
+        )
+
+        // HIGH: overallScore >= 70 && minDimensionScore >= 45
+        val highEval = engine.evaluate(baseMetrics.copy(
+            eyeContactPercentage = 65f, // eye contact = 94
+            handsVisiblePercentage = 35f, // hands = 92
+            averageTorsoLeanDeg = 8f, // posture = 95
+            averageSmile = 0.35f, // facial = 82
+        ))
+        assertTrue(highEval.overallScore >= 70)
+        assertEquals(ConfidenceBand.HIGH, highEval.confidenceBand)
+
+        // MODERATE: overallScore >= 70 but one dimension < 45
+        val modWithLowDim = engine.evaluate(baseMetrics.copy(
+            eyeContactPercentage = 75f, // eye contact = 98
+            handsVisiblePercentage = 0f,
+            handToFaceTouchCount = 5, // hands = 15
+            averageTorsoLeanDeg = 8f, // posture = 95
+            averageSmile = 0.5f, // facial = 82
+        ))
+        assertTrue("overallScore should be >= 70 but was ${modWithLowDim.overallScore}", modWithLowDim.overallScore >= 70)
+        assertTrue("hands score should be < 45 but was ${modWithLowDim.handGestures.score}", modWithLowDim.handGestures.score < 45)
+        assertEquals(ConfidenceBand.MODERATE, modWithLowDim.confidenceBand)
+    }
 }
+

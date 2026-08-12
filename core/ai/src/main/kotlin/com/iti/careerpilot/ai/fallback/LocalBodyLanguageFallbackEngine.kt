@@ -5,6 +5,7 @@ import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.core.model.bodylanguage.ConfidenceBand
 import com.iti.core.model.bodylanguage.KeyMomentType
 import com.iti.core.model.bodylanguage.MetricEvaluation
+import kotlin.math.roundToInt
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,10 +62,11 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
             facial.score * 0.20f
         ).toInt().coerceIn(0, 100)
 
+        val minDimensionScore = minOf(eyeContact.score, posture.score, facial.score, hands.score)
         val confidenceBand = when {
-            overallScore >= 75 -> ConfidenceBand.HIGH
-            overallScore >= 50 -> ConfidenceBand.MODERATE
-            else -> ConfidenceBand.LOW
+            overallScore >= 70 && minDimensionScore >= 45 -> ConfidenceBand.HIGH
+            overallScore < 50 -> ConfidenceBand.LOW
+            else -> ConfidenceBand.MODERATE
         }
 
         val tips = mutableListOf<String>()
@@ -92,35 +94,30 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
     }
 
     private fun evaluateEyeContact(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val gaze = metrics.eyeContactPercentage.toInt()
+        val e = metrics.eyeContactPercentage.coerceIn(0f, 100f)
         val lostCount = metrics.keyMoments.count { it.type == KeyMomentType.EYE_CONTACT_LOST }
 
-        val (score, observation, tip) = when {
-            gaze in 50..75 -> Triple(
-                (92 + ((75 - kotlin.math.abs(gaze - 62.5f)) / 12.5f * 8f).toInt()).coerceIn(90, 100),
-                "Optimal, natural eye contact maintained (${gaze}% of session).",
-                "Maintain this balanced camera gaze; it projects confidence and authenticity.",
-            )
-            gaze in 76..85 -> Triple(
-                85,
-                "Strong, direct eye contact (${gaze}% of session).",
-                "Allow yourself natural brief glances away when organizing complex thoughts.",
-            )
-            gaze in 40..49 -> Triple(
-                74,
-                "Moderate eye contact (${gaze}%). Looked away $lostCount times.",
-                "Position a visual cue near your camera lens to help draw your gaze back.",
-            )
-            gaze > 85 -> Triple(
-                68,
-                "Constant camera focus (${gaze}%). Unbroken staring can feel rigid or unnatural.",
-                "Blink naturally and take brief cognitive gaze breaks while answering.",
-            )
-            else -> Triple(
-                (gaze * 1.3f).toInt().coerceIn(10, 55),
-                "Low eye contact (${gaze}%). Candidate frequently looked away from the camera.",
-                "Elevate your camera to eye level and look directly into the lens when delivering key points.",
-            )
+        val rawScore = when {
+            e < 40f -> 30f + e * 1.0f
+            e < 50f -> 70f + (e - 40f) * 1.8f
+            e <= 75f -> 88f + (e - 50f) * 0.40f
+            else -> 98f - (e - 75f) * 1.12f
+        }
+        val score = rawScore.roundToInt().coerceIn(0, 100)
+
+        val gazeInt = e.toInt()
+        val observation = when {
+            e in 50f..75f -> "Optimal, natural eye contact maintained (${gazeInt}% of session)."
+            e > 75f -> "Constant camera focus (${gazeInt}%). Unbroken staring can feel rigid or unnatural."
+            e in 40f..<50f -> "Moderate eye contact (${gazeInt}%). Looked away $lostCount times."
+            else -> "Low eye contact (${gazeInt}%). Candidate frequently looked away from the camera."
+        }
+
+        val tip = when {
+            e in 50f..75f -> "Maintain this balanced camera gaze; it projects confidence and authenticity."
+            e > 75f -> "Blink naturally and take brief cognitive gaze breaks while answering."
+            e in 40f..<50f -> "Position a visual cue near your camera lens to help draw your gaze back."
+            else -> "Elevate your camera to eye level and look directly into the lens when delivering key points."
         }
 
         return MetricEvaluation(score = score, observation = observation, tip = tip)
@@ -180,25 +177,25 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
     }
 
     private fun evaluateHands(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val handsPct = metrics.handsVisiblePercentage
+        val v = metrics.handsVisiblePercentage.coerceIn(0f, 100f)
         val touches = metrics.handToFaceTouchCount
         val fidget = metrics.fidgetScore
 
         val baseScore = when {
-            handsPct in 25f..55f -> 92
-            handsPct in 10f..24f -> 78
-            handsPct > 55f -> 82
-            else -> 68
+            v < 25f -> 65f + (v / 25f) * 27f
+            v <= 50f -> 92f
+            else -> 92f - ((v - 50f) / 50f) * 17f
         }
 
-        val touchPenalty = (touches * 12).coerceAtMost(36)
-        val fidgetPenalty = if (fidget > 0.30f) ((fidget - 0.30f) * 60f).toInt().coerceIn(5, 30) else 0
-        val score = (baseScore - touchPenalty - fidgetPenalty).coerceIn(0, 100)
+        val touchPenalty = touches * 12
+        val fidgetPenalty = if (fidget > 0.30f) (fidget * 35f).toInt() else 0
+
+        val score = (baseScore.roundToInt() - touchPenalty - fidgetPenalty).coerceIn(15, 100)
 
         val observation = when {
             touches >= 2 -> "Frequent hand-to-face touches detected ($touches times), suggesting nervous tension."
             fidget > 0.35f -> "Noticeable hand fidgeting or rapid hand movements detected."
-            handsPct in 20f..60f -> "Purposeful, controlled hand gestures with good visibility (${handsPct.toInt()}%)."
+            v in 20f..60f -> "Purposeful, controlled hand gestures with good visibility (${v.toInt()}%)."
             else -> "Hands mostly rested out of camera view."
         }
 
