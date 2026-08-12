@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quiz_learning_path">Learning Path</string>
+    <string name="quiz_learning_default_title">Learning</string>
+    <string name="quiz_topics_header">AI Generated Topics</string>
+    <string name="quiz_example_header">Example:</string>
+    <string name="quiz_start_check">Take Knowledge Check</string>
+    <string name="quiz_check_title">Knowledge Check</string>
+    <string name="quiz_submit">Submit Quiz</string>
+    <string name="quiz_complete_title">Quiz Complete</string>
+    <string name="quiz_your_answer">Your answer: %1$s</string>
+    <string name="quiz_correct_answer">Correct answer: %1$s</string>
+    <string name="quiz_explanation_header">Why: %1$s</string>
+    <string name="quiz_continue">Continue Learning</string>
+    <string name="quiz_back_to_topics">Back to Topics</string>
+    <string name="quiz_question_format">Q%1$d: %2$s</string>
+    <string name="quiz_score_format">%1$d / %2$d</string>
+    <string name="quiz_percentage_format">%1$d%%</string>
+</resources>
