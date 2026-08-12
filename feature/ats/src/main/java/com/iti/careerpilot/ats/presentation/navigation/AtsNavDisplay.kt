@@ -10,7 +10,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
-import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.scoring.ScoringRoot
 import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvRoot
@@ -43,16 +42,9 @@ fun AtsNavDisplay(
                 AtsEntryRoot(
                     initialSharedText = initialSharedText,
                     onSharedTextConsumed = onSharedTextConsumed,
-                    onWorkspaceImported = { workspaceId ->
-                        backStack.add(AtsRoute.JobDetails(workspaceId))
+                    onScoreRequested = { workspaceId ->
+                        backStack.add(AtsRoute.Score(workspaceId))
                     },
-                )
-            }
-            entry<AtsRoute.JobDetails> { route ->
-                JobDetailsRoot(
-                    workspaceId = route.workspaceId,
-                    onBack = { backStack.removeLastOrNull() },
-                    onStartScoring = { workspaceId -> backStack.add(AtsRoute.Score(workspaceId)) },
                 )
             }
             entry<AtsRoute.Score> { route ->

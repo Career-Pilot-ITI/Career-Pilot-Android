@@ -119,7 +119,7 @@ class AtsEntryViewModel @Inject constructor(
                     AtsEntryEffect.ShowMessage(result.error.toUIText()),
                 )
                 is CareerPilotResult.Success -> effectChannel.send(
-                    AtsEntryEffect.NavigateToJobDetails(result.data.id),
+                    AtsEntryEffect.NavigateToScore(result.data.id),
                 )
             }
             _state.update { it.copy(isImporting = false) }

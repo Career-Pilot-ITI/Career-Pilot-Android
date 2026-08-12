@@ -18,8 +18,6 @@ import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
-import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsScreen
-import com.iti.careerpilot.ats.presentation.jobdetails.JobDetailsUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvScreen
 import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.scoring.ScoringScreen
@@ -74,23 +72,6 @@ class AtsScreenStateTest {
 
         composeRule.onNodeWithText("Upload your CV").assertExists()
         composeRule.onNodeWithText("Compare Now").assertIsNotEnabled()
-    }
-
-    @Test
-    fun jobDetailsHideUnavailableMetadataAndExternalAction() {
-        composeRule.setContent {
-            MaterialTheme {
-                JobDetailsScreen(
-                    state = JobDetailsUiState(isLoading = false, workspace = workspace()),
-                    onAction = {},
-                    onBack = {},
-                )
-            }
-        }
-
-        composeRule.onNodeWithText("Senior Android Engineer").assertExists()
-        composeRule.onNodeWithText("Employment type").assertDoesNotExist()
-        composeRule.onNodeWithText("Open").assertDoesNotExist()
     }
 
     @Test
