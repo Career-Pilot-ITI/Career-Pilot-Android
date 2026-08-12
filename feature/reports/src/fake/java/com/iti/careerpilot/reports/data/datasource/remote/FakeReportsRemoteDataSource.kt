@@ -252,7 +252,7 @@ private val fakeSessions = listOf(
 
 private const val MIN_SCORE = 0
 private const val MAX_SCORE = 100
-private const val ADDITIONAL_FAKE_SESSION_COUNT = 12
+private const val ADDITIONAL_FAKE_SESSION_COUNT = 30
 private const val SCORE_VARIATION = 40
 private const val FEEDBACK_ID_OFFSET = 1_000L
 private const val QUESTION_ID_MULTIPLIER = 10L

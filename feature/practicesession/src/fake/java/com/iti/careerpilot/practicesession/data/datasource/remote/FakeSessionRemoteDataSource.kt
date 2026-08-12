@@ -23,13 +23,17 @@ import javax.inject.Singleton
 class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSource {
 
     private var questionCounter = 1
-    private val totalQuestions = 4
+    private val totalQuestions = 8
 
     private val questions = listOf(
         "Can you describe the Android Activity lifecycle and how it handles configuration changes?",
         "What are Kotlin Coroutines, and how do they differ from traditional threads in Android?",
         "Explain the difference between LiveData, Flow, and SharedFlow in the context of state management.",
-        "How does Dagger Hilt simplify Dependency Injection in Android, and what are its key components?"
+        "How does Dagger Hilt simplify Dependency Injection in Android, and what are its key components?",
+        "What is the purpose of the Android App Bundle (AAB) compared to APK, and how does it optimize delivery?",
+        "Explain the concept of 'Process Death' in Android and how you should handle it.",
+        "What are the key benefits of using Jetpack Compose over traditional XML-based views?",
+        "How do you handle security for sensitive data like API keys or user tokens in an Android application?"
     )
 
     override suspend fun createNewSession(
