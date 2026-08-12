@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
@@ -27,7 +27,6 @@ import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoreContent
 import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoringErrorContent
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
-import com.iti.careerpilot.core.designsystem.components.BackIconButton
 
 @Composable
 fun ScoringRoot(
@@ -77,19 +76,15 @@ fun ScoringScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        CenterAlignedTopAppBar(
-            title = {
-                Text(
-                    text = stringResource(
-                        if (state.score == null) {
-                            R.string.ats_job_description_title
-                        } else {
-                            R.string.ats_job_match_title
-                        },
-                    ),
-                )
-            },
-            navigationIcon = { BackIconButton(onBack = onBack) },
+        AtsCenteredTopBar(
+            title = stringResource(
+                if (state.score == null) {
+                    R.string.ats_job_description_title
+                } else {
+                    R.string.ats_job_match_title
+                },
+            ),
+            onBack = onBack,
         )
 
         when {
@@ -117,6 +112,7 @@ fun ScoringScreen(
             else -> ScoreContent(
                 state = state,
                 onAction = onAction,
+                onOpenJob = onOpenJob,
                 modifier = Modifier.fillMaxSize(),
             )
         }

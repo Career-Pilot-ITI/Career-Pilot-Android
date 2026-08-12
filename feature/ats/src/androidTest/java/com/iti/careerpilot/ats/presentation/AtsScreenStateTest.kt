@@ -85,12 +85,12 @@ class AtsScreenStateTest {
                             overallScore = 78,
                             matchPercentage = 78,
                             matchedSkills = listOf("Kotlin"),
-                            missingRequiredSkills = emptyList(),
-                            missingPreferredSkills = emptyList(),
-                            strengths = emptyList(),
-                            weaknesses = emptyList(),
+                            missingRequiredSkills = listOf("Docker"),
+                            missingPreferredSkills = listOf("Terraform"),
+                            strengths = listOf("Strong architecture"),
+                            weaknesses = listOf("Add delivery metrics"),
                             sections = listOf(AtsSectionScore("Projects", 59, "Add impact.")),
-                            recommendations = emptyList(),
+                            recommendations = listOf("Quantify project impact"),
                             coinCost = null,
                             cvScoreUpdatedAt = null,
                         ),
@@ -104,7 +104,15 @@ class AtsScreenStateTest {
 
         composeRule.onNodeWithText("MATCH SCORE").assertExists()
         composeRule.onNodeWithText("Kotlin").assertExists()
-        composeRule.onNodeWithText("Good Match").assertDoesNotExist()
+        composeRule.onNodeWithText("Good Match").assertExists()
+        composeRule.onNodeWithText("✓ 1 matched").assertExists()
+        composeRule.onNodeWithText("× 2 missing").assertExists()
+        composeRule.onNodeWithText("Docker").assertExists()
+        composeRule.onNodeWithText("Terraform").assertExists()
+        composeRule.onNodeWithText("Strong architecture").assertExists()
+        composeRule.onNodeWithText("Quantify project impact").assertExists()
+        composeRule.onNodeWithText("Back").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Back").assertExists()
         composeRule.onNodeWithContentDescription("Expand section").assertExists()
         composeRule.onNodeWithText("Projects").performClick()
         composeRule.onNodeWithText("Add impact.").assertExists()

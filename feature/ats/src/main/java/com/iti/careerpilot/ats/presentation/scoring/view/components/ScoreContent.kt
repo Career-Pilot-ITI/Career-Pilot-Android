@@ -23,21 +23,37 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 internal fun ScoreContent(
     state: ScoringUiState,
     onAction: (ScoringAction) -> Unit,
+    onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val score = requireNotNull(state.score)
+    val workspace = requireNotNull(state.workspace)
+    val requiredKeywordCount = score.matchedSkills.size + score.missingRequiredSkills.size
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(20.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        item {
+            JobHeaderCard(
+                job = workspace.job,
+                onOpenJob = onOpenJob,
+                compact = true,
+            )
+        }
         item { ScoreSummaryCard(score = score) }
         if (score.matchedSkills.isNotEmpty()) {
             item {
                 SkillGroupCard(
                     title = stringResource(R.string.ats_matched_requirements),
+                    countLabel = stringResource(
+                        R.string.ats_keywords_ratio,
+                        score.matchedSkills.size,
+                        requiredKeywordCount,
+                    ),
                     skills = score.matchedSkills,
+                    status = SkillStatus.MATCHED,
                 )
             }
         }
@@ -45,7 +61,13 @@ internal fun ScoreContent(
             item {
                 SkillGroupCard(
                     title = stringResource(R.string.ats_missing_required_skills),
+                    countLabel = stringResource(
+                        R.string.ats_keywords_ratio,
+                        score.missingRequiredSkills.size,
+                        requiredKeywordCount,
+                    ),
                     skills = score.missingRequiredSkills,
+                    status = SkillStatus.REQUIRED_MISSING,
                 )
             }
         }
@@ -53,7 +75,12 @@ internal fun ScoreContent(
             item {
                 SkillGroupCard(
                     title = stringResource(R.string.ats_missing_preferred_skills),
+                    countLabel = stringResource(
+                        R.string.ats_keywords_count,
+                        score.missingPreferredSkills.size,
+                    ),
                     skills = score.missingPreferredSkills,
+                    status = SkillStatus.PREFERRED_MISSING,
                 )
             }
         }
@@ -62,6 +89,7 @@ internal fun ScoreContent(
                 FeedbackListCard(
                     title = stringResource(R.string.ats_strengths),
                     values = score.strengths,
+                    status = FeedbackStatus.STRENGTH,
                 )
             }
         }
@@ -70,6 +98,7 @@ internal fun ScoreContent(
                 FeedbackListCard(
                     title = stringResource(R.string.ats_weaknesses),
                     values = score.weaknesses,
+                    status = FeedbackStatus.WEAKNESS,
                 )
             }
         }
@@ -89,15 +118,16 @@ internal fun ScoreContent(
         }
         if (score.recommendations.isNotEmpty()) {
             item {
-                FeedbackListCard(
-                    title = stringResource(R.string.ats_recommendations),
-                    values = score.recommendations,
+                Text(
+                    text = stringResource(R.string.ats_recommendations),
+                    fontWeight = FontWeight.Bold,
                 )
             }
+            item { RecommendationsCard(values = score.recommendations) }
         }
         item {
             CareerPilotButton(
-                text = stringResource(R.string.ats_optimize_cv),
+                text = stringResource(R.string.ats_apply_suggested_edits),
                 onClick = { onAction(ScoringAction.OptimizeCv) },
             )
         }
@@ -110,7 +140,7 @@ internal fun ScoreContent(
         }
         item {
             CareerPilotButton(
-                text = stringResource(R.string.ats_start_practice),
+                text = stringResource(R.string.ats_start_practice_for_job),
                 onClick = { onAction(ScoringAction.StartPractice) },
                 enabled = state.trackId != null,
                 variant = ButtonVariant.OUTLINE,

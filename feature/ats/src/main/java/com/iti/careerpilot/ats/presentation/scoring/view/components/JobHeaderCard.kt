@@ -33,20 +33,23 @@ internal fun JobHeaderCard(
     job: JobListing,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     val jobUrl = job.applicationUrl ?: job.sourceUrl
+    val logoSize = if (compact) 48.dp else 64.dp
+    val cardPadding = if (compact) 12.dp else 16.dp
 
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(cardPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(logoSize)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center,
@@ -68,7 +71,11 @@ internal fun JobHeaderCard(
             androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = job.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (compact) {
+                        MaterialTheme.typography.titleSmall
+                    } else {
+                        MaterialTheme.typography.titleMedium
+                    },
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,

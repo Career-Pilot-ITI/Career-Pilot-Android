@@ -6,12 +6,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,11 +57,17 @@ internal fun SectionScoreCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = section.score.toString(),
-                    color = scoreColor(section.score),
-                    fontWeight = FontWeight.Bold,
-                )
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = scoreColor(section.score).copy(alpha = 0.12f),
+                    contentColor = scoreColor(section.score),
+                ) {
+                    Text(
+                        text = section.score.toString(),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                    )
+                }
                 Text(
                     text = section.section,
                     fontWeight = FontWeight.SemiBold,
@@ -85,6 +94,15 @@ internal fun SectionScoreCard(
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
+            LinearProgressIndicator(
+                progress = { section.score / 100f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .padding(start = 54.dp, end = 36.dp),
+                color = scoreColor(section.score),
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
             AnimatedVisibility(visible = expanded && section.feedback.isNotBlank()) {
                 Text(
                     text = section.feedback,

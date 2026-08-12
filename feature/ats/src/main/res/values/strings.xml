@@ -72,6 +72,15 @@
     <string name="ats_start_practice">Start Practice Session</string>
     <string name="ats_practice_track_required">Choose a career track in your profile to start a practice session.</string>
     <string name="ats_match_score_value">%1$d%% match</string>
+    <string name="ats_match_needs_work">Needs Work</string>
+    <string name="ats_match_good">Good Match</string>
+    <string name="ats_match_excellent">Excellent Match</string>
+    <string name="ats_matched_count">✓ %1$d matched</string>
+    <string name="ats_missing_count">× %1$d missing</string>
+    <string name="ats_keywords_ratio">%1$d of %2$d keywords</string>
+    <string name="ats_keywords_count">%1$d keywords</string>
+    <string name="ats_apply_suggested_edits">Apply Suggested Edits</string>
+    <string name="ats_start_practice_for_job">Start Practice Session for this job</string>
     <plurals name="ats_coins_used">
         <item quantity="one">%1$d coin used</item>
         <item quantity="other">%1$d coins used</item>

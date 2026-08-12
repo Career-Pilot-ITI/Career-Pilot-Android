@@ -99,4 +99,13 @@
     <string name="ats_preferred_skills_count">المهارات المفضلة (%1$d)</string>
     <string name="ats_technologies_count">التقنيات (%1$d)</string>
     <string name="ats_job_description_title">وصف الوظيفة</string>
+    <string name="ats_match_needs_work">يحتاج إلى تحسين</string>
+    <string name="ats_match_good">تطابق جيد</string>
+    <string name="ats_match_excellent">تطابق ممتاز</string>
+    <string name="ats_matched_count">✓ %1$d متطابق</string>
+    <string name="ats_missing_count">× %1$d ناقص</string>
+    <string name="ats_keywords_ratio">%1$d من %2$d كلمات مفتاحية</string>
+    <string name="ats_keywords_count">%1$d كلمات مفتاحية</string>
+    <string name="ats_apply_suggested_edits">تطبيق التعديلات المقترحة</string>
+    <string name="ats_start_practice_for_job">ابدأ جلسة تدريب لهذه الوظيفة</string>
 </resources>
