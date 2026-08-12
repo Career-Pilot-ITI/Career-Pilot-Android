@@ -9,9 +9,8 @@ import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
+import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
-import com.iti.core.datastore.models.UserProfile
-import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class QuizViewModel @Inject constructor(
     private val quizRepo: QuizRepository,
-    private val userProfileRepo: UserProfileRepo
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(QuizState())
@@ -32,22 +30,6 @@ class QuizViewModel @Inject constructor(
 
     private val _events = Channel<QuizEvent>()
     val events = _events.receiveAsFlow()
-
-    init {
-        observeProfile()
-    }
-
-    private fun observeProfile() {
-        viewModelScope.launch {
-            userProfileRepo.userProfile.collect { profile: UserProfile ->
-                _state.update {
-                    it.copy(
-                        isSeniorityLoaded = true
-                    )
-                }
-            }
-        }
-    }
 
     fun onAction(action: QuizAction) {
         when (action) {
@@ -105,15 +87,14 @@ class QuizViewModel @Inject constructor(
 
     private fun generateTopics() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null, currentStep = QuizStep.Loading) }
+            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading) }
             quizRepo.generateTopics(_state.value.trackName, _state.value.seniority)
                 .onSuccess { topics ->
                     _state.update { it.copy(isLoading = false, topics = topics, currentStep = QuizStep.Topics) }
                 }
                 .onError { error ->
-                    val uiText = error.toUIText()
-                    _state.update { it.copy(isLoading = false, error = uiText) }
-                    _events.send(QuizEvent.ShowError(uiText))
+                    _state.update { it.copy(isLoading = false) }
+                    CareerPilotSnackbarController.show(error.toUIText())
                 }
         }
     }
@@ -123,7 +104,7 @@ class QuizViewModel @Inject constructor(
         val covered = _state.value.coveredConcepts[topic.id] ?: emptyList()
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null, currentStep = QuizStep.Loading) }
+            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading) }
             quizRepo.generateNextLearningPoint(
                 _state.value.trackName,
                 _state.value.seniority,
@@ -149,9 +130,8 @@ class QuizViewModel @Inject constructor(
                     }
                 }
             }.onError { error ->
-                val uiText = error.toUIText()
-                _state.update { it.copy(isLoading = false, error = uiText) }
-                _events.send(QuizEvent.ShowError(uiText))
+                _state.update { it.copy(isLoading = false) }
+                CareerPilotSnackbarController.show(error.toUIText())
             }
         }
     }
@@ -161,7 +141,7 @@ class QuizViewModel @Inject constructor(
         val lp = _state.value.currentLearningPoint ?: return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true) }
             quizRepo.generateQuiz(topic.title, lp)
                 .onSuccess { quiz ->
                     _state.update {
@@ -174,9 +154,8 @@ class QuizViewModel @Inject constructor(
                     }
                 }
                 .onError { error ->
-                    val uiText = error.toUIText()
-                    _state.update { it.copy(isLoading = false, error = uiText) }
-                    _events.send(QuizEvent.ShowError(uiText))
+                    _state.update { it.copy(isLoading = false) }
+                    CareerPilotSnackbarController.show(error.toUIText())
                 }
         }
     }

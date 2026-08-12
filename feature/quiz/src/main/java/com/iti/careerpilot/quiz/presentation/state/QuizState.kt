@@ -4,15 +4,12 @@ import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.quiz.domain.model.LearningPoint
 import com.iti.careerpilot.quiz.domain.model.LearningQuiz
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
-import com.iti.common.util.UIText
 
 @Immutable
 data class QuizState(
     val isLoading: Boolean = false,
-    val error: UIText? = null,
     val trackName: String = "",
     val seniority: String = "",
-    val isSeniorityLoaded: Boolean = false,
     val topics: List<StudyTopic> = emptyList(),
     val selectedTopic: StudyTopic? = null,
     val currentLearningPoint: LearningPoint? = null,

@@ -56,8 +56,6 @@ fun QuizRoot(
     viewModel: QuizViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
 
     LaunchedEffect(trackName) {
         viewModel.onAction(QuizAction.Init(trackName))
@@ -66,7 +64,6 @@ fun QuizRoot(
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             QuizEvent.QuizCompleted -> onBack()
-            is QuizEvent.ShowError -> snackbarHostState.showSnackbar(event.message.asString(context))
         }
     }
 
@@ -74,7 +71,6 @@ fun QuizRoot(
         state = state,
         onAction = viewModel::onAction,
         onBack = onBack,
-        snackbarHostState = snackbarHostState
     )
 }
 
@@ -83,10 +79,8 @@ fun QuizScreen(
     state: QuizState,
     onAction: (QuizAction) -> Unit,
     onBack: () -> Unit,
-    snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             QuizTopBar(state = state, onBack = onBack, onAction = onAction)
