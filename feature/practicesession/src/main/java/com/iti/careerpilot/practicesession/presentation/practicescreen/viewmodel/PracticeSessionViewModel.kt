@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -105,6 +106,8 @@ class PracticeSessionViewModel @Inject constructor(
                 savedStateHandle[KEY_SESSION_STARTED_AT_MS] = value
             }
         }
+    private var recorderJob: Job? = null
+    private var playerJob: Job? = null
     private var timerJob: Job? = null
     private var volumeBarIdCounter = 0L
     private var lastWaveUpdateMs = 0L
@@ -140,7 +143,8 @@ class PracticeSessionViewModel @Inject constructor(
     val event: Flow<PracticeSessionEvent> = _event.receiveAsFlow()
 
     private fun observeRecorder() {
-        viewModelScope.launch {
+        recorderJob?.cancel()
+        recorderJob = viewModelScope.launch {
             voiceRecorder.recordingDetails.collect { details ->
                 val wasRecording = _state.value.isRecording
                 val isRecordingNow = details.isRecording
@@ -207,7 +211,7 @@ class PracticeSessionViewModel @Inject constructor(
     private fun startSessionTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            while (true) {
+            while (isActive) {
                 refreshSessionTimer()
                 delay(1000.milliseconds)
             }
@@ -221,7 +225,8 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun observePlayer() {
-        viewModelScope.launch {
+        playerJob?.cancel()
+        playerJob = viewModelScope.launch {
             audioPlayer.activeTrack.collect { track ->
                 _state.update {
                     it.copy(
@@ -701,6 +706,10 @@ class PracticeSessionViewModel @Inject constructor(
         if (!_state.value.isVideoSessionSelected) return
         viewModelScope.launch {
             userProfileRepo.userProfile.first().let { profile ->
+                if (!profile.isPaidSubscriber()) {
+                    _state.update { it.copy(bodyLanguageEnabled = false) }
+                    return@launch
+                }
                 val consentGiven = profile.account.bodyLanguageConsentGiven
 
                 _state.update {
@@ -762,7 +771,13 @@ class PracticeSessionViewModel @Inject constructor(
 
     // endregion
 
-    override fun onCleared() {
+    public override fun onCleared() {
+        timerJob?.cancel()
+        timerJob = null
+        recorderJob?.cancel()
+        recorderJob = null
+        playerJob?.cancel()
+        playerJob = null
         textToSpeechManager.shutdown()
         voiceRecorder.cancel()
         audioPlayer.stop()

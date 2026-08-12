@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -264,6 +265,8 @@ class PracticeSessionViewModelTest {
         }
     }
 
+    private val createdViewModels = mutableListOf<PracticeSessionViewModel>()
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -271,10 +274,23 @@ class PracticeSessionViewModelTest {
 
     @After
     fun tearDown() {
+        createdViewModels.forEach { it.onCleared() }
+        createdViewModels.clear()
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(
+    private fun runSessionTest(
+        block: suspend TestScope.() -> Unit
+    ) = runTest {
+        try {
+            block()
+        } finally {
+            createdViewModels.forEach { it.onCleared() }
+            createdViewModels.clear()
+        }
+    }
+
+    private fun TestScope.createViewModel(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         sessionRepo: SessionRepo = FakeSessionRepo(dummySession),
         voiceRecorder: VoiceRecorder = FakeVoiceRecorder(),
@@ -286,7 +302,7 @@ class PracticeSessionViewModelTest {
     ): PracticeSessionViewModel {
         val ttsManager = TextToSpeechManager(createDummyContext())
         val amplitudeNormalizer = AmplitudeNormalizer()
-        return PracticeSessionViewModel(
+        val vm = PracticeSessionViewModel(
             savedStateHandle = savedStateHandle,
             sessionRepo = sessionRepo,
             voiceRecorder = voiceRecorder,
@@ -298,14 +314,18 @@ class PracticeSessionViewModelTest {
             userProfileRepo = userProfileRepo,
             sessionCache = sessionCache,
             defaultDispatcher = testDispatcher
-        )
+        ).also { createdViewModels.add(it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            vm.state.collect {}
+        }
+        return vm
     }
 
     @Test
-    fun `CreateNewPracticeSession loads session and updates state`() = runTest {
+    fun `CreateNewPracticeSession loads session and updates state`() = runSessionTest {
         val viewModel = createViewModel()
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = false))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertEquals(dummySession.sessionId, viewModel.state.value.sessionId)
         assertEquals(dummyQuestion.questionText, viewModel.state.value.currentSession?.currentQuestion?.questionText)
@@ -313,16 +333,16 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `RestartPracticeSession restarts old session and updates state`() = runTest {
+    fun `RestartPracticeSession restarts old session and updates state`() = runSessionTest {
         val viewModel = createViewModel()
         viewModel.onAction(PracticeSessionAction.RestartPracticeSession(sessionId = 200L, isVideoSession = false))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertEquals(200L, viewModel.state.value.sessionId)
     }
 
     @Test
-    fun `Paid user with consent emits RequestCameraPermission in video session`() = runTest {
+    fun `Paid user with consent emits RequestCameraPermission in video session`() = runSessionTest {
         val profile = UserProfile(
             account = AccountInfo(
                 subscriptionTier = "PLUS",
@@ -338,7 +358,7 @@ class PracticeSessionViewModelTest {
         }
 
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertTrue(viewModel.state.value.bodyLanguageEnabled)
         assertTrue(viewModel.state.value.bodyLanguageConsentGiven)
@@ -347,7 +367,7 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `Paid user without consent shows consent dialog in video session`() = runTest {
+    fun `Paid user without consent shows consent dialog in video session`() = runSessionTest {
         val profile = UserProfile(
             account = AccountInfo(
                 subscriptionTier = "PRO",
@@ -358,7 +378,7 @@ class PracticeSessionViewModelTest {
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
 
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertTrue(viewModel.state.value.bodyLanguageEnabled)
         assertFalse(viewModel.state.value.bodyLanguageConsentGiven)
@@ -366,7 +386,7 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `Free user in video session disables body language`() = runTest {
+    fun `Free user in video session disables body language`() = runSessionTest {
         val profile = UserProfile(
             account = AccountInfo(
                 subscriptionTier = "FREE",
@@ -377,13 +397,13 @@ class PracticeSessionViewModelTest {
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
 
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertFalse(viewModel.state.value.bodyLanguageEnabled)
     }
 
     @Test
-    fun `AcceptBodyLanguageConsent updates profile repo and requests camera permission`() = runTest {
+    fun `AcceptBodyLanguageConsent updates profile repo and requests camera permission`() = runSessionTest {
         val userProfileRepo = FakeUserProfileRepo(UserProfile())
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
 
@@ -393,7 +413,7 @@ class PracticeSessionViewModelTest {
         }
 
         viewModel.onAction(PracticeSessionAction.AcceptBodyLanguageConsent)
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertTrue(userProfileRepo.readUserProfile().account.bodyLanguageConsentGiven)
         assertTrue(viewModel.state.value.bodyLanguageConsentGiven)
@@ -403,36 +423,39 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `DeclineBodyLanguageConsent hides dialog and disables body language`() = runTest {
+    fun `DeclineBodyLanguageConsent hides dialog and disables body language`() = runSessionTest {
         val viewModel = createViewModel()
         viewModel.onAction(PracticeSessionAction.DeclineBodyLanguageConsent)
+        testScheduler.runCurrent()
 
         assertFalse(viewModel.state.value.showBodyLanguageConsentDialog)
         assertFalse(viewModel.state.value.bodyLanguageEnabled)
     }
 
     @Test
-    fun `OnCameraPermissionResult granted starts analyzer and sets analyzing true`() = runTest {
+    fun `OnCameraPermissionResult granted starts analyzer and sets analyzing true`() = runSessionTest {
         val fakeAnalyzer = FakeBodyLanguageAnalyzer()
         val viewModel = createViewModel(bodyLanguageAnalyzer = fakeAnalyzer)
 
         viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(granted = true))
+        testScheduler.runCurrent()
 
         assertTrue(fakeAnalyzer.startCalled)
         assertTrue(viewModel.state.value.isBodyLanguageAnalyzing)
     }
 
     @Test
-    fun `OnCameraPermissionResult denied disables body language`() = runTest {
+    fun `OnCameraPermissionResult denied disables body language`() = runSessionTest {
         val viewModel = createViewModel()
         viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(granted = false))
+        testScheduler.runCurrent()
 
         assertFalse(viewModel.state.value.bodyLanguageEnabled)
         assertFalse(viewModel.state.value.isBodyLanguageAnalyzing)
     }
 
     @Test
-    fun `OnFrame action delivers imageProxy to bodyLanguageAnalyzer`() = runTest {
+    fun `OnFrame action delivers imageProxy to bodyLanguageAnalyzer`() = runSessionTest {
         val fakeAnalyzer = FakeBodyLanguageAnalyzer()
         val viewModel = createViewModel(bodyLanguageAnalyzer = fakeAnalyzer)
 
@@ -448,28 +471,32 @@ class PracticeSessionViewModelTest {
         } as ImageProxy
 
         viewModel.onAction(PracticeSessionAction.OnFrame(dummyImageProxy))
+        testScheduler.runCurrent()
 
         assertTrue(fakeAnalyzer.processImageCalled)
         assertTrue(imageProxyClosed)
     }
 
     @Test
-    fun `ToggleCameraPreview updates isCameraPreviewVisible in state`() = runTest {
+    fun `ToggleCameraPreview updates isCameraPreviewVisible in state`() = runSessionTest {
         val viewModel = createViewModel()
 
         viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(visible = true))
+        testScheduler.runCurrent()
         assertTrue(viewModel.state.value.isCameraPreviewVisible)
 
         viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(visible = false))
+        testScheduler.runCurrent()
         assertFalse(viewModel.state.value.isCameraPreviewVisible)
     }
 
     @Test
-    fun `DiscardCurrentAnswer cancels voiceRecorder and resets recorded audio state`() = runTest {
+    fun `DiscardCurrentAnswer cancels voiceRecorder and resets recorded audio state`() = runSessionTest {
         val fakeRecorder = FakeVoiceRecorder()
         val viewModel = createViewModel(voiceRecorder = fakeRecorder)
 
         viewModel.onAction(PracticeSessionAction.DiscardCurrentAnswer)
+        testScheduler.runCurrent()
 
         assertTrue(fakeRecorder.cancelled)
         assertEquals(null, viewModel.state.value.recordedAudioPath)
@@ -478,7 +505,7 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `SubmitAnswer with complete status stops body language analyzer and emits NavigateToResult`() = runTest {
+    fun `SubmitAnswer with complete status stops body language analyzer and emits NavigateToResult`() = runSessionTest {
         val fakeAnalyzer = FakeBodyLanguageAnalyzer()
         fakeAnalyzer.start()
         val fakeRepo = FakeSessionRepo(dummySession, submitStatus = "READY_TO_COMPLETE")
@@ -502,7 +529,7 @@ class PracticeSessionViewModelTest {
 
         // Initialize session first
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L))
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         // Simulate recording details
         fakeRecorder.emitDetails(
@@ -513,10 +540,10 @@ class PracticeSessionViewModelTest {
                 amplitudes = listOf(0.5f, 0.7f, 0.8f)
             )
         )
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         viewModel.onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion)
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
 
         assertTrue(fakeWhisper.transcribeCalled)
         assertNotNull(fakeRepo.lastAnswerRequest)
