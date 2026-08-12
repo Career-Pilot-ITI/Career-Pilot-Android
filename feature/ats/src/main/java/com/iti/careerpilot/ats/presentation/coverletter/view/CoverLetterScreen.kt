@@ -13,15 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +35,8 @@ import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLet
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
 import com.iti.careerpilot.ats.presentation.util.EmailDraft
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
+import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.UIText
 
 @Composable
 fun CoverLetterRoot(
@@ -49,10 +47,7 @@ fun CoverLetterRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val copiedMessage = stringResource(R.string.ats_copied)
     val clipboardLabel = stringResource(R.string.cover_letter)
-    val missingEmailClient = stringResource(R.string.ats_no_email_client)
 
     LaunchedEffect(workspaceId) {
         viewModel.loadWorkspace(workspaceId)
@@ -62,10 +57,14 @@ fun CoverLetterRoot(
         when (effect) {
             is CoverLetterEffect.CopyText -> {
                 copyText(context, clipboardLabel, effect.value)
-                snackbarHostState.showSnackbar(copiedMessage)
+                CareerPilotSnackbarController.show(
+                    UIText.StringResource(R.string.ats_copied),
+                )
             }
             is CoverLetterEffect.ComposeEmail -> if (!composeEmail(context, effect.draft)) {
-                snackbarHostState.showSnackbar(missingEmailClient)
+                CareerPilotSnackbarController.show(
+                    UIText.StringResource(R.string.ats_no_email_client),
+                )
             }
             CoverLetterEffect.OpenCoinsPaywall -> openCoinsPaywall()
         }
@@ -75,7 +74,6 @@ fun CoverLetterRoot(
         state = state,
         onAction = viewModel::onAction,
         onBack = onBack,
-        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -84,48 +82,38 @@ fun CoverLetterScreen(
     state: CoverLetterUiState,
     onAction: (CoverLetterAction) -> Unit,
     onBack: () -> Unit,
-    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(
+    Column(modifier = modifier.fillMaxSize()) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            TextButton(onClick = onBack) {
+                Text(stringResource(R.string.ats_back))
+            }
+            Text(
+                text = stringResource(R.string.cover_letter),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
             ) {
-                TextButton(onClick = onBack) {
-                    Text(stringResource(R.string.ats_back))
-                }
-                Text(
-                    text = stringResource(R.string.cover_letter),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
+                CircularProgressIndicator()
             }
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                CoverLetterContent(
-                    state = state,
-                    onAction = onAction,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
+        } else {
+            CoverLetterContent(
+                state = state,
+                onAction = onAction,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 

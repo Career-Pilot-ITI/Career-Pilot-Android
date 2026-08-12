@@ -1,7 +1,6 @@
 package com.iti.careerpilot.ats.presentation
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -121,7 +120,6 @@ class AtsScreenStateTest {
                     ),
                     onAction = { _: CoverLetterAction -> },
                     onBack = {},
-                    snackbarHostState = SnackbarHostState(),
                 )
             }
         }
@@ -143,7 +141,6 @@ class AtsScreenStateTest {
                     ),
                     onAction = {},
                     onBack = {},
-                    snackbarHostState = SnackbarHostState(),
                 )
             }
         }

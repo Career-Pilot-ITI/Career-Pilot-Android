@@ -49,6 +49,7 @@ import com.iti.careerpilot.rootnavigation.components.CareerPilotBottomNavBar
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.onboarding.navigation.OnboardingPagerScreen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -94,13 +95,18 @@ fun RootNavDisplay(
         CareerPilotSnackbarController.requests.collectLatest { request ->
             snackbarHostState.currentSnackbarData?.dismiss()
             val event = request.event
-            val result = snackbarHostState.showSnackbar(
-                message = event.message.asString(context),
-                withDismissAction = event.type == CareerPilotSnackbarType.DISMISSIBLE,
-                duration = event.duration,
-                actionLabel = event.actionLabel?.asString(context),
-            )
-            request.complete(result)
+            try {
+                val result = snackbarHostState.showSnackbar(
+                    message = event.message.asString(context),
+                    withDismissAction = event.type == CareerPilotSnackbarType.DISMISSIBLE,
+                    duration = event.duration,
+                    actionLabel = event.actionLabel?.asString(context),
+                )
+                request.complete(result)
+            } catch (cancellation: CancellationException) {
+                request.complete(androidx.compose.material3.SnackbarResult.Dismissed)
+                throw cancellation
+            }
         }
     }
 
