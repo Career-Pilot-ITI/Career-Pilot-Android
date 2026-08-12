@@ -7,9 +7,9 @@ import com.iti.careerpilot.quiz.presentation.action.QuizAction
 import com.iti.careerpilot.quiz.presentation.event.QuizEvent
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
+import com.iti.careerpilot.quiz.presentation.state.RetryType
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
-import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -75,11 +75,11 @@ class QuizViewModel @Inject constructor(
             }
 
             QuizAction.Retry -> {
-                when (_state.value.currentStep) {
-                    QuizStep.Topics -> generateTopics()
-                    QuizStep.LearningPoint -> generateNextLearningPoint()
-                    QuizStep.Quiz -> generateNextQuiz()
-                    else -> {}
+                when (_state.value.retryType) {
+                    RetryType.GENERATE_TOPICS -> generateTopics()
+                    RetryType.GENERATE_LEARNING_POINT -> generateNextLearningPoint()
+                    RetryType.GENERATE_QUIZ -> generateNextQuiz()
+                    null -> {}
                 }
             }
         }
@@ -87,14 +87,20 @@ class QuizViewModel @Inject constructor(
 
     private fun generateTopics() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading) }
+            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading, error = null, retryType = null) }
             quizRepo.generateTopics(_state.value.trackName, _state.value.seniority)
                 .onSuccess { topics ->
                     _state.update { it.copy(isLoading = false, topics = topics, currentStep = QuizStep.Topics) }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false) }
-                    CareerPilotSnackbarController.show(error.toUIText())
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.toUIText(),
+                            retryType = RetryType.GENERATE_TOPICS,
+                            currentStep = QuizStep.Error
+                        )
+                    }
                 }
         }
     }
@@ -104,7 +110,7 @@ class QuizViewModel @Inject constructor(
         val covered = _state.value.coveredConcepts[topic.id] ?: emptyList()
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading) }
+            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading, error = null, retryType = null) }
             quizRepo.generateNextLearningPoint(
                 _state.value.trackName,
                 _state.value.seniority,
@@ -130,8 +136,14 @@ class QuizViewModel @Inject constructor(
                     }
                 }
             }.onError { error ->
-                _state.update { it.copy(isLoading = false) }
-                CareerPilotSnackbarController.show(error.toUIText())
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = error.toUIText(),
+                        retryType = RetryType.GENERATE_LEARNING_POINT,
+                        currentStep = QuizStep.Error
+                    )
+                }
             }
         }
     }
@@ -141,7 +153,7 @@ class QuizViewModel @Inject constructor(
         val lp = _state.value.currentLearningPoint ?: return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, error = null, retryType = null) }
             quizRepo.generateQuiz(topic.title, lp)
                 .onSuccess { quiz ->
                     _state.update {
@@ -154,8 +166,14 @@ class QuizViewModel @Inject constructor(
                     }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false) }
-                    CareerPilotSnackbarController.show(error.toUIText())
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.toUIText(),
+                            retryType = RetryType.GENERATE_QUIZ,
+                            currentStep = QuizStep.Error
+                        )
+                    }
                 }
         }
     }

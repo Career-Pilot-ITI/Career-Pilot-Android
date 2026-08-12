@@ -26,4 +26,5 @@
     <string name="quiz_percentage_format">%1$d%%</string>
     <string name="quiz_not_answered">No answer yet</string>
     <string name="empty_string" />
+    <string name="error_unknown">Something went wrong, Please try again.</string>
 </resources>
