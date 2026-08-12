@@ -39,7 +39,7 @@ fun ScoringRoot(
     openCoinsPaywall: () -> Unit,
     openCoverLetter: (Long) -> Unit,
     openOptimizedCv: (Long) -> Unit,
-    openPracticeSession: (Long) -> Unit,
+    openReadyToPractice: (trackId: Long, trackName: String, workspaceId: Long) -> Unit,
     viewModel: ScoringViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -53,7 +53,11 @@ fun ScoringRoot(
             ScoringEffect.OpenCoinsPaywall -> openCoinsPaywall()
             is ScoringEffect.OpenCoverLetter -> openCoverLetter(effect.workspaceId)
             is ScoringEffect.OpenOptimizedCv -> openOptimizedCv(effect.workspaceId)
-            is ScoringEffect.OpenPractice -> openPracticeSession(effect.trackId)
+            is ScoringEffect.OpenPractice -> openReadyToPractice(
+                effect.trackId,
+                effect.trackName,
+                effect.workspaceId,
+            )
         }
     }
 

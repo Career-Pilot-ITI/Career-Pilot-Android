@@ -218,7 +218,10 @@ class PracticeSessionViewModel @Inject constructor(
 
     fun onAction(action: PracticeSessionAction) {
         when (action) {
-            is CreateNewPracticeSession -> createNewSession(action.trackId)
+            is CreateNewPracticeSession -> createNewSession(
+                trackId = action.trackId,
+                workspaceId = action.workspaceId,
+            )
 
             is RestartPracticeSession -> restartOldSession(action.sessionId)
 
@@ -356,7 +359,7 @@ class PracticeSessionViewModel @Inject constructor(
         }
     }
 
-    private fun createNewSession(trackId: Long) {
+    private fun createNewSession(trackId: Long, workspaceId: Long?) {
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
 
         val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
@@ -370,7 +373,8 @@ class PracticeSessionViewModel @Inject constructor(
                 CreateSessionRequest(
                     trackId = trackId,
                     questionCount = QUESTION_COUNT,
-                    durationMinutes = SESSION_DURATION
+                    durationMinutes = SESSION_DURATION,
+                    workspaceId = workspaceId,
                 )
             )
         }

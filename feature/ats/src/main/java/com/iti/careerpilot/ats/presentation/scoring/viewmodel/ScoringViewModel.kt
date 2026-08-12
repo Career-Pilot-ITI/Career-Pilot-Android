@@ -43,7 +43,12 @@ class ScoringViewModel @Inject constructor(
         if (profileObservationJob != null) return
         profileObservationJob = viewModelScope.launch {
             observeCurrentProfile().collect { profile ->
-                _state.update { it.copy(trackId = profile.career.trackId) }
+                _state.update {
+                    it.copy(
+                        trackId = profile.career.trackId,
+                        trackName = profile.career.trackName,
+                    )
+                }
             }
         }
     }
@@ -92,8 +97,16 @@ class ScoringViewModel @Inject constructor(
             ScoringAction.OptimizeCv -> workspaceId?.let {
                 emit(ScoringEffect.OpenOptimizedCv(it))
             }
-            ScoringAction.StartPractice -> _state.value.trackId?.let {
-                emit(ScoringEffect.OpenPractice(it))
+            ScoringAction.StartPractice -> _state.value.trackId?.let { trackId ->
+                workspaceId?.let { workspaceId ->
+                    emit(
+                        ScoringEffect.OpenPractice(
+                            trackId = trackId,
+                            trackName = _state.value.trackName,
+                            workspaceId = workspaceId,
+                        ),
+                    )
+                }
             }
         }
     }

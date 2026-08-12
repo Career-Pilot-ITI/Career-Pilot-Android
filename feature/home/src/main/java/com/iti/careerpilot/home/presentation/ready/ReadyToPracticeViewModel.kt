@@ -25,11 +25,14 @@ class ReadyToPracticeViewModel @Inject constructor(
 
     private val trackId: Long?
         get() = savedStateHandle[KEY_TRACK_ID]
+    private val workspaceId: Long?
+        get() = savedStateHandle[KEY_WORKSPACE_ID]
 
-    private fun initialize(trackId: Long, trackName: String) {
+    private fun initialize(trackId: Long, trackName: String, workspaceId: Long?) {
         if (!savedStateHandle.contains(KEY_TRACK_ID)) {
             savedStateHandle[KEY_TRACK_ID] = trackId
             savedStateHandle[KEY_TRACK_NAME] = trackName
+            workspaceId?.let { savedStateHandle[KEY_WORKSPACE_ID] = it }
         }
         _state.update {
             it.copy(trackName = savedStateHandle.get<String>(KEY_TRACK_NAME).orEmpty())
@@ -38,7 +41,11 @@ class ReadyToPracticeViewModel @Inject constructor(
 
     fun onAction(action: ReadyToPracticeAction) {
         when (action) {
-            is ReadyToPracticeAction.Initial -> initialize(action.trackId, action.trackName)
+            is ReadyToPracticeAction.Initial -> initialize(
+                action.trackId,
+                action.trackName,
+                action.workspaceId,
+            )
             is ReadyToPracticeAction.MicrophonePermissionChanged -> _state.update {
                 it.copy(
                     isMicrophoneGranted = action.isGranted,
@@ -63,7 +70,12 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun beginInterview() {
         val id = trackId ?: return
         if (!_state.value.canBegin) return
-        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id))
+        sendEvent(
+            ReadyToPracticeEvent.NavigateToPractice(
+                trackId = id,
+                workspaceId = workspaceId,
+            ),
+        )
     }
 
     private fun sendEvent(event: ReadyToPracticeEvent) {
@@ -73,5 +85,6 @@ class ReadyToPracticeViewModel @Inject constructor(
     private companion object {
         const val KEY_TRACK_ID = "ready_track_id"
         const val KEY_TRACK_NAME = "ready_track_name"
+        const val KEY_WORKSPACE_ID = "ready_workspace_id"
     }
 }

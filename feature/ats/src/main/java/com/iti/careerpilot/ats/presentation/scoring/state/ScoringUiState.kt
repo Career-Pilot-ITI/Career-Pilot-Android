@@ -13,4 +13,5 @@ data class ScoringUiState(
     val error: UIText? = null,
     val hasInsufficientCoins: Boolean = false,
     val trackId: Long? = null,
+    val trackName: String = "",
 )

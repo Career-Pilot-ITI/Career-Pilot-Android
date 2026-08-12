@@ -12,5 +12,8 @@ data class CreateSessionRequestDto(
     val questionCount: Int?,
 
     @SerialName("durationMinutes")
-    val durationMinutes: Int?
+    val durationMinutes: Int?,
+
+    @SerialName("workspaceId")
+    val workspaceId: Long? = null,
 )

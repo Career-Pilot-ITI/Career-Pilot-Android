@@ -43,6 +43,7 @@ sealed interface Route : NavKey {
     data class PracticeSession(
         val trackId: Long,
         val sessionId: Long? = null,
+        val workspaceId: Long? = null,
     ) : Route
 
     @Serializable
@@ -69,5 +70,9 @@ sealed interface Route : NavKey {
     data object Interviews : Route
 
     @Serializable
-    data class ReadyToPractice(val trackId: Long, val trackName: String) : Route
+    data class ReadyToPractice(
+        val trackId: Long,
+        val trackName: String,
+        val workspaceId: Long? = null,
+    ) : Route
 }

@@ -61,6 +61,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
+    workspaceId: Long? = null,
     onBack: () -> Unit,
     onNavigateToResult: (Long) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
@@ -85,11 +86,16 @@ fun PracticeSessionRoot(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(trackId, sessionId, workspaceId) {
         if (sessionId != null && sessionId != 0L) {
             viewModel.onAction(PracticeSessionAction.RestartPracticeSession(sessionId))
         } else {
-            viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId))
+            viewModel.onAction(
+                PracticeSessionAction.CreateNewPracticeSession(
+                    trackId = trackId,
+                    workspaceId = workspaceId,
+                ),
+            )
         }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()

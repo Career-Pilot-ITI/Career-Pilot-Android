@@ -272,8 +272,14 @@ fun RootNavDisplay(
                         openOptimizedCv = { workspaceId ->
                             rootBackStack.navigateSingleTop(Route.AtsOptimizedCv(workspaceId))
                         },
-                        openPracticeSession = { trackId ->
-                            rootBackStack.navigateSingleTop(Route.PracticeSession(trackId))
+                        openReadyToPractice = { trackId, trackName, workspaceId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                    workspaceId = workspaceId,
+                                ),
+                            )
                         },
                     )
                 }
@@ -299,6 +305,7 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = route.trackId,
                         sessionId = route.sessionId,
+                        workspaceId = route.workspaceId,
                         onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
@@ -370,12 +377,18 @@ fun RootNavDisplay(
                     ReadyToPracticeRoot(
                         trackId = route.trackId,
                         trackName = route.trackName,
+                        workspaceId = route.workspaceId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
                         },
-                        openPractice = { trackId ->
+                        openPractice = { trackId, workspaceId ->
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
-                            rootBackStack.navigateSingleTop(Route.PracticeSession(trackId))
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeSession(
+                                    trackId = trackId,
+                                    workspaceId = workspaceId,
+                                ),
+                            )
                         },
                     )
                 }

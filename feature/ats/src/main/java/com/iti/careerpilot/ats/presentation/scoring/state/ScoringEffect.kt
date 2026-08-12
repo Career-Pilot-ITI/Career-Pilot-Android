@@ -4,5 +4,9 @@ sealed interface ScoringEffect {
     data object OpenCoinsPaywall : ScoringEffect
     data class OpenCoverLetter(val workspaceId: Long) : ScoringEffect
     data class OpenOptimizedCv(val workspaceId: Long) : ScoringEffect
-    data class OpenPractice(val trackId: Long) : ScoringEffect
+    data class OpenPractice(
+        val trackId: Long,
+        val trackName: String,
+        val workspaceId: Long,
+    ) : ScoringEffect
 }

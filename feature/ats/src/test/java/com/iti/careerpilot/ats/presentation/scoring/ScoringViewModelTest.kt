@@ -12,15 +12,19 @@ import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.datastore.models.CareerInfo
 import com.iti.core.model.PdfFile
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -88,6 +92,31 @@ class ScoringViewModelTest {
 
         assertTrue(viewModel.state.value.hasInsufficientCoins)
         assertFalse(viewModel.state.value.wasInterrupted)
+    }
+
+    @Test
+    fun `start practice forwards workspace through readiness navigation`() = runTest(dispatcher) {
+        val repository = ScoringRepository().apply {
+            userProfile.value = UserProfile(
+                career = CareerInfo(trackId = 5L, trackName = "Android"),
+            )
+        }
+        val viewModel = createViewModel(repository, SavedStateHandle())
+        viewModel.onAction(ScoringAction.Initial(1L))
+        advanceUntilIdle()
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(ScoringAction.StartPractice)
+        runCurrent()
+
+        assertEquals(
+            ScoringEffect.OpenPractice(
+                trackId = 5L,
+                trackName = "Android",
+                workspaceId = 1L,
+            ),
+            effect.await(),
+        )
     }
 
     private fun createViewModel(repository: ScoringRepository, state: SavedStateHandle) = ScoringViewModel(
