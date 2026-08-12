@@ -1,6 +1,7 @@
 package com.iti.careerpilot.ats.presentation.scoring.state
 
 sealed interface ScoringAction {
+    data class Initial(val workspaceId: Long) : ScoringAction
     data object RequestScore : ScoringAction
     data object ConfirmScore : ScoringAction
     data object DismissConfirmation : ScoringAction

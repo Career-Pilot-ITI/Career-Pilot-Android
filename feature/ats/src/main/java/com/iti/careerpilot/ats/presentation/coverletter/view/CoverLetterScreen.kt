@@ -51,7 +51,7 @@ fun CoverLetterRoot(
     val clipboardLabel = stringResource(R.string.cover_letter)
 
     LaunchedEffect(workspaceId) {
-        viewModel.loadWorkspace(workspaceId)
+        viewModel.onAction(CoverLetterAction.Initial(workspaceId))
     }
 
     ObserveEvent(viewModel.effects) { effect ->

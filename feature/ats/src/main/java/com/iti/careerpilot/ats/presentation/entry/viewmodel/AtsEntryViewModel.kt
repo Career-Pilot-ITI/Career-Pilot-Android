@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AtsEntryViewModel @Inject constructor(
-    observeCurrentProfile: ObserveCurrentProfileUseCase,
+    private val observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val replaceCurrentCv: ReplaceCurrentCvUseCase,
     private val importJob: ImportJobUseCase,
     private val pdfOperations: PdfOperations,
@@ -38,9 +38,11 @@ class AtsEntryViewModel @Inject constructor(
     val effects = effectChannel.receiveAsFlow()
 
     private var activeOperation: Job? = null
+    private var profileObservationJob: Job? = null
 
-    init {
-        viewModelScope.launch {
+    private fun observeProfile() {
+        if (profileObservationJob != null) return
+        profileObservationJob = viewModelScope.launch {
             observeCurrentProfile().collect { profile ->
                 _state.update { current ->
                     current.copy(
@@ -55,6 +57,7 @@ class AtsEntryViewModel @Inject constructor(
 
     fun onAction(action: AtsEntryAction) {
         when (action) {
+            AtsEntryAction.Initial -> observeProfile()
             is AtsEntryAction.JobUrlChanged -> updateUrl(action.value)
             is AtsEntryAction.SharedTextReceived -> acceptSharedText(action.value)
             AtsEntryAction.SelectCvClicked -> emitEffect(AtsEntryEffect.OpenPdfPicker)

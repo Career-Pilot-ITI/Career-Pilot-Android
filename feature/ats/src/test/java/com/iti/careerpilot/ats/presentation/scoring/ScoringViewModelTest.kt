@@ -47,7 +47,7 @@ class ScoringViewModelTest {
         val savedState = SavedStateHandle(mapOf("ats_score_attempted_1" to true))
         val viewModel = createViewModel(repository, savedState)
 
-        viewModel.loadWorkspace(1L)
+        viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.wasInterrupted)
@@ -59,7 +59,7 @@ class ScoringViewModelTest {
     fun `duplicate confirmations execute one paid score request`() = runTest(dispatcher) {
         val repository = ScoringRepository().apply { holdScore = CompletableDeferred() }
         val viewModel = createViewModel(repository, SavedStateHandle())
-        viewModel.loadWorkspace(1L)
+        viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
         viewModel.onAction(ScoringAction.RequestScore)
@@ -79,7 +79,7 @@ class ScoringViewModelTest {
             scoreResult = CareerPilotResult.Error(NetworkError.INSUFFICIENT_COINS)
         }
         val viewModel = createViewModel(repository, SavedStateHandle())
-        viewModel.loadWorkspace(1L)
+        viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
         viewModel.onAction(ScoringAction.RequestScore)

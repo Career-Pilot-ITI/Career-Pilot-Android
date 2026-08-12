@@ -53,8 +53,16 @@ class PaywallViewModel @Inject constructor(
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val mutableState: MutableStateFlow<PaywallState>
-    val state: StateFlow<PaywallState>
+    private val initialProfile = userProfileRepo.userProfile.value
+    private val initialTier = initialProfile.account.subscriptionTier
+    private val mutableState = MutableStateFlow(
+        PaywallState(
+            coinBalance = initialProfile.account.coinBalance,
+            currentSubscriptionTier = initialTier,
+            selectedPlanId = SubscriptionTier.normalizeTierId(initialTier),
+        ),
+    )
+    val state: StateFlow<PaywallState> = mutableState.asStateFlow()
 
     private val _effectChannel = Channel<PaywallEffect>()
     val effectFlow = _effectChannel.receiveAsFlow()
@@ -62,22 +70,11 @@ class PaywallViewModel @Inject constructor(
     private val isPolling = AtomicBoolean(false)
     private var hasUserSelectedPlan = false
     private var pollingJob: Job? = null
+    private var profileObservationJob: Job? = null
 
-    init {
-        val initialProfile = userProfileRepo.userProfile.value
-        val initialTier = initialProfile.account.subscriptionTier
-        val initialPlanId = SubscriptionTier.normalizeTierId(initialTier)
-
-        mutableState = MutableStateFlow(
-            PaywallState(
-                coinBalance = initialProfile.account.coinBalance,
-                currentSubscriptionTier = initialTier,
-                selectedPlanId = initialPlanId
-            )
-        )
-        state = mutableState.asStateFlow()
-
-        userProfileRepo.userProfile.onEach { profile ->
+    private fun observeProfile() {
+        if (profileObservationJob != null) return
+        profileObservationJob = userProfileRepo.userProfile.onEach { profile ->
             val tier = profile.account.subscriptionTier
             val mappedPlanId = SubscriptionTier.normalizeTierId(tier)
             mutableState.update { currentState ->
@@ -209,6 +206,7 @@ class PaywallViewModel @Inject constructor(
 
     fun onIntent(intent: PaywallIntent) {
         when (intent) {
+            PaywallIntent.Initial -> observeProfile()
             PaywallIntent.LoadSubscriptionPlans -> {
                 loadCurrentSubscription()
                 loadSubscriptionTiers()

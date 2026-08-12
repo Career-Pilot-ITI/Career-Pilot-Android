@@ -45,7 +45,7 @@ fun ScoringRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(workspaceId) {
-        viewModel.loadWorkspace(workspaceId)
+        viewModel.onAction(ScoringAction.Initial(workspaceId))
     }
 
     ObserveEvent(viewModel.effects) { effect ->

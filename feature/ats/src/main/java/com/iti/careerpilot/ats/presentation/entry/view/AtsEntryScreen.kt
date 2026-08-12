@@ -59,6 +59,10 @@ fun AtsEntryRoot(
         uri?.let { viewModel.onAction(AtsEntryAction.PdfSelected(it.toString())) }
     }
 
+    LaunchedEffect(viewModel) {
+        viewModel.onAction(AtsEntryAction.Initial)
+    }
+
     LaunchedEffect(initialSharedText) {
         initialSharedText?.let {
             viewModel.onAction(AtsEntryAction.SharedTextReceived(it))

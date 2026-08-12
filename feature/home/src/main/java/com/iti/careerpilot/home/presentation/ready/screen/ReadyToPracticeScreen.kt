@@ -51,7 +51,7 @@ fun ReadyToPracticeRoot(
     val context = LocalContext.current
 
     LaunchedEffect(trackId, trackName) {
-        viewModel.initialise(trackId = trackId, trackName = trackName)
+        viewModel.onAction(ReadyToPracticeAction.Initial(trackId, trackName))
     }
 
     LaunchedEffect(Unit) {

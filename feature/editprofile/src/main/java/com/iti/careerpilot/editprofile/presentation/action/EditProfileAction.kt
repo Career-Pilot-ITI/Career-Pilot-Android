@@ -6,6 +6,7 @@ import com.iti.core.model.Track
 
 
 sealed interface EditProfileAction {
+    data object Initial : EditProfileAction
     data class OnDisplayNameChange(val value: String) : EditProfileAction
     data class OnUsernameChange(val value: String) : EditProfileAction
     data class OnEmailChange(val value: String) : EditProfileAction

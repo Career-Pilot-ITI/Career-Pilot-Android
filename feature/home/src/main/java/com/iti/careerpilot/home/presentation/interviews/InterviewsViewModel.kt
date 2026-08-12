@@ -30,12 +30,9 @@ class InterviewsViewModel @Inject constructor(
 
     private var allTracks: List<InterviewTrack> = emptyList()
 
-    init {
-        load()
-    }
-
     fun onAction(action: InterviewsAction) {
         when (action) {
+            InterviewsAction.Initial -> load()
             is InterviewsAction.QueryChanged -> {
                 _state.update { it.copy(query = action.query) }
                 applyFilter()

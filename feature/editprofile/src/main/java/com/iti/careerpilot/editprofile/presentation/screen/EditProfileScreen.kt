@@ -79,6 +79,10 @@ fun EditProfileRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(viewModel) {
+        viewModel.onAction(EditProfileAction.Initial)
+    }
+
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             EditProfileEvent.NavigateBack -> navigateBack()

@@ -55,6 +55,7 @@ class AtsEntryViewModelTest {
     fun `compare requires valid URL and backend synchronized CV`() = runTest(dispatcher) {
         val repository = FakeAtsRepository()
         val viewModel = createViewModel(repository)
+        viewModel.onAction(AtsEntryAction.Initial)
         runCurrent()
 
         viewModel.onAction(AtsEntryAction.JobUrlChanged("https://jobs.example.com/42"))
@@ -89,6 +90,7 @@ class AtsEntryViewModelTest {
             holdImport = CompletableDeferred()
         }
         val viewModel = createViewModel(repository)
+        viewModel.onAction(AtsEntryAction.Initial)
         runCurrent()
         viewModel.onAction(AtsEntryAction.JobUrlChanged("https://jobs.example.com/42"))
 

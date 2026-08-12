@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 class CoverLetterViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
     private val generateCoverLetter: GenerateCoverLetterUseCase,
-    observeCurrentProfile: ObserveCurrentProfileUseCase,
+    private val observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CoverLetterUiState())
@@ -38,9 +38,11 @@ class CoverLetterViewModel @Inject constructor(
     val effects = effectChannel.receiveAsFlow()
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
+    private var profileObservationJob: Job? = null
 
-    init {
-        viewModelScope.launch {
+    private fun observeProfile() {
+        if (profileObservationJob != null) return
+        profileObservationJob = viewModelScope.launch {
             observeCurrentProfile().collect { profile ->
                 _state.update {
                     it.copy(
@@ -53,7 +55,7 @@ class CoverLetterViewModel @Inject constructor(
         }
     }
 
-    fun loadWorkspace(workspaceId: Long) {
+    private fun loadWorkspace(workspaceId: Long) {
         if (this.workspaceId == workspaceId && _state.value.workspace != null) return
         this.workspaceId = workspaceId
         viewModelScope.launch {
@@ -78,6 +80,10 @@ class CoverLetterViewModel @Inject constructor(
 
     fun onAction(action: CoverLetterAction) {
         when (action) {
+            is CoverLetterAction.Initial -> {
+                observeProfile()
+                loadWorkspace(action.workspaceId)
+            }
             CoverLetterAction.RequestGeneration -> if (!_state.value.isLoading) {
                 _state.update { it.copy(isConfirmationVisible = true) }
             }

@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 class ScoringViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
     private val scoreCv: ScoreCvUseCase,
-    observeCurrentProfile: ObserveCurrentProfileUseCase,
+    private val observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScoringUiState())
@@ -37,16 +37,18 @@ class ScoringViewModel @Inject constructor(
 
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
+    private var profileObservationJob: Job? = null
 
-    init {
-        viewModelScope.launch {
+    private fun observeProfile() {
+        if (profileObservationJob != null) return
+        profileObservationJob = viewModelScope.launch {
             observeCurrentProfile().collect { profile ->
                 _state.update { it.copy(trackId = profile.career.trackId) }
             }
         }
     }
 
-    fun loadWorkspace(workspaceId: Long) {
+    private fun loadWorkspace(workspaceId: Long) {
         if (this.workspaceId == workspaceId && _state.value.workspace != null) return
         this.workspaceId = workspaceId
         viewModelScope.launch {
@@ -68,6 +70,10 @@ class ScoringViewModel @Inject constructor(
 
     fun onAction(action: ScoringAction) {
         when (action) {
+            is ScoringAction.Initial -> {
+                observeProfile()
+                loadWorkspace(action.workspaceId)
+            }
             ScoringAction.RequestScore -> if (!_state.value.isLoading) {
                 _state.update { it.copy(isScoreConfirmationVisible = true) }
             }

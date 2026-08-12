@@ -1,6 +1,7 @@
 package com.iti.careerpilot.home.presentation.home
 
 sealed interface HomeAction {
+    data object Initial : HomeAction
     data object Refresh : HomeAction
     data object PracticeInterviewClicked : HomeAction
     data object UpgradeClicked : HomeAction

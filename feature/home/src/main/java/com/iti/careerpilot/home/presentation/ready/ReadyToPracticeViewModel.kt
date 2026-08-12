@@ -26,21 +26,19 @@ class ReadyToPracticeViewModel @Inject constructor(
     private val trackId: Long?
         get() = savedStateHandle[KEY_TRACK_ID]
 
-    init {
-        savedStateHandle.get<String>(KEY_TRACK_NAME)?.let { savedTrackName ->
-            _state.update { it.copy(trackName = savedTrackName) }
+    private fun initialize(trackId: Long, trackName: String) {
+        if (!savedStateHandle.contains(KEY_TRACK_ID)) {
+            savedStateHandle[KEY_TRACK_ID] = trackId
+            savedStateHandle[KEY_TRACK_NAME] = trackName
         }
-    }
-
-    fun initialise(trackId: Long, trackName: String) {
-        if (savedStateHandle.contains(KEY_TRACK_ID)) return
-        savedStateHandle[KEY_TRACK_ID] = trackId
-        savedStateHandle[KEY_TRACK_NAME] = trackName
-        _state.update { it.copy(trackName = trackName) }
+        _state.update {
+            it.copy(trackName = savedStateHandle.get<String>(KEY_TRACK_NAME).orEmpty())
+        }
     }
 
     fun onAction(action: ReadyToPracticeAction) {
         when (action) {
+            is ReadyToPracticeAction.Initial -> initialize(action.trackId, action.trackName)
             is ReadyToPracticeAction.MicrophonePermissionChanged -> _state.update {
                 it.copy(
                     isMicrophoneGranted = action.isGranted,
