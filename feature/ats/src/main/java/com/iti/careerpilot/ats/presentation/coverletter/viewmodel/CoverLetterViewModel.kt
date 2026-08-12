@@ -1,13 +1,19 @@
-package com.iti.careerpilot.ats.presentation.scoring
+package com.iti.careerpilot.ats.presentation.coverletter.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.domain.usecase.GenerateCoverLetterUseCase
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
-import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
+import com.iti.careerpilot.ats.presentation.util.coverLetterEmailDraft
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -20,25 +26,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class ScoringViewModel @Inject constructor(
+class CoverLetterViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
-    private val scoreCv: ScoreCvUseCase,
+    private val generateCoverLetter: GenerateCoverLetterUseCase,
     observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ScoringUiState())
+    private val _state = MutableStateFlow(CoverLetterUiState())
     val state = _state.asStateFlow()
-
-    private val effectChannel = Channel<ScoringEffect>(Channel.BUFFERED)
+    private val effectChannel = Channel<CoverLetterEffect>(Channel.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
-
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
 
     init {
         viewModelScope.launch {
             observeCurrentProfile().collect { profile ->
-                _state.update { it.copy(trackId = profile.career.trackId) }
+                _state.update {
+                    it.copy(
+                        contactName = profile.personal.displayName,
+                        contactEmail = profile.account.email,
+                        contactPhone = profile.personal.phoneNumber,
+                    )
+                }
             }
         }
     }
@@ -53,9 +63,12 @@ class ScoringViewModel @Inject constructor(
                     it.copy(isLoading = false, error = result.error.toUIText())
                 }
                 is CareerPilotResult.Success -> _state.update {
+                    val restored = result.data.coverLetterText.orEmpty()
                     it.copy(
-                        isLoading = false,
                         workspace = result.data,
+                        generatedValue = restored,
+                        editedValue = restored,
+                        isLoading = false,
                         wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
                     )
                 }
@@ -63,33 +76,36 @@ class ScoringViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: ScoringAction) {
+    fun onAction(action: CoverLetterAction) {
         when (action) {
-            ScoringAction.RequestScore -> if (!_state.value.isLoading) {
-                _state.update { it.copy(isScoreConfirmationVisible = true) }
+            CoverLetterAction.RequestGeneration -> if (!_state.value.isLoading) {
+                _state.update { it.copy(isConfirmationVisible = true) }
             }
-            ScoringAction.DismissConfirmation -> _state.update {
-                it.copy(isScoreConfirmationVisible = false)
+            CoverLetterAction.DismissConfirmation -> _state.update {
+                it.copy(isConfirmationVisible = false)
             }
-            ScoringAction.ConfirmScore -> executeScore()
-            ScoringAction.RetryWorkspace -> workspaceId?.let {
-                this.workspaceId = null
-                loadWorkspace(it)
+            CoverLetterAction.ConfirmGeneration -> executeGeneration()
+            CoverLetterAction.ToggleEditing -> _state.update { it.copy(isEditing = !it.isEditing) }
+            is CoverLetterAction.EditedValueChanged -> _state.update { it.copy(editedValue = action.value) }
+            CoverLetterAction.Copy -> _state.value.editedValue.takeIf(String::isNotBlank)?.let {
+                emit(CoverLetterEffect.CopyText(it))
             }
-            ScoringAction.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
-            ScoringAction.GenerateCoverLetter -> workspaceId?.let {
-                emit(ScoringEffect.OpenCoverLetter(it))
+            CoverLetterAction.Email -> _state.value.editedValue.takeIf(String::isNotBlank)?.let { body ->
+                emit(
+                    CoverLetterEffect.ComposeEmail(
+                        coverLetterEmailDraft(
+                            workspace = _state.value.workspace,
+                            body = body,
+                            genericSubject = UIText.StringResource(R.string.ats_cover_letter_email_subject),
+                        ),
+                    ),
+                )
             }
-            ScoringAction.OptimizeCv -> workspaceId?.let {
-                emit(ScoringEffect.OpenOptimizedCv(it))
-            }
-            ScoringAction.StartPractice -> _state.value.trackId?.let {
-                emit(ScoringEffect.OpenPractice(it))
-            }
+            CoverLetterAction.OpenCoins -> emit(CoverLetterEffect.OpenCoinsPaywall)
         }
     }
 
-    private fun executeScore() {
+    private fun executeGeneration() {
         val id = workspaceId ?: return
         if (_state.value.isLoading || activeOperation?.isActive == true) return
         savedStateHandle[attemptKey(id)] = true
@@ -97,16 +113,23 @@ class ScoringViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isLoading = true,
-                    isScoreConfirmationVisible = false,
+                    isConfirmationVisible = false,
                     error = null,
                     hasInsufficientCoins = false,
                 )
             }
-            when (val result = scoreCv(id)) {
+            when (val result = generateCoverLetter(id)) {
                 is CareerPilotResult.Success -> {
                     savedStateHandle[attemptKey(id)] = false
                     _state.update {
-                        it.copy(isLoading = false, score = result.data, wasInterrupted = false)
+                        it.copy(
+                            generatedValue = result.data.body,
+                            editedValue = result.data.body,
+                            approachTips = result.data.approachTips,
+                            coinCost = result.data.coinCost,
+                            isLoading = false,
+                            wasInterrupted = false,
+                        )
                     }
                 }
                 is CareerPilotResult.Error -> {
@@ -116,8 +139,8 @@ class ScoringViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             wasInterrupted = interrupted,
-                            error = result.error.toUIText(),
                             hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
+                            error = result.error.toUIText(),
                         )
                     }
                 }
@@ -125,9 +148,9 @@ class ScoringViewModel @Inject constructor(
         }
     }
 
-    private fun emit(effect: ScoringEffect) {
+    private fun emit(effect: CoverLetterEffect) {
         viewModelScope.launch { effectChannel.send(effect) }
     }
 
-    private fun attemptKey(workspaceId: Long) = "ats_score_attempted_$workspaceId"
+    private fun attemptKey(id: Long) = "ats_cover_letter_attempted_$id"
 }

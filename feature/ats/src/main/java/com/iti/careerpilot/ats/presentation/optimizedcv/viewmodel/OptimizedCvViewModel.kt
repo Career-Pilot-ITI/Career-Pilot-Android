@@ -1,16 +1,15 @@
-package com.iti.careerpilot.ats.presentation.coverletter
+package com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.domain.usecase.GenerateCoverLetterUseCase
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
-import com.iti.careerpilot.ats.presentation.util.coverLetterEmailDraft
+import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvEffect
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
-import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -23,35 +22,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class CoverLetterViewModel @Inject constructor(
+class OptimizedCvViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
-    private val generateCoverLetter: GenerateCoverLetterUseCase,
-    observeCurrentProfile: ObserveCurrentProfileUseCase,
+    private val optimizeCv: OptimizeCvUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(CoverLetterUiState())
+    private val _state = MutableStateFlow(OptimizedCvUiState())
     val state = _state.asStateFlow()
-    private val effectChannel = Channel<CoverLetterEffect>(Channel.BUFFERED)
+    private val effectChannel = Channel<OptimizedCvEffect>(Channel.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
 
-    init {
-        viewModelScope.launch {
-            observeCurrentProfile().collect { profile ->
-                _state.update {
-                    it.copy(
-                        contactName = profile.personal.displayName,
-                        contactEmail = profile.account.email,
-                        contactPhone = profile.personal.phoneNumber,
-                    )
-                }
-            }
-        }
-    }
-
     fun loadWorkspace(workspaceId: Long) {
-        if (this.workspaceId == workspaceId && _state.value.workspace != null) return
+        if (this.workspaceId == workspaceId && !_state.value.isLoading) return
         this.workspaceId = workspaceId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
@@ -60,11 +44,8 @@ class CoverLetterViewModel @Inject constructor(
                     it.copy(isLoading = false, error = result.error.toUIText())
                 }
                 is CareerPilotResult.Success -> _state.update {
-                    val restored = result.data.coverLetterText.orEmpty()
                     it.copy(
-                        workspace = result.data,
-                        generatedValue = restored,
-                        editedValue = restored,
+                        optimizedText = result.data.cvOptimizedText.orEmpty(),
                         isLoading = false,
                         wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
                     )
@@ -73,36 +54,23 @@ class CoverLetterViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: CoverLetterAction) {
+    fun onAction(action: OptimizedCvAction) {
         when (action) {
-            CoverLetterAction.RequestGeneration -> if (!_state.value.isLoading) {
+            OptimizedCvAction.RequestOptimization -> if (!_state.value.isLoading) {
                 _state.update { it.copy(isConfirmationVisible = true) }
             }
-            CoverLetterAction.DismissConfirmation -> _state.update {
+            OptimizedCvAction.DismissConfirmation -> _state.update {
                 it.copy(isConfirmationVisible = false)
             }
-            CoverLetterAction.ConfirmGeneration -> executeGeneration()
-            CoverLetterAction.ToggleEditing -> _state.update { it.copy(isEditing = !it.isEditing) }
-            is CoverLetterAction.EditedValueChanged -> _state.update { it.copy(editedValue = action.value) }
-            CoverLetterAction.Copy -> _state.value.editedValue.takeIf(String::isNotBlank)?.let {
-                emit(CoverLetterEffect.CopyText(it))
+            OptimizedCvAction.ConfirmOptimization -> executeOptimization()
+            OptimizedCvAction.Copy -> _state.value.optimizedText.takeIf(String::isNotBlank)?.let {
+                emit(OptimizedCvEffect.CopyText(it))
             }
-            CoverLetterAction.Email -> _state.value.editedValue.takeIf(String::isNotBlank)?.let { body ->
-                emit(
-                    CoverLetterEffect.ComposeEmail(
-                        coverLetterEmailDraft(
-                            workspace = _state.value.workspace,
-                            body = body,
-                            genericSubject = UIText.StringResource(R.string.ats_cover_letter_email_subject),
-                        ),
-                    ),
-                )
-            }
-            CoverLetterAction.OpenCoins -> emit(CoverLetterEffect.OpenCoinsPaywall)
+            OptimizedCvAction.OpenCoins -> emit(OptimizedCvEffect.OpenCoinsPaywall)
         }
     }
 
-    private fun executeGeneration() {
+    private fun executeOptimization() {
         val id = workspaceId ?: return
         if (_state.value.isLoading || activeOperation?.isActive == true) return
         savedStateHandle[attemptKey(id)] = true
@@ -111,18 +79,17 @@ class CoverLetterViewModel @Inject constructor(
                 it.copy(
                     isLoading = true,
                     isConfirmationVisible = false,
-                    error = null,
                     hasInsufficientCoins = false,
+                    error = null,
                 )
             }
-            when (val result = generateCoverLetter(id)) {
+            when (val result = optimizeCv(id)) {
                 is CareerPilotResult.Success -> {
                     savedStateHandle[attemptKey(id)] = false
                     _state.update {
                         it.copy(
-                            generatedValue = result.data.body,
-                            editedValue = result.data.body,
-                            approachTips = result.data.approachTips,
+                            optimizedText = result.data.optimizedCv,
+                            recommendedTracks = result.data.recommendedTracks,
                             coinCost = result.data.coinCost,
                             isLoading = false,
                             wasInterrupted = false,
@@ -145,9 +112,9 @@ class CoverLetterViewModel @Inject constructor(
         }
     }
 
-    private fun emit(effect: CoverLetterEffect) {
+    private fun emit(effect: OptimizedCvEffect) {
         viewModelScope.launch { effectChannel.send(effect) }
     }
 
-    private fun attemptKey(id: Long) = "ats_cover_letter_attempted_$id"
+    private fun attemptKey(id: Long) = "ats_optimize_attempted_$id"
 }

@@ -1,10 +1,14 @@
-package com.iti.careerpilot.ats.presentation.optimizedcv
+package com.iti.careerpilot.ats.presentation.scoring.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
+import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
+import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
@@ -19,20 +23,31 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class OptimizedCvViewModel @Inject constructor(
+class ScoringViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
-    private val optimizeCv: OptimizeCvUseCase,
+    private val scoreCv: ScoreCvUseCase,
+    observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(OptimizedCvUiState())
+    private val _state = MutableStateFlow(ScoringUiState())
     val state = _state.asStateFlow()
-    private val effectChannel = Channel<OptimizedCvEffect>(Channel.BUFFERED)
+
+    private val effectChannel = Channel<ScoringEffect>(Channel.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
+
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
 
+    init {
+        viewModelScope.launch {
+            observeCurrentProfile().collect { profile ->
+                _state.update { it.copy(trackId = profile.career.trackId) }
+            }
+        }
+    }
+
     fun loadWorkspace(workspaceId: Long) {
-        if (this.workspaceId == workspaceId && !_state.value.isLoading) return
+        if (this.workspaceId == workspaceId && _state.value.workspace != null) return
         this.workspaceId = workspaceId
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
@@ -42,8 +57,8 @@ class OptimizedCvViewModel @Inject constructor(
                 }
                 is CareerPilotResult.Success -> _state.update {
                     it.copy(
-                        optimizedText = result.data.cvOptimizedText.orEmpty(),
                         isLoading = false,
+                        workspace = result.data,
                         wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
                     )
                 }
@@ -51,23 +66,33 @@ class OptimizedCvViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: OptimizedCvAction) {
+    fun onAction(action: ScoringAction) {
         when (action) {
-            OptimizedCvAction.RequestOptimization -> if (!_state.value.isLoading) {
-                _state.update { it.copy(isConfirmationVisible = true) }
+            ScoringAction.RequestScore -> if (!_state.value.isLoading) {
+                _state.update { it.copy(isScoreConfirmationVisible = true) }
             }
-            OptimizedCvAction.DismissConfirmation -> _state.update {
-                it.copy(isConfirmationVisible = false)
+            ScoringAction.DismissConfirmation -> _state.update {
+                it.copy(isScoreConfirmationVisible = false)
             }
-            OptimizedCvAction.ConfirmOptimization -> executeOptimization()
-            OptimizedCvAction.Copy -> _state.value.optimizedText.takeIf(String::isNotBlank)?.let {
-                emit(OptimizedCvEffect.CopyText(it))
+            ScoringAction.ConfirmScore -> executeScore()
+            ScoringAction.RetryWorkspace -> workspaceId?.let {
+                this.workspaceId = null
+                loadWorkspace(it)
             }
-            OptimizedCvAction.OpenCoins -> emit(OptimizedCvEffect.OpenCoinsPaywall)
+            ScoringAction.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
+            ScoringAction.GenerateCoverLetter -> workspaceId?.let {
+                emit(ScoringEffect.OpenCoverLetter(it))
+            }
+            ScoringAction.OptimizeCv -> workspaceId?.let {
+                emit(ScoringEffect.OpenOptimizedCv(it))
+            }
+            ScoringAction.StartPractice -> _state.value.trackId?.let {
+                emit(ScoringEffect.OpenPractice(it))
+            }
         }
     }
 
-    private fun executeOptimization() {
+    private fun executeScore() {
         val id = workspaceId ?: return
         if (_state.value.isLoading || activeOperation?.isActive == true) return
         savedStateHandle[attemptKey(id)] = true
@@ -75,22 +100,16 @@ class OptimizedCvViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isLoading = true,
-                    isConfirmationVisible = false,
-                    hasInsufficientCoins = false,
+                    isScoreConfirmationVisible = false,
                     error = null,
+                    hasInsufficientCoins = false,
                 )
             }
-            when (val result = optimizeCv(id)) {
+            when (val result = scoreCv(id)) {
                 is CareerPilotResult.Success -> {
                     savedStateHandle[attemptKey(id)] = false
                     _state.update {
-                        it.copy(
-                            optimizedText = result.data.optimizedCv,
-                            recommendedTracks = result.data.recommendedTracks,
-                            coinCost = result.data.coinCost,
-                            isLoading = false,
-                            wasInterrupted = false,
-                        )
+                        it.copy(isLoading = false, score = result.data, wasInterrupted = false)
                     }
                 }
                 is CareerPilotResult.Error -> {
@@ -100,8 +119,8 @@ class OptimizedCvViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             wasInterrupted = interrupted,
-                            hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
                             error = result.error.toUIText(),
+                            hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
                         )
                     }
                 }
@@ -109,9 +128,9 @@ class OptimizedCvViewModel @Inject constructor(
         }
     }
 
-    private fun emit(effect: OptimizedCvEffect) {
+    private fun emit(effect: ScoringEffect) {
         viewModelScope.launch { effectChannel.send(effect) }
     }
 
-    private fun attemptKey(id: Long) = "ats_optimize_attempted_$id"
+    private fun attemptKey(workspaceId: Long) = "ats_score_attempted_$workspaceId"
 }

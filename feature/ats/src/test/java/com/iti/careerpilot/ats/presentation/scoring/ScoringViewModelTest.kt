@@ -11,6 +11,8 @@ import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile

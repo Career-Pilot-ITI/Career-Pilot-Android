@@ -12,16 +12,16 @@ import com.iti.careerpilot.ats.domain.model.AtsScore
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
-import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterAction
-import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterScreen
-import com.iti.careerpilot.ats.presentation.coverletter.CoverLetterUiState
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
+import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
-import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvScreen
-import com.iti.careerpilot.ats.presentation.optimizedcv.OptimizedCvUiState
-import com.iti.careerpilot.ats.presentation.scoring.ScoringScreen
-import com.iti.careerpilot.ats.presentation.scoring.ScoringUiState
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
+import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvScreen
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
+import com.iti.careerpilot.ats.presentation.scoring.view.ScoringScreen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -45,7 +45,6 @@ class AtsScreenStateTest {
                         hasSynchronizedCv = true,
                     ),
                     onAction = { action = it },
-                    snackbarHostState = SnackbarHostState(),
                 )
             }
         }
@@ -65,7 +64,6 @@ class AtsScreenStateTest {
                         isUrlValid = true,
                     ),
                     onAction = {},
-                    snackbarHostState = SnackbarHostState(),
                 )
             }
         }
