@@ -156,7 +156,12 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         val expressivePeaks = metrics.keyMoments.count { it.type == KeyMomentType.SMILE_PEAK }
 
         val peakBonus = (expressivePeaks * 6).coerceAtMost(18)
-        val animationBonus = if (avgExpressiveness in 0.08f..0.40f) 10 else 0
+        val animationBonus = when {
+            avgExpressiveness < 0.08f -> (avgExpressiveness / 0.08f * 10f).toInt()
+            avgExpressiveness <= 0.40f -> 10
+            avgExpressiveness <= 0.60f -> (10f - ((avgExpressiveness - 0.40f) / 0.20f) * 10f).toInt()
+            else -> 0
+        }
         val rawScore = 78 + peakBonus + animationBonus
         val score = rawScore.coerceIn(0, 100)
 
