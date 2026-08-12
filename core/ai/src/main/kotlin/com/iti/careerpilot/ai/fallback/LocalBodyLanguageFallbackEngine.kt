@@ -152,25 +152,26 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
     }
 
     private fun evaluateFacialExpression(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val avgSmile = metrics.averageSmile
-        val smilePeaks = metrics.keyMoments.count { it.type == KeyMomentType.SMILE_PEAK }
+        val avgExpressiveness = metrics.averageSmile.coerceIn(0f, 1f)
+        val expressivePeaks = metrics.keyMoments.count { it.type == KeyMomentType.SMILE_PEAK }
 
-        val (score, observation, tip) = when {
-            smilePeaks > 0 || avgSmile in 0.15f..0.55f -> Triple(
-                (82 + (smilePeaks * 4).coerceAtMost(15)).coerceIn(80, 100),
-                "Warm and engaging facial expressions with natural smiles during key points.",
-                "Natural warmth builds great rapport with interviewers.",
-            )
-            avgSmile > 0.55f -> Triple(
-                78,
-                "Constant smiling throughout the session. Ensure facial tone matches serious topics.",
-                "Pair smiling with moments of neutral focus when explaining complex technical details.",
-            )
-            else -> Triple(
-                65,
-                "Neutral or serious facial expression maintained throughout the session.",
-                "Remember to smile warmly during greetings, milestones, and when concluding answers.",
-            )
+        val peakBonus = (expressivePeaks * 6).coerceAtMost(18)
+        val animationBonus = if (avgExpressiveness in 0.08f..0.40f) 10 else 0
+        val rawScore = 78 + peakBonus + animationBonus
+        val score = rawScore.coerceIn(0, 100)
+
+        val observation = when {
+            expressivePeaks > 0 -> "Dynamic, animated delivery with expressive emphasis peaks."
+            avgExpressiveness in 0.08f..0.40f -> "Engaged, natural delivery animation."
+            avgExpressiveness > 0.40f -> "High facial expressiveness throughout delivery."
+            else -> "Subdued facial expressiveness with low animation."
+        }
+
+        val tip = when {
+            expressivePeaks > 0 -> "Maintain your animated facial engagement to reinforce emphasis on key responses."
+            avgExpressiveness in 0.08f..0.40f -> "Great natural energy; continue using subtle facial animation to emphasize main ideas."
+            avgExpressiveness > 0.40f -> "Balance active delivery energy with composed neutral pauses when detailing complex points."
+            else -> "Incorporate natural facial animation and emphasis peaks to add dynamism to your delivery."
         }
 
         return MetricEvaluation(score = score, observation = observation, tip = tip)
@@ -193,7 +194,7 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         val score = (baseScore.roundToInt() - touchPenalty - fidgetPenalty).coerceIn(15, 100)
 
         val observation = when {
-            touches >= 2 -> "Frequent hand-to-face touches detected ($touches times), suggesting nervous tension."
+            touches >= 2 -> "Frequent hand-to-face touches detected ($touches times), suggesting physical restlessness."
             fidget > 0.35f -> "Noticeable hand fidgeting or rapid hand movements detected."
             v in 20f..60f -> "Purposeful, controlled hand gestures with good visibility (${v.toInt()}%)."
             else -> "Hands mostly rested out of camera view."
@@ -216,7 +217,7 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         return when (confidenceBand) {
             ConfidenceBand.HIGH -> "Demonstrated strong, confident presence with balanced eye contact (${metrics.eyeContactPercentage.toInt()}%) and solid posture."
             ConfidenceBand.MODERATE -> "Good non-verbal communication with opportunities to improve posture consistency and reduce look-aways."
-            ConfidenceBand.LOW -> "Body language indicators suggest nervousness or low engagement. Focus on camera alignment, upright posture, and reducing fidgeting."
+            ConfidenceBand.LOW -> "Body language indicators suggest low posture or gaze stability. Focus on camera alignment, upright posture, and reducing fidgeting."
         }
     }
 }

@@ -295,5 +295,40 @@ class LocalBodyLanguageFallbackEngineTest {
         assertTrue("hands score should be < 45 but was ${modWithLowDim.handGestures.score}", modWithLowDim.handGestures.score < 45)
         assertEquals(ConfidenceBand.MODERATE, modWithLowDim.confidenceBand)
     }
+
+    @Test
+    fun `facial expression evaluation uses delivery dynamics formula and objective phrasing`() {
+        val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
+            faceDetectionPercentage = 100f,
+            poseDetectionPercentage = 100f,
+        )
+
+        // Base 78 with low animation (0.0f expressiveness, 0 peaks)
+        val lowAnim = engine.evaluate(baseMetrics.copy(averageSmile = 0f))
+        assertEquals(78, lowAnim.facialExpression.score)
+        assertTrue(lowAnim.facialExpression.observation.contains("Subdued facial expressiveness"))
+
+        // Base 78 + animation bonus 10 (0.25f expressiveness in 0.08..0.40, 0 peaks) -> 88
+        val engAnim = engine.evaluate(baseMetrics.copy(averageSmile = 0.25f))
+        assertEquals(88, engAnim.facialExpression.score)
+        assertTrue(engAnim.facialExpression.observation.contains("Engaged, natural delivery animation"))
+
+        // Base 78 + peak bonus 6 (1 peak) + animation bonus 10 (0.35f in 0.08..0.40) -> 94
+        val peakAnim = engine.evaluate(baseMetrics.copy(
+            averageSmile = 0.35f,
+            keyMoments = listOf(KeyMoment(timestampMs = 5000, type = KeyMomentType.SMILE_PEAK)),
+        ))
+        assertEquals(94, peakAnim.facialExpression.score)
+        assertTrue(peakAnim.facialExpression.observation.contains("Dynamic, animated delivery"))
+
+        // Ensure no subjective emotion inference terms remain in evaluation observations
+        val allEvaluations = listOf(lowAnim, engAnim, peakAnim)
+        allEvaluations.forEach { eval ->
+            val obs = eval.facialExpression.observation.lowercase()
+            assertTrue(!obs.contains("warmth"))
+            assertTrue(!obs.contains("anxiety"))
+            assertTrue(!obs.contains("nervous"))
+        }
+    }
 }
 

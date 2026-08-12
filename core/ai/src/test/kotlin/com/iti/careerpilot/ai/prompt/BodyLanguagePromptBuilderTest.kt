@@ -20,4 +20,14 @@ class BodyLanguagePromptBuilderTest {
         assertTrue(prompt.contains("90000"))
         assertTrue(prompt.contains("5.2"))
     }
+
+    @Test
+    fun `SYSTEM_INSTRUCTION reframes 4th dimension to Facial Expressiveness and Delivery Dynamics`() {
+        val instruction = BodyLanguagePromptBuilder.SYSTEM_INSTRUCTION
+        assertTrue(instruction.contains("Facial Expressiveness & Delivery Dynamics"))
+        assertTrue(instruction.contains("private candidate coaching feedback"))
+        assertTrue(!instruction.contains("Facial Warmth"))
+        assertTrue(!instruction.contains("anxiety"))
+        assertTrue(!instruction.contains("nervousness"))
+    }
 }
