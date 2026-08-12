@@ -10,7 +10,13 @@ android {
 }
 
 dependencies {
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.ai)
+
     implementation(project(":core:common"))
     implementation(project(":core:network"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:designsystem"))
 }

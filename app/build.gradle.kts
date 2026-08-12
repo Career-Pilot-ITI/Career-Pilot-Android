@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.careerpilot.android.datastore)
     alias(libs.plugins.careerpilot.android.workmanager)
     alias(libs.plugins.careerpilot.testing)
+    alias(libs.plugins.google.services)
 }
 
 android {
