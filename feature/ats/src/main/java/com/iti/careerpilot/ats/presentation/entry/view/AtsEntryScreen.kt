@@ -114,7 +114,6 @@ fun AtsEntryScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
-            .padding(bottom = 12.dp)
             .imePadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -190,7 +189,6 @@ fun AtsEntryScreen(
             else stringResource(R.string.ats_compare_now),
             onClick = { onAction(AtsEntryAction.CompareClicked) },
             enabled = state.canCompare,
-            modifier = Modifier.padding(bottom = 16.dp),
         )
     }
 }
