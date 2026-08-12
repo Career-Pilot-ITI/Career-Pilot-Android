@@ -1,5 +1,8 @@
 package com.iti.careerpilot.quiz.presentation.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,9 +24,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
@@ -60,9 +65,7 @@ fun QuizRoot(
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             QuizEvent.QuizCompleted -> onBack()
-            is QuizEvent.ShowError -> {
-                snackbarHostState.showSnackbar(event.message.asString(context))
-            }
+            is QuizEvent.ShowError -> snackbarHostState.showSnackbar(event.message.asString(context))
         }
     }
 
@@ -84,33 +87,9 @@ fun QuizScreen(
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-// ...
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (state.currentStep == QuizStep.Topics) {
-                            stringResource(R.string.quiz_learning_path)
-                        } else {
-                            state.selectedTopic?.title ?: stringResource(R.string.quiz_learning_default_title)
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    BackIconButton(
-                        onBack = {
-                            if (state.currentStep == QuizStep.Topics) onBack()
-                            else onAction(QuizAction.BackToTopics)
-                        }
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                )
-            )
+            QuizTopBar(state = state, onBack = onBack, onAction = onAction)
         }
     ) { innerPadding ->
         Box(
@@ -118,62 +97,114 @@ fun QuizScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            when (state.currentStep) {
-                QuizStep.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LoadingWave(color = MaterialTheme.colorScheme.primary)
-                    }
-                }
+            QuizStepContent(
+                state = state,
+                onAction = onAction,
+                modifier = Modifier.fillMaxSize()
+            )
 
-                QuizStep.Topics -> {
-                    TopicsList(
-                        topics = state.topics,
-                        onTopicSelected = { onAction(QuizAction.TopicSelected(it)) }
-                    )
-                }
-
-                QuizStep.LearningPoint -> {
-                    state.currentLearningPoint?.let { lp ->
-                        LearningPointContent(
-                            learningPoint = lp,
-                            onNext = { onAction(QuizAction.StartQuiz) }
-                        )
-                    }
-                }
-
-                QuizStep.Quiz -> {
-                    state.currentQuiz?.let { quiz ->
-                        QuizContent(
-                            quiz = quiz,
-                            answers = state.quizAnswers,
-                            onAnswerSelected = { q, o -> onAction(QuizAction.AnswerSelected(q, o)) },
-                            onSubmit = { onAction(QuizAction.SubmitQuiz) }
-                        )
-                    }
-                }
-
-                QuizStep.QuizResult -> {
-                    state.currentQuiz?.let { quiz ->
-                        QuizResultContent(
-                            quiz = quiz,
-                            answers = state.quizAnswers,
-                            score = state.quizScore,
-                            onContinue = { onAction(QuizAction.ContinueLearning) },
-                            onBackToTopics = { onAction(QuizAction.BackToTopics) }
-                        )
-                    }
-                }
+            AnimatedVisibility(
+                visible = state.isLoading && state.currentStep != QuizStep.Loading,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(Dimens.SpaceL),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                LoadingWave(color = MaterialTheme.colorScheme.primary)
             }
+        }
+    }
+}
 
-            if (state.isLoading && state.currentStep != QuizStep.Loading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(Dimens.SpaceL),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    LoadingWave(color = MaterialTheme.colorScheme.primary)
-                }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuizTopBar(
+    state: QuizState,
+    onBack: () -> Unit,
+    onAction: (QuizAction) -> Unit
+) {
+    val isAtTopics = state.currentStep == QuizStep.Topics
+
+    TopAppBar(
+        title = {
+            Text(
+                text = if (isAtTopics) {
+                    stringResource(R.string.quiz_learning_path)
+                } else {
+                    state.selectedTopic?.title
+                        ?: stringResource(R.string.quiz_learning_default_title)
+                },
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        navigationIcon = {
+            BackIconButton(
+                onBack = { if (isAtTopics) onBack() else onAction(QuizAction.BackToTopics) }
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = MaterialTheme.colorScheme.onBackground
+        )
+    )
+}
+
+@Composable
+private fun QuizStepContent(
+    state: QuizState,
+    onAction: (QuizAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (state.currentStep) {
+        QuizStep.Loading -> {
+            Box(modifier = modifier, contentAlignment = Alignment.Center) {
+                LoadingWave(color = MaterialTheme.colorScheme.primary)
+            }
+        }
+
+        QuizStep.Topics -> {
+            TopicsList(
+                topics = state.topics,
+                onTopicSelected = { onAction(QuizAction.TopicSelected(it)) },
+                modifier = modifier
+            )
+        }
+
+        QuizStep.LearningPoint -> {
+            state.currentLearningPoint?.let { learningPoint ->
+                LearningPointContent(
+                    learningPoint = learningPoint,
+                    onNext = { onAction(QuizAction.StartQuiz) },
+                    modifier = modifier
+                )
+            }
+        }
+
+        QuizStep.Quiz -> {
+            state.currentQuiz?.let { quiz ->
+                QuizContent(
+                    quiz = quiz,
+                    answers = state.quizAnswers,
+                    onAnswerSelected = { q, o -> onAction(QuizAction.AnswerSelected(q, o)) },
+                    onSubmit = { onAction(QuizAction.SubmitQuiz) },
+                    modifier = modifier
+                )
+            }
+        }
+
+        QuizStep.QuizResult -> {
+            state.currentQuiz?.let { quiz ->
+                QuizResultContent(
+                    quiz = quiz,
+                    answers = state.quizAnswers,
+                    score = state.quizScore,
+                    onContinue = { onAction(QuizAction.ContinueLearning) },
+                    onBackToTopics = { onAction(QuizAction.BackToTopics) },
+                    modifier = modifier
+                )
             }
         }
     }
@@ -182,11 +213,12 @@ fun QuizScreen(
 @Composable
 fun TopicsList(
     topics: List<StudyTopic>,
-    onTopicSelected: (StudyTopic) -> Unit
+    onTopicSelected: (StudyTopic) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(Dimens.SpaceL),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
     ) {
         item {
@@ -194,6 +226,7 @@ fun TopicsList(
                 text = stringResource(R.string.quiz_topics_header),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = Dimens.SpaceS)
             )
         }

@@ -16,4 +16,5 @@
     <string name="quiz_question_format">س%1$d: %2$s</string>
     <string name="quiz_score_format">%1$d / %2$d</string>
     <string name="quiz_percentage_format">%1$d%%</string>
+    <string name="quiz_not_answered">لا اجابة بعد</string>
 </resources>
