@@ -44,6 +44,15 @@
     <!-- Transcription errors -->
     <string name="transcription_error_unknown">Transcription failed. please try again</string>
 
+    <!-- AI and Firebase errors -->
+    <string name="error_firebase">A problem occurred with our backend services. Please try again.</string>
+    <string name="error_ai">The AI assistant is having trouble. Please try again in a moment.</string>
+    <string name="error_empty_response">The AI assistant provided an empty response. Please try again.</string>
+    <string name="error_ai_quota_exceeded">The AI assistant is currently busy. Please try again later.</string>
+    <string name="error_ai_prompt_blocked">The prompt was blocked by safety filters. Please try a different prompt.</string>
+    <string name="error_ai_response_stopped">The AI assistant stopped generating the response. Please try again.</string>
+    <string name="error_ai_timeout">The request to the AI assistant timed out. Please try again.</string>
+
     <!-- Snackbar actions -->
     <string name="snackbar_action_undo">Undo</string>
 

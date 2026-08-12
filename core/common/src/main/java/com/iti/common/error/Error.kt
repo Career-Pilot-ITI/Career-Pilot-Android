@@ -38,3 +38,13 @@ enum class PhoneValidationError : IError {
 enum class TranscriptionError : IError {
     UNKNOWN
 }
+
+enum class FirebaseError : IError {
+    BAD_RESPONSE,
+    SERVICE_ERROR,
+    QUOTA_EXCEEDED,
+    PROMPT_BLOCKED,
+    RESPONSE_STOPPED,
+    TIMEOUT,
+    UNKNOWN,
+}

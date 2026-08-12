@@ -4,24 +4,24 @@ import com.iti.careerpilot.quiz.domain.model.LearningPoint
 import com.iti.careerpilot.quiz.domain.model.LearningPointResponse
 import com.iti.careerpilot.quiz.domain.model.LearningQuiz
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
-import com.iti.common.error.NetworkError
+import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
 
 interface QuizRepository {
     suspend fun generateTopics(
         track: String,
         seniority: String
-    ): CareerPilotResult<List<StudyTopic>, NetworkError>
+    ): CareerPilotResult<List<StudyTopic>, FirebaseError>
 
     suspend fun generateNextLearningPoint(
         track: String,
         seniority: String,
         topic: String,
         coveredConcepts: List<String>
-    ): CareerPilotResult<LearningPointResponse, NetworkError>
+    ): CareerPilotResult<LearningPointResponse, FirebaseError>
 
     suspend fun generateQuiz(
         topic: String,
         learningPoint: LearningPoint
-    ): CareerPilotResult<LearningQuiz, NetworkError>
+    ): CareerPilotResult<LearningQuiz, FirebaseError>
 }

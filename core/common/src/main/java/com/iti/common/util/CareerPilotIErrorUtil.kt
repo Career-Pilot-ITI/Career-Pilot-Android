@@ -1,9 +1,11 @@
 package com.iti.common.util
 
 import com.iti.common.R
+import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.error.StorageError
 import com.iti.common.error.TranscriptionError
+
 
 fun NetworkError.toUIText(): UIText {
     return UIText.StringResource(
@@ -88,6 +90,20 @@ fun TranscriptionError.toUIText(): UIText {
         resId = when (this) {
             TranscriptionError.UNKNOWN ->
                 R.string.error_network_timeout
+        }
+    )
+}
+
+fun FirebaseError.toUIText(): UIText {
+    return UIText.StringResource(
+        resId = when (this) {
+            FirebaseError.SERVICE_ERROR -> R.string.error_firebase
+            FirebaseError.BAD_RESPONSE -> R.string.error_empty_response
+            FirebaseError.QUOTA_EXCEEDED -> R.string.error_ai_quota_exceeded
+            FirebaseError.PROMPT_BLOCKED -> R.string.error_ai_prompt_blocked
+            FirebaseError.RESPONSE_STOPPED -> R.string.error_ai_response_stopped
+            FirebaseError.TIMEOUT -> R.string.error_ai_timeout
+            FirebaseError.UNKNOWN -> R.string.error_unknown
         }
     )
 }

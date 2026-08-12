@@ -5,10 +5,12 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
-import com.iti.careerpilot.quiz.data.remote.QuizRemoteDataSourceImpl.Companion.SYSTEM_INSTRUCTION
 import com.iti.careerpilot.quiz.data.remote.dto.LearningPointResponseDto
 import com.iti.careerpilot.quiz.data.remote.dto.QuizResponseDto
 import com.iti.careerpilot.quiz.data.remote.dto.TopicsResponseDto
+import com.iti.common.error.FirebaseError
+import com.iti.common.result.CareerPilotResult
+import com.iti.common.util.safeFirebaseCall
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -27,7 +29,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
     override suspend fun generateTopics(
         track: String,
         seniority: String
-    ): TopicsResponseDto {
+    ): CareerPilotResult<TopicsResponseDto, FirebaseError> = safeFirebaseCall {
         val prompt = """
             Track: $track
             Seniority: $seniority
@@ -38,7 +40,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        return json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
     }
 
     override suspend fun generateNextLearningPoint(
@@ -46,7 +48,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
         seniority: String,
         topic: String,
         coveredConcepts: List<String>
-    ): LearningPointResponseDto {
+    ): CareerPilotResult<LearningPointResponseDto, FirebaseError> = safeFirebaseCall {
         val prompt = """
             Track: $track
             Seniority: $seniority
@@ -60,7 +62,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        return json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
     }
 
     override suspend fun generateQuiz(
@@ -68,7 +70,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
         learningPointTitle: String,
         learningPointExplanation: String,
         learningPointExample: String
-    ): QuizResponseDto {
+    ): CareerPilotResult<QuizResponseDto, FirebaseError> = safeFirebaseCall {
         val prompt = """
             Topic: $topic
             Learning Point: $learningPointTitle
@@ -80,7 +82,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        return json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
     }
 
     companion object {
