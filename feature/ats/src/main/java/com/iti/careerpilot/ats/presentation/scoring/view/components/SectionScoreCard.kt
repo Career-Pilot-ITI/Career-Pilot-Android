@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,6 +73,17 @@ internal fun SectionScoreCard(
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
+                Icon(
+                    imageVector = if (expanded) {
+                        Icons.Filled.KeyboardArrowUp
+                    } else {
+                        Icons.Filled.KeyboardArrowDown
+                    },
+                    contentDescription = stringResource(
+                        if (expanded) R.string.ats_collapse_section else R.string.ats_expand_section,
+                    ),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
             }
             AnimatedVisibility(visible = expanded && section.feedback.isNotBlank()) {
                 Text(

@@ -85,4 +85,6 @@
     <string name="ats_list_item">• %1$s</string>
     <string name="ats_expanded">Expanded</string>
     <string name="ats_collapsed">Collapsed</string>
+    <string name="ats_expand_section">Expand section</string>
+    <string name="ats_collapse_section">Collapse section</string>
 </resources>

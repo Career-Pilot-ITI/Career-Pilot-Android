@@ -89,4 +89,6 @@
     <string name="ats_list_item">• %1$s</string>
     <string name="ats_expanded">موسّع</string>
     <string name="ats_collapsed">مطوي</string>
+    <string name="ats_expand_section">توسيع القسم</string>
+    <string name="ats_collapse_section">طي القسم</string>
 </resources>
