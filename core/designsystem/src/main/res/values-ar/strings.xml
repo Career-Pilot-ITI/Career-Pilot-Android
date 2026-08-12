@@ -16,4 +16,12 @@
     <string name="parsing_cv_subtitle">قد يستغرق هذا لحظة…</string>
 
     <string name="back">رجوع</string>
+    <string name="cv_upload_tap_to_upload">اضغط لرفع سيرتك الذاتية</string>
+    <string name="cv_upload_requirements">PDF · الحد الأقصى 10 ميجابايت</string>
+    <string name="cv_upload_preparing">جارٍ تجهيز السيرة الذاتية…</string>
+    <string name="cv_upload_ready">جاهزة للرفع</string>
+    <string name="cv_upload_uploaded">تم الرفع</string>
+    <string name="cv_upload_progress">تم رفع %1$d%%</string>
+    <string name="cv_upload_file_details">%1$s • %2$s</string>
+    <string name="cv_upload_parsing">جارٍ معالجة السيرة الذاتية…</string>
 </resources>

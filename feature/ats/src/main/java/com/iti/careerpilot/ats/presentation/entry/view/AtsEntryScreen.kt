@@ -34,12 +34,12 @@ import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.entry.view.components.AtsScreenHeader
-import com.iti.careerpilot.ats.presentation.entry.view.components.CurrentCvCard
 import com.iti.careerpilot.ats.presentation.entry.view.components.FasterShareHintCard
 import com.iti.careerpilot.ats.presentation.entry.view.components.JobUrlTextField
-import com.iti.careerpilot.ats.presentation.entry.view.components.MissingCvCard
 import com.iti.careerpilot.ats.presentation.entry.viewmodel.AtsEntryViewModel
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.CvUploadCard
+import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import kotlinx.coroutines.delay
 
@@ -167,14 +167,17 @@ fun AtsEntryScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                if (state.hasSynchronizedCv) {
-                    CurrentCvCard(state = state)
-                } else {
-                    MissingCvCard(
-                        enabled = !state.isBusy,
-                        onUpload = { onAction(AtsEntryAction.SelectCvClicked) },
-                    )
-                }
+                CvUploadCard(
+                    fileName = state.cvFileName.takeIf(String::isNotBlank),
+                    fileSizeBytes = state.cvSizeBytes,
+                    stage = when {
+                        state.isUploadingCv -> CvUploadCardStage.UPLOADING
+                        state.hasSynchronizedCv -> CvUploadCardStage.UPLOADED
+                        else -> CvUploadCardStage.EMPTY
+                    },
+                    uploadProgress = state.uploadProgress,
+                    onClick = { onAction(AtsEntryAction.SelectCvClicked) },
+                )
             }
 
             item {

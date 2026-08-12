@@ -67,7 +67,7 @@ class AtsScreenStateTest {
             }
         }
 
-        composeRule.onNodeWithText("Upload your CV").assertExists()
+        composeRule.onNodeWithText("Tap to upload your CV").assertExists()
         composeRule.onNodeWithText("Compare Now").assertIsNotEnabled()
     }
 

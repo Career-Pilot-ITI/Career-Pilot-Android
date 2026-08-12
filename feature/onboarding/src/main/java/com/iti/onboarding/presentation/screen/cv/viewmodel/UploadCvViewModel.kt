@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
 import com.iti.common.error.NetworkError
 import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
@@ -11,7 +12,6 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.toUIText
 import com.iti.onboarding.domain.usecase.AnalyzeCvUseCase
-import com.iti.onboarding.presentation.screen.cv.state.CvUploadStage
 import com.iti.onboarding.presentation.screen.cv.state.SelectedCvUiModel
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvEffect
 import com.iti.onboarding.presentation.screen.cv.state.UploadCvIntent
@@ -73,7 +73,7 @@ class UploadCvViewModel @Inject constructor(
                 onStart = {
                     _state.update {
                         it.copy(
-                            stage = CvUploadStage.UPLOADING,
+                            stage = CvUploadCardStage.UPLOADING,
                             uploadProgress = 0,
                             selectedFile = null
                         )
@@ -93,17 +93,17 @@ class UploadCvViewModel @Inject constructor(
                                     name = metadata.name,
                                     sizeBytes = metadata.sizeBytes ?: 0L,
                                 ),
-                                stage = CvUploadStage.UPLOADED,
+                                stage = CvUploadCardStage.UPLOADED,
                                 uploadProgress = 100,
                             )
                         }
                     }
                 },
                 onFinish = {
-                    if (_state.value.stage != CvUploadStage.UPLOADED) {
+                    if (_state.value.stage != CvUploadCardStage.UPLOADED) {
                         _state.update {
                             it.copy(
-                                stage = CvUploadStage.EMPTY,
+                                stage = CvUploadCardStage.EMPTY,
                                 uploadProgress = 0,
                             )
                         }
@@ -143,8 +143,8 @@ class UploadCvViewModel @Inject constructor(
                 displayProgress++
                 onProgress(displayProgress)
             }
-            if (displayProgress >= 100 && !isDone && _state.value.stage != CvUploadStage.PARSING) {
-                _state.update { it.copy(stage = CvUploadStage.PARSING) }
+            if (displayProgress >= 100 && !isDone && _state.value.stage != CvUploadCardStage.PARSING) {
+                _state.update { it.copy(stage = CvUploadCardStage.PARSING) }
             }
             if (isDone && displayProgress >= 100) break
             delay(20.milliseconds)
@@ -161,11 +161,11 @@ class UploadCvViewModel @Inject constructor(
     }
 
     private fun navigateAfterAnalysis() {
-        if (_state.value.stage == CvUploadStage.UPLOADED) {
+        if (_state.value.stage == CvUploadCardStage.UPLOADED) {
             viewModelScope.launch {
                 _effects.emit(UploadCvEffect.NavigateNext)
             }
-        } else if (selectedUriString != null && _state.value.stage != CvUploadStage.UPLOADING && _state.value.stage != CvUploadStage.PARSING) {
+        } else if (selectedUriString != null && _state.value.stage != CvUploadCardStage.UPLOADING && _state.value.stage != CvUploadCardStage.PARSING) {
             prepareAndUpload(selectedUriString!!)
         }
     }
