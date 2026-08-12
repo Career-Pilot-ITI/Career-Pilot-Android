@@ -2,6 +2,7 @@ package com.iti.careerpilot.ai.evaluator
 
 import com.iti.careerpilot.ai.fallback.LocalBodyLanguageFallbackEngine
 import com.iti.careerpilot.ai.testing.FakeBodyLanguageData
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.core.model.bodylanguage.FallbackReason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -9,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import kotlinx.serialization.json.Json
@@ -148,5 +150,30 @@ class BodyLanguageAiEvaluatorTest {
 
         assertEquals(FallbackReason.TIMEOUT, fallbackReason)
         assertNotNull(evaluation)
+    }
+
+    @Test
+    fun `candidate not detected returns out-of-frame evaluation without calling AI generator`() = runTest {
+        var generatorCalled = false
+        val generator = AiContentGenerator {
+            generatorCalled = true
+            FakeBodyLanguageData.sampleEvaluationJson
+        }
+        val evaluator = BodyLanguageAiEvaluator(
+            contentGenerator = generator,
+            fallbackEngine = fallbackEngine,
+            json = json,
+            ioDispatcher = Dispatchers.Unconfined,
+        )
+
+        val emptyMetrics = BodyLanguageMetrics.EMPTY.copy(sessionDurationMs = 30_000L)
+        val (evaluation, fallbackReason) = evaluator.evaluate(emptyMetrics)
+
+        assertEquals(false, generatorCalled)
+        assertNull(fallbackReason)
+        assertEquals(0, evaluation.overallScore)
+        assertEquals(0, evaluation.eyeContact.score)
+        assertEquals(0, evaluation.posture.score)
+        assertTrue(evaluation.summary.contains("out of camera view", ignoreCase = true))
     }
 }

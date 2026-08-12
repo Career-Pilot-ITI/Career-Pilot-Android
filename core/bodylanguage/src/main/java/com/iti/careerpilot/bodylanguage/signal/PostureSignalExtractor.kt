@@ -47,10 +47,10 @@ internal class PostureSignalExtractor @Inject constructor() {
         val ls = landmarks[LEFT_SHOULDER]
         val rs = landmarks[RIGHT_SHOULDER]
 
-        // Check visibility
-        if (ls.visibility().orElse(0f) < MIN_VISIBILITY ||
-            rs.visibility().orElse(0f) < MIN_VISIBILITY
-        ) {
+        // Check visibility (default to 1.0f if the model does not provide explicit visibility)
+        val lsVis = ls.visibility().orElse(1.0f)
+        val rsVis = rs.visibility().orElse(1.0f)
+        if (lsVis < MIN_VISIBILITY || rsVis < MIN_VISIBILITY) {
             return PostureFrameSignal(
                 timestampMs = timestampMs,
                 poseDetected = false,

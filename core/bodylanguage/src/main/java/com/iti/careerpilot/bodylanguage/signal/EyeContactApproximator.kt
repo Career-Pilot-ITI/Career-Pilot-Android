@@ -14,8 +14,8 @@ import kotlin.math.abs
 internal class EyeContactApproximator @Inject constructor() {
 
     companion object {
-        private const val YAW_THRESHOLD_DEG = 15f
-        private const val PITCH_THRESHOLD_DEG = 12f
+        private const val YAW_THRESHOLD_DEG = 18f
+        private const val PITCH_THRESHOLD_DEG = 14f
 
         // MediaPipe Face Mesh iris landmark indices
         private const val LEFT_IRIS_CENTER = 468
@@ -25,7 +25,7 @@ internal class EyeContactApproximator @Inject constructor() {
         private const val RIGHT_EYE_INNER = 362
         private const val RIGHT_EYE_OUTER = 263
 
-        private const val IRIS_OFFSET_THRESHOLD = 0.15f
+        private const val IRIS_OFFSET_THRESHOLD = 0.28f
     }
 
     fun isLookingAtCamera(
@@ -33,14 +33,14 @@ internal class EyeContactApproximator @Inject constructor() {
         headPitchDeg: Float?,
         landmarks: List<NormalizedLandmark>?,
     ): Boolean? {
-        if (headYawDeg == null || headPitchDeg == null) return null
-
-        // Head must be roughly facing the camera
-        if (abs(headYawDeg) > YAW_THRESHOLD_DEG || abs(headPitchDeg) > PITCH_THRESHOLD_DEG) {
-            return false
+        // If head pose is available, verify head is roughly facing the camera
+        if (headYawDeg != null && headPitchDeg != null) {
+            if (abs(headYawDeg) > YAW_THRESHOLD_DEG || abs(headPitchDeg) > PITCH_THRESHOLD_DEG) {
+                return false
+            }
         }
 
-        // If we have iris landmarks (refinement enabled), check iris centering
+        // If we have iris landmarks, check iris centering
         if (landmarks != null && landmarks.size > RIGHT_IRIS_CENTER) {
             val leftIrisCentered = isIrisCentered(
                 iris = landmarks[LEFT_IRIS_CENTER],
@@ -55,8 +55,8 @@ internal class EyeContactApproximator @Inject constructor() {
             return leftIrisCentered && rightIrisCentered
         }
 
-        // Fallback: head pose alone
-        return true
+        // Fallback: if head is facing camera, treat as looking at camera
+        return if (headYawDeg != null && headPitchDeg != null) true else null
     }
 
     private fun isIrisCentered(

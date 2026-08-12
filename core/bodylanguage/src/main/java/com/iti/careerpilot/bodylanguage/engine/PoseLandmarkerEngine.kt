@@ -34,9 +34,9 @@ internal open class PoseLandmarkerEngine(
             .setBaseOptions(baseOptions)
             .setRunningMode(RunningMode.LIVE_STREAM)
             .setNumPoses(1)
-            .setMinPoseDetectionConfidence(0.5f)
-            .setMinPosePresenceConfidence(0.5f)
-            .setMinTrackingConfidence(0.5f)
+            .setMinPoseDetectionConfidence(0.35f)
+            .setMinPosePresenceConfidence(0.35f)
+            .setMinTrackingConfidence(0.35f)
             .setResultListener { result, _ ->
                 onResult(result, result.timestampMs())
             }

@@ -18,6 +18,7 @@ internal class SessionAggregator @Inject constructor() {
     private var maxSmile = 0f
     private var eyeContactFrames = 0
     private var faceFrameCount = 0
+    private var detectedFaceFrames = 0
     private var faceLostCount = 0
     private var lastFaceDetected = true
     private var lookAwayStartMs: Long? = null
@@ -27,7 +28,8 @@ internal class SessionAggregator @Inject constructor() {
     private var torsoLeanSum = 0.0
     private var shoulderTiltSum = 0.0
     private var slouchFrames = 0
-    private var postureFrameCount = 0
+    private var totalPostureFrames = 0
+    private var detectedPostureFrames = 0
     private var postureChangeCount = 0
     private var lastSlouchAboveThreshold = false
 
@@ -42,7 +44,7 @@ internal class SessionAggregator @Inject constructor() {
     // Session time & active recording tracking
     private var sessionStartMs: Long? = null
     private var sessionEndMs: Long? = null
-    private var isRecordingActive = true
+    private var isRecordingActive = false
     private var activeWindowStartMs: Long? = null
     private var lastActiveTimestampMs: Long? = null
     private var cumulativeActiveDurationMs = 0L
@@ -102,6 +104,7 @@ internal class SessionAggregator @Inject constructor() {
             lastFaceDetected = false
             return
         }
+        detectedFaceFrames++
         lastFaceDetected = true
 
         signal.smileScore?.let {
@@ -129,8 +132,9 @@ internal class SessionAggregator @Inject constructor() {
     fun addPosture(signal: PostureFrameSignal) {
         if (!isRecordingActive) return
         trackSessionTime(signal.timestampMs)
+        totalPostureFrames++
         if (!signal.poseDetected) return
-        postureFrameCount++
+        detectedPostureFrames++
 
         signal.torsoLeanDeg?.let { torsoLeanSum += it }
         signal.shoulderTiltDeg?.let { shoulderTiltSum += it }
@@ -179,31 +183,38 @@ internal class SessionAggregator @Inject constructor() {
         } else 0L
         val totalActiveDurationMs = cumulativeActiveDurationMs + currentActiveDelta
 
+        val faceDetPct = if (faceFrameCount > 0) (detectedFaceFrames.toFloat() / faceFrameCount) * 100f else 0f
+        val poseDetPct = if (totalPostureFrames > 0) (detectedPostureFrames.toFloat() / totalPostureFrames) * 100f else 0f
+        val handsDetPct = if (handFrameCount > 0) (handsVisibleFrames.toFloat() / handFrameCount) * 100f else 0f
+
         return BodyLanguageMetrics(
+            schemaVersion = 1,
             sessionDurationMs = totalActiveDurationMs,
+            faceDetectionPercentage = faceDetPct,
+            poseDetectionPercentage = poseDetPct,
+            handsDetectionPercentage = handsDetPct,
+            totalFramesAnalyzed = faceFrameCount + totalPostureFrames + handFrameCount,
 
             averageSmile = if (smileCount > 0) (smileSum / smileCount).toFloat() else 0f,
             maxSmile = maxSmile,
-            eyeContactPercentage = if (faceFrameCount > 0) {
-                (eyeContactFrames.toFloat() / faceFrameCount) * 100f
+            eyeContactPercentage = if (detectedFaceFrames > 0) {
+                (eyeContactFrames.toFloat() / detectedFaceFrames) * 100f
             } else 0f,
             timeLookingAwayMs = totalLookAwayMs,
             faceLostCount = faceLostCount,
 
-            averageTorsoLeanDeg = if (postureFrameCount > 0) {
-                (torsoLeanSum / postureFrameCount).toFloat()
+            averageTorsoLeanDeg = if (detectedPostureFrames > 0) {
+                (torsoLeanSum / detectedPostureFrames).toFloat()
             } else 0f,
-            averageShoulderTiltDeg = if (postureFrameCount > 0) {
-                (shoulderTiltSum / postureFrameCount).toFloat()
+            averageShoulderTiltDeg = if (detectedPostureFrames > 0) {
+                (shoulderTiltSum / detectedPostureFrames).toFloat()
             } else 0f,
-            slouchPercentage = if (postureFrameCount > 0) {
-                (slouchFrames.toFloat() / postureFrameCount) * 100f
+            slouchPercentage = if (detectedPostureFrames > 0) {
+                (slouchFrames.toFloat() / detectedPostureFrames) * 100f
             } else 0f,
             postureChanges = postureChangeCount,
 
-            handsVisiblePercentage = if (handFrameCount > 0) {
-                (handsVisibleFrames.toFloat() / handFrameCount) * 100f
-            } else 0f,
+            handsVisiblePercentage = handsDetPct,
             handToFaceTouchCount = handToFaceTouchCount,
             fidgetScore = if (fidgetCount > 0) {
                 (fidgetScoreSum / fidgetCount).toFloat()
@@ -229,14 +240,14 @@ internal class SessionAggregator @Inject constructor() {
     @Synchronized
     fun reset() {
         smileSum = 0.0; smileCount = 0; maxSmile = 0f
-        eyeContactFrames = 0; faceFrameCount = 0; faceLostCount = 0
+        eyeContactFrames = 0; faceFrameCount = 0; detectedFaceFrames = 0; faceLostCount = 0
         lastFaceDetected = true; lookAwayStartMs = null; totalLookAwayMs = 0L
         torsoLeanSum = 0.0; shoulderTiltSum = 0.0; slouchFrames = 0
-        postureFrameCount = 0; postureChangeCount = 0; lastSlouchAboveThreshold = false
+        totalPostureFrames = 0; detectedPostureFrames = 0; postureChangeCount = 0; lastSlouchAboveThreshold = false
         handsVisibleFrames = 0; handFrameCount = 0; handToFaceTouchCount = 0
         lastHandToFace = false; fidgetScoreSum = 0.0; fidgetCount = 0
         sessionStartMs = null; sessionEndMs = null
-        isRecordingActive = true
+        isRecordingActive = false
         activeWindowStartMs = null
         lastActiveTimestampMs = null
         cumulativeActiveDurationMs = 0L

@@ -66,6 +66,8 @@ class ResultViewModelTest {
     )
 
     private val sampleMetrics = BodyLanguageMetrics.EMPTY.copy(
+        faceDetectionPercentage = 90f,
+        poseDetectionPercentage = 90f,
         eyeContactPercentage = 85f,
         averageSmile = 0.5f,
         slouchPercentage = 10f,

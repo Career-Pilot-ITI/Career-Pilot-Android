@@ -7,6 +7,12 @@ data class BodyLanguageMetrics(
     val schemaVersion: Int = 1,
     val sessionDurationMs: Long,
 
+    // Presence & Tracking Coverage
+    val faceDetectionPercentage: Float = 0f,
+    val poseDetectionPercentage: Float = 0f,
+    val handsDetectionPercentage: Float = 0f,
+    val totalFramesAnalyzed: Int = 0,
+
     // Face
     val averageSmile: Float,
     val maxSmile: Float,
@@ -27,9 +33,16 @@ data class BodyLanguageMetrics(
 
     val keyMoments: List<KeyMoment>,
 ) {
+    val isCandidateDetected: Boolean
+        get() = faceDetectionPercentage >= 15f || poseDetectionPercentage >= 15f
+
     companion object {
         val EMPTY = BodyLanguageMetrics(
             sessionDurationMs = 0L,
+            faceDetectionPercentage = 0f,
+            poseDetectionPercentage = 0f,
+            handsDetectionPercentage = 0f,
+            totalFramesAnalyzed = 0,
             averageSmile = 0f,
             maxSmile = 0f,
             eyeContactPercentage = 0f,

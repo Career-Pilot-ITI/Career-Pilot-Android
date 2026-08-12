@@ -1,5 +1,6 @@
 package com.iti.careerpilot.ai.evaluator
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
@@ -12,6 +13,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "FirebaseAiGenerator"
 
 /**
  * AI Content Generator using the official Firebase AI Logic SDK (`com.google.firebase:firebase-ai`)
@@ -36,8 +39,11 @@ class FirebaseAiContentGenerator @Inject constructor(
     }
 
     override suspend fun generateContent(prompt: String): String = withContext(ioDispatcher) {
+        Log.d(TAG, "Sending request to Firebase AI Logic (backend=googleAI, model=$MODEL_NAME)...")
         val response = generativeModel.generateContent(prompt)
-        response.text ?: throw SerializationException("Firebase AI Logic returned empty response text")
+        val text = response.text ?: throw SerializationException("Firebase AI Logic returned empty response text")
+        Log.d(TAG, "Received successful response from Firebase AI Logic (${text.length} chars)")
+        text
     }
 
     companion object {

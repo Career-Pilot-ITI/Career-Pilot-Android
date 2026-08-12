@@ -12,6 +12,10 @@ object FakeBodyLanguageData {
     val sampleMetrics = BodyLanguageMetrics(
         schemaVersion = 1,
         sessionDurationMs = 120_000L,
+        faceDetectionPercentage = 95.0f,
+        poseDetectionPercentage = 92.0f,
+        handsDetectionPercentage = 65.0f,
+        totalFramesAnalyzed = 450,
         averageSmile = 0.45f,
         maxSmile = 0.85f,
         eyeContactPercentage = 78.5f,

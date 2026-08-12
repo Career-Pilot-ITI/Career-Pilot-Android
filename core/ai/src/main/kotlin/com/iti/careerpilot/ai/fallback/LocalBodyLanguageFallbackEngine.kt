@@ -12,16 +12,12 @@ import javax.inject.Singleton
 class LocalBodyLanguageFallbackEngine @Inject constructor() {
 
     fun evaluate(metrics: BodyLanguageMetrics): BodyLanguageEvaluation {
-        val hasNoDetectedLandmarks = metrics.sessionDurationMs > 0L &&
-            metrics.eyeContactPercentage == 0f &&
-            metrics.slouchPercentage == 0f &&
-            metrics.handsVisiblePercentage == 0f &&
-            metrics.averageSmile == 0f
+        val hasNoDetectedLandmarks = !metrics.isCandidateDetected
 
         if (hasNoDetectedLandmarks) {
             return BodyLanguageEvaluation(
                 schemaVersion = 1,
-                overallScore = 15,
+                overallScore = 0,
                 eyeContact = MetricEvaluation(
                     score = 0,
                     observation = "Candidate out of camera view. Eye contact could not be tracked.",
@@ -57,12 +53,12 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         val facial = evaluateFacialExpression(metrics)
         val hands = evaluateHands(metrics)
 
-        // Weighted overall score: Eye Contact 30%, Posture 30%, Facial 20%, Hands 20%
+        // Weighted overall score: Eye Contact 30%, Posture 25%, Hands 25%, Facial 20%
         val overallScore = (
             eyeContact.score * 0.30f +
-            posture.score * 0.30f +
-            facial.score * 0.20f +
-            hands.score * 0.20f
+            posture.score * 0.25f +
+            hands.score * 0.25f +
+            facial.score * 0.20f
         ).toInt().coerceIn(0, 100)
 
         val confidenceBand = when {
@@ -96,76 +92,120 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
     }
 
     private fun evaluateEyeContact(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val score = metrics.eyeContactPercentage.toInt().coerceIn(0, 100)
+        val gaze = metrics.eyeContactPercentage.toInt()
         val lostCount = metrics.keyMoments.count { it.type == KeyMomentType.EYE_CONTACT_LOST }
 
-        val observation = when {
-            score >= 80 -> "Maintained strong, consistent eye contact (${score}% of session)."
-            score >= 60 -> "Moderate eye contact (${score}%). Looked away $lostCount times."
-            else -> "Infrequent eye contact (${score}%). Candidate frequently looked away from the camera."
-        }
-
-        val tip = when {
-            score >= 80 -> "Great camera gaze! Keep looking directly into the lens when delivering key points."
-            score >= 60 -> "Try to keep your eyes centered on the camera lens rather than looking around the room."
-            else -> "Practice looking steadily at the camera to convey confidence and engagement."
+        val (score, observation, tip) = when {
+            gaze in 50..75 -> Triple(
+                (92 + ((75 - kotlin.math.abs(gaze - 62.5f)) / 12.5f * 8f).toInt()).coerceIn(90, 100),
+                "Optimal, natural eye contact maintained (${gaze}% of session).",
+                "Maintain this balanced camera gaze; it projects confidence and authenticity.",
+            )
+            gaze in 76..85 -> Triple(
+                85,
+                "Strong, direct eye contact (${gaze}% of session).",
+                "Allow yourself natural brief glances away when organizing complex thoughts.",
+            )
+            gaze in 40..49 -> Triple(
+                74,
+                "Moderate eye contact (${gaze}%). Looked away $lostCount times.",
+                "Position a visual cue near your camera lens to help draw your gaze back.",
+            )
+            gaze > 85 -> Triple(
+                68,
+                "Constant camera focus (${gaze}%). Unbroken staring can feel rigid or unnatural.",
+                "Blink naturally and take brief cognitive gaze breaks while answering.",
+            )
+            else -> Triple(
+                (gaze * 1.3f).toInt().coerceIn(10, 55),
+                "Low eye contact (${gaze}%). Candidate frequently looked away from the camera.",
+                "Elevate your camera to eye level and look directly into the lens when delivering key points.",
+            )
         }
 
         return MetricEvaluation(score = score, observation = observation, tip = tip)
     }
 
     private fun evaluatePosture(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val score = (100f - metrics.slouchPercentage).toInt().coerceIn(0, 100)
-        val slouchMoments = metrics.keyMoments.count { it.type == KeyMomentType.SLOUCH_START }
+        val torsoLean = metrics.averageTorsoLeanDeg
+        val slouchPct = metrics.slouchPercentage
+        val postureShifts = metrics.postureChanges
+        val shoulderTilt = metrics.averageShoulderTiltDeg
+
+        val leanBonus = if (torsoLean in 5f..15f) 5 else if (torsoLean > 20f || torsoLean < -5f) -5 else 0
+        val tiltDeduction = if (kotlin.math.abs(shoulderTilt) > 6f) 5 else 0
+        val shiftDeduction = (postureShifts * 2).coerceAtMost(15)
+        val slouchDeduction = (slouchPct * 0.8f).toInt()
+
+        val score = (90 + leanBonus - slouchDeduction - shiftDeduction - tiltDeduction).coerceIn(0, 100)
 
         val observation = when {
-            score >= 80 -> "Excellent upright posture throughout the session (slouch duration: ${metrics.slouchPercentage.toInt()}%)."
-            score >= 60 -> "Generally acceptable posture with occasional slouching (${metrics.slouchPercentage.toInt()}%)."
-            else -> "Significant slouching detected (${metrics.slouchPercentage.toInt()}% of session duration) with $slouchMoments posture shifts."
+            score >= 85 -> "Excellent upright posture with engaged forward presence (slouch: ${slouchPct.toInt()}%)."
+            score >= 65 -> "Generally good posture with occasional slouching (${slouchPct.toInt()}%) or minor movement."
+            else -> "Noticeable slouching detected (${slouchPct.toInt()}% of session) with $postureShifts posture shifts."
         }
 
         val tip = when {
-            score >= 80 -> "Keep your shoulders relaxed and back aligned for optimal presence."
-            score >= 60 -> "Set up your screen at eye level to naturally prevent slouching."
-            else -> "Sit upright with your back supported and shoulders relaxed to project readiness."
+            score >= 85 -> "Keep your shoulders relaxed and back aligned for optimal presence."
+            score >= 65 -> "Set up your screen at eye level to naturally support an upright posture."
+            else -> "Sit upright with your back supported and lean slightly forward (+5° to +10°) to project readiness."
         }
 
         return MetricEvaluation(score = score, observation = observation, tip = tip)
     }
 
     private fun evaluateFacialExpression(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val smileScore = ((metrics.averageSmile * 0.5f + metrics.maxSmile * 0.5f) * 100f).toInt().coerceIn(0, 100)
+        val avgSmile = metrics.averageSmile
         val smilePeaks = metrics.keyMoments.count { it.type == KeyMomentType.SMILE_PEAK }
 
-        val observation = when {
-            smileScore >= 40 || smilePeaks > 0 -> "Warm and engaging facial expressions with natural smiles observed."
-            else -> "Neutral or serious facial expression maintained throughout the session."
+        val (score, observation, tip) = when {
+            smilePeaks > 0 || avgSmile in 0.15f..0.55f -> Triple(
+                (82 + (smilePeaks * 4).coerceAtMost(15)).coerceIn(80, 100),
+                "Warm and engaging facial expressions with natural smiles during key points.",
+                "Natural warmth builds great rapport with interviewers.",
+            )
+            avgSmile > 0.55f -> Triple(
+                78,
+                "Constant smiling throughout the session. Ensure facial tone matches serious topics.",
+                "Pair smiling with moments of neutral focus when explaining complex technical details.",
+            )
+            else -> Triple(
+                65,
+                "Neutral or serious facial expression maintained throughout the session.",
+                "Remember to smile warmly during greetings, milestones, and when concluding answers.",
+            )
         }
 
-        val tip = when {
-            smileScore >= 40 || smilePeaks > 0 -> "Natural warmth builds great rapport with interviewers."
-            else -> "Remember to smile warmly during greetings and when concluding answers."
-        }
-
-        return MetricEvaluation(score = (50 + smileScore / 2).coerceIn(0, 100), observation = observation, tip = tip)
+        return MetricEvaluation(score = score, observation = observation, tip = tip)
     }
 
     private fun evaluateHands(metrics: BodyLanguageMetrics): MetricEvaluation {
-        val baseScore = (metrics.handsVisiblePercentage * 0.7f).toInt()
-        val penalty = (metrics.handToFaceTouchCount * 10) + (metrics.fidgetScore * 30f).toInt()
-        val score = (baseScore + 40 - penalty).coerceIn(0, 100)
+        val handsPct = metrics.handsVisiblePercentage
+        val touches = metrics.handToFaceTouchCount
+        val fidget = metrics.fidgetScore
+
+        val baseScore = when {
+            handsPct in 25f..55f -> 92
+            handsPct in 10f..24f -> 78
+            handsPct > 55f -> 82
+            else -> 68
+        }
+
+        val touchPenalty = (touches * 12).coerceAtMost(36)
+        val fidgetPenalty = if (fidget > 0.30f) ((fidget - 0.30f) * 60f).toInt().coerceIn(5, 30) else 0
+        val score = (baseScore - touchPenalty - fidgetPenalty).coerceIn(0, 100)
 
         val observation = when {
-            metrics.handToFaceTouchCount > 2 -> "Frequent hand-to-face touches detected (${metrics.handToFaceTouchCount} times) suggesting nervousness."
-            metrics.fidgetScore > 0.4f -> "Noticeable hand fidgeting or rapid hand movements detected."
-            metrics.handsVisiblePercentage > 30f -> "Expressive, controlled hand gestures with good visibility (${metrics.handsVisiblePercentage.toInt()}%)."
+            touches >= 2 -> "Frequent hand-to-face touches detected ($touches times), suggesting nervous tension."
+            fidget > 0.35f -> "Noticeable hand fidgeting or rapid hand movements detected."
+            handsPct in 20f..60f -> "Purposeful, controlled hand gestures with good visibility (${handsPct.toInt()}%)."
             else -> "Hands mostly rested out of camera view."
         }
 
         val tip = when {
-            metrics.handToFaceTouchCount > 0 -> "Avoid touching your face or chin, as it can distract interviewers."
-            metrics.fidgetScore > 0.3f -> "Rest your hands calmly on the desk or in your lap between gestures."
-            else -> "Use purposeful hand gestures to emphasize key achievements."
+            touches > 0 -> "Keep hands away from your face, chin, or hair to project composure."
+            fidget > 0.30f -> "Rest your hands calmly on the desk or in your lap between gestures."
+            else -> "Use open-palm hand gestures at chest level to reinforce key achievements."
         }
 
         return MetricEvaluation(score = score, observation = observation, tip = tip)
@@ -177,7 +217,7 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         metrics: BodyLanguageMetrics,
     ): String {
         return when (confidenceBand) {
-            ConfidenceBand.HIGH -> "Demonstrated strong, confident presence with steady eye contact (${metrics.eyeContactPercentage.toInt()}%) and solid posture."
+            ConfidenceBand.HIGH -> "Demonstrated strong, confident presence with balanced eye contact (${metrics.eyeContactPercentage.toInt()}%) and solid posture."
             ConfidenceBand.MODERATE -> "Good non-verbal communication with opportunities to improve posture consistency and reduce look-aways."
             ConfidenceBand.LOW -> "Body language indicators suggest nervousness or low engagement. Focus on camera alignment, upright posture, and reducing fidgeting."
         }

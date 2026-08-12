@@ -37,6 +37,13 @@ class BodyLanguageAiEvaluator @Inject constructor(
         metrics: BodyLanguageMetrics,
         isAiEnabled: Boolean = true,
     ): Pair<BodyLanguageEvaluation, FallbackReason?> = withContext(ioDispatcher) {
+        if (!metrics.isCandidateDetected) {
+            return@withContext Pair(
+                fallbackEngine.evaluate(metrics),
+                null,
+            )
+        }
+
         if (!isAiEnabled) {
             return@withContext Pair(
                 fallbackEngine.evaluate(metrics),

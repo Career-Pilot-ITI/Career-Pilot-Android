@@ -1,6 +1,9 @@
 package com.iti.careerpilot.bodylanguage
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.os.SystemClock
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -27,7 +30,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -43,13 +45,13 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     private val _isRunning = AtomicBoolean(false)
     override val isRunning: Boolean get() = _isRunning.get()
 
-    private val _isRecordingActive = AtomicBoolean(true)
+    private val _isRecordingActive = AtomicBoolean(false)
     override val isRecordingActive: Boolean get() = _isRecordingActive.get()
 
     override fun setRecordingActive(active: Boolean) {
         val wasActive = _isRecordingActive.getAndSet(active)
         if (wasActive != active) {
-            val nowMs = System.currentTimeMillis()
+            val nowMs = SystemClock.elapsedRealtime()
             if (active) {
                 aggregator.resumeRecording(nowMs)
             } else {
@@ -90,10 +92,14 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     @Volatile
     private var lastFaceCenterNorm: Pair<Float, Float>? = null
 
+    @Volatile
+    private var lastFrameTimestampMs = 0L
+
     override fun start() {
         if (_isRunning.getAndSet(true)) return
 
-        _isRecordingActive.set(true)
+        _isRecordingActive.set(false)
+        lastFrameTimestampMs = 0L
         aggregator.reset()
         keyMomentDetector.reset()
         postureExtractor.reset()
@@ -169,16 +175,32 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
     }
 
     override fun processImage(imageProxy: ImageProxy) {
-        if (!_isRunning.get()) {
+        if (!_isRunning.get() || !_isRecordingActive.get()) {
             imageProxy.close()
             return
         }
         try {
             val scheduler = frameScheduler
             if (scheduler != null) {
-                val bitmap = imageProxy.toBitmap()
+                val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                val rawBitmap = imageProxy.toBitmap()
+                val bitmap = if (rotationDegrees != 0) {
+                    val matrix = Matrix().apply {
+                        postRotate(rotationDegrees.toFloat())
+                    }
+                    Bitmap.createBitmap(
+                        rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true
+                    )
+                } else {
+                    rawBitmap
+                }
                 val mpImage = BitmapImageBuilder(bitmap).build()
-                val timestampMs = TimeUnit.NANOSECONDS.toMillis(imageProxy.imageInfo.timestamp)
+                val now = SystemClock.elapsedRealtime()
+                val timestampMs = synchronized(this) {
+                    val ts = if (now <= lastFrameTimestampMs) lastFrameTimestampMs + 1 else now
+                    lastFrameTimestampMs = ts
+                    ts
+                }
                 scheduler.onFrame(mpImage, timestampMs)
             }
         } catch (e: Exception) {

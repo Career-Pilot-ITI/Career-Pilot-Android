@@ -34,9 +34,9 @@ internal open class FaceLandmarkerEngine(
             .setBaseOptions(baseOptions)
             .setRunningMode(RunningMode.LIVE_STREAM)
             .setNumFaces(1)
-            .setMinFaceDetectionConfidence(0.5f)
-            .setMinFacePresenceConfidence(0.5f)
-            .setMinTrackingConfidence(0.5f)
+            .setMinFaceDetectionConfidence(0.35f)
+            .setMinFacePresenceConfidence(0.35f)
+            .setMinTrackingConfidence(0.35f)
             .setOutputFaceBlendshapes(true)
             .setOutputFacialTransformationMatrixes(true)
             .setResultListener { result, _ ->

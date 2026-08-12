@@ -18,15 +18,29 @@ class SessionAggregatorTest {
     }
 
     @Test
-    fun `empty session returns zero metrics`() {
+    fun `empty session returns zero metrics and isCandidateDetected false`() {
         val metrics = aggregator.finalize()
         assertEquals(0L, metrics.sessionDurationMs)
         assertEquals(0f, metrics.averageSmile, 0.01f)
         assertEquals(0f, metrics.eyeContactPercentage, 0.01f)
+        assertEquals(0f, metrics.faceDetectionPercentage, 0.01f)
+        assertEquals(0f, metrics.poseDetectionPercentage, 0.01f)
+        assertEquals(false, metrics.isCandidateDetected)
     }
 
     @Test
-    fun `smile average computed correctly from face signals`() {
+    fun `signals dropped when recording is not active`() {
+        // isRecordingActive is false by default
+        aggregator.addFace(faceSignal(timestampMs = 0, smileScore = 0.8f))
+        val metrics = aggregator.finalize()
+        assertEquals(0L, metrics.sessionDurationMs)
+        assertEquals(0, metrics.totalFramesAnalyzed)
+        assertEquals(0f, metrics.averageSmile, 0.01f)
+    }
+
+    @Test
+    fun `smile average and presence computed correctly during active recording`() {
+        aggregator.resumeRecording(0)
         aggregator.addFace(faceSignal(timestampMs = 0, smileScore = 0.2f))
         aggregator.addFace(faceSignal(timestampMs = 125, smileScore = 0.8f))
         aggregator.addFace(faceSignal(timestampMs = 250, smileScore = 0.6f))
@@ -35,10 +49,13 @@ class SessionAggregatorTest {
         // (0.2 + 0.8 + 0.6) / 3 ≈ 0.533
         assertEquals(0.533f, metrics.averageSmile, 0.01f)
         assertEquals(0.8f, metrics.maxSmile, 0.01f)
+        assertEquals(100f, metrics.faceDetectionPercentage, 0.01f)
+        assertEquals(true, metrics.isCandidateDetected)
     }
 
     @Test
     fun `eye contact percentage tracks looking-at-camera frames`() {
+        aggregator.resumeRecording(0)
         aggregator.addFace(faceSignal(timestampMs = 0, lookingAtCamera = true))
         aggregator.addFace(faceSignal(timestampMs = 125, lookingAtCamera = true))
         aggregator.addFace(faceSignal(timestampMs = 250, lookingAtCamera = false))
@@ -51,6 +68,7 @@ class SessionAggregatorTest {
 
     @Test
     fun `face lost count increments on transition from detected to not-detected`() {
+        aggregator.resumeRecording(0)
         aggregator.addFace(faceSignal(timestampMs = 0, faceDetected = true))
         aggregator.addFace(faceSignal(timestampMs = 125, faceDetected = false))
         aggregator.addFace(faceSignal(timestampMs = 250, faceDetected = false))
@@ -59,10 +77,13 @@ class SessionAggregatorTest {
 
         val metrics = aggregator.finalize()
         assertEquals(2, metrics.faceLostCount)
+        // 2 detected out of 5 = 40%
+        assertEquals(40f, metrics.faceDetectionPercentage, 0.01f)
     }
 
     @Test
     fun `hand-to-face counts distinct touch events`() {
+        aggregator.resumeRecording(0)
         aggregator.addHand(handSignal(timestampMs = 0, handToFaceTouch = false))
         aggregator.addHand(handSignal(timestampMs = 250, handToFaceTouch = true))
         aggregator.addHand(handSignal(timestampMs = 500, handToFaceTouch = true))
@@ -75,6 +96,7 @@ class SessionAggregatorTest {
 
     @Test
     fun `slouch percentage computed correctly`() {
+        aggregator.resumeRecording(0)
         // 2 out of 4 frames slouching
         aggregator.addPosture(postureSignal(timestampMs = 0, slouchScore = 0.3f))
         aggregator.addPosture(postureSignal(timestampMs = 250, slouchScore = 0.6f))
@@ -83,10 +105,12 @@ class SessionAggregatorTest {
 
         val metrics = aggregator.finalize()
         assertEquals(50f, metrics.slouchPercentage, 0.01f)
+        assertEquals(100f, metrics.poseDetectionPercentage, 0.01f)
     }
 
     @Test
     fun `session duration spans first to last signal`() {
+        aggregator.resumeRecording(1000)
         aggregator.addFace(faceSignal(timestampMs = 1000))
         aggregator.addPosture(postureSignal(timestampMs = 5000))
         aggregator.addHand(handSignal(timestampMs = 10000))
@@ -98,6 +122,7 @@ class SessionAggregatorTest {
     @Test
     fun `pause and resume calculates cumulative active answering duration`() {
         // Window 1: 1000ms -> 5000ms (duration = 4000ms)
+        aggregator.resumeRecording(1000)
         aggregator.addFace(faceSignal(timestampMs = 1000))
         aggregator.addFace(faceSignal(timestampMs = 3000))
         aggregator.pauseRecording(timestampMs = 5000)
@@ -118,6 +143,7 @@ class SessionAggregatorTest {
 
     @Test
     fun `pause closes open look-away span up to pause timestamp`() {
+        aggregator.resumeRecording(1000)
         aggregator.addFace(faceSignal(timestampMs = 1000, lookingAtCamera = true))
         aggregator.addFace(faceSignal(timestampMs = 2000, lookingAtCamera = false)) // look-away start
         aggregator.pauseRecording(timestampMs = 5000) // look-away closed at 5000 (duration = 3000ms)
@@ -132,6 +158,7 @@ class SessionAggregatorTest {
     @Test
     fun `multiple pause and resume cycles accumulate active duration accurately`() {
         // Window 1: 0 -> 2000 (2000ms)
+        aggregator.resumeRecording(0)
         aggregator.addFace(faceSignal(timestampMs = 0))
         aggregator.pauseRecording(timestampMs = 2000)
 
@@ -151,6 +178,7 @@ class SessionAggregatorTest {
 
     @Test
     fun `reset clears all accumulators`() {
+        aggregator.resumeRecording(0)
         aggregator.addFace(faceSignal(timestampMs = 0, smileScore = 0.8f))
         aggregator.reset()
         val metrics = aggregator.finalize()
