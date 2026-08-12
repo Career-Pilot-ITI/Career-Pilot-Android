@@ -1,4 +1,4 @@
-package com.iti.careerpilot.rootnavigation.components
+package com.iti.careerpilot.nestednavigation
 
 import com.iti.careerpilot.R
 import com.iti.careerpilot.rootnavigation.Route
@@ -11,21 +11,21 @@ enum class BottomBarDestination(
     Home(
         title = R.string.home,
         icon = R.drawable.ic_home,
-        route = Route.Home
+        route = Route.NestedNav.Home
     ),
     Ats(
         title = R.string.ats,
         icon = R.drawable.ic_ats,
-        route = Route.Ats,
+        route = Route.NestedNav.Ats,
     ),
     Reports(
         title = R.string.reports,
         icon = R.drawable.ic_reports,
-        route = Route.SessionHistory
+        route = Route.NestedNav.SessionHistory
     ),
     Profile(
         title = R.string.profile,
         icon = R.drawable.ic_person,
-        route = Route.Profile
+        route = Route.NestedNav.Profile
     )
 }

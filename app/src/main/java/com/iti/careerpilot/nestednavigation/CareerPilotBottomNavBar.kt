@@ -1,4 +1,4 @@
-package com.iti.careerpilot.rootnavigation.components
+package com.iti.careerpilot.nestednavigation
 
 import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.LinearOutSlowInEasing

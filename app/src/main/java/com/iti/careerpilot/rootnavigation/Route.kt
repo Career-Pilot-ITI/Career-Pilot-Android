@@ -16,25 +16,21 @@ sealed interface Route : NavKey {
     data class OTP(val phoneNumber: String) : Route
 
     @Serializable
-    data object Home : Route
+    data object NestedNav : Route {
 
-    @Serializable
-    data object SessionHistory : Route
+        @Serializable
+        data object Home : Route
 
-    @Serializable
-    data object Ats : Route
+        @Serializable
+        data object SessionHistory : Route
 
-    @Serializable
-    data object Profile : Route
+        @Serializable
+        data object Ats : Route
 
-    @Serializable
-    data class AtsScore(val workspaceId: Long) : Route
+        @Serializable
+        data object Profile : Route
 
-    @Serializable
-    data class AtsCoverLetter(val workspaceId: Long) : Route
-
-    @Serializable
-    data class AtsOptimizedCv(val workspaceId: Long) : Route
+    }
 
     @Serializable
     data class SessionDetails(val id: Long) : Route
