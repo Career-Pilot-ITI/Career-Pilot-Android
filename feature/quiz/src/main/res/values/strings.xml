@@ -2,6 +2,14 @@
 <resources>
     <string name="quiz_learning_path">Learning Path</string>
     <string name="quiz_learning_default_title">Learning</string>
+    <string name="quiz_select_seniority">Select Seniority</string>
+    <string name="quiz_select_seniority_description">Choose your experience level to generate tailored topics</string>
+    <string name="seniority_entry_level">Entry-level</string>
+    <string name="seniority_junior">Junior</string>
+    <string name="seniority_mid_level">Mid-level</string>
+    <string name="seniority_senior">Senior</string>
+    <string name="seniority_lead">Lead</string>
+    <string name="seniority_executive">Executive</string>
     <string name="quiz_topics_header">AI Generated Topics</string>
     <string name="quiz_example_header">Example:</string>
     <string name="quiz_start_check">Take Knowledge Check</string>

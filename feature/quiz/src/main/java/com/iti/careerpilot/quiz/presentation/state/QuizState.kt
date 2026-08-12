@@ -19,7 +19,7 @@ data class QuizState(
     val currentQuiz: LearningQuiz? = null,
     val coveredConcepts: Map<String, List<String>> = emptyMap(), // TopicId to CoveredConcepts
     val completedTopicIds: Set<String> = emptySet(),
-    val currentStep: QuizStep = QuizStep.Topics,
+    val currentStep: QuizStep = QuizStep.SelectSeniority,
     val quizAnswers: Map<Int, Int> = emptyMap(), // QuestionIndex to SelectedOptionIndex
     val showQuizResults: Boolean = false,
     val quizScore: Int = 0
@@ -27,6 +27,7 @@ data class QuizState(
 
 sealed interface QuizStep {
     data object Loading : QuizStep
+    data object SelectSeniority : QuizStep
     data object Topics : QuizStep
     data object LearningPoint : QuizStep
     data object Quiz : QuizStep

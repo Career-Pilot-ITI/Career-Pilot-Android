@@ -2,6 +2,14 @@
 <resources>
     <string name="quiz_learning_path">مسار التعلم</string>
     <string name="quiz_learning_default_title">تعلم</string>
+    <string name="quiz_select_seniority">اختر المستوى</string>
+    <string name="quiz_select_seniority_description">اختر مستوى خبرتك لتوليد مواضيع مخصصة</string>
+    <string name="seniority_entry_level">مستوى مبتدئ</string>
+    <string name="seniority_junior">مبتدئ</string>
+    <string name="seniority_mid_level">مستوى متوسط</string>
+    <string name="seniority_senior">خبير</string>
+    <string name="seniority_lead">قائد فريق</string>
+    <string name="seniority_executive">تنفيذي</string>
     <string name="quiz_topics_header">مواضيع مولدة بالذكاء الاصطناعي</string>
     <string name="quiz_example_header">مثال:</string>
     <string name="quiz_start_check">ابدأ مراجعة المعرفة</string>

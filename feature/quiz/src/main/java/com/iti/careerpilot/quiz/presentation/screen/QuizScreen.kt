@@ -1,5 +1,6 @@
 package com.iti.careerpilot.quiz.presentation.screen
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -42,6 +42,7 @@ import com.iti.careerpilot.quiz.presentation.event.QuizEvent
 import com.iti.careerpilot.quiz.presentation.screen.components.LearningPointContent
 import com.iti.careerpilot.quiz.presentation.screen.components.QuizContent
 import com.iti.careerpilot.quiz.presentation.screen.components.QuizResultContent
+import com.iti.careerpilot.quiz.presentation.screen.components.SelectSeniorityContent
 import com.iti.careerpilot.quiz.presentation.screen.components.TopicItem
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
@@ -59,7 +60,7 @@ fun QuizRoot(
     val context = LocalContext.current
 
     LaunchedEffect(trackName) {
-        viewModel.onAction(QuizAction.Init(trackName, state.seniority))
+        viewModel.onAction(QuizAction.Init(trackName))
     }
 
     ObserveEvent(viewModel.events) { event ->
@@ -77,7 +78,6 @@ fun QuizRoot(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizScreen(
     state: QuizState,
@@ -117,7 +117,6 @@ fun QuizScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun QuizTopBar(
     state: QuizState,
@@ -125,14 +124,15 @@ private fun QuizTopBar(
     onAction: (QuizAction) -> Unit
 ) {
     val isAtTopics = state.currentStep == QuizStep.Topics
+    val isAtSeniority = state.currentStep == QuizStep.SelectSeniority
 
     TopAppBar(
         title = {
             Text(
-                text = if (isAtTopics) {
-                    stringResource(R.string.quiz_learning_path)
-                } else {
-                    state.selectedTopic?.title
+                text = when {
+                    isAtSeniority -> stringResource(R.string.quiz_select_seniority)
+                    isAtTopics -> stringResource(R.string.quiz_learning_path)
+                    else -> state.selectedTopic?.title
                         ?: stringResource(R.string.quiz_learning_default_title)
                 },
                 style = MaterialTheme.typography.titleLarge,
@@ -142,7 +142,13 @@ private fun QuizTopBar(
         },
         navigationIcon = {
             BackIconButton(
-                onBack = { if (isAtTopics) onBack() else onAction(QuizAction.BackToTopics) }
+                onBack = {
+                    when (state.currentStep) {
+                        QuizStep.SelectSeniority -> onBack()
+                        QuizStep.Topics -> onAction(QuizAction.BackToSeniority)
+                        else -> onAction(QuizAction.BackToTopics)
+                    }
+                }
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -158,53 +164,68 @@ private fun QuizStepContent(
     onAction: (QuizAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (state.currentStep) {
-        QuizStep.Loading -> {
-            Box(modifier = modifier, contentAlignment = Alignment.Center) {
-                LoadingWave(color = MaterialTheme.colorScheme.primary)
+    AnimatedContent(
+        targetState = state.currentStep,
+        modifier = modifier,
+    ) { step ->
+        when (step) {
+            QuizStep.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingWave(color = MaterialTheme.colorScheme.primary)
+                }
             }
-        }
 
-        QuizStep.Topics -> {
-            TopicsList(
-                topics = state.topics,
-                onTopicSelected = { onAction(QuizAction.TopicSelected(it)) },
-                modifier = modifier
-            )
-        }
-
-        QuizStep.LearningPoint -> {
-            state.currentLearningPoint?.let { learningPoint ->
-                LearningPointContent(
-                    learningPoint = learningPoint,
-                    onNext = { onAction(QuizAction.StartQuiz) },
-                    modifier = modifier
+            QuizStep.SelectSeniority -> {
+                SelectSeniorityContent(
+                    onSenioritySelected = { level -> onAction(QuizAction.SenioritySelected(level.apiKey)) },
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
-        }
 
-        QuizStep.Quiz -> {
-            state.currentQuiz?.let { quiz ->
-                QuizContent(
-                    quiz = quiz,
-                    answers = state.quizAnswers,
-                    onAnswerSelected = { q, o -> onAction(QuizAction.AnswerSelected(q, o)) },
-                    onSubmit = { onAction(QuizAction.SubmitQuiz) },
-                    modifier = modifier
+            QuizStep.Topics -> {
+                TopicsList(
+                    topics = state.topics,
+                    onTopicSelected = { onAction(QuizAction.TopicSelected(it)) },
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
-        }
 
-        QuizStep.QuizResult -> {
-            state.currentQuiz?.let { quiz ->
-                QuizResultContent(
-                    quiz = quiz,
-                    answers = state.quizAnswers,
-                    score = state.quizScore,
-                    onContinue = { onAction(QuizAction.ContinueLearning) },
-                    onBackToTopics = { onAction(QuizAction.BackToTopics) },
-                    modifier = modifier
-                )
+            QuizStep.LearningPoint -> {
+                state.currentLearningPoint?.let { learningPoint ->
+                    LearningPointContent(
+                        learningPoint = learningPoint,
+                        onNext = { onAction(QuizAction.StartQuiz) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            QuizStep.Quiz -> {
+                state.currentQuiz?.let { quiz ->
+                    QuizContent(
+                        quiz = quiz,
+                        answers = state.quizAnswers,
+                        onAnswerSelected = { q, o -> onAction(QuizAction.AnswerSelected(q, o)) },
+                        onSubmit = { onAction(QuizAction.SubmitQuiz) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            QuizStep.QuizResult -> {
+                state.currentQuiz?.let { quiz ->
+                    QuizResultContent(
+                        quiz = quiz,
+                        answers = state.quizAnswers,
+                        score = state.quizScore,
+                        onContinue = { onAction(QuizAction.ContinueLearning) },
+                        onBackToTopics = { onAction(QuizAction.BackToTopics) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
         }
     }

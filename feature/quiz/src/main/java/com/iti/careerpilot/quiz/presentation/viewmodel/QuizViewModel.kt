@@ -42,12 +42,8 @@ class QuizViewModel @Inject constructor(
             userProfileRepo.userProfile.collect { profile: UserProfile ->
                 _state.update {
                     it.copy(
-                        seniority = profile.career.experienceLevel,
                         isSeniorityLoaded = true
                     )
-                }
-                if (_state.value.trackName.isNotEmpty() && _state.value.topics.isEmpty()) {
-                    generateTopics()
                 }
             }
         }
@@ -57,9 +53,11 @@ class QuizViewModel @Inject constructor(
         when (action) {
             is QuizAction.Init -> {
                 _state.update { it.copy(trackName = action.trackName) }
-                if (_state.value.isSeniorityLoaded) {
-                    generateTopics()
-                }
+            }
+
+            is QuizAction.SenioritySelected -> {
+                _state.update { it.copy(seniority = action.level) }
+                generateTopics()
             }
 
             is QuizAction.TopicSelected -> {
@@ -88,6 +86,10 @@ class QuizViewModel @Inject constructor(
 
             QuizAction.BackToTopics -> {
                 _state.update { it.copy(currentStep = QuizStep.Topics, selectedTopic = null) }
+            }
+
+            QuizAction.BackToSeniority -> {
+                _state.update { it.copy(currentStep = QuizStep.SelectSeniority, topics = emptyList()) }
             }
 
             QuizAction.Retry -> {
