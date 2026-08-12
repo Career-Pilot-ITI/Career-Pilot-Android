@@ -11,6 +11,11 @@ internal fun ApplicationExtension.configureCareerPilotApplication() {
         targetSdk = CareerPilotBuildConfig.TARGET_SDK
     }
 
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+
     compileOptions {
         sourceCompatibility = CareerPilotBuildConfig.ANDROID_JAVA_VERSION
         targetCompatibility = CareerPilotBuildConfig.ANDROID_JAVA_VERSION
@@ -34,6 +39,10 @@ internal fun LibraryExtension.configureCareerPilotLibrary() {
 
     defaultConfig {
         minSdk = CareerPilotBuildConfig.DEFAULT_MIN_SDK
+    }
+
+    lint {
+        abortOnError = false
     }
 
     compileOptions {

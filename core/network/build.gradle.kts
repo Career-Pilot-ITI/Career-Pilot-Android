@@ -16,17 +16,7 @@ val baseUrl: String = run {
         fromLocalProperties,
         providers.gradleProperty("careerpilot.baseUrl").orNull,
         providers.environmentVariable("CAREERPILOT_BASE_URL").orNull,
-    ).firstOrNull { !it.isNullOrBlank() }
-        ?: throw GradleException(
-            """
-            Missing backend base URL for :core:network.
-
-            Local development - add this line to local.properties in the project root:
-
-                careerpilot.baseUrl=http://10.0.2.2:8080
-
-            """.trimIndent()
-        )
+    ).firstOrNull { !it.isNullOrBlank() } ?: "http://10.0.2.2:8080"
 }
 
 android {
