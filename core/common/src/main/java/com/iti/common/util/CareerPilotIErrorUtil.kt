@@ -104,6 +104,7 @@ fun FirebaseError.toUIText(): UIText {
             FirebaseError.RESPONSE_STOPPED -> R.string.error_ai_response_stopped
             FirebaseError.TIMEOUT -> R.string.error_ai_timeout
             FirebaseError.UNKNOWN -> R.string.error_unknown
+            FirebaseError.FAKE_ERROR -> R.string.fake_error_unknown
         }
     )
 }

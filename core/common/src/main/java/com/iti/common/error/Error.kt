@@ -47,4 +47,5 @@ enum class FirebaseError : IError {
     RESPONSE_STOPPED,
     TIMEOUT,
     UNKNOWN,
+    FAKE_ERROR,
 }
