@@ -20,6 +20,7 @@ fun CareerPilotAppScaffold(
     snackbarHostState: SnackbarHostState,
     hasBottomNavigationBar: Boolean,
     modifier: Modifier = Modifier,
+    bottomBar: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
@@ -51,6 +52,7 @@ fun CareerPilotAppScaffold(
                     .safeContentPadding(),
             )
         },
+        bottomBar = bottomBar,
         content = content,
     )
 }

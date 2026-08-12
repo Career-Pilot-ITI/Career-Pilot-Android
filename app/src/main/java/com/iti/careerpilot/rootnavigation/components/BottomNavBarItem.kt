@@ -1,4 +1,4 @@
-package com.iti.careerpilot.nestednavigation
+package com.iti.careerpilot.rootnavigation.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
