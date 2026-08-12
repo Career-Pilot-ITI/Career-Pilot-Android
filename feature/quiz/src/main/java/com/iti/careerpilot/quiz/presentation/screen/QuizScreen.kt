@@ -133,7 +133,7 @@ private fun QuizTopBar(
                     isAtSeniority -> stringResource(R.string.quiz_select_seniority)
                     isAtTopics -> stringResource(R.string.quiz_learning_path)
                     else -> state.selectedTopic?.title
-                        ?: stringResource(R.string.quiz_learning_default_title)
+                        ?: stringResource(R.string.empty_string)
                 },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
@@ -242,15 +242,6 @@ fun TopicsList(
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
     ) {
-        item {
-            Text(
-                text = stringResource(R.string.quiz_topics_header),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = Dimens.SpaceS)
-            )
-        }
         items(topics, key = { it.id }) { topic ->
             TopicItem(
                 topic = topic,

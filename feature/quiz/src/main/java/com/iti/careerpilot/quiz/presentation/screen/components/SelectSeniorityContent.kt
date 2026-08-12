@@ -43,7 +43,10 @@ fun SelectSeniorityContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            Column(modifier = Modifier.padding(bottom = Dimens.SpaceS)) {
+            Column(
+                modifier = Modifier.padding(bottom = Dimens.SpaceS),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.quiz_select_seniority),
                     style = MaterialTheme.typography.titleLarge,

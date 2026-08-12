@@ -1,6 +1,7 @@
 package com.iti.careerpilot.quiz.presentation.screen.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,43 +45,51 @@ fun TopicItem(
     CareerPilotCard(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
     ) {
-        Row(
+        Column(
             modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable(
+                    onClick = onClick
+                )
                 .padding(Dimens.CardPadding)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = topic.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = topic.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = CareerPilotPalette.gray600
-                )
-                Spacer(modifier = Modifier.size(Dimens.SpaceS))
-                LinearProgressIndicator(
-                    progress = { topic.progress / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CareerPilotShapes.small),
-                    color = statusColor,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                TopicStatusBadge(
+                    progress = topic.progress,
+                    isCompleted = topic.isCompleted,
+                    color = statusColor
                 )
             }
 
-            Spacer(modifier = Modifier.width(Dimens.SpaceM))
-
-            TopicStatusBadge(
-                progress = topic.progress,
-                isCompleted = topic.isCompleted,
-                color = statusColor
+            Text(
+                text = topic.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = CareerPilotPalette.gray600
+            )
+            LinearProgressIndicator(
+                progress = { topic.progress / 100f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(CareerPilotShapes.small),
+                color = statusColor,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }
