@@ -61,7 +61,6 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.co
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
 import com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel.PracticeSessionViewModel
-import com.iti.common.util.SecureScreenEffect
 import com.iti.common.util.UIText
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -98,8 +97,6 @@ fun PracticeSessionRoot(
             }
         }
     }
-
-    SecureScreenEffect()
 
     LaunchedEffect(errorMessage) {
         if (errorMessage != null) {
