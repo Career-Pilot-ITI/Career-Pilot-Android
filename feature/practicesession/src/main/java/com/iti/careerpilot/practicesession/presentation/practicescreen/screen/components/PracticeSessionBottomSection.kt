@@ -29,7 +29,6 @@ fun PracticeSessionBottomSection(
                 isPlayingAudio = isPlayingAudio,
                 playbackDurationMs = playbackDurationMs,
                 playbackPositionMs = playbackPositionMs,
-                onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
                 onTogglePlay = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) },
                 onSeek = { ms -> onAction(PracticeSessionAction.SeekAudioTo(ms)) },
                 onSubmit = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) }
