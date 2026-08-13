@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,7 +21,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
@@ -31,7 +33,6 @@ import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLetterContent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
 import com.iti.careerpilot.ats.presentation.util.EmailDraft
-import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 
@@ -44,26 +45,33 @@ fun CoverLetterRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val clipboardLabel = stringResource(R.string.cover_letter)
 
     LaunchedEffect(workspaceId) {
         viewModel.onAction(CoverLetterAction.Initial(workspaceId))
     }
 
-    ObserveEvent(viewModel.effects) { effect ->
-        when (effect) {
-            is CoverLetterEffect.CopyText -> {
-                copyText(context, clipboardLabel, effect.value)
-                CareerPilotSnackbarController.show(
-                    UIText.StringResource(R.string.ats_copied),
-                )
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    is CoverLetterEffect.CopyText -> {
+                        copyText(context, clipboardLabel, effect.value)
+                        CareerPilotSnackbarController.show(
+                            UIText.StringResource(R.string.ats_copied),
+                        )
+                    }
+
+                    is CoverLetterEffect.ComposeEmail -> if (!composeEmail(context, effect.draft)) {
+                        CareerPilotSnackbarController.show(
+                            UIText.StringResource(R.string.ats_no_email_client),
+                        )
+                    }
+
+                    CoverLetterEffect.OpenCoinsPaywall -> openCoinsPaywall()
+                }
             }
-            is CoverLetterEffect.ComposeEmail -> if (!composeEmail(context, effect.draft)) {
-                CareerPilotSnackbarController.show(
-                    UIText.StringResource(R.string.ats_no_email_client),
-                )
-            }
-            CoverLetterEffect.OpenCoinsPaywall -> openCoinsPaywall()
         }
     }
 
