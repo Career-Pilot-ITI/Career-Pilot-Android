@@ -74,7 +74,19 @@ class ReadyToPracticeViewModel @Inject constructor(
             }
 
             ReadyToPracticeAction.SelectAudioMode -> _state.update {
-                it.copy(isVideoMode = false)
+                it.copy(
+                    isVideoMode = false,
+                    enablePostureTracking = false,
+                    enableHandTracking = false
+                )
+            }
+
+            is ReadyToPracticeAction.TogglePostureTracking -> _state.update {
+                it.copy(enablePostureTracking = action.enabled)
+            }
+
+            is ReadyToPracticeAction.ToggleHandTracking -> _state.update {
+                it.copy(enableHandTracking = action.enabled)
             }
 
             ReadyToPracticeAction.SelectVideoMode -> {
@@ -115,7 +127,15 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun beginInterview() {
         val id = trackId ?: return
         if (!_state.value.canBegin) return
-        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id, isVideo = _state.value.isVideoMode))
+        val s = _state.value
+        sendEvent(
+            ReadyToPracticeEvent.NavigateToPractice(
+                trackId = id,
+                isVideo = s.isVideoMode,
+                enablePosture = s.enablePostureTracking,
+                enableHands = s.enableHandTracking,
+            )
+        )
     }
 
     private fun sendEvent(event: ReadyToPracticeEvent) {

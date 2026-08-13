@@ -5,6 +5,8 @@ data class ReadyToPracticeState(
     val isMicrophoneGranted: Boolean = false,
     val isPermissionDialogVisible: Boolean = false,
     val isVideoMode: Boolean = false,
+    val enablePostureTracking: Boolean = false,
+    val enableHandTracking: Boolean = false,
     val isPaidPlan: Boolean = false,
     val isCameraGranted: Boolean = false,
     val showCameraPermissionDialog: Boolean = false,
