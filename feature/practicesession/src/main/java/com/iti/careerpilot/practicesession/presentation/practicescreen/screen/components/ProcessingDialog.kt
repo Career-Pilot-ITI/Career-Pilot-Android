@@ -26,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.SecureFlagPolicy
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.practicesession.R
 
@@ -39,7 +38,6 @@ fun SessionLoadingDialog() {
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
             usePlatformDefaultWidth = false,
-            securePolicy = SecureFlagPolicy.SecureOn,
         )
     ) {
         CareerPilotCard(
@@ -118,7 +116,6 @@ fun ProcessingDialog(
             dismissOnBackPress = false,
             dismissOnClickOutside = false,
             usePlatformDefaultWidth = false,
-            securePolicy = SecureFlagPolicy.SecureOn,
         )
     ) {
         CareerPilotCard(
