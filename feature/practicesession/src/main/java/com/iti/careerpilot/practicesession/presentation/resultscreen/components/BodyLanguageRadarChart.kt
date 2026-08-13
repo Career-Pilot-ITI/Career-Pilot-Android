@@ -25,43 +25,28 @@ import com.iti.careerpilot.practicesession.R
 import kotlin.math.cos
 import kotlin.math.sin
 
+data class RadarAxis(
+    val label: String,
+    val score: Int,
+)
+
 @Composable
 fun BodyLanguageRadarChart(
-    eyeContactScore: Int,
-    postureScore: Int,
-    handGesturesScore: Int,
-    facialExpressionScore: Int,
+    axes: List<RadarAxis>,
     modifier: Modifier = Modifier,
-    labels: List<String> = listOf(
-        stringResource(R.string.radar_eye_contact),
-        stringResource(R.string.radar_posture),
-        stringResource(R.string.radar_hand_stability),
-        stringResource(R.string.radar_facial_expressions),
-    ),
 ) {
-    val animEye by animateFloatAsState(
-        targetValue = eyeContactScore.coerceIn(0, 100) / 100f,
-        animationSpec = tween(1000),
-        label = "animEye"
-    )
-    val animPosture by animateFloatAsState(
-        targetValue = postureScore.coerceIn(0, 100) / 100f,
-        animationSpec = tween(1000),
-        label = "animPosture"
-    )
-    val animHand by animateFloatAsState(
-        targetValue = handGesturesScore.coerceIn(0, 100) / 100f,
-        animationSpec = tween(1000),
-        label = "animHand"
-    )
-    val animFacial by animateFloatAsState(
-        targetValue = facialExpressionScore.coerceIn(0, 100) / 100f,
-        animationSpec = tween(1000),
-        label = "animFacial"
-    )
+    if (axes.isEmpty()) return
 
-    val scores = listOf(animEye, animPosture, animHand, animFacial)
-    val angles = listOf(-Math.PI / 2, 0.0, Math.PI / 2, Math.PI)
+    val animatedScores = axes.mapIndexed { index, axis ->
+        val anim by animateFloatAsState(
+            targetValue = axis.score.coerceIn(0, 100) / 100f,
+            animationSpec = tween(1000),
+            label = "animRadarAxis_$index"
+        )
+        anim
+    }
+
+    val angles = (0 until axes.size).map { -Math.PI / 2 + it * (2 * Math.PI / axes.size) }
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -107,7 +92,7 @@ fun BodyLanguageRadarChart(
                 )
             }
 
-            // 2. Draw 4 radial axis spokes
+            // 2. Draw radial axis spokes
             angles.forEach { angle ->
                 val endX = centerX + maxRadius * cos(angle).toFloat()
                 val endY = centerY + maxRadius * sin(angle).toFloat()
@@ -121,7 +106,7 @@ fun BodyLanguageRadarChart(
 
             // 3. Construct Data Polygon
             val dataPoints = angles.mapIndexed { index, angle ->
-                val r = maxRadius * scores[index].coerceIn(0f, 1f)
+                val r = maxRadius * animatedScores[index].coerceIn(0f, 1f)
                 val x = centerX + r * cos(angle).toFloat()
                 val y = centerY + r * sin(angle).toFloat()
                 Offset(x, y)
@@ -163,28 +148,37 @@ fun BodyLanguageRadarChart(
             }
 
             // 5. Draw labels outside the radar chart web
-            labels.forEachIndexed { index, label ->
+            axes.forEachIndexed { index, axis ->
                 if (index < angles.size) {
                     val angle = angles[index]
                     val labelRadius = maxRadius + 14.dp.toPx()
                     val lx = centerX + labelRadius * cos(angle).toFloat()
                     val ly = centerY + labelRadius * sin(angle).toFloat()
 
-                    val layoutResult = textMeasurer.measure(label, textStyle)
+                    val layoutResult = textMeasurer.measure(axis.label, textStyle)
                     val w = layoutResult.size.width.toFloat()
                     val h = layoutResult.size.height.toFloat()
 
-                    val topLeft = when (index) {
-                        0 -> Offset(lx - w / 2f, ly - h) // Top (Eye Contact)
-                        1 -> Offset(lx + 4.dp.toPx(), ly - h / 2f) // Right (Posture)
-                        2 -> Offset(lx - w / 2f, ly) // Bottom (Hand Stability)
-                        3 -> Offset(lx - w - 4.dp.toPx(), ly - h / 2f) // Left (Facial Expressions)
-                        else -> Offset(lx, ly)
+                    val cosA = cos(angle).toFloat()
+                    val sinA = sin(angle).toFloat()
+
+                    val xOffset = when {
+                        cosA > 0.3f -> 4.dp.toPx()
+                        cosA < -0.3f -> -w - 4.dp.toPx()
+                        else -> -w / 2f
                     }
+
+                    val yOffset = when {
+                        sinA > 0.3f -> 4.dp.toPx()
+                        sinA < -0.3f -> -h - 4.dp.toPx()
+                        else -> -h / 2f
+                    }
+
+                    val topLeft = Offset(lx + xOffset, ly + yOffset)
 
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = label,
+                        text = axis.label,
                         topLeft = topLeft,
                         style = textStyle
                     )
@@ -192,4 +186,27 @@ fun BodyLanguageRadarChart(
             }
         }
     }
+}
+
+@Composable
+fun BodyLanguageRadarChart(
+    eyeContactScore: Int,
+    postureScore: Int,
+    handGesturesScore: Int,
+    facialExpressionScore: Int,
+    modifier: Modifier = Modifier,
+    labels: List<String> = listOf(
+        stringResource(R.string.radar_eye_contact),
+        stringResource(R.string.radar_posture),
+        stringResource(R.string.radar_hand_stability),
+        stringResource(R.string.radar_facial_expressions),
+    ),
+) {
+    val axes = listOf(
+        RadarAxis(labels.getOrElse(0) { stringResource(R.string.radar_eye_contact) }, eyeContactScore),
+        RadarAxis(labels.getOrElse(1) { stringResource(R.string.radar_posture) }, postureScore),
+        RadarAxis(labels.getOrElse(2) { stringResource(R.string.radar_hand_stability) }, handGesturesScore),
+        RadarAxis(labels.getOrElse(3) { stringResource(R.string.radar_facial_expressions) }, facialExpressionScore),
+    )
+    BodyLanguageRadarChart(axes = axes, modifier = modifier)
 }

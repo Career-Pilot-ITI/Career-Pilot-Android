@@ -94,13 +94,15 @@ fun BodyLanguageSection(
             is BodyLanguageUiState.Success -> {
                 EvaluationBodyLanguageCard(
                     evaluation = state.evaluation,
-                    fallbackReason = null
+                    fallbackReason = null,
+                    metrics = metrics,
                 )
             }
             is BodyLanguageUiState.FallbackUsed -> {
                 EvaluationBodyLanguageCard(
                     evaluation = state.evaluation,
-                    fallbackReason = state.reason
+                    fallbackReason = state.reason,
+                    metrics = metrics,
                 )
             }
             BodyLanguageUiState.Idle -> {
@@ -170,6 +172,7 @@ private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
 private fun EvaluationBodyLanguageCard(
     evaluation: BodyLanguageEvaluation,
     fallbackReason: FallbackReason?,
+    metrics: BodyLanguageMetrics? = null,
     modifier: Modifier = Modifier,
 ) {
     val cardContentDesc = stringResource(
@@ -187,6 +190,20 @@ private fun EvaluationBodyLanguageCard(
         animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
         label = "hero_overall_score"
     )
+
+    val hasPosture = evaluation.posture.score >= 0 && (metrics == null || metrics.poseDetectionPercentage > 0f)
+    val hasHands = evaluation.handGestures.score >= 0 && (metrics == null || metrics.handsDetectionPercentage > 0f)
+
+    val axes = buildList {
+        add(RadarAxis(stringResource(R.string.radar_eye_contact), evaluation.eyeContact.score))
+        add(RadarAxis(stringResource(R.string.radar_facial_expressions), evaluation.facialExpression.score))
+        if (hasPosture) {
+            add(RadarAxis(stringResource(R.string.radar_posture), evaluation.posture.score))
+        }
+        if (hasHands) {
+            add(RadarAxis(stringResource(R.string.radar_hand_stability), evaluation.handGestures.score))
+        }
+    }
 
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -269,12 +286,7 @@ private fun EvaluationBodyLanguageCard(
             }
 
             // Radar Chart Visual Summary
-            BodyLanguageRadarChart(
-                eyeContactScore = evaluation.eyeContact.score,
-                postureScore = evaluation.posture.score,
-                handGesturesScore = evaluation.handGestures.score,
-                facialExpressionScore = evaluation.facialExpression.score,
-            )
+            BodyLanguageRadarChart(axes = axes)
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
 
@@ -300,7 +312,7 @@ private fun EvaluationBodyLanguageCard(
                 )
             }
 
-            if (evaluation.posture.score >= 0) {
+            if (hasPosture) {
                 MetricBreakdownCard(
                     label = stringResource(R.string.posture),
                     icon = Icons.Default.Accessibility,
@@ -308,7 +320,7 @@ private fun EvaluationBodyLanguageCard(
                 )
             }
 
-            if (evaluation.handGestures.score >= 0) {
+            if (hasHands) {
                 MetricBreakdownCard(
                     label = stringResource(R.string.hand_gestures),
                     icon = Icons.Default.TouchApp,
@@ -531,6 +543,17 @@ private fun RawMetricsBodyLanguageCard(
     val facialExpressionScore = (metrics.averageSmile * 100).toInt().coerceIn(0, 100)
     val telemetryMetricsDesc = stringResource(R.string.body_language_telemetry_metrics_desc)
 
+    val axes = buildList {
+        add(RadarAxis(stringResource(R.string.radar_eye_contact), eyeContactScore))
+        add(RadarAxis(stringResource(R.string.radar_facial_expressions), facialExpressionScore))
+        if (metrics.poseDetectionPercentage > 0f) {
+            add(RadarAxis(stringResource(R.string.radar_posture), postureScore))
+        }
+        if (metrics.handsDetectionPercentage > 0f) {
+            add(RadarAxis(stringResource(R.string.radar_hand_stability), handGesturesScore))
+        }
+    }
+
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -547,12 +570,7 @@ private fun RawMetricsBodyLanguageCard(
                 )
             )
 
-            BodyLanguageRadarChart(
-                eyeContactScore = eyeContactScore,
-                postureScore = postureScore,
-                handGesturesScore = handGesturesScore,
-                facialExpressionScore = facialExpressionScore
-            )
+            BodyLanguageRadarChart(axes = axes)
 
             ScoreItem(
                 label = stringResource(R.string.eye_contact),
