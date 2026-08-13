@@ -34,6 +34,7 @@
     <!-- Session screen chrome -->
     <string name="toggle_question_card">إظهار/إخفاء بطاقة السؤال</string>
     <string name="session_status_icon">حالة الجلسة</string>
+    <string name="scroll_for_more">مرر للمزيد</string>
     <string name="loading_question">جارٍ تحميل السؤال…</string>
     <string name="question_number">السؤال %1$s</string>
 

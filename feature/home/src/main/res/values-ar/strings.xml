@@ -95,4 +95,10 @@
     <string name="ready_feature_hands">اليدين</string>
     <string name="ready_analysis_features">ميزات التحليل</string>
 
+    <string name="ready_camera_permission_title">الوصول إلى الكاميرا</string>
+    <string name="ready_camera_permission_text">يحتاج CareerPilot إلى الكاميرا لتحليل لغة الجسد أثناء المقابلة المصورة.</string>
+    <string name="ready_camera_title">الوصول إلى الكاميرا</string>
+    <string name="ready_camera_required">مطلوب للفيديو</string>
+    <string name="ready_camera_granted">تم منح الوصول</string>
+
 </resources>
