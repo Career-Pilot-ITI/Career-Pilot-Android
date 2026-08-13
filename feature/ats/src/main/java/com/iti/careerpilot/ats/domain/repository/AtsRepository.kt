@@ -1,8 +1,8 @@
 package com.iti.careerpilot.ats.domain.repository
 
 import com.iti.careerpilot.ats.domain.model.AtsScore
+import com.iti.careerpilot.ats.domain.model.AiJob
 import com.iti.careerpilot.ats.domain.model.CoverLetter
-import com.iti.careerpilot.ats.domain.model.CvOptimization
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
@@ -24,7 +24,9 @@ interface AtsRepository {
 
     suspend fun scoreCv(workspaceId: Long): CareerPilotResult<AtsScore, NetworkError>
 
-    suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<CvOptimization, NetworkError>
+    suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<AiJob, NetworkError>
+
+    suspend fun getAiJob(jobId: Long): CareerPilotResult<AiJob, NetworkError>
 
     suspend fun generateCoverLetter(workspaceId: Long): CareerPilotResult<CoverLetter, NetworkError>
 }

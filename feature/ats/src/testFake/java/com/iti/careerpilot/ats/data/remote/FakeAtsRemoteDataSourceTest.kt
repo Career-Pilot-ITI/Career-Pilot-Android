@@ -17,7 +17,8 @@ class FakeAtsRemoteDataSourceTest {
 
         assertTrue(source.getWorkspace(workspaceId) is CareerPilotResult.Success)
         assertTrue(source.scoreCv(workspaceId) is CareerPilotResult.Success)
-        assertTrue(source.optimizeCv(workspaceId) is CareerPilotResult.Success)
+        val optimization = source.optimizeCv(workspaceId) as CareerPilotResult.Success
+        assertTrue(source.getAiJob(optimization.data.id) is CareerPilotResult.Success)
         assertTrue(source.generateCoverLetter(workspaceId) is CareerPilotResult.Success)
     }
 

@@ -34,6 +34,8 @@ object Endpoints {
     fun atsScoreCv(workspaceId: Long) = "${atsWorkspace(workspaceId)}/score-cv"
     fun atsOptimizeCv(workspaceId: Long) = "${atsWorkspace(workspaceId)}/cv/optimize"
     fun atsCoverLetter(workspaceId: Long) = "${atsWorkspace(workspaceId)}/cover-letter"
+    const val AI_JOBS = "$BASE_URL/api/v1/ai-jobs"
+    fun aiJob(jobId: Long) = "$AI_JOBS/$jobId"
 
     const val INTERVIEW_SESSIONS = "$BASE_URL/api/v1/interviews/sessions"
     fun SUBMIT_ANSWER(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/answer"

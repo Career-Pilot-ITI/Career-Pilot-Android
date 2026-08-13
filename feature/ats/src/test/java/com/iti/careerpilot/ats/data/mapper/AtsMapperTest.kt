@@ -1,10 +1,13 @@
 package com.iti.careerpilot.ats.data.mapper
 
 import com.iti.careerpilot.ats.data.dto.AtsScoreDto
+import com.iti.careerpilot.ats.data.dto.AtsApiResponseDto
+import com.iti.careerpilot.ats.data.dto.AiJobDto
 import com.iti.careerpilot.ats.data.dto.AtsSectionScoreDto
 import com.iti.careerpilot.ats.data.dto.JobDto
 import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
 import kotlinx.serialization.json.Json
+import com.iti.careerpilot.ats.domain.model.AiJobStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -64,5 +67,81 @@ class AtsMapperTest {
         assertEquals("https://example.com/logo.png", mapped.companyLogoUrl)
         assertEquals("2 days ago", mapped.postedLabel)
         assertEquals("1000+ Person", mapped.applicantsLabel)
+    }
+
+    @Test
+    fun `pending optimization keeps result absent even when backend returns empty object`() {
+        val response = Json.decodeFromString<AtsApiResponseDto<AiJobDto>>(
+            """
+            {
+              "success": true,
+              "data": {
+                "id": 42,
+                "workspaceId": 7,
+                "type": "CV_OPTIMIZE",
+                "status": "PENDING",
+                "progressPercentage": 0,
+                "currentStep": "Queued",
+                "result": {}
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val mapped = requireNotNull(response.data).toDomain()
+
+        assertEquals(AiJobStatus.PENDING, mapped.status)
+        assertNull(mapped.result)
+    }
+
+    @Test
+    fun `completed optimization maps section improvements and empty sections`() {
+        val response = Json.decodeFromString<AtsApiResponseDto<AiJobDto>>(
+            """
+            {
+              "success": true,
+              "data": {
+                "id": 42,
+                "workspaceId": 7,
+                "type": "CV_OPTIMIZE",
+                "status": "COMPLETED",
+                "progressPercentage": 100,
+                "currentStep": "Done",
+                "result": {
+                  "sections": [
+                    {
+                      "name": "Experience",
+                      "score": 82,
+                      "improvements": [
+                        {
+                          "original": "Worked on APIs.",
+                          "improved": "Delivered 12 APIs.",
+                          "reason": "Adds measurable impact."
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Skills",
+                      "score": 90,
+                      "improvements": []
+                    }
+                  ],
+                  "recommendedTracks": [" Backend Development ", ""],
+                  "coinCost": 50
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val mapped = requireNotNull(response.data).toDomain()
+        val optimization = requireNotNull(mapped.result)
+
+        assertEquals(AiJobStatus.COMPLETED, mapped.status)
+        assertEquals(2, optimization.sections.size)
+        assertEquals("Delivered 12 APIs.", optimization.sections.first().improvements.single().improved)
+        assertEquals(emptyList<Any>(), optimization.sections.last().improvements)
+        assertEquals(listOf("Backend Development"), optimization.recommendedTracks)
+        assertEquals(50, optimization.coinCost)
     }
 }

@@ -1,8 +1,8 @@
 package com.iti.careerpilot.ats.presentation.jobdetails
 
 import com.iti.careerpilot.ats.domain.model.AtsScore
+import com.iti.careerpilot.ats.domain.model.AiJob
 import com.iti.careerpilot.ats.domain.model.CoverLetter
-import com.iti.careerpilot.ats.domain.model.CvOptimization
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
@@ -80,7 +80,9 @@ private class JobDetailsRepository : AtsRepository {
         scoreCalls++
         return CareerPilotResult.Error(NetworkError.UNKNOWN)
     }
-    override suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<CvOptimization, NetworkError> =
+    override suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<AiJob, NetworkError> =
+        CareerPilotResult.Error(NetworkError.UNKNOWN)
+    override suspend fun getAiJob(jobId: Long): CareerPilotResult<AiJob, NetworkError> =
         CareerPilotResult.Error(NetworkError.UNKNOWN)
     override suspend fun generateCoverLetter(workspaceId: Long): CareerPilotResult<CoverLetter, NetworkError> =
         CareerPilotResult.Error(NetworkError.UNKNOWN)

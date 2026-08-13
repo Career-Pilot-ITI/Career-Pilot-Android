@@ -2,8 +2,11 @@ package com.iti.careerpilot.ats.data.remote
 
 import com.iti.careerpilot.ats.data.dto.AtsScoreDto
 import com.iti.careerpilot.ats.data.dto.AtsSectionScoreDto
+import com.iti.careerpilot.ats.data.dto.AiJobDto
 import com.iti.careerpilot.ats.data.dto.CoverLetterDto
 import com.iti.careerpilot.ats.data.dto.CvOptimizationDto
+import com.iti.careerpilot.ats.data.dto.CvOptimizationSectionDto
+import com.iti.careerpilot.ats.data.dto.CvSectionImprovementDto
 import com.iti.careerpilot.ats.data.dto.JobDto
 import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
 import com.iti.common.error.NetworkError
@@ -34,7 +37,16 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
 
     override suspend fun scoreCv(workspaceId: Long) = workspaceResult(workspaceId, SCORE)
 
-    override suspend fun optimizeCv(workspaceId: Long) = workspaceResult(workspaceId, OPTIMIZATION)
+    override suspend fun optimizeCv(workspaceId: Long) = workspaceResult(workspaceId, PENDING_OPTIMIZATION)
+
+    override suspend fun getAiJob(jobId: Long): CareerPilotResult<AiJobDto, NetworkError> {
+        fakeDelay()
+        return if (jobId == COMPLETED_OPTIMIZATION.id) {
+            CareerPilotResult.Success(COMPLETED_OPTIMIZATION)
+        } else {
+            CareerPilotResult.Error(NetworkError.NOT_FOUND)
+        }
+    }
 
     override suspend fun generateCoverLetter(workspaceId: Long) = workspaceResult(workspaceId, COVER_LETTER)
 
@@ -86,10 +98,39 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
             coinCost = 2,
             cvScoreUpdatedAt = "2026-08-11T09:41:00Z",
         )
-        val OPTIMIZATION = CvOptimizationDto(
-            optimizedCv = "Senior engineer with measurable experience delivering accessible products at scale.",
-            recommendedTracks = listOf("Frontend Engineering", "System Design"),
-            coinCost = 3,
+        val PENDING_OPTIMIZATION = AiJobDto(
+            id = 42L,
+            workspaceId = WORKSPACE.id,
+            type = "CV_OPTIMIZE",
+            status = "PENDING",
+            progressPercentage = 0,
+            currentStep = "Queued",
+        )
+        val COMPLETED_OPTIMIZATION = PENDING_OPTIMIZATION.copy(
+            status = "COMPLETED",
+            progressPercentage = 100,
+            currentStep = "CV Optimization completed successfully!",
+            result = CvOptimizationDto(
+                sections = listOf(
+                    CvOptimizationSectionDto(
+                        name = "Experience",
+                        score = 82,
+                        improvements = listOf(
+                            CvSectionImprovementDto(
+                                original = "Worked on backend APIs.",
+                                improved = "Delivered measurable backend API improvements.",
+                                reason = "Adds measurable impact.",
+                            ),
+                        ),
+                    ),
+                    CvOptimizationSectionDto(
+                        name = "Skills",
+                        score = 90,
+                    ),
+                ),
+                recommendedTracks = listOf("Frontend Engineering", "System Design"),
+                coinCost = 3,
+            ),
         )
         val COVER_LETTER = CoverLetterDto(
             coverLetter = "Dear Hiring Manager,\n\nI am excited to apply for the Senior Frontend Engineer role.",

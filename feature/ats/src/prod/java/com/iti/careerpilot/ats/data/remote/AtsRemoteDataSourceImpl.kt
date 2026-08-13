@@ -1,9 +1,9 @@
 package com.iti.careerpilot.ats.data.remote
 
 import com.iti.careerpilot.ats.data.dto.AtsApiResponseDto
+import com.iti.careerpilot.ats.data.dto.AiJobDto
 import com.iti.careerpilot.ats.data.dto.AtsScoreDto
 import com.iti.careerpilot.ats.data.dto.CoverLetterDto
-import com.iti.careerpilot.ats.data.dto.CvOptimizationDto
 import com.iti.careerpilot.ats.data.dto.ImportJobRequestDto
 import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
 import com.iti.careerpilot.core.network.Endpoints
@@ -76,8 +76,12 @@ class AtsRemoteDataSourceImpl @Inject constructor(
         client.post(Endpoints.atsScoreCv(workspaceId)) { atsTimeout() }
     }
 
-    override suspend fun optimizeCv(workspaceId: Long) = payload<CvOptimizationDto> {
-        client.post(Endpoints.atsOptimizeCv(workspaceId)) { atsTimeout() }
+    override suspend fun optimizeCv(workspaceId: Long) = payload<AiJobDto> {
+        client.post(Endpoints.atsOptimizeCv(workspaceId))
+    }
+
+    override suspend fun getAiJob(jobId: Long) = payload<AiJobDto> {
+        client.get(Endpoints.aiJob(jobId))
     }
 
     override suspend fun generateCoverLetter(workspaceId: Long) = payload<CoverLetterDto> {

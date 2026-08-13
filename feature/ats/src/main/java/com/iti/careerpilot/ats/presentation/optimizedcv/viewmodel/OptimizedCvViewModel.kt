@@ -86,11 +86,15 @@ class OptimizedCvViewModel @Inject constructor(
             when (val result = optimizeCv(id)) {
                 is CareerPilotResult.Success -> {
                     savedStateHandle[attemptKey(id)] = false
+                    val optimization = result.data.result
                     _state.update {
                         it.copy(
-                            optimizedText = result.data.optimizedCv,
-                            recommendedTracks = result.data.recommendedTracks,
-                            coinCost = result.data.coinCost,
+                            optimizedText = optimization?.sections
+                                .orEmpty()
+                                .flatMap { section -> section.improvements }
+                                .joinToString("\n\n") { improvement -> improvement.improved },
+                            recommendedTracks = optimization?.recommendedTracks.orEmpty(),
+                            coinCost = optimization?.coinCost,
                             isLoading = false,
                             wasInterrupted = false,
                         )
