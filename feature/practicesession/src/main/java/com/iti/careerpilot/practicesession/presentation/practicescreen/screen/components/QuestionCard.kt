@@ -30,6 +30,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+
 @Composable
 fun QuestionCard(
     questionOrder: Int?,
@@ -39,6 +49,8 @@ fun QuestionCard(
     onStopClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
+
     CareerPilotCard(
         elevation = 8.dp,
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
@@ -47,7 +59,7 @@ fun QuestionCard(
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .heightIn(max = 125.dp),
+                .heightIn(max = 135.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -82,21 +94,71 @@ fun QuestionCard(
                 }
             }
             Spacer(Modifier.height(6.dp))
-            Column(
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 70.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
-                Text(
-                    text = questionText ?: stringResource(R.string.loading_question),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Start
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                ) {
+                    Text(
+                        text = questionText ?: stringResource(R.string.loading_question),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Start
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                // Subtle bottom gradient fade hint when text exceeds visible height
+                if (scrollState.canScrollForward) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(18.dp)
+                            .align(Alignment.BottomCenter)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                                    )
+                                )
+                            )
+                    )
+                }
+            }
+
+            // Explicit UX indicator notifying the user that the question is scrollable
+            AnimatedVisibility(
+                visible = scrollState.canScrollForward,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Row(
+                    modifier = Modifier.padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_expand_down),
+                        contentDescription = stringResource(R.string.scroll_for_more),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.80f),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.scroll_for_more),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.80f)
+                    )
+                }
             }
         }
     }

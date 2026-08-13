@@ -33,6 +33,7 @@
     <!-- Session screen chrome -->
     <string name="toggle_question_card">Toggle question card</string>
     <string name="session_status_icon">Session status</string>
+    <string name="scroll_for_more">Scroll for more</string>
     <string name="loading_question">Loading question…</string>
     <string name="question_number">Question %1$s</string>
     <string name="session_settings">Session Settings</string>
