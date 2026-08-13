@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -246,6 +249,13 @@ private fun ScoringContent(
                 CareerPilotButton(
                     text = stringResource(R.string.ats_optimize_cv),
                     onClick = { onAction(ScoringAction.OptimizeCv) },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lightbulb_outline),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
                 )
             }
             item {
@@ -253,6 +263,13 @@ private fun ScoringContent(
                     text = stringResource(R.string.ats_generate_cover_letter),
                     onClick = { onAction(ScoringAction.GenerateCoverLetter) },
                     variant = ButtonVariant.OUTLINE,
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_email_outline),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
                 )
             }
             item {
@@ -261,6 +278,13 @@ private fun ScoringContent(
                     onClick = { onAction(ScoringAction.StartPractice) },
                     enabled = state.trackId != null,
                     variant = ButtonVariant.OUTLINE,
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_record_outline),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
                 )
                 if (state.trackId == null) {
                     Text(
