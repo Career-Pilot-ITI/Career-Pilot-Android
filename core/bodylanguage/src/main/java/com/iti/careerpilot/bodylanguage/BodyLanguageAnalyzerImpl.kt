@@ -162,6 +162,18 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         try {
             val scheduler = frameScheduler
             if (scheduler != null) {
+                val now = SystemClock.elapsedRealtime()
+                val timestampMs = synchronized(this) {
+                    val ts = if (now <= lastFrameTimestampMs) lastFrameTimestampMs + 1 else now
+                    lastFrameTimestampMs = ts
+                    ts
+                }
+
+                // Pre-check gate: Avoid expensive bitmap creation, allocation, and rotation if frame will be dropped by scheduler
+                if (!scheduler.shouldProcessFrame(timestampMs)) {
+                    return
+                }
+
                 val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                 val rawBitmap = imageProxy.toBitmap()
                 val bitmap = if (rotationDegrees != 0) {
@@ -175,12 +187,6 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                     rawBitmap
                 }
                 val mpImage = BitmapImageBuilder(bitmap).build()
-                val now = SystemClock.elapsedRealtime()
-                val timestampMs = synchronized(this) {
-                    val ts = if (now <= lastFrameTimestampMs) lastFrameTimestampMs + 1 else now
-                    lastFrameTimestampMs = ts
-                    ts
-                }
                 scheduler.onFrame(mpImage, timestampMs)
             }
         } catch (e: Exception) {

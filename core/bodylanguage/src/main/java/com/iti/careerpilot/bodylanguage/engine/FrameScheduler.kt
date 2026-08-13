@@ -46,6 +46,27 @@ internal class FrameScheduler(
         }
     }
 
+    /**
+     * Returns true if at least one engine is due for a frame at [timestampMs].
+     * Call this BEFORE doing expensive bitmap conversion and allocations.
+     */
+    fun shouldProcessFrame(timestampMs: Long): Boolean {
+        val lastFace = lastFaceMs.get()
+        if (lastFace == -1L || timestampMs - lastFace >= faceIntervalMs) return true
+
+        if (poseEngine != null) {
+            val lastPose = lastPoseMs.get()
+            if (lastPose == -1L || timestampMs - lastPose >= poseIntervalMs) return true
+        }
+
+        if (handEngine != null) {
+            val lastHand = lastHandMs.get()
+            if (lastHand == -1L || timestampMs - lastHand >= handIntervalMs) return true
+        }
+
+        return false
+    }
+
     fun reset() {
         lastFaceMs.set(-1L)
         lastPoseMs.set(-1L)

@@ -2,6 +2,8 @@ package com.iti.careerpilot.bodylanguage.engine
 
 import com.google.mediapipe.framework.image.MPImage
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FrameSchedulerTest {
@@ -77,6 +79,70 @@ class FrameSchedulerTest {
     }
 
     @Test
+    fun `shouldProcessFrame returns true for initial frame`() {
+        val faceEngine = FakeFaceEngine()
+        val scheduler = FrameScheduler(
+            faceEngine = faceEngine,
+            faceFps = 8,
+        )
+
+        assertTrue(scheduler.shouldProcessFrame(0L))
+    }
+
+    @Test
+    fun `shouldProcessFrame returns false within interval and true when interval reached`() {
+        val faceEngine = FakeFaceEngine()
+        val poseEngine = FakePoseEngine()
+        val handEngine = FakeHandEngine()
+
+        val scheduler = FrameScheduler(
+            faceEngine = faceEngine,
+            poseEngine = poseEngine,
+            handEngine = handEngine,
+            faceFps = 8,  // 125ms interval
+            poseFps = 4,  // 250ms interval
+            handFps = 4,  // 250ms interval
+        )
+
+        val image = dummyImage()
+
+        // Process first frame at t = 0ms
+        scheduler.onFrame(image, 0L)
+
+        // At t = 100ms (< 125ms for face, < 250ms for pose/hand), should process frame is false
+        assertFalse(scheduler.shouldProcessFrame(100L))
+
+        // At t = 125ms (>= 125ms for face), should process frame is true
+        assertTrue(scheduler.shouldProcessFrame(125L))
+    }
+
+    @Test
+    fun `shouldProcessFrame returns true when pose or hand interval is reached`() {
+        val faceEngine = FakeFaceEngine()
+        val poseEngine = FakePoseEngine()
+
+        val scheduler = FrameScheduler(
+            faceEngine = faceEngine,
+            poseEngine = poseEngine,
+            faceFps = 8,  // 125ms interval
+            poseFps = 4,  // 250ms interval
+        )
+
+        val image = dummyImage()
+
+        // Initial frame processed at t = 0ms for face & pose
+        scheduler.onFrame(image, 0L)
+
+        // Frame processed at t = 200ms for face (face lastMs becomes 200L, pose lastMs remains 0L)
+        scheduler.onFrame(image, 200L)
+
+        // At t = 260ms:
+        // face diff = 260 - 200 = 60ms (< 125ms) -> face not due
+        // pose diff = 260 - 0 = 260ms (>= 250ms) -> pose IS due!
+        assertTrue(scheduler.shouldProcessFrame(260L))
+    }
+
+    @Test
     fun `reset clears last timestamp markers`() {
         val faceEngine = FakeFaceEngine()
         val poseEngine = FakePoseEngine()
@@ -96,7 +162,8 @@ class FrameSchedulerTest {
         scheduler.onFrame(image, 1000L)
         scheduler.reset()
 
-        // After reset, t = 100ms should trigger again because last timestamp was reset to 0L
+        // After reset, shouldProcessFrame and onFrame for t = 100ms should trigger again
+        assertTrue(scheduler.shouldProcessFrame(100L))
         scheduler.onFrame(image, 100L)
         assertEquals(listOf(1000L, 100L), faceEngine.detectedTimestamps)
         assertEquals(listOf(1000L, 100L), poseEngine.detectedTimestamps)
