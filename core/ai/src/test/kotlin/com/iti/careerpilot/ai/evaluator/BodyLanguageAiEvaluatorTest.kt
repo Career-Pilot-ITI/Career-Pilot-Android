@@ -136,7 +136,7 @@ class BodyLanguageAiEvaluatorTest {
     @Test
     fun `timeout triggers TIMEOUT fallback`() = runTest {
         val generator = AiContentGenerator {
-            delay(25_000L)
+            delay(2000L)
             FakeBodyLanguageData.sampleEvaluationJson
         }
         val evaluator = BodyLanguageAiEvaluator(
@@ -144,6 +144,7 @@ class BodyLanguageAiEvaluatorTest {
             fallbackEngine = fallbackEngine,
             json = json,
             ioDispatcher = Dispatchers.Unconfined,
+            timeoutMillis = 1000L,
         )
 
         val (evaluation, fallbackReason) = evaluator.evaluate(FakeBodyLanguageData.sampleMetrics)

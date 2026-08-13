@@ -11,7 +11,10 @@ import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
+import com.iti.common.dispatcher.CareerPilotDispatchers.IO
+import com.iti.common.dispatcher.Dispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -24,6 +27,7 @@ class ResultViewModel @Inject constructor(
     private val sessionRepo: SessionRepo,
     private val evaluateBodyLanguageUseCase: EvaluateBodyLanguageUseCase,
     private val sessionCache: InMemorySessionCache,
+    @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val sessionId: Long? get() = savedStateHandle.get<Long>("sessionId")
@@ -79,7 +83,7 @@ class ResultViewModel @Inject constructor(
         sessionId: Long,
         metrics: BodyLanguageMetrics,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             _state.update { it.copy(bodyLanguageUiState = BodyLanguageUiState.Loading) }
             val (evaluation, fallbackReason) = evaluateBodyLanguageUseCase(sessionId, metrics)
             val uiState = if (fallbackReason != null) {
@@ -95,7 +99,7 @@ class ResultViewModel @Inject constructor(
 
     private fun loadResult() {
         val id = sessionId ?: return
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             _state.update { it.copy(isLoading = true) }
             sessionRepo.getSessionFeedback(id)
                 .onSuccess { sessionResult ->

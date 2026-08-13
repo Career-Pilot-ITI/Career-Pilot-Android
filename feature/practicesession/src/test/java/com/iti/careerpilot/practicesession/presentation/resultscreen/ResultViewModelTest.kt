@@ -94,7 +94,8 @@ class ResultViewModelTest {
             savedStateHandle = savedStateHandle,
             sessionRepo = sessionRepo,
             evaluateBodyLanguageUseCase = evaluateBodyLanguageUseCase,
-            sessionCache = sessionCache
+            sessionCache = sessionCache,
+            ioDispatcher = testDispatcher,
         )
     }
 

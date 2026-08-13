@@ -23,6 +23,7 @@ class BodyLanguageAiEvaluator @Inject constructor(
     private val fallbackEngine: LocalBodyLanguageFallbackEngine,
     private val json: Json,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
+    private val timeoutMillis: Long = 120_000L,
 ) {
 
     /**
@@ -52,7 +53,7 @@ class BodyLanguageAiEvaluator @Inject constructor(
         }
 
         try {
-            withTimeout(20_000L) {
+            withTimeout(timeoutMillis) {
                 val prompt = BodyLanguagePromptBuilder.buildPrompt(metrics)
                 val responseText = contentGenerator.generateContent(prompt)
 
@@ -67,7 +68,7 @@ class BodyLanguageAiEvaluator @Inject constructor(
                 Pair(evaluation, null)
             }
         } catch (e: TimeoutCancellationException) {
-            android.util.Log.w("BodyLanguageAI", "AI evaluation timed out (>20s), using on-device fallback", e)
+            android.util.Log.w("BodyLanguageAI", "AI evaluation timed out (>${timeoutMillis}ms), using on-device fallback", e)
             Pair(fallbackEngine.evaluate(metrics), FallbackReason.TIMEOUT)
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
