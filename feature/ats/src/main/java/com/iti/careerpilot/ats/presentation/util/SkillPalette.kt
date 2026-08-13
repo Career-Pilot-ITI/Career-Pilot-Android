@@ -3,7 +3,7 @@ package com.iti.careerpilot.ats.presentation.util
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillPaletteData
@@ -25,7 +25,7 @@ fun skillPalette(status: SkillStatus): SkillPaletteData {
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
         )
         SkillStatus.PREFERRED_MISSING -> SkillPaletteData(
-            icon = Icons.Outlined.Schedule,
+            icon = Icons.Outlined.ErrorOutline,
             containerColor = colors.warningContainer,
             contentColor = colors.onWarningContainer,
         )
