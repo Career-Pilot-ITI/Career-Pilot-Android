@@ -49,20 +49,61 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
             )
         }
 
+        val isPostureTracked = metrics.poseDetectionPercentage > 0f
+        val isHandsTracked = metrics.handsDetectionPercentage > 0f
+
         val eyeContact = evaluateEyeContact(metrics)
-        val posture = evaluatePosture(metrics)
+        val posture = if (isPostureTracked) {
+            evaluatePosture(metrics)
+        } else {
+            MetricEvaluation(
+                score = -1,
+                observation = "Posture tracking was not enabled for this session.",
+                tip = ""
+            )
+        }
         val facial = evaluateFacialExpression(metrics)
-        val hands = evaluateHands(metrics)
+        val hands = if (isHandsTracked) {
+            evaluateHands(metrics)
+        } else {
+            MetricEvaluation(
+                score = -1,
+                observation = "Hand gestures tracking was not enabled for this session.",
+                tip = ""
+            )
+        }
 
-        // Weighted overall score: Eye Contact 30%, Posture 25%, Hands 25%, Facial 20%
-        val overallScore = (
-            eyeContact.score * 0.30f +
-            posture.score * 0.25f +
-            hands.score * 0.25f +
-            facial.score * 0.20f
-        ).toInt().coerceIn(0, 100)
+        // Weighted overall score dynamically computed based strictly on tracked dimensions
+        val overallScore = when {
+            isPostureTracked && isHandsTracked -> (
+                eyeContact.score * 0.30f +
+                posture.score * 0.25f +
+                hands.score * 0.25f +
+                facial.score * 0.20f
+            )
+            isPostureTracked -> (
+                eyeContact.score * 0.40f +
+                posture.score * 0.30f +
+                facial.score * 0.30f
+            )
+            isHandsTracked -> (
+                eyeContact.score * 0.40f +
+                hands.score * 0.30f +
+                facial.score * 0.30f
+            )
+            else -> (
+                eyeContact.score * 0.60f +
+                facial.score * 0.40f
+            )
+        }.toInt().coerceIn(0, 100)
 
-        val minDimensionScore = minOf(eyeContact.score, posture.score, facial.score, hands.score)
+        val minDimensionScore = listOfNotNull(
+            eyeContact.score,
+            if (isPostureTracked) posture.score else null,
+            facial.score,
+            if (isHandsTracked) hands.score else null
+        ).minOrNull() ?: 50
+
         val confidenceBand = when {
             overallScore >= 70 && minDimensionScore >= 45 -> ConfidenceBand.HIGH
             overallScore < 50 -> ConfidenceBand.LOW
@@ -70,12 +111,12 @@ class LocalBodyLanguageFallbackEngine @Inject constructor() {
         }
 
         val tips = mutableListOf<String>()
-        if (eyeContact.score < 75) tips.add(eyeContact.tip)
-        if (posture.score < 75) tips.add(posture.tip)
-        if (facial.score < 75) tips.add(facial.tip)
-        if (hands.score < 75) tips.add(hands.tip)
+        if (eyeContact.score < 75 && eyeContact.tip.isNotBlank()) tips.add(eyeContact.tip)
+        if (isPostureTracked && posture.score in 0..74 && posture.tip.isNotBlank()) tips.add(posture.tip)
+        if (facial.score < 75 && facial.tip.isNotBlank()) tips.add(facial.tip)
+        if (isHandsTracked && hands.score in 0..74 && hands.tip.isNotBlank()) tips.add(hands.tip)
         if (tips.isEmpty()) {
-            tips.add("Maintain your confident posture and steady eye contact in upcoming interviews.")
+            tips.add("Maintain your confident facial engagement and camera gaze in upcoming interviews.")
         }
 
         val summary = buildSummary(overallScore, confidenceBand, metrics)

@@ -265,6 +265,18 @@ fun PracticeSessionScreen(
                 )
             )
         },
+        bottomBar = {
+            PracticeSessionBottomSection(
+                isRecording = state.isRecording,
+                recordedAudioPath = state.recordedAudioPath,
+                isPlayingAudio = state.isPlayingAudio,
+                playbackDurationMs = state.playbackDurationMs,
+                playbackPositionMs = state.playbackPositionMs,
+                showQuestionCard = state.showQuestionCard,
+                onAction = onAction,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+            )
+        },
         containerColor = Color.Transparent,
     ) { innerPadding ->
         Box(
@@ -352,17 +364,6 @@ fun PracticeSessionScreen(
                         )
                     }
                 }
-
-                // Action Controls Bottom Section
-                PracticeSessionBottomSection(
-                    isRecording = state.isRecording,
-                    recordedAudioPath = state.recordedAudioPath,
-                    isPlayingAudio = state.isPlayingAudio,
-                    playbackDurationMs = state.playbackDurationMs,
-                    playbackPositionMs = state.playbackPositionMs,
-                    showQuestionCard = state.showQuestionCard,
-                    onAction = onAction
-                )
             }
         }
     }

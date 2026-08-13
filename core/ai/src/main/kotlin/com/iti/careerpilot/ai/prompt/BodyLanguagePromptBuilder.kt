@@ -26,7 +26,8 @@ Return your evaluation strictly as a valid JSON object matching this schema:
 
 Guidelines & Behavioral Benchmarks:
 1. Presence & Tracking Safety:
-   - If faceDetectionPercentage < 15% or poseDetectionPercentage < 15%, the candidate was not properly in camera frame. Score undetected categories as 0 and provide clear camera positioning tips in observations.
+   - If faceDetectionPercentage < 15%, the candidate was not properly in camera frame. Score face categories as 0 and provide clear camera positioning tips.
+   - Optional Tracking: If poseDetectionPercentage == 0, posture tracking was disabled for this session. Set posture score to -1, observation to "Posture tracking was not enabled for this session.", and tip to "". If handsDetectionPercentage == 0, hand gestures tracking was disabled. Set handGestures score to -1, observation to "Hand gestures tracking was not enabled for this session.", and tip to "". Compute overallScore using ONLY the active/tracked dimensions.
 2. Gaze & Eye Contact (Weight: 30%):
    - Optimal conversational range: 50%-75% of speaking time. Brief cognitive gaze shifts (1-2s) to formulate ideas are natural and positive.
    - Low eye contact (<40%): Flag as reduced camera engagement or reading off-screen notes.

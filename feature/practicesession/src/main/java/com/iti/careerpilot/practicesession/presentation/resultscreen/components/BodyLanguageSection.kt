@@ -283,30 +283,38 @@ private fun EvaluationBodyLanguageCard(
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
             )
 
-            // 4 Detailed Metric Breakdown Cards
-            MetricBreakdownCard(
-                label = stringResource(R.string.eye_contact),
-                icon = Icons.Default.RemoveRedEye,
-                metric = evaluation.eyeContact
-            )
+            // Detailed Metric Breakdown Cards (only rendered for tracked dimensions)
+            if (evaluation.eyeContact.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.eye_contact),
+                    icon = Icons.Default.RemoveRedEye,
+                    metric = evaluation.eyeContact
+                )
+            }
 
-            MetricBreakdownCard(
-                label = stringResource(R.string.posture),
-                icon = Icons.Default.Accessibility,
-                metric = evaluation.posture
-            )
+            if (evaluation.facialExpression.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.facial_expression),
+                    icon = Icons.Default.Face,
+                    metric = evaluation.facialExpression
+                )
+            }
 
-            MetricBreakdownCard(
-                label = stringResource(R.string.facial_expression),
-                icon = Icons.Default.Face,
-                metric = evaluation.facialExpression
-            )
+            if (evaluation.posture.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.posture),
+                    icon = Icons.Default.Accessibility,
+                    metric = evaluation.posture
+                )
+            }
 
-            MetricBreakdownCard(
-                label = stringResource(R.string.hand_gestures),
-                icon = Icons.Default.TouchApp,
-                metric = evaluation.handGestures
-            )
+            if (evaluation.handGestures.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.hand_gestures),
+                    icon = Icons.Default.TouchApp,
+                    metric = evaluation.handGestures
+                )
+            }
 
             // Actionable Coaching Tips
             if (evaluation.actionableTips.isNotEmpty()) {
@@ -556,16 +564,20 @@ private fun RawMetricsBodyLanguageCard(
                 score = facialExpressionScore,
                 icon = Icons.Default.Face,
             )
-            ScoreItem(
-                label = stringResource(R.string.good_posture),
-                score = postureScore,
-                icon = Icons.Default.Accessibility,
-            )
-            ScoreItem(
-                label = stringResource(R.string.hand_composure),
-                score = handGesturesScore,
-                icon = Icons.Default.TouchApp,
-            )
+            if (metrics.poseDetectionPercentage > 0f) {
+                ScoreItem(
+                    label = stringResource(R.string.good_posture),
+                    score = postureScore,
+                    icon = Icons.Default.Accessibility,
+                )
+            }
+            if (metrics.handsDetectionPercentage > 0f) {
+                ScoreItem(
+                    label = stringResource(R.string.hand_composure),
+                    score = handGesturesScore,
+                    icon = Icons.Default.TouchApp,
+                )
+            }
         }
     }
 }

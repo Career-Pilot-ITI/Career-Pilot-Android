@@ -245,6 +245,7 @@ class LocalBodyLanguageFallbackEngineTest {
         val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
             faceDetectionPercentage = 100f,
             poseDetectionPercentage = 100f,
+            handsDetectionPercentage = 80f,
         )
 
         // V = 0% -> 65
@@ -271,6 +272,7 @@ class LocalBodyLanguageFallbackEngineTest {
         val baseMetrics = BodyLanguageMetrics.EMPTY.copy(
             faceDetectionPercentage = 100f,
             poseDetectionPercentage = 100f,
+            handsDetectionPercentage = 80f,
         )
 
         // HIGH: overallScore >= 70 && minDimensionScore >= 45
