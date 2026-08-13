@@ -37,10 +37,13 @@ fun QuestionCard(
 ) {
     CareerPilotCard(
         elevation = 8.dp,
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp).heightIn(max = 180.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .heightIn(max = 160.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
