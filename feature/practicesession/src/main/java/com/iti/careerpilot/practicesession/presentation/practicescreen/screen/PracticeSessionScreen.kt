@@ -179,12 +179,8 @@ fun PracticeSessionRoot(
             autoReadQuestion = state.autoReadQuestion,
             showCameraPreviewToggle = state.isBodyLanguageAnalyzing,
             isCameraPreviewVisible = state.isCameraPreviewVisible,
-            enablePostureTracking = state.enablePostureTracking,
-            enableHandTracking = state.enableHandTracking,
             onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
             onCameraPreviewToggle = { viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(it)) },
-            onPostureTrackingToggle = { viewModel.onAction(PracticeSessionAction.TogglePostureTracking(it)) },
-            onHandTrackingToggle = { viewModel.onAction(PracticeSessionAction.ToggleHandTracking(it)) },
             onDismiss = {
                 viewModel.onAction(
                     PracticeSessionAction.ShowOrHideSettingsBottomSheet(

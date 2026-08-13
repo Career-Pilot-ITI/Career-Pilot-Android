@@ -298,14 +298,6 @@ class PracticeSessionViewModel @Inject constructor(
 
             // Body language
             is ToggleCameraPreview -> toggleCameraPreview(action.visible)
-            is TogglePostureTracking -> {
-                _state.update { it.copy(enablePostureTracking = action.enabled) }
-                bodyLanguageAnalyzer.enablePostureTracking(action.enabled)
-            }
-            is ToggleHandTracking -> {
-                _state.update { it.copy(enableHandTracking = action.enabled) }
-                bodyLanguageAnalyzer.enableHandTracking(action.enabled)
-            }
             is OnFrame -> handleOnFrame(action.imageProxy)
         }
     }

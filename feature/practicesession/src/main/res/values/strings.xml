@@ -85,10 +85,6 @@
     <string name="enable_body_language">Got it, enable</string>
     <string name="camera_preview">Camera Preview</string>
     <string name="show_camera_during_session">Show camera preview during the session</string>
-    <string name="track_posture_and_body">Track Posture &amp; Body</string>
-    <string name="analyze_body_language_and_posture">Analyze body language and posture</string>
-    <string name="track_hand_gestures">Track Hand Gestures</string>
-    <string name="analyze_hand_movements">Analyze hand movements</string>
 
     <!-- Radar Chart & Body Language Evaluation -->
     <string name="radar_eye_contact">Eye Contact</string>
