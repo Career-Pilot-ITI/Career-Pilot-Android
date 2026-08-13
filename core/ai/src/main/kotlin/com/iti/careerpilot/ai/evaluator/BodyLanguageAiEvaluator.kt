@@ -23,8 +23,18 @@ class BodyLanguageAiEvaluator @Inject constructor(
     private val fallbackEngine: LocalBodyLanguageFallbackEngine,
     private val json: Json,
     @Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
-    private val timeoutMillis: Long = 120_000L,
 ) {
+    internal var timeoutMillis: Long = 120_000L
+
+    constructor(
+        contentGenerator: AiContentGenerator,
+        fallbackEngine: LocalBodyLanguageFallbackEngine,
+        json: Json,
+        ioDispatcher: CoroutineDispatcher,
+        timeoutMillis: Long,
+    ) : this(contentGenerator, fallbackEngine, json, ioDispatcher) {
+        this.timeoutMillis = timeoutMillis
+    }
 
     /**
      * Evaluates interview body language telemetry.
