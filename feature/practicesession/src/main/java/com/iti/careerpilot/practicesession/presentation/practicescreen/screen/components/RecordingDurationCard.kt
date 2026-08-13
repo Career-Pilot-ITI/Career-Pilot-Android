@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
 
+import androidx.compose.material3.CardDefaults
+
 @Composable
 fun RecordingDurationCard(
     durationMs: Long,
@@ -45,7 +47,10 @@ fun RecordingDurationCard(
 
     Card(
         modifier = modifier.padding(bottom = 8.dp),
-        shape = MaterialTheme.shapes.medium,
+        shape = CircleShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
