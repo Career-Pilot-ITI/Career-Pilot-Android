@@ -177,7 +177,12 @@ class PracticeSessionViewModelTest {
 
     private class FakeBodyLanguageAnalyzer : BodyLanguageAnalyzer {
         private var _isRunning = false
-        override val isRunning: Boolean get() = _isRunning
+        override fun enablePostureTracking(enabled: Boolean) {}
+
+        override fun enableHandTracking(enabled: Boolean) {}
+
+        override val isRunning: Boolean
+            get() = _isRunning
 
         private var _isRecordingActive = true
         override val isRecordingActive: Boolean get() = _isRecordingActive

@@ -50,5 +50,7 @@ sealed interface PracticeSessionAction {
 
     // Body language actions
     data class ToggleCameraPreview(val visible: Boolean) : PracticeSessionAction
+    data class TogglePostureTracking(val enabled: Boolean) : PracticeSessionAction
+    data class ToggleHandTracking(val enabled: Boolean) : PracticeSessionAction
     data class OnFrame(val imageProxy: androidx.camera.core.ImageProxy) : PracticeSessionAction
 }

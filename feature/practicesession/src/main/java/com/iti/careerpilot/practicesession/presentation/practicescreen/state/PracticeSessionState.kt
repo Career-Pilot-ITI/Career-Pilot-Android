@@ -41,4 +41,6 @@ data class PracticeSessionState(
     val bodyLanguageConsentGiven: Boolean = false,
     val isCameraPreviewVisible: Boolean = true,
     val isBodyLanguageAnalyzing: Boolean = false,
+    val enablePostureTracking: Boolean = false,
+    val enableHandTracking: Boolean = false,
 )

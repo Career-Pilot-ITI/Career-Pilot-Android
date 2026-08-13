@@ -48,6 +48,16 @@ interface BodyLanguageAnalyzer {
      */
     suspend fun finalizeSession(): BodyLanguageMetrics
 
+    /**
+     * Controls whether posture tracking is enabled.
+     */
+    fun enablePostureTracking(enabled: Boolean)
+
+    /**
+     * Controls whether hand tracking is enabled.
+     */
+    fun enableHandTracking(enabled: Boolean)
+
     /** Whether the analyzer is currently running. */
     val isRunning: Boolean
 

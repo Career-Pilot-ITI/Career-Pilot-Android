@@ -128,31 +128,11 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                     }
                 }
 
-                val pose = PoseLandmarkerEngine(context) { result, ts ->
-                    val signal = postureExtractor.extract(result, ts)
-                    if (_isRecordingActive.get()) {
-                        aggregator.addPosture(signal)
-                        keyMomentDetector.onPostureFrame(signal)
-                    }
-                }
-
-                val hand = HandLandmarkerEngine(context) { result, ts ->
-                    val signal = handExtractor.extract(result, ts, lastFaceCenterNorm)
-                    if (_isRecordingActive.get()) {
-                        aggregator.addHand(signal)
-                        keyMomentDetector.onHandFrame(signal)
-                    }
-                }
-
                 face.initialize()
-                pose.initialize()
-                hand.initialize()
 
                 if (!_isRunning.get()) {
                     try {
                         face.close()
-                        pose.close()
-                        hand.close()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error closing engines initialized after stop", e)
                     }
@@ -160,9 +140,9 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
                 }
 
                 faceEngine = face
-                poseEngine = pose
-                handEngine = hand
-                frameScheduler = FrameScheduler(face, pose, hand)
+                synchronized(this@BodyLanguageAnalyzerImpl) {
+                    frameScheduler = FrameScheduler(face, poseEngine, handEngine)
+                }
 
                 Log.d(TAG, "MediaPipe body language engines initialized in background")
             } catch (e: Exception) {
@@ -236,6 +216,96 @@ internal class BodyLanguageAnalyzerImpl @Inject constructor(
         }
 
         Log.d(TAG, "Body language analysis stopped")
+    }
+
+    override fun enablePostureTracking(enabled: Boolean) {
+        if (enabled && poseEngine == null && _isRunning.get()) {
+            analyzerScope?.launch(ioDispatcher) {
+                try {
+                    val pose = PoseLandmarkerEngine(context) { result, ts ->
+                        val signal = postureExtractor.extract(result, ts)
+                        if (_isRecordingActive.get()) {
+                            aggregator.addPosture(signal)
+                            keyMomentDetector.onPostureFrame(signal)
+                        }
+                    }
+                    pose.initialize()
+                    if (!_isRunning.get()) {
+                        pose.close()
+                        return@launch
+                    }
+                    poseEngine = pose
+                    synchronized(this@BodyLanguageAnalyzerImpl) {
+                        faceEngine?.let {
+                            frameScheduler = FrameScheduler(it, poseEngine, handEngine)
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.e(TAG, "Error initializing pose engine", e)
+                }
+            }
+        } else if (!enabled && poseEngine != null) {
+            val pose = poseEngine
+            poseEngine = null
+            synchronized(this@BodyLanguageAnalyzerImpl) {
+                faceEngine?.let { face ->
+                    frameScheduler = FrameScheduler(face, null, handEngine)
+                }
+            }
+            appScope.launch(ioDispatcher) {
+                try {
+                    pose?.close()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error closing pose engine", e)
+                }
+            }
+        }
+    }
+
+    override fun enableHandTracking(enabled: Boolean) {
+        if (enabled && handEngine == null && _isRunning.get()) {
+            analyzerScope?.launch(ioDispatcher) {
+                try {
+                    val hand = HandLandmarkerEngine(context) { result, ts ->
+                        val signal = handExtractor.extract(result, ts, lastFaceCenterNorm)
+                        if (_isRecordingActive.get()) {
+                            aggregator.addHand(signal)
+                            keyMomentDetector.onHandFrame(signal)
+                        }
+                    }
+                    hand.initialize()
+                    if (!_isRunning.get()) {
+                        hand.close()
+                        return@launch
+                    }
+                    handEngine = hand
+                    synchronized(this@BodyLanguageAnalyzerImpl) {
+                        faceEngine?.let {
+                            frameScheduler = FrameScheduler(it, poseEngine, handEngine)
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.e(TAG, "Error initializing hand engine", e)
+                }
+            }
+        } else if (!enabled && handEngine != null) {
+            val hand = handEngine
+            handEngine = null
+            synchronized(this@BodyLanguageAnalyzerImpl) {
+                faceEngine?.let { face ->
+                    frameScheduler = FrameScheduler(face, poseEngine, null)
+                }
+            }
+            appScope.launch(ioDispatcher) {
+                try {
+                    hand?.close()
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error closing hand engine", e)
+                }
+            }
+        }
     }
 
     override suspend fun finalizeSession(): BodyLanguageMetrics =

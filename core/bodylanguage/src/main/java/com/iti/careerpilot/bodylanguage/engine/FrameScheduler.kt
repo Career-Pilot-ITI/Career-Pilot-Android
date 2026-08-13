@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicLong
  */
 internal class FrameScheduler(
     private val faceEngine: FaceLandmarkerEngine,
-    private val poseEngine: PoseLandmarkerEngine,
-    private val handEngine: HandLandmarkerEngine,
+    private val poseEngine: PoseLandmarkerEngine? = null,
+    private val handEngine: HandLandmarkerEngine? = null,
     faceFps: Int = 8,
     poseFps: Int = 4,
     handFps: Int = 4,
@@ -33,13 +33,13 @@ internal class FrameScheduler(
             }
         }
         val lastPose = lastPoseMs.get()
-        if (lastPose == -1L || timestampMs - lastPose >= poseIntervalMs) {
+        if (poseEngine != null && (lastPose == -1L || timestampMs - lastPose >= poseIntervalMs)) {
             if (lastPoseMs.compareAndSet(lastPose, timestampMs)) {
                 poseEngine.detectAsync(image, timestampMs)
             }
         }
         val lastHand = lastHandMs.get()
-        if (lastHand == -1L || timestampMs - lastHand >= handIntervalMs) {
+        if (handEngine != null && (lastHand == -1L || timestampMs - lastHand >= handIntervalMs)) {
             if (lastHandMs.compareAndSet(lastHand, timestampMs)) {
                 handEngine.detectAsync(image, timestampMs)
             }

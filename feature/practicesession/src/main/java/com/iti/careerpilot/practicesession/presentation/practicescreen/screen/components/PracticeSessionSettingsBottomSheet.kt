@@ -23,8 +23,12 @@ fun PracticeSessionSettingsBottomSheet(
     autoReadQuestion: Boolean,
     showCameraPreviewToggle: Boolean,
     isCameraPreviewVisible: Boolean,
+    enablePostureTracking: Boolean,
+    enableHandTracking: Boolean,
     onAutoReadToggle: (Boolean) -> Unit,
     onCameraPreviewToggle: (Boolean) -> Unit,
+    onPostureTrackingToggle: (Boolean) -> Unit,
+    onHandTrackingToggle: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberBottomSheetState(
@@ -60,6 +64,18 @@ fun PracticeSessionSettingsBottomSheet(
                     description = stringResource(R.string.show_camera_during_session),
                     checked = isCameraPreviewVisible,
                     onCheckedChange = onCameraPreviewToggle,
+                )
+                SettingsSwitchRow(
+                    label = "Track Posture & Body",
+                    description = "Analyze body language and posture",
+                    checked = enablePostureTracking,
+                    onCheckedChange = onPostureTrackingToggle,
+                )
+                SettingsSwitchRow(
+                    label = "Track Hand Gestures",
+                    description = "Analyze hand movements",
+                    checked = enableHandTracking,
+                    onCheckedChange = onHandTrackingToggle,
                 )
             }
         }
