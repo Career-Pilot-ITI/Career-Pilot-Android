@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +40,7 @@ fun QuestionCard(
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp).heightIn(max = 180.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -72,13 +75,16 @@ fun QuestionCard(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text(
-                text = questionText ?: stringResource(R.string.loading_question),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                ),
-            )
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(
+                    text = questionText ?: stringResource(R.string.loading_question),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

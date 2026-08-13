@@ -55,7 +55,7 @@ fun CameraPreviewPip(
     previewModifier: Modifier = Modifier.size(width = 100.dp, height = 140.dp),
     shape: Shape = RoundedCornerShape(12.dp),
     borderCornerRadius: Dp = 12.dp,
-    showAnimatedBorder: Boolean = true,
+    isRecording: Boolean = false,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -107,7 +107,9 @@ fun CameraPreviewPip(
         }
     }
 
-    val borderModifier = if (showAnimatedBorder) {
+    val outlineColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+
+    val borderModifier = if (isRecording) {
         val currentAngle = angle.value
         Modifier.drawWithContent {
             drawContent()
@@ -119,7 +121,14 @@ fun CameraPreviewPip(
             )
         }
     } else {
-        Modifier
+        Modifier.drawWithContent {
+            drawContent()
+            drawRoundRect(
+                color = outlineColor,
+                cornerRadius = CornerRadius(borderCornerRadius.toPx(), borderCornerRadius.toPx()),
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+        }
     }
 
     DisposableEffect(lifecycleOwner, previewView) {

@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -247,57 +249,48 @@ fun PracticeSessionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(horizontal = 20.dp)
         ) {
             AmbientStageBackdrop()
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Main Stage Area (Camera Preview in Video Mode, CenterStage in Audio Mode)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isCameraPreviewVisible) {
-                        CameraPreviewPip(
-                            isVisible = true,
-                            onFrame = { imageProxy ->
-                                onAction(PracticeSessionAction.OnFrame(imageProxy))
-                            },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
-                            previewModifier = Modifier.fillMaxSize(),
-                            shape = RoundedCornerShape(24.dp),
-                            borderCornerRadius = 24.dp,
-                            showAnimatedBorder = true,
-                        )
-                    } else {
-                        CenterStage(
-                            isReadingQuestion = state.isReadingQuestion,
-                            isRecording = state.isRecording,
-                            onToggleListening = {
-                                if (state.isReadingQuestion) {
-                                    onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
-                                } else {
-                                    onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
-                                }
-                            }
-                        )
+            if (isCameraPreviewVisible) {
+                CameraPreviewPip(
+                    isVisible = true,
+                    isRecording = state.isRecording,
+                    onFrame = { imageProxy ->
+                        onAction(PracticeSessionAction.OnFrame(imageProxy))
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    previewModifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(24.dp),
+                    borderCornerRadius = 24.dp,
+                )
+            } else {
+                CenterStage(
+                    isReadingQuestion = state.isReadingQuestion,
+                    isRecording = state.isRecording,
+                    onToggleListening = {
+                        if (state.isReadingQuestion) {
+                            onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
+                        } else {
+                            onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
+                        }
                     }
-                }
+                )
+            }
 
-                // Bottom Controls Area (Question Card, Waveform & Duration, Action Buttons)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.60f))
+                        )
+                    )
+            ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AnimatedVisibility(
@@ -349,3 +342,4 @@ fun PracticeSessionScreen(
         }
     }
 }
+
