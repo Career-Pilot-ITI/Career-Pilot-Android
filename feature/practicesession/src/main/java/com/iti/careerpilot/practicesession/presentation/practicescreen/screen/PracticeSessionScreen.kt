@@ -250,74 +250,73 @@ fun PracticeSessionScreen(
     BackHandler { onBack() }
     val isCameraPreviewVisible = state.isBodyLanguageAnalyzing && state.isCameraPreviewVisible
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                },
-                title = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                        shape = CircleShape,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (state.isRecording) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.error)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                            }
-                            Text(
-                                text = formatDuration(state.totalSessionDuration.inWholeMilliseconds),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurface
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        AmbientStageBackdrop()
+
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                                contentDescription = stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+                    },
+                    title = {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            shape = CircleShape,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (state.isRecording) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.error)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text(
+                                    text = formatDuration(state.totalSessionDuration.inWholeMilliseconds),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
-        },
-        bottomBar = {
-            PracticeSessionBottomSection(
-                isRecording = state.isRecording,
-                recordedAudioPath = state.recordedAudioPath,
-                isPlayingAudio = state.isPlayingAudio,
-                playbackDurationMs = state.playbackDurationMs,
-                playbackPositionMs = state.playbackPositionMs,
-                showQuestionCard = state.showQuestionCard,
-                onAction = onAction,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        },
-        containerColor = Color.Transparent,
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            AmbientStageBackdrop()
-
+            },
+            bottomBar = {
+                PracticeSessionBottomSection(
+                    isRecording = state.isRecording,
+                    recordedAudioPath = state.recordedAudioPath,
+                    isPlayingAudio = state.isPlayingAudio,
+                    playbackDurationMs = state.playbackDurationMs,
+                    playbackPositionMs = state.playbackPositionMs,
+                    showQuestionCard = state.showQuestionCard,
+                    onAction = onAction,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            },
+            containerColor = Color.Transparent,
+        ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

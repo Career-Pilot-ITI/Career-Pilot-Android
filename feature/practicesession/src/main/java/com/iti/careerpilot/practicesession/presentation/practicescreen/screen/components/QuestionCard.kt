@@ -135,29 +135,36 @@ fun QuestionCard(
                 }
             }
 
-            // Explicit UX indicator notifying the user that the question is scrollable
+            // High-contrast explicit UX indicator notifying the user that the question is scrollable
             AnimatedVisibility(
                 visible = scrollState.canScrollForward,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape,
+                    shadowElevation = 4.dp,
+                    modifier = Modifier.padding(top = 6.dp)
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_expand_down),
-                        contentDescription = stringResource(R.string.scroll_for_more),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.80f),
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.scroll_for_more),
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.80f)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_expand_down),
+                            contentDescription = stringResource(R.string.scroll_for_more),
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.scroll_for_more),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
             }
         }
