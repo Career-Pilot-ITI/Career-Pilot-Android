@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -154,6 +157,7 @@ fun ReadyToPracticeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(start = Dimens.SpaceXXL, end = Dimens.SpaceXXL, bottom = Dimens.SpaceXXL),
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
         ) {
@@ -304,7 +308,7 @@ fun ReadyToPracticeScreen(
                 )
             }
 
-            Box(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(Dimens.SpaceM))
 
             CareerPilotButton(
                 text = stringResource(R.string.ready_begin),

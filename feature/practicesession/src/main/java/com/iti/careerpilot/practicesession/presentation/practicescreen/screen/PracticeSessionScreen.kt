@@ -241,156 +241,126 @@ fun PracticeSessionScreen(
     val isCameraPreviewVisible = state.isBodyLanguageAnalyzing && state.isCameraPreviewVisible
 
     Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                title = {
+                    Text(
+                        text = formatDuration(state.totalSessionDuration.inWholeMilliseconds),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
+            )
+        },
         containerColor = Color.Transparent,
     ) { innerPadding ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-            // Layer 1: Background Stage (Camera in Video mode, AmbientStageBackdrop in Audio mode)
-            if (isCameraPreviewVisible) {
+            AmbientStageBackdrop()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Main Stage Area (Camera Preview in Video Mode, CenterStage in Audio Mode)
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    CameraPreviewPip(
-                        isVisible = true,
-                        isRecording = state.isRecording,
-                        onFrame = { imageProxy ->
-                            onAction(PracticeSessionAction.OnFrame(imageProxy))
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        previewModifier = Modifier.fillMaxSize(),
-                        shape = RoundedCornerShape(24.dp),
-                        borderCornerRadius = 24.dp,
-                    )
-                }
-            } else {
-                AmbientStageBackdrop()
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CenterStage(
-                        isReadingQuestion = state.isReadingQuestion,
-                        isRecording = state.isRecording,
-                        onToggleListening = {
-                            if (state.isReadingQuestion) {
-                                onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
-                            } else {
-                                onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
-                            }
-                        }
-                    )
-                }
-            }
-
-            // Layer 2: Top Bar & Floating Question Card (Top Overlay)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Black.copy(alpha = 0.70f), Color.Transparent)
+                    if (isCameraPreviewVisible) {
+                        CameraPreviewPip(
+                            isVisible = true,
+                            isRecording = state.isRecording,
+                            onFrame = { imageProxy ->
+                                onAction(PracticeSessionAction.OnFrame(imageProxy))
+                            },
+                            modifier = Modifier.fillMaxSize(),
+                            previewModifier = Modifier.fillMaxSize(),
+                            shape = RoundedCornerShape(24.dp),
+                            borderCornerRadius = 24.dp,
                         )
-                    )
-                    .padding(top = innerPadding.calculateTopPadding())
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CenterAlignedTopAppBar(
-                        navigationIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                                    contentDescription = stringResource(R.string.back),
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        title = {
-                            Text(
-                                text = formatDuration(state.totalSessionDuration.inWholeMilliseconds),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White
-                            )
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent
-                        )
-                    )
-
-                    AnimatedVisibility(
-                        visible = state.showQuestionCard,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    ) {
-                        QuestionCard(
-                            questionOrder = state.currentSession?.currentQuestion?.questionOrder,
-                            questionText = state.currentSession?.currentQuestion?.questionText,
+                    } else {
+                        CenterStage(
                             isReadingQuestion = state.isReadingQuestion,
-                            onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
-                            onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) },
+                            isRecording = state.isRecording,
+                            onToggleListening = {
+                                if (state.isReadingQuestion) {
+                                    onAction(PracticeSessionAction.PauseListeningToCurrentQuestion)
+                                } else {
+                                    onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion)
+                                }
+                            }
                         )
                     }
                 }
-            }
 
-            // Layer 3: Bottom Controls Overlay (Recording Waveform, Duration & Bottom Bar)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.70f))
-                        )
-                    )
-                    .padding(bottom = innerPadding.calculateBottomPadding())
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Question Card (positioned below the camera stage)
+                AnimatedVisibility(
+                    visible = state.showQuestionCard,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
                 ) {
-                    AnimatedVisibility(
-                        visible = state.isRecording,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        ) {
-                            RecordingWave(
-                                volumeBars = state.volumeBars,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                            RecordingDurationCard(
-                                durationMs = state.recordingDuration.inWholeMilliseconds,
-                                isRecording = state.isRecording
-                            )
-                        }
-                    }
-
-                    PracticeSessionBottomSection(
-                        isRecording = state.isRecording,
-                        recordedAudioPath = state.recordedAudioPath,
-                        isPlayingAudio = state.isPlayingAudio,
-                        playbackDurationMs = state.playbackDurationMs,
-                        playbackPositionMs = state.playbackPositionMs,
-                        showQuestionCard = state.showQuestionCard,
-                        onAction = onAction
+                    QuestionCard(
+                        questionOrder = state.currentSession?.currentQuestion?.questionOrder,
+                        questionText = state.currentSession?.currentQuestion?.questionText,
+                        isReadingQuestion = state.isReadingQuestion,
+                        onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
+                        onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) },
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
+
+                // Recording Waveform & Duration
+                AnimatedVisibility(
+                    visible = state.isRecording,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        RecordingWave(
+                            volumeBars = state.volumeBars,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        RecordingDurationCard(
+                            durationMs = state.recordingDuration.inWholeMilliseconds,
+                            isRecording = state.isRecording
+                        )
+                    }
+                }
+
+                // Action Controls Bottom Section
+                PracticeSessionBottomSection(
+                    isRecording = state.isRecording,
+                    recordedAudioPath = state.recordedAudioPath,
+                    isPlayingAudio = state.isPlayingAudio,
+                    playbackDurationMs = state.playbackDurationMs,
+                    playbackPositionMs = state.playbackPositionMs,
+                    showQuestionCard = state.showQuestionCard,
+                    onAction = onAction
+                )
             }
         }
     }
