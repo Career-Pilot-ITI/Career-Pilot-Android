@@ -26,8 +26,8 @@ class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSourc
     private val totalQuestions = 4
 
     private val questions = listOf(
-        "Can you describe the Android Activity lifecycle and explain in detail how it handles configuration changes like screen rotation or multi-window mode? Additionally, discuss how SavedStateHandle and ViewModel preserve UI state, and how process death differs from normal activity destruction.",
-        "What are Kotlin Coroutines, and how do they differ from traditional threads in Android? Explain structured concurrency, dispatchers, exception handling, and cancellation in production apps.",
+        "Can you describe the full Android Activity lifecycle from initial creation to final destruction, and explain in comprehensive detail how the system handles complex configuration changes such as screen rotation, fold/unfold transitions, and multi-window split screening? Furthermore, elaborate on the architectural differences between onSaveInstanceState, SavedStateHandle, and ViewModel retention, explain how the Android OS determines when to kill background processes under severe memory pressure, and provide a real-world scenario illustrating how you would recover volatile transient state after unexpected process termination without degrading user experience.",
+        "What are Kotlin Coroutines, and how do they differ from traditional threads in Android? Explain structured concurrency, CoroutineScope lifecycle integration, dispatchers (Default, IO, Main), SupervisorJob, exception propagation and handling, and cooperative cancellation in large-scale production applications.",
         "Explain the difference between LiveData, Flow, and SharedFlow in the context of state management, detailing cold vs hot streams, backpressure handling, and lifecycle-aware collection in Jetpack Compose.",
         "How does Dagger Hilt simplify Dependency Injection in Android, what are its key component scopes, and how do custom qualifiers and Hilt viewmodel injection work under the hood?"
     )

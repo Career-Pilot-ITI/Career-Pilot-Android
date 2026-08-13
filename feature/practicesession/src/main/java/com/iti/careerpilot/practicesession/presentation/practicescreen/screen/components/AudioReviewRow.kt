@@ -27,6 +27,7 @@ fun AudioReviewRow(
     playbackPositionMs: Long,
     onTogglePlay: () -> Unit,
     onSeek: (Long) -> Unit,
+    onDiscard: () -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -37,12 +38,21 @@ fun AudioReviewRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         PracticeIconButton(
+            onClick = onDiscard,
+            iconId = R.drawable.ic_delete,
+            descriptionId = R.string.discard,
+            tint = MaterialTheme.colorScheme.error,
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        PracticeIconButton(
             onClick = onTogglePlay,
             iconId = if (isPlayingAudio) R.drawable.ic_pause else R.drawable.ic_play,
             descriptionId = if (isPlayingAudio) R.string.pause else R.string.play
         )
 
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(10.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             val progress = if (playbackDurationMs > 0) {
@@ -74,7 +84,7 @@ fun AudioReviewRow(
             }
         }
 
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(10.dp))
 
         LargeGradientIconButton(
             icon = ImageVector.vectorResource(R.drawable.ic_send),
