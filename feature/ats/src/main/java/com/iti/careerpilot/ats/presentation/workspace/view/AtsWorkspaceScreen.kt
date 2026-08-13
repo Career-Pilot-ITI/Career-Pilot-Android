@@ -8,7 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
@@ -19,7 +22,6 @@ import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringScreen
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
-import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 
 @Composable
 fun AtsWorkspaceRoot(
@@ -33,21 +35,26 @@ fun AtsWorkspaceRoot(
     viewModel: ScoringViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(workspaceId) {
         viewModel.onAction(ScoringAction.Initial(workspaceId))
     }
 
-    ObserveEvent(viewModel.effects) { effect ->
-        when (effect) {
-            ScoringEffect.OpenCoinsPaywall -> openCoinsPaywall()
-            is ScoringEffect.OpenCoverLetter -> openCoverLetter(effect.workspaceId)
-            is ScoringEffect.OpenOptimizedCv -> openOptimizedCv(effect.workspaceId)
-            is ScoringEffect.OpenPractice -> openReadyToPractice(
-                effect.trackId,
-                effect.trackName,
-                effect.workspaceId,
-            )
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    ScoringEffect.OpenCoinsPaywall -> openCoinsPaywall()
+                    is ScoringEffect.OpenCoverLetter -> openCoverLetter(effect.workspaceId)
+                    is ScoringEffect.OpenOptimizedCv -> openOptimizedCv(effect.workspaceId)
+                    is ScoringEffect.OpenPractice -> openReadyToPractice(
+                        effect.trackId,
+                        effect.trackName,
+                        effect.workspaceId,
+                    )
+                }
+            }
         }
     }
 
