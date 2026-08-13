@@ -55,8 +55,8 @@ fun AudioReviewRow(
     val extendedColors = CareerPilotTheme.extendedColors
 
     CareerPilotCard(
-        elevation = 6.dp,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.90f),
+        elevation = 8.dp,
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
