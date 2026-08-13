@@ -1,8 +1,12 @@
-package com.iti.careerpilot.ats.presentation.scoring.view.components
+package com.iti.careerpilot.ats.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,8 +19,21 @@ import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ScoringErrorContent(
+internal fun AtsWorkspaceLoadingContent(
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularWavyProgressIndicator()
+    }
+}
+
+@Composable
+internal fun AtsWorkspaceErrorContent(
     state: ScoringUiState,
     onAction: (ScoringAction) -> Unit,
     modifier: Modifier = Modifier,

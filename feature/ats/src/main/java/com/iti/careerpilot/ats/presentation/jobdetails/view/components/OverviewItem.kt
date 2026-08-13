@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.scoring.view.components
+package com.iti.careerpilot.ats.presentation.jobdetails.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.ats.presentation.scoring.uimodel.OverviewValue
+import com.iti.careerpilot.ats.presentation.jobdetails.uimodel.OverviewValue
 
 
 @Composable

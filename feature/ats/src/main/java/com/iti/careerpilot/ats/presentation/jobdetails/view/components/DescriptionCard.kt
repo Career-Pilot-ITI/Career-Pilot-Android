@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.scoring.view.components
+package com.iti.careerpilot.ats.presentation.jobdetails.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

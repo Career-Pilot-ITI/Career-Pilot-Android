@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.scoring.uimodel
+package com.iti.careerpilot.ats.presentation.jobdetails.uimodel
 
 data class OverviewValue(
     val resourceId: Int,

@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.scoring.view.components
+package com.iti.careerpilot.ats.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

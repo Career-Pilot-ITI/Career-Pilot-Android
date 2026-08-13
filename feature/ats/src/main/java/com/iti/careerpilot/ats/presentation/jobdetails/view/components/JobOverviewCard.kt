@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ats.presentation.scoring.view.components
+package com.iti.careerpilot.ats.presentation.jobdetails.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.JobListing
-import com.iti.careerpilot.ats.presentation.scoring.uimodel.OverviewValue
+import com.iti.careerpilot.ats.presentation.jobdetails.uimodel.OverviewValue
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 @Composable

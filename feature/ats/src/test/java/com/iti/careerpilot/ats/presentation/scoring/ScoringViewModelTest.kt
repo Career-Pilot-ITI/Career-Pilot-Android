@@ -66,7 +66,6 @@ class ScoringViewModelTest {
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(ScoringAction.RequestScore)
         viewModel.onAction(ScoringAction.StartScore)
         viewModel.onAction(ScoringAction.StartScore)
         runCurrent()
@@ -86,7 +85,6 @@ class ScoringViewModelTest {
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(ScoringAction.RequestScore)
         viewModel.onAction(ScoringAction.StartScore)
         advanceUntilIdle()
 
