@@ -91,6 +91,7 @@ class PracticeSessionViewModel @Inject constructor(
         const val TAG = "PracticeSessionVM"
         const val KEY_ACTIVE_SESSION_ID = "practice_active_session_id"
         const val KEY_SESSION_STARTED_AT_MS = "practice_session_started_at_ms"
+        const val KEY_IS_VIDEO_SESSION = "practice_is_video_session"
         const val MAX_RESTORABLE_SESSION_AGE_MS = 24L * 60L * 60L * 1000L
     }
 
@@ -385,7 +386,9 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun restartOldSession(sessionId: Long, isVideoSession: Boolean = false) {
-        _state.update { it.copy(isVideoSessionSelected = isVideoSession) }
+        val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
+        _state.update { it.copy(isVideoSessionSelected = effectiveIsVideo) }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.restartOldSession(sessionId)
@@ -393,12 +396,14 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun createNewSession(trackId: Long, isVideoSession: Boolean = false) {
-        _state.update { it.copy(isVideoSessionSelected = isVideoSession) }
+        val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
+        _state.update { it.copy(isVideoSessionSelected = effectiveIsVideo) }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
 
         val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
         if (restoredSessionId != null && restoredSessionId > 0L) {
-            restartOldSession(restoredSessionId)
+            restartOldSession(restoredSessionId, effectiveIsVideo)
             return
         }
 

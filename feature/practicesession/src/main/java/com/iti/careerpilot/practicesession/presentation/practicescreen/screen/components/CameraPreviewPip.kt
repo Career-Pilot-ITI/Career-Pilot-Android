@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import java.util.concurrent.Executors
 
 private const val TAG = "CameraPreviewPip"
@@ -138,11 +140,11 @@ fun CameraPreviewPip(
         var cameraProvider: ProcessCameraProvider? = null
         var isDisposed = false
 
-        val listener = Runnable {
-            if (isDisposed) return@Runnable
+        fun bindCamera() {
+            if (isDisposed) return
             try {
                 val provider = cameraProviderFuture.get()
-                if (isDisposed) return@Runnable
+                if (isDisposed) return
                 cameraProvider = provider
 
                 val previewUseCase = Preview.Builder()
@@ -180,10 +182,22 @@ fun CameraPreviewPip(
             }
         }
 
+        val listener = Runnable {
+            bindCamera()
+        }
+
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                bindCamera()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
         cameraProviderFuture.addListener(listener, ContextCompat.getMainExecutor(context))
 
         onDispose {
             isDisposed = true
+            lifecycleOwner.lifecycle.removeObserver(observer)
             try {
                 cameraProvider?.unbindAll()
             } catch (e: Exception) {
