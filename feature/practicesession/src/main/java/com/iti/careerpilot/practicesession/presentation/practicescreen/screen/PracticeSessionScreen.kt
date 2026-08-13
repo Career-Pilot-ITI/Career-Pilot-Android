@@ -2,6 +2,7 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -25,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,10 +38,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
@@ -77,6 +82,22 @@ fun PracticeSessionRoot(
 ) {
     val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
+    val view = LocalView.current
+
+    DisposableEffect(view) {
+        val window = (view.context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            val insetsController = WindowInsetsControllerCompat(window, view)
+            insetsController.isAppearanceLightNavigationBars = false
+        }
+        onDispose {
+            val window = (view.context as? Activity)?.window
+            if (window != null) {
+                WindowCompat.setDecorFitsSystemWindows(window, true)
+            }
+        }
+    }
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
