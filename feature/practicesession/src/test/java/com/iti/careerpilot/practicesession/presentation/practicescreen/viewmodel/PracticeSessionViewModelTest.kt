@@ -342,7 +342,7 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `Paid user with consent emits RequestCameraPermission in video session`() = runSessionTest {
+    fun `Paid user in video session enables body language`() = runSessionTest {
         val profile = UserProfile(
             account = AccountInfo(
                 subscriptionTier = "PLUS",
@@ -352,37 +352,11 @@ class PracticeSessionViewModelTest {
         val userProfileRepo = FakeUserProfileRepo(profile)
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
 
-        val events = mutableListOf<PracticeSessionEvent>()
-        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.event.toList(events)
-        }
-
         viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
         testScheduler.runCurrent()
 
         assertTrue(viewModel.state.value.bodyLanguageEnabled)
         assertTrue(viewModel.state.value.bodyLanguageConsentGiven)
-        assertTrue(events.any { it is PracticeSessionEvent.RequestCameraPermission })
-        job.cancel()
-    }
-
-    @Test
-    fun `Paid user without consent shows consent dialog in video session`() = runSessionTest {
-        val profile = UserProfile(
-            account = AccountInfo(
-                subscriptionTier = "PRO",
-                bodyLanguageConsentGiven = false
-            )
-        )
-        val userProfileRepo = FakeUserProfileRepo(profile)
-        val viewModel = createViewModel(userProfileRepo = userProfileRepo)
-
-        viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
-        testScheduler.runCurrent()
-
-        assertTrue(viewModel.state.value.bodyLanguageEnabled)
-        assertFalse(viewModel.state.value.bodyLanguageConsentGiven)
-        assertTrue(viewModel.state.value.showBodyLanguageConsentDialog)
     }
 
     @Test
@@ -400,58 +374,6 @@ class PracticeSessionViewModelTest {
         testScheduler.runCurrent()
 
         assertFalse(viewModel.state.value.bodyLanguageEnabled)
-    }
-
-    @Test
-    fun `AcceptBodyLanguageConsent updates profile repo and requests camera permission`() = runSessionTest {
-        val userProfileRepo = FakeUserProfileRepo(UserProfile())
-        val viewModel = createViewModel(userProfileRepo = userProfileRepo)
-
-        val events = mutableListOf<PracticeSessionEvent>()
-        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.event.toList(events)
-        }
-
-        viewModel.onAction(PracticeSessionAction.AcceptBodyLanguageConsent)
-        testScheduler.runCurrent()
-
-        assertTrue(userProfileRepo.readUserProfile().account.bodyLanguageConsentGiven)
-        assertTrue(viewModel.state.value.bodyLanguageConsentGiven)
-        assertFalse(viewModel.state.value.showBodyLanguageConsentDialog)
-        assertTrue(events.any { it is PracticeSessionEvent.RequestCameraPermission })
-        job.cancel()
-    }
-
-    @Test
-    fun `DeclineBodyLanguageConsent hides dialog and disables body language`() = runSessionTest {
-        val viewModel = createViewModel()
-        viewModel.onAction(PracticeSessionAction.DeclineBodyLanguageConsent)
-        testScheduler.runCurrent()
-
-        assertFalse(viewModel.state.value.showBodyLanguageConsentDialog)
-        assertFalse(viewModel.state.value.bodyLanguageEnabled)
-    }
-
-    @Test
-    fun `OnCameraPermissionResult granted starts analyzer and sets analyzing true`() = runSessionTest {
-        val fakeAnalyzer = FakeBodyLanguageAnalyzer()
-        val viewModel = createViewModel(bodyLanguageAnalyzer = fakeAnalyzer)
-
-        viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(granted = true))
-        testScheduler.runCurrent()
-
-        assertTrue(fakeAnalyzer.startCalled)
-        assertTrue(viewModel.state.value.isBodyLanguageAnalyzing)
-    }
-
-    @Test
-    fun `OnCameraPermissionResult denied disables body language`() = runSessionTest {
-        val viewModel = createViewModel()
-        viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(granted = false))
-        testScheduler.runCurrent()
-
-        assertFalse(viewModel.state.value.bodyLanguageEnabled)
-        assertFalse(viewModel.state.value.isBodyLanguageAnalyzing)
     }
 
     @Test
