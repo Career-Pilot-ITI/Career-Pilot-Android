@@ -21,8 +21,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterRoot
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
+import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
-import com.iti.careerpilot.ats.presentation.workspace.view.AtsWorkspaceRoot
+import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
@@ -145,24 +146,31 @@ fun NestedNavDisplay(
                         onSharedTextConsumed = onSharedTextConsumed,
                         onJobDetailsRequested = { workspaceId ->
                             nestedBackStack.navigateSingleTop(
-                                Route.NestedNav.AtsWorkspace(workspaceId),
+                                Route.NestedNav.AtsJobDetails(workspaceId),
                             )
                         },
                     )
                 }
-                entry<Route.NestedNav.AtsWorkspace> { route ->
-                    AtsWorkspaceRoot(
+                entry<Route.NestedNav.AtsJobDetails> { route ->
+                    JobDetailsRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { nestedBackStack.removeLastOrNull() },
+                        openScore = { workspaceId ->
+                            nestedBackStack.navigateSingleTop(
+                                Route.NestedNav.AtsScore(workspaceId),
+                            )
+                        },
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
+                    )
+                }
+                entry<Route.NestedNav.AtsScore> { route ->
+                    ScoringRoot(
                         workspaceId = route.workspaceId,
                         onBack = { nestedBackStack.removeLastOrNull() },
                         openCoinsPaywall = { openPaywall(true) },
                         openCoverLetter = { workspaceId ->
                             nestedBackStack.navigateSingleTop(
                                 Route.NestedNav.AtsCoverLetter(workspaceId),
-                            )
-                        },
-                        openOptimizedCv = { workspaceId ->
-                            nestedBackStack.navigateSingleTop(
-                                Route.NestedNav.AtsOptimizedCv(workspaceId),
                             )
                         },
                         openReadyToPractice = openReadyToPractice,

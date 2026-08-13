@@ -19,6 +19,8 @@ import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsScreen
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvScreen
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
@@ -122,11 +124,11 @@ class AtsScreenStateTest {
 
     @Test
     fun importedWorkspaceRendersJobDetailsAndStartsScoring() {
-        var action: ScoringAction? = null
+        var action: JobDetailsAction? = null
         composeRule.setContent {
             MaterialTheme {
                 JobDetailsScreen(
-                    state = ScoringUiState(
+                    state = JobDetailsUiState(
                         isLoading = false,
                         workspace = workspace(),
                     ),
@@ -141,7 +143,7 @@ class AtsScreenStateTest {
         composeRule.onNodeWithText("Build accessible Android products.").assertExists()
         composeRule.onNodeWithText("Kotlin").assertExists()
         composeRule.onNodeWithText("Start Scoring").performClick()
-        composeRule.runOnIdle { assertEquals(ScoringAction.StartScore, action) }
+        composeRule.runOnIdle { assertEquals(JobDetailsAction.StartScoring, action) }
     }
 
     @Test

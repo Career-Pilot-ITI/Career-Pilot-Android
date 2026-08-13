@@ -53,21 +53,51 @@ class ScoringViewModel @Inject constructor(
         }
     }
 
-    private fun loadWorkspace(workspaceId: Long) {
-        if (this.workspaceId == workspaceId && _state.value.workspace != null) return
+    private fun loadScore(workspaceId: Long) {
+        if (this.workspaceId == workspaceId && _state.value.score != null) return
         this.workspaceId = workspaceId
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            when (val result = getWorkspace(workspaceId)) {
-                is CareerPilotResult.Error -> _state.update {
-                    it.copy(isLoading = false, error = result.error.toUIText())
+        if (activeOperation?.isActive == true) return
+        savedStateHandle[attemptKey(workspaceId)] = true
+        activeOperation = viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    hasInsufficientCoins = false,
+                )
+            }
+            val workspaceResult = getWorkspace(workspaceId)
+            if (workspaceResult is CareerPilotResult.Error) {
+                savedStateHandle[attemptKey(workspaceId)] = false
+                _state.update {
+                    it.copy(isLoading = false, error = workspaceResult.error.toUIText())
                 }
-                is CareerPilotResult.Success -> _state.update {
-                    it.copy(
-                        isLoading = false,
-                        workspace = result.data,
-                        wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
-                    )
+                return@launch
+            }
+            val workspace = (workspaceResult as CareerPilotResult.Success).data
+            _state.update { it.copy(workspace = workspace) }
+            when (val result = scoreCv(workspaceId)) {
+                is CareerPilotResult.Success -> {
+                    savedStateHandle[attemptKey(workspaceId)] = false
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            score = result.data,
+                            wasInterrupted = false,
+                        )
+                    }
+                }
+                is CareerPilotResult.Error -> {
+                    val interrupted = result.error == NetworkError.TIME_OUT
+                    if (!interrupted) savedStateHandle[attemptKey(workspaceId)] = false
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            wasInterrupted = interrupted,
+                            error = result.error.toUIText(),
+                            hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
+                        )
+                    }
                 }
             }
         }
@@ -77,20 +107,17 @@ class ScoringViewModel @Inject constructor(
         when (action) {
             is ScoringAction.Initial -> {
                 observeProfile()
-                loadWorkspace(action.workspaceId)
+                loadScore(action.workspaceId)
             }
-            ScoringAction.StartScore -> executeScore()
-            ScoringAction.RetryWorkspace -> workspaceId?.let {
-                this.workspaceId = null
-                loadWorkspace(it)
+            ScoringAction.Retry -> workspaceId?.let {
+                _state.update { state -> state.copy(score = null) }
+                loadScore(it)
             }
             ScoringAction.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
             ScoringAction.GenerateCoverLetter -> workspaceId?.let {
                 emit(ScoringEffect.OpenCoverLetter(it))
             }
-            ScoringAction.OptimizeCv -> workspaceId?.let {
-                emit(ScoringEffect.OpenOptimizedCv(it))
-            }
+            ScoringAction.OptimizeCv -> Unit
             ScoringAction.StartPractice -> _state.value.trackId?.let { trackId ->
                 workspaceId?.let { workspaceId ->
                     emit(
@@ -100,41 +127,6 @@ class ScoringViewModel @Inject constructor(
                             workspaceId = workspaceId,
                         ),
                     )
-                }
-            }
-        }
-    }
-
-    private fun executeScore() {
-        val id = workspaceId ?: return
-        if (_state.value.isLoading || activeOperation?.isActive == true) return
-        savedStateHandle[attemptKey(id)] = true
-        activeOperation = viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                    hasInsufficientCoins = false,
-                )
-            }
-            when (val result = scoreCv(id)) {
-                is CareerPilotResult.Success -> {
-                    savedStateHandle[attemptKey(id)] = false
-                    _state.update {
-                        it.copy(isLoading = false, score = result.data, wasInterrupted = false)
-                    }
-                }
-                is CareerPilotResult.Error -> {
-                    val interrupted = result.error == NetworkError.TIME_OUT
-                    if (!interrupted) savedStateHandle[attemptKey(id)] = false
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            wasInterrupted = interrupted,
-                            error = result.error.toUIText(),
-                            hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
-                        )
-                    }
                 }
             }
         }

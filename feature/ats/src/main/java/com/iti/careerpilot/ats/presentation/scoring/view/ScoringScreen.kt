@@ -10,15 +10,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
+import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
+import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceLoadingContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillStatus
@@ -27,8 +37,50 @@ import com.iti.careerpilot.ats.presentation.scoring.view.components.Recommendati
 import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoreSummaryCard
 import com.iti.careerpilot.ats.presentation.scoring.view.components.SectionScoreCard
 import com.iti.careerpilot.ats.presentation.scoring.view.components.SkillGroupCard
+import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+
+@Composable
+fun ScoringRoot(
+    workspaceId: Long,
+    onBack: () -> Unit,
+    openCoinsPaywall: () -> Unit,
+    openCoverLetter: (Long) -> Unit,
+    openReadyToPractice: (trackId: Long, trackName: String, workspaceId: Long) -> Unit,
+    openJob: (String) -> Unit,
+    viewModel: ScoringViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(workspaceId) {
+        viewModel.onAction(ScoringAction.Initial(workspaceId))
+    }
+
+    LaunchedEffect(lifecycleOwner, viewModel) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.effects.collect { effect ->
+                when (effect) {
+                    ScoringEffect.OpenCoinsPaywall -> openCoinsPaywall()
+                    is ScoringEffect.OpenCoverLetter -> openCoverLetter(effect.workspaceId)
+                    is ScoringEffect.OpenPractice -> openReadyToPractice(
+                        effect.trackId,
+                        effect.trackName,
+                        effect.workspaceId,
+                    )
+                }
+            }
+        }
+    }
+
+    ScoringScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        onBack = onBack,
+        onOpenJob = openJob,
+    )
+}
 
 @Composable
 fun ScoringScreen(
@@ -38,18 +90,65 @@ fun ScoringScreen(
     modifier: Modifier = Modifier,
     onOpenJob: (String) -> Unit = {},
 ) {
-    val score = requireNotNull(state.score)
-    val workspace = requireNotNull(state.workspace)
-    val requiredKeywordCount = score.matchedSkills.size + score.missingRequiredSkills.size
-
     Column(modifier = modifier.fillMaxSize()) {
         AtsCenteredTopBar(
             title = stringResource(R.string.ats_job_match_title),
             onBack = onBack,
         )
 
+        when {
+            state.isLoading -> AtsWorkspaceLoadingContent(modifier = Modifier.fillMaxSize())
+            state.workspace == null || state.score == null -> ScoringErrorContent(
+                state = state,
+                onAction = onAction,
+                modifier = Modifier.fillMaxSize(),
+            )
+            else -> ScoringContent(
+                state = state,
+                onAction = onAction,
+                onOpenJob = onOpenJob,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScoringErrorContent(
+    state: ScoringUiState,
+    onAction: (ScoringAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        AtsWorkspaceErrorContent(
+            error = state.error,
+            onRetry = { onAction(ScoringAction.Retry) },
+            modifier = Modifier.weight(1f),
+        )
+        if (state.hasInsufficientCoins) {
+            CareerPilotButton(
+                text = stringResource(R.string.ats_get_coins),
+                onClick = { onAction(ScoringAction.OpenCoins) },
+                variant = ButtonVariant.OUTLINE,
+                modifier = Modifier.padding(20.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScoringContent(
+    state: ScoringUiState,
+    onAction: (ScoringAction) -> Unit,
+    onOpenJob: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val score = requireNotNull(state.score)
+    val workspace = requireNotNull(state.workspace)
+    val requiredKeywordCount = score.matchedSkills.size + score.missingRequiredSkills.size
+
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -173,5 +272,4 @@ fun ScoringScreen(
                 }
             }
         }
-    }
 }

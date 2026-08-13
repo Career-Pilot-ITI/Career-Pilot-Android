@@ -44,11 +44,13 @@ internal fun CoverLetterContent(
             }
         }
         if (state.editedValue.isBlank()) {
-            item {
-                CareerPilotButton(
-                    text = stringResource(R.string.ats_generate_cover_letter),
-                    onClick = { onAction(CoverLetterAction.RequestGeneration) },
-                )
+            if (state.error != null || state.wasInterrupted) {
+                item {
+                    CareerPilotButton(
+                        text = stringResource(R.string.ats_retry),
+                        onClick = { onAction(CoverLetterAction.Retry) },
+                    )
+                }
             }
         } else {
             item {

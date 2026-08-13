@@ -46,28 +46,24 @@ class ScoringViewModelTest {
     @After fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `restored attempt refreshes workspace and never scores automatically`() = runTest(dispatcher) {
+    fun `opening score loads workspace and scores automatically`() = runTest(dispatcher) {
         val repository = ScoringRepository()
-        val savedState = SavedStateHandle(mapOf("ats_score_attempted_1" to true))
-        val viewModel = createViewModel(repository, savedState)
+        val viewModel = createViewModel(repository, SavedStateHandle())
 
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.wasInterrupted)
         assertEquals(1, repository.workspaceCalls)
-        assertEquals(0, repository.scoreCalls)
+        assertEquals(1, repository.scoreCalls)
+        assertEquals(4, viewModel.state.value.score?.coinCost)
     }
 
     @Test
-    fun `duplicate confirmations execute one paid score request`() = runTest(dispatcher) {
+    fun `duplicate initial actions execute one paid score request`() = runTest(dispatcher) {
         val repository = ScoringRepository().apply { holdScore = CompletableDeferred() }
         val viewModel = createViewModel(repository, SavedStateHandle())
         viewModel.onAction(ScoringAction.Initial(1L))
-        advanceUntilIdle()
-
-        viewModel.onAction(ScoringAction.StartScore)
-        viewModel.onAction(ScoringAction.StartScore)
+        viewModel.onAction(ScoringAction.Initial(1L))
         runCurrent()
 
         assertEquals(1, repository.scoreCalls)
@@ -77,15 +73,12 @@ class ScoringViewModelTest {
     }
 
     @Test
-    fun `confirmed insufficient coins exposes Paywall recovery`() = runTest(dispatcher) {
+    fun `insufficient coins exposes Paywall recovery`() = runTest(dispatcher) {
         val repository = ScoringRepository().apply {
             scoreResult = CareerPilotResult.Error(NetworkError.INSUFFICIENT_COINS)
         }
         val viewModel = createViewModel(repository, SavedStateHandle())
         viewModel.onAction(ScoringAction.Initial(1L))
-        advanceUntilIdle()
-
-        viewModel.onAction(ScoringAction.StartScore)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.hasInsufficientCoins)

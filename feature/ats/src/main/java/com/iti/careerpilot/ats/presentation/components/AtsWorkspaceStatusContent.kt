@@ -15,9 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.common.util.UIText
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -34,8 +33,8 @@ internal fun AtsWorkspaceLoadingContent(
 
 @Composable
 internal fun AtsWorkspaceErrorContent(
-    state: ScoringUiState,
-    onAction: (ScoringAction) -> Unit,
+    error: UIText?,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -43,10 +42,10 @@ internal fun AtsWorkspaceErrorContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(state.error?.asString() ?: stringResource(R.string.ats_unknown_error))
+        Text(error?.asString() ?: stringResource(R.string.ats_unknown_error))
         CareerPilotButton(
             text = stringResource(R.string.ats_retry),
-            onClick = { onAction(ScoringAction.RetryWorkspace) },
+            onClick = onRetry,
             modifier = Modifier.padding(top = 16.dp),
         )
     }

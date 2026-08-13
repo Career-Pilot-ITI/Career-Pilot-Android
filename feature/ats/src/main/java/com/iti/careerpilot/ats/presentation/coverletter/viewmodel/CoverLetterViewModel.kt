@@ -66,13 +66,18 @@ class CoverLetterViewModel @Inject constructor(
                 }
                 is CareerPilotResult.Success -> _state.update {
                     val restored = result.data.coverLetterText.orEmpty()
+                    val wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true
                     it.copy(
                         workspace = result.data,
                         generatedValue = restored,
                         editedValue = restored,
                         isLoading = false,
-                        wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
+                        wasInterrupted = wasInterrupted,
                     )
+                }.also {
+                    if (_state.value.editedValue.isBlank() && !_state.value.wasInterrupted) {
+                        executeGeneration()
+                    }
                 }
             }
         }
@@ -84,13 +89,11 @@ class CoverLetterViewModel @Inject constructor(
                 observeProfile()
                 loadWorkspace(action.workspaceId)
             }
-            CoverLetterAction.RequestGeneration -> if (!_state.value.isLoading) {
-                _state.update { it.copy(isConfirmationVisible = true) }
+            CoverLetterAction.Retry -> if (_state.value.workspace == null) {
+                workspaceId?.let(::loadWorkspace)
+            } else {
+                executeGeneration()
             }
-            CoverLetterAction.DismissConfirmation -> _state.update {
-                it.copy(isConfirmationVisible = false)
-            }
-            CoverLetterAction.ConfirmGeneration -> executeGeneration()
             CoverLetterAction.ToggleEditing -> _state.update { it.copy(isEditing = !it.isEditing) }
             is CoverLetterAction.EditedValueChanged -> _state.update { it.copy(editedValue = action.value) }
             CoverLetterAction.Copy -> _state.value.editedValue.takeIf(String::isNotBlank)?.let {
@@ -119,7 +122,6 @@ class CoverLetterViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isLoading = true,
-                    isConfirmationVisible = false,
                     error = null,
                     hasInsufficientCoins = false,
                 )

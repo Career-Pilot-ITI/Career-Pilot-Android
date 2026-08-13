@@ -14,7 +14,6 @@ data class CoverLetterUiState(
     val coinCost: Int? = null,
     val isLoading: Boolean = true,
     val isEditing: Boolean = false,
-    val isConfirmationVisible: Boolean = false,
     val wasInterrupted: Boolean = false,
     val hasInsufficientCoins: Boolean = false,
     val error: UIText? = null,

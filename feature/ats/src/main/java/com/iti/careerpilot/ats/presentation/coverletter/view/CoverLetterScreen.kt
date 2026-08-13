@@ -7,11 +7,8 @@ import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -111,23 +108,4 @@ fun CoverLetterScreen(
             )
         }
     }
-
-    if (state.isConfirmationVisible) {
-        AlertDialog(
-            onDismissRequest = { onAction(CoverLetterAction.DismissConfirmation) },
-            title = { Text(stringResource(R.string.ats_generate_cover_letter)) },
-            text = { Text(stringResource(R.string.ats_paid_operation_confirmation)) },
-            confirmButton = {
-                TextButton(onClick = { onAction(CoverLetterAction.ConfirmGeneration) }) {
-                    Text(stringResource(R.string.ats_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onAction(CoverLetterAction.DismissConfirmation) }) {
-                    Text(stringResource(R.string.ats_cancel))
-                }
-            },
-        )
-    }
 }
-

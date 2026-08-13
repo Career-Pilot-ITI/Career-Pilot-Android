@@ -1,0 +1,121 @@
+package com.iti.careerpilot.ats.presentation.jobdetails
+
+import com.iti.careerpilot.ats.domain.model.AtsScore
+import com.iti.careerpilot.ats.domain.model.CoverLetter
+import com.iti.careerpilot.ats.domain.model.CvOptimization
+import com.iti.careerpilot.ats.domain.model.JobListing
+import com.iti.careerpilot.ats.domain.model.JobWorkspace
+import com.iti.careerpilot.ats.domain.repository.AtsRepository
+import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
+import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewModel
+import com.iti.common.error.NetworkError
+import com.iti.common.result.CareerPilotResult
+import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.PdfFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class JobDetailsViewModelTest {
+    private val dispatcher = StandardTestDispatcher()
+
+    @Before fun setUp() = Dispatchers.setMain(dispatcher)
+    @After fun tearDown() = Dispatchers.resetMain()
+
+    @Test
+    fun `job details loads workspace without scoring`() = runTest(dispatcher) {
+        val repository = JobDetailsRepository()
+        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(repository))
+
+        viewModel.onAction(JobDetailsAction.Initial(1L))
+        advanceUntilIdle()
+
+        assertEquals(WORKSPACE, viewModel.state.value.workspace)
+        assertEquals(1, repository.workspaceCalls)
+        assertEquals(0, repository.scoreCalls)
+    }
+
+    @Test
+    fun `start scoring emits score route with workspace id`() = runTest(dispatcher) {
+        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(JobDetailsRepository()))
+        viewModel.onAction(JobDetailsAction.Initial(1L))
+        advanceUntilIdle()
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(JobDetailsAction.StartScoring)
+        runCurrent()
+
+        assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
+    }
+}
+
+private class JobDetailsRepository : AtsRepository {
+    override val userProfile = MutableStateFlow(UserProfile())
+    var workspaceCalls = 0
+    var scoreCalls = 0
+
+    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
+        CareerPilotResult.Success(Unit)
+    override suspend fun importJob(url: String) = CareerPilotResult.Success(WORKSPACE)
+    override suspend fun getWorkspace(workspaceId: Long): CareerPilotResult<JobWorkspace, NetworkError> {
+        workspaceCalls++
+        return CareerPilotResult.Success(WORKSPACE)
+    }
+    override suspend fun scoreCv(workspaceId: Long): CareerPilotResult<AtsScore, NetworkError> {
+        scoreCalls++
+        return CareerPilotResult.Error(NetworkError.UNKNOWN)
+    }
+    override suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<CvOptimization, NetworkError> =
+        CareerPilotResult.Error(NetworkError.UNKNOWN)
+    override suspend fun generateCoverLetter(workspaceId: Long): CareerPilotResult<CoverLetter, NetworkError> =
+        CareerPilotResult.Error(NetworkError.UNKNOWN)
+}
+
+private val WORKSPACE = JobWorkspace(
+    id = 1L,
+    job = JobListing(
+        id = 2L,
+        title = "Engineer",
+        companyName = "CareerPilot",
+        location = "Cairo",
+        description = "Description",
+        employmentType = null,
+        seniorityLevel = null,
+        requiredSkills = emptyList(),
+        preferredSkills = emptyList(),
+        responsibilities = emptyList(),
+        qualifications = emptyList(),
+        technologies = emptyList(),
+        salaryMin = null,
+        salaryMax = null,
+        currency = null,
+        experienceYears = null,
+        educationLevel = null,
+        applicationUrl = null,
+        sourceUrl = null,
+        sourceType = null,
+    ),
+    status = "IMPORTED",
+    cvScore = null,
+    cvScoreUpdatedAt = null,
+    cvOptimizedText = null,
+    coverLetterText = null,
+    lastInterviewSessionId = null,
+    createdAt = null,
+    updatedAt = null,
+)
