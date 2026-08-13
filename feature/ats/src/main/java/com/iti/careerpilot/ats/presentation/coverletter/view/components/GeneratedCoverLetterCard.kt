@@ -1,7 +1,5 @@
 package com.iti.careerpilot.ats.presentation.coverletter.view.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -9,15 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,9 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,11 +27,11 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
-import com.iti.careerpilot.core.designsystem.CareerPilotTheme
+import com.iti.careerpilot.ats.presentation.coverletter.uimodels.CoverLetterContactInfo
+import com.iti.careerpilot.ats.presentation.util.toPalette
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 val coverLetterPadding = 16.dp
-
 
 @Composable
 internal fun GeneratedCoverLetterCard(
@@ -167,126 +157,6 @@ internal fun GeneratedCoverLetterCard(
                     }
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun CoverLetterActionButton(
-    onClick: () -> Unit,
-    label: String,
-    icon: ImageVector,
-    contentDescription: String,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .background(
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-            )
-            .padding(
-                horizontal = 8.dp,
-                vertical = 6.dp,
-            ),
-    ) {
-        Icon(
-            modifier = Modifier.size(18.dp),
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-    }
-}
-
-enum class CoverLetterContactInfo {
-    EMAIL,
-    NAME,
-    PHONE
-}
-
-data class CoverLetterContactInfoPalette(
-    val icon: ImageVector,
-    val containerColor: Color,
-    val contentColor: Color,
-)
-
-@Composable
-fun CoverLetterContactInfo.toPalette(): CoverLetterContactInfoPalette {
-    val colors = CareerPilotTheme.extendedColors
-    val colorScheme = MaterialTheme.colorScheme
-
-    return when (this) {
-        CoverLetterContactInfo.EMAIL -> CoverLetterContactInfoPalette(
-            icon = Icons.Outlined.Email,
-            containerColor = colors.infoContainer,
-            contentColor = colors.onInfoContainer,
-        )
-
-        CoverLetterContactInfo.NAME -> CoverLetterContactInfoPalette(
-            icon = Icons.Outlined.Email,
-            containerColor = colorScheme.onSurface,
-            contentColor = colorScheme.surface,
-        )
-
-        else -> CoverLetterContactInfoPalette(
-            icon = Icons.Outlined.Email,
-            containerColor = colors.warningContainer,
-            contentColor = colors.onWarningContainer,
-        )
-    }
-}
-
-
-@Composable
-fun CoverLetterContactInfoCard(
-    palette: CoverLetterContactInfoPalette,
-    info: String
-) {
-    AssistChip(
-        onClick = {},
-        border = null,
-        colors = AssistChipDefaults.assistChipColors(
-            containerColor = palette.containerColor,
-            labelColor = palette.contentColor,
-            leadingIconContentColor = palette.contentColor,
-        ),
-        leadingIcon = {
-            Icon(
-                imageVector = palette.icon,
-                contentDescription = null
-            )
-        },
-        label = { Text(info) },
-    )
-}
-
-
-@Composable
-internal fun ApproachTipsCard(
-    tips: String,
-    modifier: Modifier = Modifier,
-) {
-    CareerPilotCard(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.ats_approach_tips),
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = tips,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
         }
     }
 }
