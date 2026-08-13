@@ -42,8 +42,8 @@ fun QuestionCard(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .heightIn(max = 160.dp),
+                .padding(14.dp)
+                .heightIn(max = 115.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -53,13 +53,14 @@ fun QuestionCard(
             ) {
                 Text(
                     text = stringResource(R.string.question_number, questionOrder ?: ""),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f)
                 )
                 if (isReadingQuestion) {
                     IconButton(
-                        onClick = onStopClick
+                        onClick = onStopClick,
+                        modifier = Modifier.padding(0.dp)
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_stop),
@@ -68,7 +69,8 @@ fun QuestionCard(
                     }
                 } else {
                     IconButton(
-                        onClick = onPlayClick
+                        onClick = onPlayClick,
+                        modifier = Modifier.padding(0.dp)
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_play),
@@ -77,11 +79,16 @@ fun QuestionCard(
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Spacer(Modifier.height(4.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 65.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 Text(
                     text = questionText ?: stringResource(R.string.loading_question),
-                    style = MaterialTheme.typography.bodyLarge.copy(
+                    style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     ),
