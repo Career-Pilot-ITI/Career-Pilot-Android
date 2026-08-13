@@ -81,6 +81,12 @@
     <string name="ready_permission_text">CareerPilot needs your microphone to hear your answers during the interview.</string>
     <string name="ready_permission_allow">Allow</string>
     <string name="ready_permission_cancel">Not now</string>
+    
+    <string name="ready_camera_permission_title">Camera access</string>
+    <string name="ready_camera_permission_text">CareerPilot needs your camera to analyze body language during the video interview.</string>
+    <string name="ready_camera_title">Camera Access</string>
+    <string name="ready_camera_required">Required for video</string>
+    <string name="ready_camera_granted">Granted</string>
     <string name="getting_ready">Getting Ready</string>
     <string name="audio_session">Audio Session</string>
     <string name="video_session">Video Session</string>

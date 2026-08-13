@@ -66,13 +66,25 @@ class ReadyToPracticeViewModel @Inject constructor(
                 )
             }
 
+            is ReadyToPracticeAction.CameraPermissionChanged -> _state.update {
+                it.copy(
+                    isCameraGranted = action.isGranted,
+                    showCameraPermissionDialog = false,
+                )
+            }
+
             ReadyToPracticeAction.SelectAudioMode -> _state.update {
                 it.copy(isVideoMode = false)
             }
 
             ReadyToPracticeAction.SelectVideoMode -> {
                 if (_state.value.isPaidPlan) {
-                    _state.update { it.copy(isVideoMode = true) }
+                    _state.update { 
+                        it.copy(
+                            isVideoMode = true,
+                            showCameraPermissionDialog = !it.isCameraGranted
+                        ) 
+                    }
                 } else {
                     sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
                 }
@@ -84,6 +96,14 @@ class ReadyToPracticeViewModel @Inject constructor(
 
             ReadyToPracticeAction.PermissionDialogDismissed -> _state.update {
                 it.copy(isPermissionDialogVisible = false)
+            }
+
+            ReadyToPracticeAction.CameraRowClicked -> _state.update {
+                if (it.isCameraGranted) it else it.copy(showCameraPermissionDialog = true)
+            }
+
+            ReadyToPracticeAction.CameraPermissionDialogDismissed -> _state.update {
+                it.copy(showCameraPermissionDialog = false)
             }
 
             ReadyToPracticeAction.BeginInterviewClicked -> beginInterview()

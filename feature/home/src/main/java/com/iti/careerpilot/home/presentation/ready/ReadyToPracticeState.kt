@@ -6,6 +6,8 @@ data class ReadyToPracticeState(
     val isPermissionDialogVisible: Boolean = false,
     val isVideoMode: Boolean = false,
     val isPaidPlan: Boolean = false,
+    val isCameraGranted: Boolean = false,
+    val showCameraPermissionDialog: Boolean = false,
 ) {
-    val canBegin: Boolean get() = isMicrophoneGranted
+    val canBegin: Boolean get() = isMicrophoneGranted && (!isVideoMode || isCameraGranted)
 }

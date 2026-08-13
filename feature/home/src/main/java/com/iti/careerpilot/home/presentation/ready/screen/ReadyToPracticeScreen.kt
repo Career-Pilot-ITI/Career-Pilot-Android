@@ -51,6 +51,7 @@ import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeAction
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeEvent
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeState
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeViewModel
+import com.iti.careerpilot.home.presentation.ready.screen.components.CameraRow
 import com.iti.careerpilot.home.presentation.ready.screen.components.MicrophoneRow
 import com.iti.careerpilot.home.presentation.ready.screen.components.TipsCard
 
@@ -75,9 +76,17 @@ fun ReadyToPracticeRoot(
             context,
             Manifest.permission.RECORD_AUDIO,
         ) == PackageManager.PERMISSION_GRANTED
+        
+        val cameraGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
 
         if (granted) {
             viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        }
+        if (cameraGranted) {
+            viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
         }
     }
 
@@ -103,6 +112,23 @@ fun ReadyToPracticeRoot(
                 )
             },
             neededPermissions = arrayOf(Manifest.permission.RECORD_AUDIO),
+        )
+    }
+
+    if (state.showCameraPermissionDialog) {
+        PermissionsDialog(
+            title = stringResource(R.string.ready_camera_permission_title),
+            text = stringResource(R.string.ready_camera_permission_text),
+            icon = Icons.Filled.Videocam,
+            cancel = stringResource(R.string.ready_permission_cancel),
+            allow = stringResource(R.string.ready_permission_allow),
+            onDismiss = { viewModel.onAction(ReadyToPracticeAction.CameraPermissionDialogDismissed) },
+            onGranted = {
+                viewModel.onAction(
+                    ReadyToPracticeAction.CameraPermissionChanged(isGranted = true)
+                )
+            },
+            neededPermissions = arrayOf(Manifest.permission.CAMERA),
         )
     }
 
@@ -270,6 +296,13 @@ fun ReadyToPracticeScreen(
                 isGranted = state.isMicrophoneGranted,
                 onClick = { onAction(ReadyToPracticeAction.MicrophoneRowClicked) },
             )
+
+            if (state.isVideoMode) {
+                CameraRow(
+                    isGranted = state.isCameraGranted,
+                    onClick = { onAction(ReadyToPracticeAction.CameraRowClicked) },
+                )
+            }
 
             Box(modifier = Modifier.weight(1f))
 

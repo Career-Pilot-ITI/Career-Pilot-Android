@@ -39,8 +39,6 @@ data class PracticeSessionState(
     val isVideoSessionSelected: Boolean = false,
     val bodyLanguageEnabled: Boolean = false,
     val bodyLanguageConsentGiven: Boolean = false,
-    val showBodyLanguageConsentDialog: Boolean = false,
-    val showCameraPermissionDialog: Boolean = false,
     val isCameraPreviewVisible: Boolean = true,
     val isBodyLanguageAnalyzing: Boolean = false,
 )

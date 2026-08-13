@@ -46,7 +46,6 @@ import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.AmbientStageBackdrop
-import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.BodyLanguageConsentDialog
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CameraPreviewPip
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.CenterStage
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components.ConfirmationDialog
@@ -76,24 +75,12 @@ fun PracticeSessionRoot(
 ) {
     val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
-    var shouldRequestCameraPermission by remember { mutableStateOf(false) }
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
-            }
-            is PracticeSessionEvent.RequestCameraPermission -> {
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED
-                if (hasPermission) {
-                    viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
-                } else {
-                    shouldRequestCameraPermission = true
-                }
             }
         }
     }
@@ -200,33 +187,6 @@ fun PracticeSessionRoot(
                 viewModel.onAction(PracticeSessionAction.StartRecordingAnswer)
             },
             neededPermissions = arrayOf(Manifest.permission.RECORD_AUDIO)
-        )
-    }
-
-    if (shouldRequestCameraPermission) {
-        PermissionsDialog(
-            title = stringResource(R.string.camera_permission),
-            text = stringResource(R.string.please_allow_camera_permission_for_body_language),
-            icon = ImageVector.vectorResource(R.drawable.ic_camera),
-            cancel = stringResource(R.string.cancel),
-            allow = stringResource(R.string.allow),
-            onDismiss = {
-                shouldRequestCameraPermission = false
-                viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(false))
-            },
-            onGranted = {
-                shouldRequestCameraPermission = false
-                viewModel.onAction(PracticeSessionAction.OnCameraPermissionResult(true))
-            },
-            neededPermissions = arrayOf(Manifest.permission.CAMERA)
-        )
-    }
-
-    // Body language consent dialog
-    if (state.showBodyLanguageConsentDialog) {
-        BodyLanguageConsentDialog(
-            onAccept = { viewModel.onAction(PracticeSessionAction.AcceptBodyLanguageConsent) },
-            onDecline = { viewModel.onAction(PracticeSessionAction.DeclineBodyLanguageConsent) },
         )
     }
 

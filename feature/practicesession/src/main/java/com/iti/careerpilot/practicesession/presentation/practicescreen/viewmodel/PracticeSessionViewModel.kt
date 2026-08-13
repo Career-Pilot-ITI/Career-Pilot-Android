@@ -284,10 +284,7 @@ class PracticeSessionViewModel @Inject constructor(
             is ToggleAutoReadQuestion -> toggleAutoReadQuestion(action.enabled)
 
             // Body language
-            is AcceptBodyLanguageConsent -> acceptBodyLanguageConsent()
-            is DeclineBodyLanguageConsent -> declineBodyLanguageConsent()
             is ToggleCameraPreview -> toggleCameraPreview(action.visible)
-            is OnCameraPermissionResult -> handleCameraPermissionResult(action.granted)
             is OnFrame -> handleOnFrame(action.imageProxy)
         }
     }
@@ -710,54 +707,19 @@ class PracticeSessionViewModel @Inject constructor(
                     _state.update { it.copy(bodyLanguageEnabled = false) }
                     return@launch
                 }
-                val consentGiven = profile.account.bodyLanguageConsentGiven
-
+                
                 _state.update {
                     it.copy(
                         bodyLanguageEnabled = true,
-                        bodyLanguageConsentGiven = consentGiven,
+                        bodyLanguageConsentGiven = true,
+                        isBodyLanguageAnalyzing = true
                     )
                 }
 
-                if (!consentGiven) {
-                    _state.update { it.copy(showBodyLanguageConsentDialog = true) }
-                } else {
-                    _event.send(PracticeSessionEvent.RequestCameraPermission)
+                if (!bodyLanguageAnalyzer.isRunning) {
+                    bodyLanguageAnalyzer.start()
                 }
             }
-        }
-    }
-
-    private fun acceptBodyLanguageConsent() {
-        viewModelScope.launch {
-            userProfileRepo.setBodyLanguageConsent(true)
-            _state.update {
-                it.copy(
-                    bodyLanguageConsentGiven = true,
-                    showBodyLanguageConsentDialog = false,
-                )
-            }
-            _event.send(PracticeSessionEvent.RequestCameraPermission)
-        }
-    }
-
-    private fun declineBodyLanguageConsent() {
-        _state.update {
-            it.copy(
-                showBodyLanguageConsentDialog = false,
-                bodyLanguageEnabled = false,
-            )
-        }
-    }
-
-    private fun handleCameraPermissionResult(granted: Boolean) {
-        if (granted) {
-            if (!bodyLanguageAnalyzer.isRunning) {
-                bodyLanguageAnalyzer.start()
-            }
-            _state.update { it.copy(isBodyLanguageAnalyzing = true) }
-        } else {
-            _state.update { it.copy(bodyLanguageEnabled = false, isBodyLanguageAnalyzing = false) }
         }
     }
 
