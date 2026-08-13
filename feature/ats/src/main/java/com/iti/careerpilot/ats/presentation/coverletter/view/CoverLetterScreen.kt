@@ -32,7 +32,8 @@ import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLetterContent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
-import com.iti.careerpilot.ats.presentation.util.EmailDraft
+import com.iti.careerpilot.ats.presentation.util.composeEmail
+import com.iti.careerpilot.ats.presentation.util.copyText
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 
@@ -130,28 +131,3 @@ fun CoverLetterScreen(
     }
 }
 
-private fun copyText(
-    context: Context,
-    label: String,
-    value: String,
-) {
-    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(ClipData.newPlainText(label, value))
-}
-
-private fun composeEmail(
-    context: Context,
-    draft: EmailDraft,
-): Boolean {
-    val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = "mailto:".toUri()
-        putExtra(Intent.EXTRA_SUBJECT, draft.subject.asString(context))
-        putExtra(Intent.EXTRA_TEXT, draft.body)
-    }
-    return if (intent.resolveActivity(context.packageManager) != null) {
-        context.startActivity(intent)
-        true
-    } else {
-        false
-    }
-}
