@@ -8,7 +8,6 @@ data class ScoringUiState(
     val workspace: JobWorkspace? = null,
     val score: AtsScore? = null,
     val isLoading: Boolean = true,
-    val isScoreConfirmationVisible: Boolean = false,
     val wasInterrupted: Boolean = false,
     val error: UIText? = null,
     val hasInsufficientCoins: Boolean = false,

@@ -1,5 +1,6 @@
 package com.iti.careerpilot.ats.presentation.scoring.view.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
@@ -111,6 +113,7 @@ internal fun FeedbackListCard(
         modifier = modifier.fillMaxWidth(),
         useShadow = false,
         containerColor = containerColor,
+        borderStroke = BorderStroke(width = 1.dp, contentColor)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -139,7 +142,6 @@ internal fun RecommendationsCard(
     values: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    val colors = CareerPilotTheme.extendedColors
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column {
             values.forEachIndexed { index, value ->
@@ -148,16 +150,16 @@ internal fun RecommendationsCard(
                         .fillMaxWidth()
                         .padding(14.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.Top,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Surface(
-                        shape = MaterialTheme.shapes.small,
-                        color = colors.infoContainer,
-                        contentColor = colors.onInfoContainer,
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = .05f),
+                        contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = .8f),
                     ) {
                         Text(
                             text = (index + 1).toString(),
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
                         )

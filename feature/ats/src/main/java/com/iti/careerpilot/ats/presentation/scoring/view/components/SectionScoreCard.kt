@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
+import com.iti.careerpilot.ats.presentation.util.scoreColor
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
 @Composable
@@ -52,8 +53,12 @@ internal fun SectionScoreCard(
                 role = Role.Button
                 stateDescription = expansionState
             }
-            .clickable { expanded = !expanded }
+            .clickable(
+                indication = null,
+                interactionSource = null,
+                onClick = { expanded = !expanded })
             .animateContentSize(),
+        useShadow = false
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

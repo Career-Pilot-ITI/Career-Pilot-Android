@@ -1,6 +1,7 @@
 package com.iti.careerpilot.ats.presentation.scoring.view.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,7 +44,9 @@ internal fun JobHeaderCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(cardPadding),
+                .clickable(
+                    onClick = { jobUrl?.let { onOpenJob(jobUrl) } }
+                ).padding(cardPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -98,13 +100,11 @@ internal fun JobHeaderCard(
                     }
             }
             if (jobUrl != null) {
-                IconButton(onClick = { onOpenJob(jobUrl) }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
-                        contentDescription = stringResource(R.string.ats_open_job),
-                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
-                    )
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
+                    contentDescription = stringResource(R.string.ats_open_job),
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
+                )
             }
         }
     }

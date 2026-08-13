@@ -1,21 +1,16 @@
 package com.iti.careerpilot.ats.presentation.scoring.view
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.ats.R
@@ -73,8 +68,8 @@ fun ScoringScreen(
     state: ScoringUiState,
     onAction: (ScoringAction) -> Unit,
     onBack: () -> Unit,
-    onOpenJob: (String) -> Unit = {},
     modifier: Modifier = Modifier,
+    onOpenJob: (String) -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         AtsCenteredTopBar(
@@ -107,7 +102,7 @@ fun ScoringScreen(
                 wasInterrupted = state.wasInterrupted,
                 hasInsufficientCoins = state.hasInsufficientCoins,
                 errorMessage = state.error?.asString(),
-                onStartScoring = { onAction(ScoringAction.RequestScore) },
+                onStartScoring = { onAction(ScoringAction.StartScore) },
                 onOpenCoins = { onAction(ScoringAction.OpenCoins) },
                 onOpenJob = onOpenJob,
                 modifier = Modifier.fillMaxSize(),
@@ -120,23 +115,5 @@ fun ScoringScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
-    }
-
-    if (state.isScoreConfirmationVisible) {
-        AlertDialog(
-            onDismissRequest = { onAction(ScoringAction.DismissConfirmation) },
-            title = { Text(stringResource(R.string.ats_confirm_scoring_title)) },
-            text = { Text(stringResource(R.string.ats_paid_operation_confirmation)) },
-            confirmButton = {
-                TextButton(onClick = { onAction(ScoringAction.ConfirmScore) }) {
-                    Text(stringResource(R.string.ats_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { onAction(ScoringAction.DismissConfirmation) }) {
-                    Text(stringResource(R.string.ats_cancel))
-                }
-            },
-        )
     }
 }

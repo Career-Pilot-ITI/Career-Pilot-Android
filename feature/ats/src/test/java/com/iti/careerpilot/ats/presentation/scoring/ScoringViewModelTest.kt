@@ -67,8 +67,8 @@ class ScoringViewModelTest {
         advanceUntilIdle()
 
         viewModel.onAction(ScoringAction.RequestScore)
-        viewModel.onAction(ScoringAction.ConfirmScore)
-        viewModel.onAction(ScoringAction.ConfirmScore)
+        viewModel.onAction(ScoringAction.StartScore)
+        viewModel.onAction(ScoringAction.StartScore)
         runCurrent()
 
         assertEquals(1, repository.scoreCalls)
@@ -87,7 +87,7 @@ class ScoringViewModelTest {
         advanceUntilIdle()
 
         viewModel.onAction(ScoringAction.RequestScore)
-        viewModel.onAction(ScoringAction.ConfirmScore)
+        viewModel.onAction(ScoringAction.StartScore)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.hasInsufficientCoins)

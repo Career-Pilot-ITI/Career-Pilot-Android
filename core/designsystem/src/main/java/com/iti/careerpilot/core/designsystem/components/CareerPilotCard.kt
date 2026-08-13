@@ -1,5 +1,6 @@
 package com.iti.careerpilot.core.designsystem.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -22,6 +23,7 @@ fun CareerPilotCard(
     modifier: Modifier = Modifier,
     useShadow: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.surface,
+    borderStroke: BorderStroke? = null,
     elevation: Dp = 8.dp,
     content: @Composable () -> Unit
 ) {
@@ -32,6 +34,7 @@ fun CareerPilotCard(
             containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
+        border = borderStroke,
         elevation = CardDefaults.cardElevation(0.dp),
     ) {
         content()

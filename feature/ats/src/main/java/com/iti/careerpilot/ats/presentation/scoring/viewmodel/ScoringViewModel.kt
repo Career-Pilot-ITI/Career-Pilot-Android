@@ -79,13 +79,7 @@ class ScoringViewModel @Inject constructor(
                 observeProfile()
                 loadWorkspace(action.workspaceId)
             }
-            ScoringAction.RequestScore -> if (!_state.value.isLoading) {
-                _state.update { it.copy(isScoreConfirmationVisible = true) }
-            }
-            ScoringAction.DismissConfirmation -> _state.update {
-                it.copy(isScoreConfirmationVisible = false)
-            }
-            ScoringAction.ConfirmScore -> executeScore()
+            ScoringAction.StartScore -> executeScore()
             ScoringAction.RetryWorkspace -> workspaceId?.let {
                 this.workspaceId = null
                 loadWorkspace(it)
@@ -119,7 +113,6 @@ class ScoringViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isLoading = true,
-                    isScoreConfirmationVisible = false,
                     error = null,
                     hasInsufficientCoins = false,
                 )

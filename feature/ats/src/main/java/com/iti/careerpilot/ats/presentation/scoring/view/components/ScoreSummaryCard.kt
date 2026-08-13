@@ -3,11 +3,13 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,7 +37,7 @@ internal fun ScoreSummaryCard(
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -43,7 +45,7 @@ internal fun ScoreSummaryCard(
             ) {
                 ScoreRing(
                     progress = score.overallScore / 100f,
-                    progressColor = scoreColor(score.overallScore),
+                    progressColor = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.outlineVariant,
                     modifier = Modifier.size(72.dp),
                     centerContent = {
@@ -68,6 +70,7 @@ internal fun ScoreSummaryCard(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
+                    Spacer(Modifier.height(4.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ScoreCountBadge(
                             text = stringResource(R.string.ats_matched_count, score.matchedSkills.size),
@@ -87,7 +90,7 @@ internal fun ScoreSummaryCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp),
-                color = scoreColor(score.matchPercentage),
+                color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
             )
         }
@@ -118,11 +121,4 @@ private fun matchVerdict(score: Int) = when (score) {
     in 0..59 -> R.string.ats_match_needs_work
     in 60..79 -> R.string.ats_match_good
     else -> R.string.ats_match_excellent
-}
-
-@Composable
-internal fun scoreColor(score: Int): Color = when (score) {
-    in 0..59 -> MaterialTheme.colorScheme.error
-    in 60..79 -> CareerPilotTheme.extendedColors.warning
-    else -> CareerPilotTheme.extendedColors.success
 }

@@ -127,7 +127,7 @@ internal fun ScoreContent(
         }
         item {
             CareerPilotButton(
-                text = stringResource(R.string.ats_apply_suggested_edits),
+                text = stringResource(R.string.ats_optimize_cv),
                 onClick = { onAction(ScoringAction.OptimizeCv) },
             )
         }
