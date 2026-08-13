@@ -48,7 +48,7 @@ fun AudioReviewRow(
 ) {
     val extendedColors = CareerPilotTheme.extendedColors
 
-    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+    Column(modifier = Modifier.padding(vertical = 10.dp)) {
         Box(modifier = Modifier.fillMaxWidth()) {
             PracticeIconButton(
                 onClick = onDiscard,

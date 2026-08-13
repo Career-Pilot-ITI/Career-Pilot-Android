@@ -66,14 +66,14 @@ fun PracticeSessionSettingsBottomSheet(
                     onCheckedChange = onCameraPreviewToggle,
                 )
                 SettingsSwitchRow(
-                    label = "Track Posture & Body",
-                    description = "Analyze body language and posture",
+                    label = stringResource(R.string.track_posture_and_body),
+                    description = stringResource(R.string.analyze_body_language_and_posture),
                     checked = enablePostureTracking,
                     onCheckedChange = onPostureTrackingToggle,
                 )
                 SettingsSwitchRow(
-                    label = "Track Hand Gestures",
-                    description = "Analyze hand movements",
+                    label = stringResource(R.string.track_hand_gestures),
+                    description = stringResource(R.string.analyze_hand_movements),
                     checked = enableHandTracking,
                     onCheckedChange = onHandTrackingToggle,
                 )
