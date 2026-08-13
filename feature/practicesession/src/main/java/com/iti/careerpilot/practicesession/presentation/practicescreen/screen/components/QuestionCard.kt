@@ -1,5 +1,6 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.components
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,31 +18,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.practicesession.R
-
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
-
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.BiasAlignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun QuestionCard(
@@ -53,18 +43,17 @@ fun QuestionCard(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
-    val isScrollable = scrollState.maxValue > 0
-    val cardSurfaceColor = MaterialTheme.colorScheme.surface
+    val scrollbarColor = MaterialTheme.colorScheme.primary
 
     CareerPilotCard(
         elevation = 8.dp,
-        containerColor = cardSurfaceColor.copy(alpha = 0.88f),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .heightIn(max = 180.dp),
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -94,90 +83,70 @@ fun QuestionCard(
             }
             Spacer(Modifier.height(6.dp))
 
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 105.dp)
+                    .heightIn(max = 110.dp)
+                    .verticalScrollbar(scrollState = scrollState, color = scrollbarColor)
+                    .verticalScroll(scrollState)
+                    .padding(end = 8.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = if (isScrollable) 10.dp else 0.dp)
-                        .verticalScroll(scrollState)
-                ) {
-                    Text(
-                        text = questionText ?: stringResource(R.string.loading_question),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Start
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (isScrollable) {
-                        Spacer(Modifier.height(8.dp))
-                    }
-                }
-
-                // Top gradient fade scrim when scrolled down
-                if (scrollState.canScrollBackward) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(14.dp)
-                            .align(Alignment.TopCenter)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        cardSurfaceColor.copy(alpha = 0.95f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                    )
-                }
-
-                // Bottom gradient fade scrim when text extends below
-                if (scrollState.canScrollForward) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(18.dp)
-                            .align(Alignment.BottomCenter)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        cardSurfaceColor.copy(alpha = 0.95f)
-                                    )
-                                )
-                            )
-                    )
-                }
-
-                // Sleek custom vertical scrollbar indicator thumb on right edge
-                if (isScrollable) {
-                    val scrollRatio = (scrollState.value.toFloat() / scrollState.maxValue.toFloat()).coerceIn(0f, 1f)
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .width(4.dp)
-                            .fillMaxHeight()
-                            .padding(vertical = 2.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.20f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .align(BiasAlignment(horizontalBias = 0f, verticalBias = -1f + 2f * scrollRatio))
-                                .width(4.dp)
-                                .fillMaxHeight(0.35f)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                        )
-                    }
-                }
+                Text(
+                    text = questionText ?: stringResource(R.string.loading_question),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
+    }
+}
+
+/**
+ * Standard, smooth vertical scrollbar drawn directly in the Draw phase.
+ * Defers state reads to drawing so scrolling never causes recompositions.
+ */
+private fun Modifier.verticalScrollbar(
+    scrollState: ScrollState,
+    color: Color,
+    width: Dp = 4.dp,
+    minThumbHeight: Dp = 20.dp,
+    paddingEnd: Dp = 0.dp,
+): Modifier = drawWithContent {
+    drawContent()
+
+    val maxValue = scrollState.maxValue
+    if (maxValue > 0) {
+        val visibleHeight = size.height
+        val totalHeight = visibleHeight + maxValue
+        val minThumbPx = minThumbHeight.toPx()
+        val thumbHeight = (visibleHeight * (visibleHeight / totalHeight))
+            .coerceIn(minThumbPx, visibleHeight)
+        val scrollRatio = scrollState.value.toFloat() / maxValue.toFloat()
+        val thumbOffsetY = scrollRatio * (visibleHeight - thumbHeight)
+
+        val widthPx = width.toPx()
+        val paddingEndPx = paddingEnd.toPx()
+        val thumbOffsetX = size.width - widthPx - paddingEndPx
+        val cornerRadius = CornerRadius(widthPx / 2f, widthPx / 2f)
+
+        // Draw subtle background track
+        drawRoundRect(
+            color = color.copy(alpha = 0.15f),
+            topLeft = Offset(thumbOffsetX, 0f),
+            size = Size(widthPx, visibleHeight),
+            cornerRadius = cornerRadius
+        )
+
+        // Draw scroll thumb
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(thumbOffsetX, thumbOffsetY),
+            size = Size(widthPx, thumbHeight),
+            cornerRadius = cornerRadius
+        )
     }
 }
