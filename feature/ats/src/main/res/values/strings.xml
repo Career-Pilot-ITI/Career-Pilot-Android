@@ -106,4 +106,22 @@
     <string name="ats_collapsed">Collapsed</string>
     <string name="ats_expand_section">Expand section</string>
     <string name="ats_collapse_section">Collapse section</string>
+    <string name="ats_cv_optimization_starting">Starting CV optimization…</string>
+    <string name="ats_cv_optimization_queued">CV optimization started. You can keep using CareerPilot; we’ll notify you when it’s ready.</string>
+    <string name="ats_cv_optimization_channel">CV optimization progress</string>
+    <string name="ats_cv_optimization_result_channel">CV optimization results</string>
+    <string name="ats_cv_optimization_processing_title">Optimizing your CV</string>
+    <string name="ats_cv_optimization_processing">Your CV is being optimized.</string>
+    <string name="ats_cv_optimization_progress">%1$d%% · %2$s</string>
+    <string name="ats_cv_optimization_waiting_network">Waiting for a connection to continue…</string>
+    <string name="ats_cv_optimization_complete_title">Your optimized CV is ready</string>
+    <string name="ats_cv_optimization_complete_message">Tap to review the suggested improvements.</string>
+    <string name="ats_cv_optimization_failed_title">CV optimization failed</string>
+    <string name="ats_cv_optimization_failed_message">We couldn’t finish optimizing this CV. Your coins were refunded.</string>
+    <string name="ats_cv_optimization_not_ready">The optimization result is not ready yet.</string>
+    <string name="ats_cv_optimization_no_sections">No CV sections were returned.</string>
+    <string name="ats_section_good_enough">This section is already strong enough. No improvements are needed.</string>
+    <string name="ats_original_text">Original</string>
+    <string name="ats_improved_text">Improved</string>
+    <string name="ats_improvement_reason">Why this is better</string>
 </resources>

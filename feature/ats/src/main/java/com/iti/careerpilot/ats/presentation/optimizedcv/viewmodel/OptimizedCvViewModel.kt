@@ -1,124 +1,68 @@
 package com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
+import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.domain.model.AiJobStatus
+import com.iti.careerpilot.ats.domain.usecase.GetAiJobUseCase
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvEffect
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
-import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class OptimizedCvViewModel @Inject constructor(
-    private val getWorkspace: GetWorkspaceUseCase,
-    private val optimizeCv: OptimizeCvUseCase,
-    private val savedStateHandle: SavedStateHandle,
+    private val getAiJob: GetAiJobUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(OptimizedCvUiState())
     val state = _state.asStateFlow()
-    private val effectChannel = Channel<OptimizedCvEffect>(Channel.BUFFERED)
-    val effects = effectChannel.receiveAsFlow()
-    private var workspaceId: Long? = null
-    private var activeOperation: Job? = null
 
-    fun loadWorkspace(workspaceId: Long) {
-        if (this.workspaceId == workspaceId && !_state.value.isLoading) return
-        this.workspaceId = workspaceId
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            when (val result = getWorkspace(workspaceId)) {
-                is CareerPilotResult.Error -> _state.update {
-                    it.copy(isLoading = false, error = result.error.toUIText())
-                }
-                is CareerPilotResult.Success -> _state.update {
-                    it.copy(
-                        optimizedText = result.data.cvOptimizedText.orEmpty(),
-                        isLoading = false,
-                        wasInterrupted = savedStateHandle.get<Boolean>(attemptKey(workspaceId)) == true,
-                    )
-                }
-            }
-        }
-    }
+    private var jobId: Long? = null
 
     fun onAction(action: OptimizedCvAction) {
         when (action) {
-            OptimizedCvAction.RequestOptimization -> if (!_state.value.isLoading) {
-                _state.update { it.copy(isConfirmationVisible = true) }
-            }
-            OptimizedCvAction.DismissConfirmation -> _state.update {
-                it.copy(isConfirmationVisible = false)
-            }
-            OptimizedCvAction.ConfirmOptimization -> executeOptimization()
-            OptimizedCvAction.Copy -> _state.value.optimizedText.takeIf(String::isNotBlank)?.let {
-                emit(OptimizedCvEffect.CopyText(it))
-            }
-            OptimizedCvAction.OpenCoins -> emit(OptimizedCvEffect.OpenCoinsPaywall)
+            is OptimizedCvAction.Initial -> load(action.jobId)
+            OptimizedCvAction.Retry -> jobId?.let(::load)
         }
     }
 
-    private fun executeOptimization() {
-        val id = workspaceId ?: return
-        if (_state.value.isLoading || activeOperation?.isActive == true) return
-        savedStateHandle[attemptKey(id)] = true
-        activeOperation = viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    isConfirmationVisible = false,
-                    hasInsufficientCoins = false,
-                    error = null,
-                )
-            }
-            when (val result = optimizeCv(id)) {
+    private fun load(jobId: Long) {
+        if (this.jobId == jobId && _state.value.sections.isNotEmpty()) return
+        this.jobId = jobId
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            when (val result = getAiJob(jobId)) {
+                is CareerPilotResult.Error -> _state.update {
+                    it.copy(isLoading = false, error = result.error.toUIText())
+                }
                 is CareerPilotResult.Success -> {
-                    savedStateHandle[attemptKey(id)] = false
                     val optimization = result.data.result
+                    val error = when {
+                        result.data.status == AiJobStatus.FAILED -> result.data.errorMessage
+                            ?.let(UIText::DynamicString)
+                            ?: UIText.StringResource(R.string.ats_cv_optimization_failed_message)
+                        result.data.status != AiJobStatus.COMPLETED || optimization == null ->
+                            UIText.StringResource(R.string.ats_cv_optimization_not_ready)
+                        else -> null
+                    }
                     _state.update {
                         it.copy(
-                            optimizedText = optimization?.sections
-                                .orEmpty()
-                                .flatMap { section -> section.improvements }
-                                .joinToString("\n\n") { improvement -> improvement.improved },
+                            sections = optimization?.sections.orEmpty(),
                             recommendedTracks = optimization?.recommendedTracks.orEmpty(),
                             coinCost = optimization?.coinCost,
                             isLoading = false,
-                            wasInterrupted = false,
-                        )
-                    }
-                }
-                is CareerPilotResult.Error -> {
-                    val interrupted = result.error == NetworkError.TIME_OUT
-                    if (!interrupted) savedStateHandle[attemptKey(id)] = false
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            wasInterrupted = interrupted,
-                            hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
-                            error = result.error.toUIText(),
+                            error = error,
                         )
                     }
                 }
             }
         }
     }
-
-    private fun emit(effect: OptimizedCvEffect) {
-        viewModelScope.launch { effectChannel.send(effect) }
-    }
-
-    private fun attemptKey(id: Long) = "ats_optimize_attempted_$id"
 }

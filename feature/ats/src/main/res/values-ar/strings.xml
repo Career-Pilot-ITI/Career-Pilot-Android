@@ -110,4 +110,22 @@
     <string name="ats_keywords_count">%1$d كلمات مفتاحية</string>
     <string name="ats_apply_suggested_edits">تطبيق التعديلات المقترحة</string>
     <string name="ats_start_practice_for_job">ابدأ جلسة تدريب لهذه الوظيفة</string>
+    <string name="ats_cv_optimization_starting">جارٍ بدء تحسين السيرة الذاتية…</string>
+    <string name="ats_cv_optimization_queued">بدأ تحسين السيرة الذاتية. يمكنك متابعة استخدام CareerPilot وسنرسل إليك إشعارًا عند اكتماله.</string>
+    <string name="ats_cv_optimization_channel">تقدم تحسين السيرة الذاتية</string>
+    <string name="ats_cv_optimization_result_channel">نتائج تحسين السيرة الذاتية</string>
+    <string name="ats_cv_optimization_processing_title">جارٍ تحسين سيرتك الذاتية</string>
+    <string name="ats_cv_optimization_processing">سيرتك الذاتية قيد التحسين.</string>
+    <string name="ats_cv_optimization_progress">%1$d%% · %2$s</string>
+    <string name="ats_cv_optimization_waiting_network">في انتظار الاتصال لمتابعة المعالجة…</string>
+    <string name="ats_cv_optimization_complete_title">سيرتك الذاتية المحسّنة جاهزة</string>
+    <string name="ats_cv_optimization_complete_message">اضغط لمراجعة التحسينات المقترحة.</string>
+    <string name="ats_cv_optimization_failed_title">فشل تحسين السيرة الذاتية</string>
+    <string name="ats_cv_optimization_failed_message">تعذر إكمال تحسين هذه السيرة الذاتية. تمت إعادة عملاتك.</string>
+    <string name="ats_cv_optimization_not_ready">نتيجة التحسين ليست جاهزة بعد.</string>
+    <string name="ats_cv_optimization_no_sections">لم يتم إرجاع أي أقسام للسيرة الذاتية.</string>
+    <string name="ats_section_good_enough">هذا القسم جيد بما يكفي ولا يحتاج إلى تحسينات.</string>
+    <string name="ats_original_text">النص الأصلي</string>
+    <string name="ats_improved_text">النص المحسّن</string>
+    <string name="ats_improvement_reason">سبب التحسين</string>
 </resources>

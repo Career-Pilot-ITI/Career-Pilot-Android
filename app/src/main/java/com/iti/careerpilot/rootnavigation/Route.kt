@@ -37,7 +37,10 @@ sealed interface Route : NavKey {
         data class AtsCoverLetter(val workspaceId: Long) : Route
 
         @Serializable
-        data class AtsOptimizedCv(val workspaceId: Long) : Route
+        data class AtsOptimizedCv(
+            val workspaceId: Long,
+            val jobId: Long,
+        ) : Route
 
         @Serializable
         data object Profile : Route

@@ -35,6 +35,7 @@ import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.onboarding.navigation.OnboardingPagerScreen
 import kotlinx.coroutines.CancellationException
@@ -48,6 +49,8 @@ fun RootNavDisplay(
     isLoggedIn: Boolean?,
     pendingSharedText: String?,
     onSharedTextConsumed: () -> Unit,
+    pendingCvOptimization: PendingCvOptimization?,
+    onCvOptimizationConsumed: () -> Unit,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -71,6 +74,21 @@ fun RootNavDisplay(
             currentRootRoute == Route.Onboarding
         if (
             pendingSharedText != null &&
+            isLoggedIn == true &&
+            currentRootRoute != Route.NestedNav &&
+            !authOrSetupRoute
+        ) {
+            rootBackStack.replaceAll(Route.NestedNav)
+        }
+    }
+
+    LaunchedEffect(pendingCvOptimization, isLoggedIn, currentRootRoute) {
+        val authOrSetupRoute = currentRootRoute == Route.Splash ||
+            currentRootRoute == Route.Login ||
+            currentRootRoute is Route.OTP ||
+            currentRootRoute == Route.Onboarding
+        if (
+            pendingCvOptimization != null &&
             isLoggedIn == true &&
             currentRootRoute != Route.NestedNav &&
             !authOrSetupRoute
@@ -258,6 +276,8 @@ fun RootNavDisplay(
                         },
                         pendingSharedText = pendingSharedText,
                         onSharedTextConsumed = onSharedTextConsumed,
+                        pendingCvOptimization = pendingCvOptimization,
+                        onCvOptimizationConsumed = onCvOptimizationConsumed,
                     )
                 }
                 entry<Route.Onboarding> {

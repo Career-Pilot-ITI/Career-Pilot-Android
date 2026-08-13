@@ -5,13 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
+import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
+import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
+import com.iti.common.util.UIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -27,6 +30,7 @@ class ScoringViewModel @Inject constructor(
     private val getWorkspace: GetWorkspaceUseCase,
     private val scoreCv: ScoreCvUseCase,
     private val observeCurrentProfile: ObserveCurrentProfileUseCase,
+    private val optimizeCv: OptimizeCvUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScoringUiState())
@@ -38,6 +42,7 @@ class ScoringViewModel @Inject constructor(
     private var workspaceId: Long? = null
     private var activeOperation: Job? = null
     private var profileObservationJob: Job? = null
+    private var optimizationOperation: Job? = null
 
     private fun observeProfile() {
         if (profileObservationJob != null) return
@@ -117,7 +122,7 @@ class ScoringViewModel @Inject constructor(
             ScoringAction.GenerateCoverLetter -> workspaceId?.let {
                 emit(ScoringEffect.OpenCoverLetter(it))
             }
-            ScoringAction.OptimizeCv -> Unit
+            ScoringAction.OptimizeCv -> startOptimization()
             ScoringAction.StartPractice -> _state.value.trackId?.let { trackId ->
                 workspaceId?.let { workspaceId ->
                     emit(
@@ -134,6 +139,38 @@ class ScoringViewModel @Inject constructor(
 
     private fun emit(effect: ScoringEffect) {
         viewModelScope.launch { effectChannel.send(effect) }
+    }
+
+    private fun startOptimization() {
+        val id = workspaceId ?: return
+        if (optimizationOperation?.isActive == true) return
+        optimizationOperation = viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isStartingOptimization = true,
+                    optimizationError = null,
+                    hasInsufficientCoins = false,
+                )
+            }
+            when (val result = optimizeCv(id)) {
+                is CareerPilotResult.Success -> {
+                    _state.update { it.copy(isStartingOptimization = false) }
+                    effectChannel.send(ScoringEffect.StartOptimizationTracking(result.data))
+                    effectChannel.send(
+                        ScoringEffect.ShowMessage(
+                            UIText.StringResource(R.string.ats_cv_optimization_queued),
+                        ),
+                    )
+                }
+                is CareerPilotResult.Error -> _state.update {
+                    it.copy(
+                        isStartingOptimization = false,
+                        optimizationError = result.error.toUIText(),
+                        hasInsufficientCoins = result.error == NetworkError.INSUFFICIENT_COINS,
+                    )
+                }
+            }
+        }
     }
 
     private fun attemptKey(workspaceId: Long) = "ats_score_attempted_$workspaceId"

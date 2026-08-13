@@ -11,6 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
+import com.iti.careerpilot.optimization.toPendingCvOptimization
 import com.iti.common.network.NetworkMonitor
 import com.iti.careerpilot.share.toPendingSharedText
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,11 +27,13 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         viewModel.acceptSharedText(intent.toPendingSharedText())
+        viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
         enableEdgeToEdge()
         setContent {
             val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
             val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
             val pendingSharedText by viewModel.pendingSharedText.collectAsStateWithLifecycle()
+            val pendingCvOptimization by viewModel.pendingCvOptimization.collectAsStateWithLifecycle()
 
             CareerPilotTheme {
                 RootNavDisplay(
@@ -39,6 +42,8 @@ class MainActivity : AppCompatActivity() {
                     isLoggedIn = isLoggedIn,
                     pendingSharedText = pendingSharedText,
                     onSharedTextConsumed = viewModel::consumeSharedText,
+                    pendingCvOptimization = pendingCvOptimization,
+                    onCvOptimizationConsumed = viewModel::consumeCvOptimization,
                 )
             }
         }
@@ -48,5 +53,6 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         viewModel.acceptSharedText(intent.toPendingSharedText())
+        viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
     }
 }

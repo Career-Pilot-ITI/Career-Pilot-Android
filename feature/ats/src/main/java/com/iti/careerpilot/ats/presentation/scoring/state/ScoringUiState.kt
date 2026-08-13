@@ -11,6 +11,8 @@ data class ScoringUiState(
     val wasInterrupted: Boolean = false,
     val error: UIText? = null,
     val hasInsufficientCoins: Boolean = false,
+    val isStartingOptimization: Boolean = false,
+    val optimizationError: UIText? = null,
     val trackId: Long? = null,
     val trackName: String = "",
 )

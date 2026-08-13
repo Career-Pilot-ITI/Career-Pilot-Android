@@ -10,6 +10,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.iti.careerpilot.ats.domain.model.AtsScore
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
+import com.iti.careerpilot.ats.domain.model.CvOptimizationSection
+import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
@@ -171,12 +173,29 @@ class AtsScreenStateTest {
     }
 
     @Test
-    fun optimizedCvShowsReturnedTextWithoutPdfAction() {
+    fun optimizedCvExpandsSectionImprovementsAndHandlesGoodEnoughSection() {
         composeRule.setContent {
             MaterialTheme {
                 OptimizedCvScreen(
                     state = OptimizedCvUiState(
-                        optimizedText = "Optimized experience text",
+                        sections = listOf(
+                            CvOptimizationSection(
+                                name = "Experience",
+                                score = 82,
+                                improvements = listOf(
+                                    CvSectionImprovement(
+                                        original = "Worked on APIs.",
+                                        improved = "Delivered 12 APIs.",
+                                        reason = "Adds measurable impact.",
+                                    ),
+                                ),
+                            ),
+                            CvOptimizationSection(
+                                name = "Skills",
+                                score = 90,
+                                improvements = emptyList(),
+                            ),
+                        ),
                         recommendedTracks = emptyList(),
                         isLoading = false,
                     ),
@@ -186,8 +205,14 @@ class AtsScreenStateTest {
             }
         }
 
-        composeRule.onNodeWithText("Optimized experience text").assertExists()
-        composeRule.onNodeWithText("Download PDF").assertDoesNotExist()
+        composeRule.onNodeWithText("Experience").performClick()
+        composeRule.onNodeWithText("Worked on APIs.").assertExists()
+        composeRule.onNodeWithText("Delivered 12 APIs.").assertExists()
+        composeRule.onNodeWithText("Adds measurable impact.").assertExists()
+        composeRule.onNodeWithText("Skills").performClick()
+        composeRule.onNodeWithText(
+            "This section is already strong enough. No improvements are needed.",
+        ).assertExists()
     }
 
     private fun workspace() = JobWorkspace(

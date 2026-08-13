@@ -4,12 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import com.iti.careerpilot.ats.domain.model.AtsScore
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.domain.model.AiJob
+import com.iti.careerpilot.ats.domain.model.AiJobStatus
+import com.iti.careerpilot.ats.domain.model.AiJobType
 import com.iti.careerpilot.ats.domain.model.CoverLetter
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
+import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
@@ -110,10 +113,26 @@ class ScoringViewModelTest {
         )
     }
 
+    @Test
+    fun `optimize starts one background job and emits tracking effect`() = runTest(dispatcher) {
+        val repository = ScoringRepository()
+        val viewModel = createViewModel(repository, SavedStateHandle())
+        viewModel.onAction(ScoringAction.Initial(1L))
+        advanceUntilIdle()
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(ScoringAction.OptimizeCv)
+        runCurrent()
+
+        assertEquals(1, repository.optimizeCalls)
+        assertEquals(ScoringEffect.StartOptimizationTracking(OPTIMIZATION_JOB), effect.await())
+    }
+
     private fun createViewModel(repository: ScoringRepository, state: SavedStateHandle) = ScoringViewModel(
         getWorkspace = GetWorkspaceUseCase(repository),
         scoreCv = ScoreCvUseCase(repository),
         observeCurrentProfile = ObserveCurrentProfileUseCase(repository),
+        optimizeCv = OptimizeCvUseCase(repository),
         savedStateHandle = state,
     )
 }
@@ -122,6 +141,7 @@ private class ScoringRepository : AtsRepository {
     override val userProfile = MutableStateFlow(UserProfile())
     var workspaceCalls = 0
     var scoreCalls = 0
+    var optimizeCalls = 0
     var holdScore: CompletableDeferred<Unit>? = null
     var scoreResult: CareerPilotResult<AtsScore, NetworkError> = CareerPilotResult.Success(SCORE)
 
@@ -137,8 +157,10 @@ private class ScoringRepository : AtsRepository {
         holdScore?.await()
         return scoreResult
     }
-    override suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<AiJob, NetworkError> =
-        CareerPilotResult.Error(NetworkError.UNKNOWN)
+    override suspend fun optimizeCv(workspaceId: Long): CareerPilotResult<AiJob, NetworkError> {
+        optimizeCalls++
+        return CareerPilotResult.Success(OPTIMIZATION_JOB)
+    }
     override suspend fun getAiJob(jobId: Long): CareerPilotResult<AiJob, NetworkError> =
         CareerPilotResult.Error(NetworkError.UNKNOWN)
     override suspend fun generateCoverLetter(workspaceId: Long): CareerPilotResult<CoverLetter, NetworkError> =
@@ -194,3 +216,17 @@ private class ScoringRepository : AtsRepository {
         )
     }
 }
+
+private val OPTIMIZATION_JOB = AiJob(
+    id = 42L,
+    workspaceId = 1L,
+    type = AiJobType.CV_OPTIMIZE,
+    status = AiJobStatus.PENDING,
+    progressPercentage = 0,
+    currentStep = "Queued",
+    result = null,
+    errorMessage = null,
+    createdAt = null,
+    startedAt = null,
+    completedAt = null,
+)

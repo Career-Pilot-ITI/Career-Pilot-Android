@@ -1,5 +1,11 @@
 package com.iti.careerpilot.ats.presentation.scoring.view
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,24 +13,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.size
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.background.CvOptimizationService
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
@@ -43,6 +51,7 @@ import com.iti.careerpilot.ats.presentation.scoring.view.components.SkillGroupCa
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.common.snackbar.CareerPilotSnackbarController
 
 @Composable
 fun ScoringRoot(
@@ -56,6 +65,12 @@ fun ScoringRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) {
+        viewModel.onAction(ScoringAction.OptimizeCv)
+    }
 
     LaunchedEffect(workspaceId) {
         viewModel.onAction(ScoringAction.Initial(workspaceId))
@@ -67,6 +82,12 @@ fun ScoringRoot(
                 when (effect) {
                     ScoringEffect.OpenCoinsPaywall -> openCoinsPaywall()
                     is ScoringEffect.OpenCoverLetter -> openCoverLetter(effect.workspaceId)
+                    is ScoringEffect.StartOptimizationTracking -> {
+                        CvOptimizationService.start(context, effect.job)
+                    }
+                    is ScoringEffect.ShowMessage -> {
+                        CareerPilotSnackbarController.show(effect.message)
+                    }
                     is ScoringEffect.OpenPractice -> openReadyToPractice(
                         effect.trackId,
                         effect.trackName,
@@ -79,7 +100,20 @@ fun ScoringRoot(
 
     ScoringScreen(
         state = state,
-        onAction = viewModel::onAction,
+        onAction = { action ->
+            if (
+                action == ScoringAction.OptimizeCv &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.onAction(action)
+            }
+        },
         onBack = onBack,
         onOpenJob = openJob,
     )
@@ -150,11 +184,11 @@ private fun ScoringContent(
     val workspace = requireNotNull(state.workspace)
     val requiredKeywordCount = score.matchedSkills.size + score.missingRequiredSkills.size
 
-        LazyColumn(
-            modifier = modifier,
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
             item {
                 JobHeaderCard(
                     job = workspace.job,
@@ -246,17 +280,40 @@ private fun ScoringContent(
                 item { RecommendationsCard(values = score.recommendations) }
             }
             item {
-                CareerPilotButton(
-                    text = stringResource(R.string.ats_optimize_cv),
-                    onClick = { onAction(ScoringAction.OptimizeCv) },
-                    leadingContent = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_lightbulb_outline),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    },
-                )
+                if (state.hasInsufficientCoins) {
+                    CareerPilotButton(
+                        text = stringResource(R.string.ats_get_coins),
+                        onClick = { onAction(ScoringAction.OpenCoins) },
+                        variant = ButtonVariant.OUTLINE,
+                    )
+                } else {
+                    CareerPilotButton(
+                        text = stringResource(
+                            if (state.isStartingOptimization) {
+                                R.string.ats_cv_optimization_starting
+                            } else {
+                                R.string.ats_optimize_cv
+                            },
+                        ),
+                        onClick = { onAction(ScoringAction.OptimizeCv) },
+                        enabled = !state.isStartingOptimization,
+                        leadingContent = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_lightbulb_outline),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        },
+                    )
+                }
+                state.optimizationError?.let { error ->
+                    Text(
+                        text = error.asString(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
             }
             item {
                 CareerPilotButton(
@@ -295,5 +352,5 @@ private fun ScoringContent(
                     )
                 }
             }
-        }
+    }
 }

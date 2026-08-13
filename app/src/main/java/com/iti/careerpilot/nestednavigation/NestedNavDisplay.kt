@@ -30,6 +30,7 @@ import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHisto
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 import com.iti.common.model.ProfileEditSection
+import com.iti.careerpilot.optimization.PendingCvOptimization
 
 import androidx.compose.ui.graphics.Color
 
@@ -47,6 +48,8 @@ fun NestedNavDisplay(
     openInterviews: () -> Unit,
     pendingSharedText: String?,
     onSharedTextConsumed: () -> Unit,
+    pendingCvOptimization: PendingCvOptimization?,
+    onCvOptimizationConsumed: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -59,6 +62,24 @@ fun NestedNavDisplay(
                 add(Route.NestedNav.Home)
                 add(Route.NestedNav.Ats)
             }
+        }
+    }
+
+    LaunchedEffect(pendingCvOptimization) {
+        pendingCvOptimization?.let { optimization ->
+            nestedBackStack.apply {
+                clear()
+                add(Route.NestedNav.Home)
+                add(Route.NestedNav.Ats)
+                add(Route.NestedNav.AtsJobDetails(optimization.workspaceId))
+                add(
+                    Route.NestedNav.AtsOptimizedCv(
+                        workspaceId = optimization.workspaceId,
+                        jobId = optimization.jobId,
+                    ),
+                )
+            }
+            onCvOptimizationConsumed()
         }
     }
 
@@ -186,9 +207,8 @@ fun NestedNavDisplay(
                 }
                 entry<Route.NestedNav.AtsOptimizedCv> { route ->
                     OptimizedCvRoot(
-                        workspaceId = route.workspaceId,
+                        jobId = route.jobId,
                         onBack = { nestedBackStack.removeLastOrNull() },
-                        openCoinsPaywall = { openPaywall(true) },
                     )
                 }
                 entry<Route.NestedNav.Profile> {

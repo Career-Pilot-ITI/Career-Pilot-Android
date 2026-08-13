@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.core.datastore.UserTokensRepo
 import com.iti.careerpilot.share.PendingSharedText
+import com.iti.careerpilot.optimization.PendingCvOptimization
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,8 @@ class MainViewModel @Inject constructor(
 
     private val _pendingSharedText = MutableStateFlow<String?>(null)
     val pendingSharedText = _pendingSharedText.asStateFlow()
+    private val _pendingCvOptimization = MutableStateFlow<PendingCvOptimization?>(null)
+    val pendingCvOptimization = _pendingCvOptimization.asStateFlow()
 
     val isLoggedIn: StateFlow<Boolean?> = userTokensRepo.tokenUpdates
         .map { it.accessToken?.isNotBlank() }
@@ -36,5 +39,14 @@ class MainViewModel @Inject constructor(
 
     fun consumeSharedText() {
         _pendingSharedText.value = null
+    }
+
+    fun acceptCvOptimization(payload: PendingCvOptimization?) {
+        payload ?: return
+        _pendingCvOptimization.value = payload
+    }
+
+    fun consumeCvOptimization() {
+        _pendingCvOptimization.value = null
     }
 }
