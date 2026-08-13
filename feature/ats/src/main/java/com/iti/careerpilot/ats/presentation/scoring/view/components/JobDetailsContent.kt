@@ -3,18 +3,13 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Badge
-import androidx.compose.material.icons.outlined.Group
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.WorkOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -23,13 +18,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
+import com.iti.careerpilot.ats.presentation.scoring.uimodel.OverviewValue
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
@@ -46,14 +42,22 @@ internal fun JobDetailsContent(
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .padding(top = 8.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item { Spacer(Modifier.height(2.dp)) }
+
             item { JobHeaderCard(job = workspace.job, onOpenJob = onOpenJob) }
             item { JobOverviewCard(job = workspace.job) }
+
             if (workspace.job.description.isNotBlank()) {
                 item { DescriptionCard(workspace.job.description) }
             }
@@ -64,6 +68,9 @@ internal fun JobDetailsContent(
             ) {
                 item { RequirementsCard(workspace.job) }
             }
+
+            item { Spacer(Modifier.height(8.dp)) }
+
             if (wasInterrupted) {
                 item {
                     Text(
@@ -77,26 +84,17 @@ internal fun JobDetailsContent(
             }
         }
 
-        Surface(shadowElevation = 8.dp) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (hasInsufficientCoins) {
-                    CareerPilotButton(
-                        text = stringResource(R.string.ats_get_coins),
-                        onClick = onOpenCoins,
-                        variant = ButtonVariant.OUTLINE,
-                    )
-                }
-                CareerPilotButton(
-                    text = stringResource(R.string.ats_start_scoring),
-                    onClick = onStartScoring,
-                )
-            }
+        if (hasInsufficientCoins) {
+            CareerPilotButton(
+                text = stringResource(R.string.ats_get_coins),
+                onClick = onOpenCoins,
+                variant = ButtonVariant.OUTLINE,
+            )
+        } else {
+            CareerPilotButton(
+                text = stringResource(R.string.ats_start_scoring),
+                onClick = onStartScoring,
+            )
         }
     }
 }
@@ -105,19 +103,19 @@ internal fun JobDetailsContent(
 private fun JobOverviewCard(job: JobListing) {
     val items = buildList {
         job.employmentType?.let {
-            add(OverviewValue(Icons.Outlined.WorkOutline, R.string.ats_employment_type, it))
+            add(OverviewValue(R.drawable.ic_bag, R.string.ats_employment_type, it))
         }
         listOfNotNull(
             job.seniorityLevel,
             job.experienceYears?.let { stringResource(R.string.ats_experience_years, it) },
         ).joinToString(" · ").takeIf(String::isNotBlank)?.let {
-            add(OverviewValue(Icons.Outlined.Badge, R.string.ats_experience_level, it))
+            add(OverviewValue(R.drawable.ic_graduation, R.string.ats_experience_level, it))
         }
         job.postedLabel?.let {
-            add(OverviewValue(Icons.Outlined.Schedule, R.string.ats_posted, it))
+            add(OverviewValue(R.drawable.ic_clock, R.string.ats_posted, it))
         }
         job.applicantsLabel?.let {
-            add(OverviewValue(Icons.Outlined.Group, R.string.ats_applied, it))
+            add(OverviewValue(R.drawable.ic_person, R.string.ats_applied, it))
         }
     }
 
@@ -128,7 +126,7 @@ private fun JobOverviewCard(job: JobListing) {
         ) {
             Text(
                 text = stringResource(R.string.ats_job_overview),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
             items.chunked(2).forEach { rowItems ->
@@ -138,7 +136,7 @@ private fun JobOverviewCard(job: JobListing) {
                 ) {
                     rowItems.forEach { item -> OverviewItem(item, Modifier.weight(1f)) }
                     if (rowItems.size == 1) {
-                        androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                        Spacer(Modifier.weight(1f))
                     }
                 }
             }
@@ -155,10 +153,10 @@ private fun OverviewItem(value: OverviewValue, modifier: Modifier = Modifier) {
     ) {
         Surface(
             shape = MaterialTheme.shapes.small,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .3f),
         ) {
             Icon(
-                imageVector = value.icon,
+                painter = painterResource(value.resourceId),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(10.dp),
@@ -188,12 +186,12 @@ private fun DescriptionCard(description: String) {
         ) {
             Text(
                 text = stringResource(R.string.ats_description),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -203,6 +201,7 @@ private fun DescriptionCard(description: String) {
 @Composable
 private fun RequirementsCard(job: JobListing) {
     val colors = CareerPilotTheme.extendedColors
+
     CareerPilotCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -220,7 +219,10 @@ private fun RequirementsCard(job: JobListing) {
                 contentColor = colors.onSuccessContainer,
             )
             SkillGroup(
-                title = stringResource(R.string.ats_preferred_skills_count, job.preferredSkills.size),
+                title = stringResource(
+                    R.string.ats_preferred_skills_count,
+                    job.preferredSkills.size
+                ),
                 values = job.preferredSkills,
                 containerColor = colors.warningContainer,
                 contentColor = colors.onWarningContainer,
@@ -270,8 +272,3 @@ private fun SkillGroup(
     }
 }
 
-private data class OverviewValue(
-    val icon: ImageVector,
-    val label: Int,
-    val value: String,
-)

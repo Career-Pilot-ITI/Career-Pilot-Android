@@ -3,6 +3,7 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,21 +55,23 @@ internal fun JobHeaderCard(
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = job.companyName.firstOrNull()?.uppercase() ?: "?",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                )
                 job.companyLogoUrl?.let { logoUrl ->
                     AsyncImage(
                         model = logoUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                     )
-                }
+                } ?: Text(
+                    text = job.companyName.firstOrNull()?.uppercase() ?: "?",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
             }
-            androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = job.title,
                     style = if (compact) {
@@ -97,9 +100,9 @@ internal fun JobHeaderCard(
             if (jobUrl != null) {
                 IconButton(onClick = { onOpenJob(jobUrl) }) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
                         contentDescription = stringResource(R.string.ats_open_job),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f),
                     )
                 }
             }
