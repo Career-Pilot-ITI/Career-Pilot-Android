@@ -72,17 +72,11 @@ fun QuestionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
-                    shape = CircleShape,
-                ) {
-                    Text(
-                        text = stringResource(R.string.question_number, questionOrder ?: ""),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.question_number, questionOrder ?: ""),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
 
                 IconButton(
                     onClick = if (isReadingQuestion) onStopClick else onPlayClick,
@@ -180,46 +174,6 @@ fun QuestionCard(
                                 }
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary)
-                        )
-                    }
-                }
-            }
-
-            // High-contrast explicit UX pill badge notifying the user to scroll
-            AnimatedVisibility(
-                visible = isScrollable,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape,
-                    shadowElevation = 4.dp,
-                    modifier = Modifier.padding(top = 6.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(
-                                if (scrollState.canScrollForward) R.drawable.ic_expand_down
-                                else R.drawable.ic_expand_up
-                            ),
-                            contentDescription = stringResource(R.string.scroll_for_more),
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = if (scrollState.canScrollForward) {
-                                stringResource(R.string.scroll_for_more)
-                            } else {
-                                stringResource(R.string.back)
-                            },
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
