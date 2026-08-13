@@ -21,13 +21,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
-import com.iti.careerpilot.features.settings.domain.models.LanguageSetting
-import com.iti.careerpilot.features.settings.domain.models.ThemeSetting
-import com.iti.careerpilot.features.settings.domain.models.UserSettings
-import com.iti.careerpilot.features.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
+import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.common.network.NetworkMonitor
+import com.iti.core.datastore.settings.domain.models.LanguageSetting
+import com.iti.core.datastore.settings.domain.models.ThemeSetting
+import com.iti.core.datastore.settings.domain.models.UserSettings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

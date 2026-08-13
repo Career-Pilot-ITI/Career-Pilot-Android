@@ -6,19 +6,4 @@
     <string name="profile">الملف الشخصي</string>
     <string name="offline_mode">وضع عدم الاتصال</string>
 
-    <!-- Settings screen -->
-    <string name="english">الإنجليزية</string>
-    <string name="arabic">العربية</string>
-    <string name="light">فاتح</string>
-    <string name="dark">داكن</string>
-    <string name="follow_system">حسب النظام</string>
-
-    <string name="settings">الإعدادات</string>
-    <string name="language">اللغة</string>
-    <string name="select_language">اختر اللغة</string>
-    <string name="confirm">تأكيد</string>
-    <string name="cancel">إلغاء</string>
-    <string name="theme">المظهر</string>
-    <string name="select_theme">اختر المظهر</string>
-    <string name="done">تم</string>
 </resources>

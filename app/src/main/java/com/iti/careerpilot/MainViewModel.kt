@@ -2,9 +2,9 @@ package com.iti.careerpilot
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.features.settings.domain.UserSettingsRepo
-import com.iti.careerpilot.features.settings.domain.models.LanguageSetting
 import com.iti.core.datastore.UserTokensRepo
+import com.iti.core.datastore.settings.domain.UserSettingsRepo
+import com.iti.core.datastore.settings.domain.models.LanguageSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted

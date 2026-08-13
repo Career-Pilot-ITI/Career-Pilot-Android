@@ -1,6 +1,6 @@
 package com.iti.careerpilot
 
-import com.iti.careerpilot.features.settings.domain.models.UserSettings
+import com.iti.core.datastore.settings.domain.models.UserSettings
 
 
 sealed interface MainUiState {
