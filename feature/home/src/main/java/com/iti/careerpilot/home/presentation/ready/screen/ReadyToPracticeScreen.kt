@@ -55,6 +55,7 @@ import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeEvent
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeState
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeViewModel
 import com.iti.careerpilot.home.presentation.ready.screen.components.CameraRow
+import com.iti.careerpilot.home.presentation.ready.screen.components.LandmarkFeatureChips
 import com.iti.careerpilot.home.presentation.ready.screen.components.MicrophoneRow
 import com.iti.careerpilot.home.presentation.ready.screen.components.TipsCard
 
@@ -292,6 +293,15 @@ fun ReadyToPracticeScreen(
                         }
                     }
                 }
+            }
+
+            if (state.isVideoMode) {
+                LandmarkFeatureChips(
+                    enablePosture = state.enablePostureTracking,
+                    enableHands = state.enableHandTracking,
+                    onPostureToggle = { onAction(ReadyToPracticeAction.TogglePostureTracking(it)) },
+                    onHandsToggle = { onAction(ReadyToPracticeAction.ToggleHandTracking(it)) },
+                )
             }
 
             TipsCard()

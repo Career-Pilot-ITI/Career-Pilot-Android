@@ -92,4 +92,9 @@
     <string name="video_session">Video Session</string>
     <string name="pro_badge">PRO</string>
 
+    <string name="ready_feature_face">Face</string>
+    <string name="ready_feature_posture">Posture</string>
+    <string name="ready_feature_hands">Hands</string>
+    <string name="ready_analysis_features">Analysis Features</string>
+
 </resources>
