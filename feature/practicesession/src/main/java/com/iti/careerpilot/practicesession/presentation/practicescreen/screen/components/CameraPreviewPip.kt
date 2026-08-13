@@ -144,7 +144,7 @@ fun CameraPreviewPip(
 
                 @Suppress("DEPRECATION")
                 val imageAnalysisUseCase = ImageAnalysis.Builder()
-                    .setTargetResolution(Size(480, 640))
+                    .setTargetResolution(Size(320, 240))
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                     .build()
