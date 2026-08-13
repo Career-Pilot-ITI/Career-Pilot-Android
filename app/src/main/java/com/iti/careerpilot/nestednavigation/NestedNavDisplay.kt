@@ -22,7 +22,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterRoot
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
-import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
+import com.iti.careerpilot.ats.presentation.workspace.view.AtsWorkspaceRoot
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
@@ -129,6 +129,9 @@ fun NestedNavDisplay(
                                 navigateSingleTop(Route.NestedNav.SessionHistory)
                             }
                         },
+                        openAts = {
+                            nestedBackStack.navigateSingleTop(Route.NestedNav.Ats)
+                        },
                     )
                 }
                 entry<Route.NestedNav.SessionHistory> {
@@ -148,7 +151,7 @@ fun NestedNavDisplay(
                     )
                 }
                 entry<Route.NestedNav.AtsWorkspace> { route ->
-                    ScoringRoot(
+                    AtsWorkspaceRoot(
                         workspaceId = route.workspaceId,
                         onBack = { nestedBackStack.removeLastOrNull() },
                         openCoinsPaywall = { openPaywall(true) },
@@ -194,7 +197,6 @@ fun NestedNavDisplay(
 
 private fun NavKey?.isBottomDestination() = this == Route.NestedNav.Home ||
     this == Route.NestedNav.SessionHistory ||
-    this == Route.NestedNav.Ats ||
     this == Route.NestedNav.Profile
 
 private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
@@ -205,15 +207,11 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
             }
 
             Route.NestedNav.SessionHistory -> {
-                2
-            }
-
-            Route.NestedNav.Ats -> {
                 1
             }
 
             else -> {
-                3
+                2
             }
         }
     } ?: 0

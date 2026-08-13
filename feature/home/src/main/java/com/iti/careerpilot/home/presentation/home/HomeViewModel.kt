@@ -70,6 +70,7 @@ class HomeViewModel @Inject constructor(
             HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
             HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
+            HomeAction.AtsJobMatchClicked -> sendEvent(HomeEvent.NavigateToAts)
             HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllInterviewsClicked -> sendEvent(HomeEvent.NavigateToInterviews)
 

@@ -13,11 +13,6 @@ enum class BottomBarDestination(
         icon = R.drawable.ic_home,
         route = Route.NestedNav.Home
     ),
-    Ats(
-        title = R.string.ats,
-        icon = R.drawable.ic_ats,
-        route = Route.NestedNav.Ats,
-    ),
     Reports(
         title = R.string.reports,
         icon = R.drawable.ic_reports,
