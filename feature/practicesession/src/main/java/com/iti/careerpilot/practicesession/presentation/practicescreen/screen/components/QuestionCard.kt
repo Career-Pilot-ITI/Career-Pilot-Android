@@ -35,10 +35,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun QuestionCard(
@@ -50,16 +53,18 @@ fun QuestionCard(
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
+    val isScrollable = scrollState.maxValue > 0
+    val cardSurfaceColor = MaterialTheme.colorScheme.surface
 
     CareerPilotCard(
         elevation = 8.dp,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        containerColor = cardSurfaceColor.copy(alpha = 0.88f),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .heightIn(max = 135.dp),
+                .heightIn(max = 150.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -98,11 +103,12 @@ fun QuestionCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 70.dp)
+                    .heightIn(max = 85.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(end = if (isScrollable) 10.dp else 0.dp)
                         .verticalScroll(scrollState)
                 ) {
                     Text(
@@ -116,7 +122,25 @@ fun QuestionCard(
                     )
                 }
 
-                // Subtle bottom gradient fade hint when text exceeds visible height
+                // Top gradient fade scrim when scrolled down
+                if (scrollState.canScrollBackward) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(14.dp)
+                            .align(Alignment.TopCenter)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        cardSurfaceColor.copy(alpha = 0.95f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                }
+
+                // Bottom gradient fade scrim when text extends below
                 if (scrollState.canScrollForward) {
                     Box(
                         modifier = Modifier
@@ -127,17 +151,43 @@ fun QuestionCard(
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                                        cardSurfaceColor.copy(alpha = 0.95f)
                                     )
                                 )
                             )
                     )
                 }
+
+                // Sleek custom vertical scrollbar indicator thumb on right edge
+                if (isScrollable) {
+                    val scrollRatio = (scrollState.value.toFloat() / scrollState.maxValue.toFloat()).coerceIn(0f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(4.dp)
+                            .fillMaxHeight()
+                            .padding(vertical = 2.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.20f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .width(4.dp)
+                                .fillMaxHeight(0.35f)
+                                .graphicsLayer {
+                                    translationY = scrollRatio * (this.size.height * 0.65f)
+                                }
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+                    }
+                }
             }
 
-            // High-contrast explicit UX indicator notifying the user that the question is scrollable
+            // High-contrast explicit UX pill badge notifying the user to scroll
             AnimatedVisibility(
-                visible = scrollState.canScrollForward,
+                visible = isScrollable,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -148,19 +198,26 @@ fun QuestionCard(
                     modifier = Modifier.padding(top = 6.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_expand_down),
+                            imageVector = ImageVector.vectorResource(
+                                if (scrollState.canScrollForward) R.drawable.ic_expand_down
+                                else R.drawable.ic_expand_up
+                            ),
                             contentDescription = stringResource(R.string.scroll_for_more),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(14.dp)
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            text = stringResource(R.string.scroll_for_more),
+                            text = if (scrollState.canScrollForward) {
+                                stringResource(R.string.scroll_for_more)
+                            } else {
+                                stringResource(R.string.back)
+                            },
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onPrimary
                         )
