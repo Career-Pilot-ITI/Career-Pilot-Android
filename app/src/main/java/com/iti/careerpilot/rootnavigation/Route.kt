@@ -37,6 +37,8 @@ sealed interface Route : NavKey {
         val trackId: Long,
         val sessionId: Long? = null,
         val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : Route
 
     @Serializable

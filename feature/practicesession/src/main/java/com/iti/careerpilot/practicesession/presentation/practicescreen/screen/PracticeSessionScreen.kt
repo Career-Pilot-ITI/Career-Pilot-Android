@@ -86,6 +86,8 @@ fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
     isVideoSession: Boolean = false,
+    enablePostureTracking: Boolean = false,
+    enableHandTracking: Boolean = false,
     onBack: () -> Unit,
     onNavigateToResult: (Long) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
@@ -127,9 +129,23 @@ fun PracticeSessionRoot(
 
     LaunchedEffect(Unit) {
         if (sessionId != null && sessionId != 0L) {
-            viewModel.onAction(PracticeSessionAction.RestartPracticeSession(sessionId, isVideoSession))
+            viewModel.onAction(
+                PracticeSessionAction.RestartPracticeSession(
+                    sessionId = sessionId,
+                    isVideoSession = isVideoSession,
+                    enablePostureTracking = enablePostureTracking,
+                    enableHandTracking = enableHandTracking
+                )
+            )
         } else {
-            viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId, isVideoSession))
+            viewModel.onAction(
+                PracticeSessionAction.CreateNewPracticeSession(
+                    trackId = trackId,
+                    isVideoSession = isVideoSession,
+                    enablePostureTracking = enablePostureTracking,
+                    enableHandTracking = enableHandTracking
+                )
+            )
         }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()

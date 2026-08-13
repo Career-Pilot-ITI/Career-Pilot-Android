@@ -92,6 +92,8 @@ class PracticeSessionViewModel @Inject constructor(
         const val KEY_ACTIVE_SESSION_ID = "practice_active_session_id"
         const val KEY_SESSION_STARTED_AT_MS = "practice_session_started_at_ms"
         const val KEY_IS_VIDEO_SESSION = "practice_is_video_session"
+        const val KEY_ENABLE_POSTURE = "enable_posture_tracking"
+        const val KEY_ENABLE_HANDS = "enable_hand_tracking"
         const val MAX_RESTORABLE_SESSION_AGE_MS = 24L * 60L * 60L * 1000L
     }
 
@@ -243,9 +245,19 @@ class PracticeSessionViewModel @Inject constructor(
 
     fun onAction(action: PracticeSessionAction) {
         when (action) {
-            is CreateNewPracticeSession -> createNewSession(action.trackId, action.isVideoSession)
+            is CreateNewPracticeSession -> createNewSession(
+                action.trackId,
+                action.isVideoSession,
+                action.enablePostureTracking,
+                action.enableHandTracking
+            )
 
-            is RestartPracticeSession -> restartOldSession(action.sessionId, action.isVideoSession)
+            is RestartPracticeSession -> restartOldSession(
+                action.sessionId,
+                action.isVideoSession,
+                action.enablePostureTracking,
+                action.enableHandTracking
+            )
 
             is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
@@ -385,25 +397,55 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update { it.copy(showLeaveConfirm = show) }
     }
 
-    private fun restartOldSession(sessionId: Long, isVideoSession: Boolean = false) {
+    private fun restartOldSession(
+        sessionId: Long,
+        isVideoSession: Boolean = false,
+        enablePostureTracking: Boolean = false,
+        enableHandTracking: Boolean = false
+    ) {
         val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
+        val effectiveHands = savedStateHandle.get<Boolean>(KEY_ENABLE_HANDS) ?: enableHandTracking
         savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
-        _state.update { it.copy(isVideoSessionSelected = effectiveIsVideo) }
+        savedStateHandle[KEY_ENABLE_POSTURE] = effectivePosture
+        savedStateHandle[KEY_ENABLE_HANDS] = effectiveHands
+        _state.update {
+            it.copy(
+                isVideoSessionSelected = effectiveIsVideo,
+                enablePostureTracking = effectivePosture,
+                enableHandTracking = effectiveHands
+            )
+        }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.restartOldSession(sessionId)
         }
     }
 
-    private fun createNewSession(trackId: Long, isVideoSession: Boolean = false) {
+    private fun createNewSession(
+        trackId: Long,
+        isVideoSession: Boolean = false,
+        enablePostureTracking: Boolean = false,
+        enableHandTracking: Boolean = false
+    ) {
         val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
+        val effectiveHands = savedStateHandle.get<Boolean>(KEY_ENABLE_HANDS) ?: enableHandTracking
         savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
-        _state.update { it.copy(isVideoSessionSelected = effectiveIsVideo) }
+        savedStateHandle[KEY_ENABLE_POSTURE] = effectivePosture
+        savedStateHandle[KEY_ENABLE_HANDS] = effectiveHands
+        _state.update {
+            it.copy(
+                isVideoSessionSelected = effectiveIsVideo,
+                enablePostureTracking = effectivePosture,
+                enableHandTracking = effectiveHands
+            )
+        }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
 
         val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
         if (restoredSessionId != null && restoredSessionId > 0L) {
-            restartOldSession(restoredSessionId, effectiveIsVideo)
+            restartOldSession(restoredSessionId, effectiveIsVideo, effectivePosture, effectiveHands)
             return
         }
 
@@ -731,6 +773,12 @@ class PracticeSessionViewModel @Inject constructor(
 
                 if (!bodyLanguageAnalyzer.isRunning) {
                     bodyLanguageAnalyzer.start()
+                }
+                if (_state.value.enablePostureTracking) {
+                    bodyLanguageAnalyzer.enablePostureTracking(true)
+                }
+                if (_state.value.enableHandTracking) {
+                    bodyLanguageAnalyzer.enableHandTracking(true)
                 }
             }
         }

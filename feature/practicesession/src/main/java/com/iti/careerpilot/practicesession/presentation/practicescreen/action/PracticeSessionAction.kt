@@ -5,11 +5,15 @@ sealed interface PracticeSessionAction {
     data class CreateNewPracticeSession(
         val trackId: Long,
         val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : PracticeSessionAction
 
     data class RestartPracticeSession(
         val sessionId: Long,
         val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : PracticeSessionAction
 
     data class ShowOrHidePermissionDialog(

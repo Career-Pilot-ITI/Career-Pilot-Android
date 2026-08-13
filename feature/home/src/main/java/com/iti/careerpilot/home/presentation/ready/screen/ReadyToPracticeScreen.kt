@@ -64,7 +64,7 @@ fun ReadyToPracticeRoot(
     trackId: Long,
     trackName: String,
     onBack: () -> Unit,
-    openPractice: (trackId: Long, isVideo: Boolean) -> Unit,
+    openPractice: (trackId: Long, isVideo: Boolean, enablePosture: Boolean, enableHands: Boolean) -> Unit,
     openPaywall: () -> Unit = {},
     viewModel: ReadyToPracticeViewModel = hiltViewModel(),
 ) {
@@ -96,7 +96,12 @@ fun ReadyToPracticeRoot(
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(event.trackId, event.isVideo)
+            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(
+                event.trackId,
+                event.isVideo,
+                event.enablePosture,
+                event.enableHands,
+            )
             ReadyToPracticeEvent.NavigateToPaywall -> openPaywall()
             ReadyToPracticeEvent.NavigateBack -> onBack()
         }

@@ -251,6 +251,8 @@ fun RootNavDisplay(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
                         isVideoSession = it.isVideoSession,
+                        enablePostureTracking = it.enablePostureTracking,
+                        enableHandTracking = it.enableHandTracking,
                         onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(
@@ -341,7 +343,7 @@ fun RootNavDisplay(
                         openPaywall = {
                             rootBackStack.navigateSingleTop(Route.Paywall())
                         },
-                        openPractice = { trackId, isVideo ->
+                        openPractice = { trackId, isVideo, enablePosture, enableHands ->
                             rootBackStack.apply {
                                 popIfCurrentIs<Route.ReadyToPractice>()
                                 navigateSingleTop(
@@ -349,6 +351,8 @@ fun RootNavDisplay(
                                         trackId = trackId,
                                         sessionId = null,
                                         isVideoSession = isVideo,
+                                        enablePostureTracking = enablePosture,
+                                        enableHandTracking = enableHands,
                                     ),
                                 )
                             }

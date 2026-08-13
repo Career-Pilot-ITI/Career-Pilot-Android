@@ -177,9 +177,16 @@ class PracticeSessionViewModelTest {
 
     private class FakeBodyLanguageAnalyzer : BodyLanguageAnalyzer {
         private var _isRunning = false
-        override fun enablePostureTracking(enabled: Boolean) {}
+        var postureTrackingEnabled = false
+        var handTrackingEnabled = false
 
-        override fun enableHandTracking(enabled: Boolean) {}
+        override fun enablePostureTracking(enabled: Boolean) {
+            postureTrackingEnabled = enabled
+        }
+
+        override fun enableHandTracking(enabled: Boolean) {
+            handTrackingEnabled = enabled
+        }
 
         override val isRunning: Boolean
             get() = _isRunning
@@ -347,7 +354,7 @@ class PracticeSessionViewModelTest {
     }
 
     @Test
-    fun `Paid user in video session enables body language`() = runSessionTest {
+    fun `Paid user in video session enables body language and landmark tracking`() = runSessionTest {
         val profile = UserProfile(
             account = AccountInfo(
                 subscriptionTier = "PLUS",
@@ -355,13 +362,25 @@ class PracticeSessionViewModelTest {
             )
         )
         val userProfileRepo = FakeUserProfileRepo(profile)
-        val viewModel = createViewModel(userProfileRepo = userProfileRepo)
+        val fakeAnalyzer = FakeBodyLanguageAnalyzer()
+        val viewModel = createViewModel(userProfileRepo = userProfileRepo, bodyLanguageAnalyzer = fakeAnalyzer)
 
-        viewModel.onAction(PracticeSessionAction.CreateNewPracticeSession(trackId = 1L, isVideoSession = true))
+        viewModel.onAction(
+            PracticeSessionAction.CreateNewPracticeSession(
+                trackId = 1L,
+                isVideoSession = true,
+                enablePostureTracking = true,
+                enableHandTracking = true
+            )
+        )
         testScheduler.runCurrent()
 
         assertTrue(viewModel.state.value.bodyLanguageEnabled)
         assertTrue(viewModel.state.value.bodyLanguageConsentGiven)
+        assertTrue(viewModel.state.value.enablePostureTracking)
+        assertTrue(viewModel.state.value.enableHandTracking)
+        assertTrue(fakeAnalyzer.postureTrackingEnabled)
+        assertTrue(fakeAnalyzer.handTrackingEnabled)
     }
 
     @Test
