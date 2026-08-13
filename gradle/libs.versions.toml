@@ -171,6 +171,7 @@ careerpilot-feature-domain = { id = "careerpilot.feature.domain" }
 careerpilot-feature-data = { id = "careerpilot.feature.data" }
 careerpilot-feature-presentation = { id = "careerpilot.feature.presentation" }
 careerpilot-feature-profile = { id = "careerpilot.feature.profile" }
+careerpilot-feature-settings = { id = "careerpilot.feature.settings" }
 careerpilot-feature-home = { id = "careerpilot.feature.home" }
 careerpilot-testing = { id = "careerpilot.testing" }
 feature-onboarding = { id = "feature.onboarding" }
