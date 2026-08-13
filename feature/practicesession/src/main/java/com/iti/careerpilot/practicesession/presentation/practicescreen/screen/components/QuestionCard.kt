@@ -38,10 +38,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun QuestionCard(
@@ -64,7 +64,7 @@ fun QuestionCard(
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .heightIn(max = 150.dp),
+                .heightIn(max = 180.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -97,7 +97,7 @@ fun QuestionCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 85.dp)
+                    .heightIn(max = 105.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -114,6 +114,9 @@ fun QuestionCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    if (isScrollable) {
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
 
                 // Top gradient fade scrim when scrolled down
@@ -166,12 +169,9 @@ fun QuestionCard(
                     ) {
                         Box(
                             modifier = Modifier
-                                .align(Alignment.TopCenter)
+                                .align(BiasAlignment(horizontalBias = 0f, verticalBias = -1f + 2f * scrollRatio))
                                 .width(4.dp)
                                 .fillMaxHeight(0.35f)
-                                .graphicsLayer {
-                                    translationY = scrollRatio * (this.size.height * 0.65f)
-                                }
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary)
                         )
