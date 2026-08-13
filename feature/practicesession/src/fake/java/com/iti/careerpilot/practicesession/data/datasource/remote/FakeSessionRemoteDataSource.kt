@@ -26,10 +26,10 @@ class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSourc
     private val totalQuestions = 4
 
     private val questions = listOf(
-        "Can you describe the Android Activity lifecycle and how it handles configuration changes?",
-        "What are Kotlin Coroutines, and how do they differ from traditional threads in Android?",
-        "Explain the difference between LiveData, Flow, and SharedFlow in the context of state management.",
-        "How does Dagger Hilt simplify Dependency Injection in Android, and what are its key components?"
+        "Can you describe the Android Activity lifecycle and explain in detail how it handles configuration changes like screen rotation or multi-window mode? Additionally, discuss how SavedStateHandle and ViewModel preserve UI state, and how process death differs from normal activity destruction.",
+        "What are Kotlin Coroutines, and how do they differ from traditional threads in Android? Explain structured concurrency, dispatchers, exception handling, and cancellation in production apps.",
+        "Explain the difference between LiveData, Flow, and SharedFlow in the context of state management, detailing cold vs hot streams, backpressure handling, and lifecycle-aware collection in Jetpack Compose.",
+        "How does Dagger Hilt simplify Dependency Injection in Android, what are its key component scopes, and how do custom qualifiers and Hilt viewmodel injection work under the hood?"
     )
 
     override suspend fun createNewSession(
