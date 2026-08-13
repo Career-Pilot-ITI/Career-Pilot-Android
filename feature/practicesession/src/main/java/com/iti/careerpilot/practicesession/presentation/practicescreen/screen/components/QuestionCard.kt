@@ -26,6 +26,10 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.practicesession.R
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+
 @Composable
 fun QuestionCard(
     questionOrder: Int?,
@@ -36,14 +40,14 @@ fun QuestionCard(
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(
-        elevation = 8.dp,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        elevation = 6.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.90f),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
-                .padding(14.dp)
-                .heightIn(max = 115.dp),
+                .padding(16.dp)
+                .heightIn(max = 125.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -51,47 +55,46 @@ fun QuestionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.question_number, questionOrder ?: ""),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f)
-                )
-                if (isReadingQuestion) {
-                    IconButton(
-                        onClick = onStopClick,
-                        modifier = Modifier.padding(0.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_stop),
-                            contentDescription = stringResource(R.string.stop)
-                        )
-                    }
-                } else {
-                    IconButton(
-                        onClick = onPlayClick,
-                        modifier = Modifier.padding(0.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                            contentDescription = stringResource(R.string.play)
-                        )
-                    }
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
+                    shape = CircleShape,
+                ) {
+                    Text(
+                        text = stringResource(R.string.question_number, questionOrder ?: ""),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = if (isReadingQuestion) onStopClick else onPlayClick,
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(
+                            if (isReadingQuestion) R.drawable.ic_stop else R.drawable.ic_play
+                        ),
+                        contentDescription = stringResource(
+                            if (isReadingQuestion) R.string.stop else R.string.play
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 65.dp)
+                    .heightIn(max = 70.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = questionText ?: stringResource(R.string.loading_question),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Start
                     ),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

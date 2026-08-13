@@ -26,6 +26,8 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.practicesession.R
 
 
+import androidx.compose.material3.Surface
+
 @Composable
 fun ActionBottomBar(
     isRecording: Boolean,
@@ -39,64 +41,72 @@ fun ActionBottomBar(
     val context = LocalContext.current
     val extendedColors = CareerPilotTheme.extendedColors
 
-    Row(
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.90f),
+        shape = CircleShape,
+        shadowElevation = 6.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 4.dp),
     ) {
-        PracticeIconButton(
-            onClick = onToggleQuestionCard,
-            iconId = if (showQuestionCard) R.drawable.ic_expand_down
-            else R.drawable.ic_expand_up,
-            descriptionId = R.string.toggle_question_card
-        )
-
-        Box(
+        Row(
             modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.background, CircleShape)
-                .background(
-                    brush = Brush.radialGradient(
-                        0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                        1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-                    ),
-                    shape = CircleShape
-                )
-                .border(1.dp, extendedColors.actionBorder, CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            LargeGradientIconButton(
-                icon = ImageVector.vectorResource(
-                    if (isRecording) R.drawable.ic_stop
-                    else R.drawable.ic_mic
-                ),
-                contentDescription = if (isRecording) {
-                    stringResource(R.string.stop_recording)
-                } else {
-                    stringResource(R.string.start_recording)
-                },
-                onClick = {
-                    if (isRecording) {
-                        onStopRecording()
+            PracticeIconButton(
+                onClick = onToggleQuestionCard,
+                iconId = if (showQuestionCard) R.drawable.ic_expand_down
+                else R.drawable.ic_expand_up,
+                descriptionId = R.string.toggle_question_card
+            )
+
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.background, CircleShape)
+                    .background(
+                        brush = Brush.radialGradient(
+                            0f to MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            1f to MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                        ),
+                        shape = CircleShape
+                    )
+                    .border(1.dp, extendedColors.actionBorder, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                LargeGradientIconButton(
+                    icon = ImageVector.vectorResource(
+                        if (isRecording) R.drawable.ic_stop
+                        else R.drawable.ic_mic
+                    ),
+                    contentDescription = if (isRecording) {
+                        stringResource(R.string.stop_recording)
                     } else {
-                        val hasPermission = ContextCompat.checkSelfPermission(
-                            context, Manifest.permission.RECORD_AUDIO
-                        ) == PackageManager.PERMISSION_GRANTED
-                        if (hasPermission) onStartRecording()
-                        else onShowPermissionDialog()
-                    }
-                },
-                size = 80.dp,
+                        stringResource(R.string.start_recording)
+                    },
+                    onClick = {
+                        if (isRecording) {
+                            onStopRecording()
+                        } else {
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.RECORD_AUDIO
+                            ) == PackageManager.PERMISSION_GRANTED
+                            if (hasPermission) onStartRecording()
+                            else onShowPermissionDialog()
+                        }
+                    },
+                    size = 72.dp,
+                )
+            }
+
+            PracticeIconButton(
+                onClick = onOpenSettings,
+                iconId = R.drawable.ic_more,
+                descriptionId = R.string.session_settings
             )
         }
-
-        PracticeIconButton(
-            onClick = onOpenSettings,
-            iconId = R.drawable.ic_more,
-            descriptionId = R.string.session_settings
-        )
     }
 }

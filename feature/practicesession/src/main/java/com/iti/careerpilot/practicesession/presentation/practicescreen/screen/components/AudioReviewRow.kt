@@ -39,6 +39,8 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.ut
 import androidx.compose.ui.text.font.FontWeight
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 @Composable
 fun AudioReviewRow(
     isPlayingAudio: Boolean,
@@ -53,11 +55,9 @@ fun AudioReviewRow(
     val extendedColors = CareerPilotTheme.extendedColors
 
     CareerPilotCard(
-        elevation = 8.dp,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        elevation = 6.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.90f),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
