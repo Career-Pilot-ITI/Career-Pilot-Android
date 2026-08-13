@@ -25,6 +25,8 @@
     <string name="ats_invalid_shared_link">لا يحتوي المحتوى المشارك على رابط وظيفة HTTPS صالح.</string>
     <string name="ats_cv_updated">تمت مزامنة سيرتك الذاتية وأصبحت جاهزة للمقارنة.</string>
     <string name="ats_back">رجوع</string>
+    <string name="ats_cover_letter_edit_icon">علامة تعديل خطاب التقديم للوظيفة</string>
+    <string name="ats_cover_letter_copy_icon">علامة نسخ خطاب التقديم للوظيفة</string>
     <string name="ats_retry">إعادة المحاولة</string>
     <string name="ats_open_job">فتح</string>
     <string name="ats_job_overview">نظرة عامة على الوظيفة</string>

@@ -26,6 +26,8 @@
     <string name="ats_invalid_shared_link">The shared content doesn’t contain a valid HTTPS job link.</string>
     <string name="ats_cv_updated">Your CV is synchronized and ready to compare.</string>
     <string name="ats_back">Back</string>
+    <string name="ats_cover_letter_edit_icon">Cover Letter Edit Icon</string>
+    <string name="ats_cover_letter_copy_icon">Cover Letter Copy Icon</string>
     <string name="ats_retry">Retry</string>
     <string name="ats_open_job">Open</string>
     <string name="ats_job_overview">Job Overview</string>
