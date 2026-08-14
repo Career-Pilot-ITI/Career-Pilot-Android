@@ -17,6 +17,8 @@ import com.iti.careerpilot.ats.domain.model.CvOptimizationSection
 import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 internal fun JobWorkspaceDto.toDomain() = JobWorkspace(
     id = id,
@@ -65,32 +67,40 @@ internal fun AtsScoreDto.toDomain() = AtsScore(
     missingPreferredSkills = missingPreferredSkills.nonBlankValues(),
     strengths = strengths.nonBlankValues(),
     weaknesses = weaknesses.nonBlankValues(),
-    sections = sections.map { section ->
-        AtsSectionScore(
-            section = section.section.orEmpty(),
-            score = section.score.coerceIn(SCORE_RANGE),
-            feedback = section.feedback.orEmpty(),
-        )
-    }.filter { it.section.isNotBlank() },
+    sections = sections
+        .map { section ->
+            AtsSectionScore(
+                section = section.section.orEmpty(),
+                score = section.score.coerceIn(SCORE_RANGE),
+                feedback = section.feedback.orEmpty(),
+            )
+        }
+        .filter { it.section.isNotBlank() }
+        .toImmutableList(),
     recommendations = recommendations.nonBlankValues(),
     coinCost = coinCost?.coerceAtLeast(0),
     cvScoreUpdatedAt = cvScoreUpdatedAt,
 )
 
 internal fun CvOptimizationDto.toDomain() = CvOptimization(
-    sections = sections.map { section ->
-        CvOptimizationSection(
-            name = section.name.orEmpty(),
-            score = section.score.coerceIn(SCORE_RANGE),
-            improvements = section.improvements.map { improvement ->
-                CvSectionImprovement(
-                    original = improvement.original.orEmpty(),
-                    improved = improvement.improved.orEmpty(),
-                    reason = improvement.reason.orEmpty(),
-                )
-            },
-        )
-    }.filter { it.name.isNotBlank() },
+    sections = sections
+        .map { section ->
+            CvOptimizationSection(
+                name = section.name.orEmpty(),
+                score = section.score.coerceIn(SCORE_RANGE),
+                improvements = section.improvements
+                    .map { improvement ->
+                        CvSectionImprovement(
+                            original = improvement.original.orEmpty(),
+                            improved = improvement.improved.orEmpty(),
+                            reason = improvement.reason.orEmpty(),
+                        )
+                    }
+                    .toImmutableList(),
+            )
+        }
+        .filter { it.name.isNotBlank() }
+        .toImmutableList(),
     recommendedTracks = recommendedTracks.nonBlankValues(),
     coinCost = coinCost?.coerceAtLeast(0),
 )
@@ -120,7 +130,8 @@ internal fun CoverLetterDto.toDomain() = CoverLetter(
 
 private fun String?.nonBlankOrNull() = this?.trim()?.takeIf(String::isNotEmpty)
 
-private fun List<String>.nonBlankValues() = map(String::trim).filter(String::isNotEmpty)
+private fun List<String>.nonBlankValues(): ImmutableList<String> =
+    map(String::trim).filter(String::isNotEmpty).toImmutableList()
 
 private fun String?.toAiJobType() = when (this?.uppercase()) {
     "CV_OPTIMIZE" -> AiJobType.CV_OPTIMIZE

@@ -1,5 +1,8 @@
 package com.iti.careerpilot.ats.presentation.entry.state
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class AtsEntryUiState(
     val jobUrl: String = "",
     val isUrlValid: Boolean = false,

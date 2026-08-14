@@ -19,6 +19,7 @@ import com.iti.core.model.PdfFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -106,11 +107,11 @@ private class CoverLetterRepository(
             description = "Description",
             employmentType = null,
             seniorityLevel = null,
-            requiredSkills = emptyList(),
-            preferredSkills = emptyList(),
-            responsibilities = emptyList(),
-            qualifications = emptyList(),
-            technologies = emptyList(),
+            requiredSkills = persistentListOf(),
+            preferredSkills = persistentListOf(),
+            responsibilities = persistentListOf(),
+            qualifications = persistentListOf(),
+            technologies = persistentListOf(),
             salaryMin = null,
             salaryMax = null,
             currency = null,

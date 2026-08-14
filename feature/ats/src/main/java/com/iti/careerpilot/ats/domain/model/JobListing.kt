@@ -1,5 +1,7 @@
 package com.iti.careerpilot.ats.domain.model
 
+import kotlinx.collections.immutable.ImmutableList
+
 data class JobListing(
     val id: Long,
     val title: String,
@@ -8,11 +10,11 @@ data class JobListing(
     val description: String,
     val employmentType: String?,
     val seniorityLevel: String?,
-    val requiredSkills: List<String>,
-    val preferredSkills: List<String>,
-    val responsibilities: List<String>,
-    val qualifications: List<String>,
-    val technologies: List<String>,
+    val requiredSkills: ImmutableList<String>,
+    val preferredSkills: ImmutableList<String>,
+    val responsibilities: ImmutableList<String>,
+    val qualifications: ImmutableList<String>,
+    val technologies: ImmutableList<String>,
     val salaryMin: Int?,
     val salaryMax: Int?,
     val currency: String?,

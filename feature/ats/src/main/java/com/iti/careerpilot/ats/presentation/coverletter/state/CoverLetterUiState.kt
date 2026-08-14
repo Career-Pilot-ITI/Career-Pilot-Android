@@ -1,8 +1,10 @@
 package com.iti.careerpilot.ats.presentation.coverletter.state
 
+import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.common.util.UIText
 
+@Immutable
 data class CoverLetterUiState(
     val workspace: JobWorkspace? = null,
     val generatedValue: String = "",

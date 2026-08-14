@@ -3,6 +3,7 @@ package com.iti.careerpilot.ats.presentation.util
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.common.util.UIText
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
@@ -43,11 +44,11 @@ class EmailDraftTest {
             description = "",
             employmentType = null,
             seniorityLevel = null,
-            requiredSkills = emptyList(),
-            preferredSkills = emptyList(),
-            responsibilities = emptyList(),
-            qualifications = emptyList(),
-            technologies = emptyList(),
+            requiredSkills = persistentListOf(),
+            preferredSkills = persistentListOf(),
+            responsibilities = persistentListOf(),
+            qualifications = persistentListOf(),
+            technologies = persistentListOf(),
             salaryMin = null,
             salaryMax = null,
             currency = null,

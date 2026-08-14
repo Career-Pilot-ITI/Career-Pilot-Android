@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -98,11 +99,11 @@ private val WORKSPACE = JobWorkspace(
         description = "Description",
         employmentType = null,
         seniorityLevel = null,
-        requiredSkills = emptyList(),
-        preferredSkills = emptyList(),
-        responsibilities = emptyList(),
-        qualifications = emptyList(),
-        technologies = emptyList(),
+        requiredSkills = persistentListOf(),
+        preferredSkills = persistentListOf(),
+        responsibilities = persistentListOf(),
+        qualifications = persistentListOf(),
+        technologies = persistentListOf(),
         salaryMin = null,
         salaryMax = null,
         currency = null,

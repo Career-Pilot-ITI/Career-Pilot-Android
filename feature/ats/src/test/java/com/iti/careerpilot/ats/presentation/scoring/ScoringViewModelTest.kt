@@ -27,6 +27,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -175,11 +176,11 @@ private class ScoringRepository : AtsRepository {
             description = "Description",
             employmentType = null,
             seniorityLevel = null,
-            requiredSkills = emptyList(),
-            preferredSkills = emptyList(),
-            responsibilities = emptyList(),
-            qualifications = emptyList(),
-            technologies = emptyList(),
+            requiredSkills = persistentListOf(),
+            preferredSkills = persistentListOf(),
+            responsibilities = persistentListOf(),
+            qualifications = persistentListOf(),
+            technologies = persistentListOf(),
             salaryMin = null,
             salaryMax = null,
             currency = null,
@@ -204,13 +205,13 @@ private class ScoringRepository : AtsRepository {
         val SCORE = AtsScore(
             overallScore = 78,
             matchPercentage = 78,
-            matchedSkills = listOf("Kotlin"),
-            missingRequiredSkills = emptyList(),
-            missingPreferredSkills = emptyList(),
-            strengths = emptyList(),
-            weaknesses = emptyList(),
-            sections = listOf(AtsSectionScore("Projects", 60, "Add metrics")),
-            recommendations = emptyList(),
+            matchedSkills = persistentListOf("Kotlin"),
+            missingRequiredSkills = persistentListOf(),
+            missingPreferredSkills = persistentListOf(),
+            strengths = persistentListOf(),
+            weaknesses = persistentListOf(),
+            sections = persistentListOf(AtsSectionScore("Projects", 60, "Add metrics")),
+            recommendations = persistentListOf(),
             coinCost = 4,
             cvScoreUpdatedAt = null,
         )

@@ -20,6 +20,7 @@ import com.iti.core.model.PdfFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -101,11 +102,11 @@ private val COMPLETED_JOB = PENDING_JOB.copy(
     status = AiJobStatus.COMPLETED,
     progressPercentage = 100,
     result = CvOptimization(
-        sections = listOf(
+        sections = persistentListOf(
             CvOptimizationSection(
                 name = "Experience",
                 score = 82,
-                improvements = listOf(
+                improvements = persistentListOf(
                     CvSectionImprovement(
                         original = "Worked on APIs.",
                         improved = "Delivered 12 APIs.",
@@ -114,7 +115,7 @@ private val COMPLETED_JOB = PENDING_JOB.copy(
                 ),
             ),
         ),
-        recommendedTracks = listOf("Backend Development"),
+        recommendedTracks = persistentListOf("Backend Development"),
         coinCost = 50,
     ),
 )

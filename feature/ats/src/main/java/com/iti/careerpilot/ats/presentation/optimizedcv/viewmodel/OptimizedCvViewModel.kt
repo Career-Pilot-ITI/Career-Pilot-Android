@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.collections.immutable.persistentListOf
 
 @HiltViewModel
 class OptimizedCvViewModel @Inject constructor(
@@ -54,8 +55,8 @@ class OptimizedCvViewModel @Inject constructor(
                     }
                     _state.update {
                         it.copy(
-                            sections = optimization?.sections.orEmpty(),
-                            recommendedTracks = optimization?.recommendedTracks.orEmpty(),
+                            sections = optimization?.sections ?: persistentListOf(),
+                            recommendedTracks = optimization?.recommendedTracks ?: persistentListOf(),
                             coinCost = optimization?.coinCost,
                             isLoading = false,
                             error = error,

@@ -1,15 +1,17 @@
 package com.iti.careerpilot.ats.domain.model
 
+import kotlinx.collections.immutable.ImmutableList
+
 data class AtsScore(
     val overallScore: Int,
     val matchPercentage: Int,
-    val matchedSkills: List<String>,
-    val missingRequiredSkills: List<String>,
-    val missingPreferredSkills: List<String>,
-    val strengths: List<String>,
-    val weaknesses: List<String>,
-    val sections: List<AtsSectionScore>,
-    val recommendations: List<String>,
+    val matchedSkills: ImmutableList<String>,
+    val missingRequiredSkills: ImmutableList<String>,
+    val missingPreferredSkills: ImmutableList<String>,
+    val strengths: ImmutableList<String>,
+    val weaknesses: ImmutableList<String>,
+    val sections: ImmutableList<AtsSectionScore>,
+    val recommendations: ImmutableList<String>,
     val coinCost: Int?,
     val cvScoreUpdatedAt: String?,
 )

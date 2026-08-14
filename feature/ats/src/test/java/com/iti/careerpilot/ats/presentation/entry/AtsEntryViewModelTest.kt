@@ -23,6 +23,7 @@ import com.iti.core.model.PdfFileMetadata
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -158,11 +159,11 @@ private class FakeAtsRepository : AtsRepository {
                 description = "Description",
                 employmentType = null,
                 seniorityLevel = null,
-                requiredSkills = emptyList(),
-                preferredSkills = emptyList(),
-                responsibilities = emptyList(),
-                qualifications = emptyList(),
-                technologies = emptyList(),
+                requiredSkills = persistentListOf(),
+                preferredSkills = persistentListOf(),
+                responsibilities = persistentListOf(),
+                qualifications = persistentListOf(),
+                technologies = persistentListOf(),
                 salaryMin = null,
                 salaryMax = null,
                 currency = null,
