@@ -48,6 +48,6 @@ class FirebaseAiContentGenerator @Inject constructor(
     }
 
     companion object {
-        const val MODEL_NAME = "gemini-3.6-flash"
+        const val MODEL_NAME = "gemini-3.1-flash-lite"
     }
 }
