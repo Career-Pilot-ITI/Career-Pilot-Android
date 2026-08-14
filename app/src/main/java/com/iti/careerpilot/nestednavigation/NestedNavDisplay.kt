@@ -8,9 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -19,20 +18,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterRoot
-import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
-import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
-import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
-import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 import com.iti.common.model.ProfileEditSection
-import com.iti.careerpilot.optimization.PendingCvOptimization
-
-import androidx.compose.ui.graphics.Color
 
 @Composable
 fun NestedNavDisplay(
@@ -46,42 +37,10 @@ fun NestedNavDisplay(
     openEditProfile: (ProfileEditSection) -> Unit,
     openReadyToPractice: (trackId: Long, trackName: String, workspaceId: Long?) -> Unit,
     openInterviews: () -> Unit,
-    pendingSharedText: String?,
-    onSharedTextConsumed: () -> Unit,
-    pendingCvOptimization: PendingCvOptimization?,
-    onCvOptimizationConsumed: () -> Unit,
+    openAts: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
-    val uriHandler = LocalUriHandler.current
-
-    LaunchedEffect(pendingSharedText) {
-        if (pendingSharedText != null) {
-            nestedBackStack.apply {
-                clear()
-                add(Route.NestedNav.Home)
-                add(Route.NestedNav.Ats)
-            }
-        }
-    }
-
-    LaunchedEffect(pendingCvOptimization) {
-        pendingCvOptimization?.let { optimization ->
-            nestedBackStack.apply {
-                clear()
-                add(Route.NestedNav.Home)
-                add(Route.NestedNav.Ats)
-                add(Route.NestedNav.AtsJobDetails(optimization.workspaceId))
-                add(
-                    Route.NestedNav.AtsOptimizedCv(
-                        workspaceId = optimization.workspaceId,
-                        jobId = optimization.jobId,
-                    ),
-                )
-            }
-            onCvOptimizationConsumed()
-        }
-    }
 
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
@@ -151,64 +110,12 @@ fun NestedNavDisplay(
                                 navigateSingleTop(Route.NestedNav.SessionHistory)
                             }
                         },
-                        openAts = {
-                            nestedBackStack.navigateSingleTop(Route.NestedNav.Ats)
-                        },
+                        openAts = openAts,
                     )
                 }
                 entry<Route.NestedNav.SessionHistory> {
                     SessionHistoryRoot(
                         openSessionDetails = openSessionDetails,
-                    )
-                }
-                entry<Route.NestedNav.Ats> {
-                    AtsEntryRoot(
-                        initialSharedText = pendingSharedText,
-                        onSharedTextConsumed = onSharedTextConsumed,
-                        onJobDetailsRequested = { workspaceId ->
-                            nestedBackStack.navigateSingleTop(
-                                Route.NestedNav.AtsJobDetails(workspaceId),
-                            )
-                        },
-                    )
-                }
-                entry<Route.NestedNav.AtsJobDetails> { route ->
-                    JobDetailsRoot(
-                        workspaceId = route.workspaceId,
-                        onBack = { nestedBackStack.removeLastOrNull() },
-                        openScore = { workspaceId ->
-                            nestedBackStack.navigateSingleTop(
-                                Route.NestedNav.AtsScore(workspaceId),
-                            )
-                        },
-                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
-                    )
-                }
-                entry<Route.NestedNav.AtsScore> { route ->
-                    ScoringRoot(
-                        workspaceId = route.workspaceId,
-                        onBack = { nestedBackStack.removeLastOrNull() },
-                        openCoinsPaywall = { openPaywall(true) },
-                        openCoverLetter = { workspaceId ->
-                            nestedBackStack.navigateSingleTop(
-                                Route.NestedNav.AtsCoverLetter(workspaceId),
-                            )
-                        },
-                        openReadyToPractice = openReadyToPractice,
-                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
-                    )
-                }
-                entry<Route.NestedNav.AtsCoverLetter> { route ->
-                    CoverLetterRoot(
-                        workspaceId = route.workspaceId,
-                        onBack = { nestedBackStack.removeLastOrNull() },
-                        openCoinsPaywall = { openPaywall(true) },
-                    )
-                }
-                entry<Route.NestedNav.AtsOptimizedCv> { route ->
-                    OptimizedCvRoot(
-                        jobId = route.jobId,
-                        onBack = { nestedBackStack.removeLastOrNull() },
                     )
                 }
                 entry<Route.NestedNav.Profile> {

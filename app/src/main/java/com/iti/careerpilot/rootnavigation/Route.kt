@@ -25,27 +25,27 @@ sealed interface Route : NavKey {
         data object SessionHistory : Route
 
         @Serializable
-        data object Ats : Route
-
-        @Serializable
-        data class AtsJobDetails(val workspaceId: Long) : Route
-
-        @Serializable
-        data class AtsScore(val workspaceId: Long) : Route
-
-        @Serializable
-        data class AtsCoverLetter(val workspaceId: Long) : Route
-
-        @Serializable
-        data class AtsOptimizedCv(
-            val workspaceId: Long,
-            val jobId: Long,
-        ) : Route
-
-        @Serializable
         data object Profile : Route
 
     }
+
+    @Serializable
+    data object Ats : Route
+
+    @Serializable
+    data class AtsJobDetails(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsScore(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsCoverLetter(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsOptimizedCv(
+        val workspaceId: Long,
+        val jobId: Long,
+    ) : Route
 
     @Serializable
     data class SessionDetails(val id: Long) : Route

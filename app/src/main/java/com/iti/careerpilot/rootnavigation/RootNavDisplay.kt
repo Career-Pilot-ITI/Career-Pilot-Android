@@ -14,11 +14,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterRoot
+import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
+import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
+import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
+import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
@@ -29,18 +35,17 @@ import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
-import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.onboarding.navigation.OnboardingPagerScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collectLatest
-
 
 @Composable
 fun RootNavDisplay(
@@ -65,6 +70,7 @@ fun RootNavDisplay(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val currentRootRoute = rootBackStack.lastOrNull()
 
     LaunchedEffect(pendingSharedText, isLoggedIn, currentRootRoute) {
@@ -75,10 +81,14 @@ fun RootNavDisplay(
         if (
             pendingSharedText != null &&
             isLoggedIn == true &&
-            currentRootRoute != Route.NestedNav &&
+            currentRootRoute != Route.Ats &&
             !authOrSetupRoute
         ) {
-            rootBackStack.replaceAll(Route.NestedNav)
+            rootBackStack.apply {
+                clear()
+                add(Route.NestedNav)
+                add(Route.Ats)
+            }
         }
     }
 
@@ -90,10 +100,26 @@ fun RootNavDisplay(
         if (
             pendingCvOptimization != null &&
             isLoggedIn == true &&
-            currentRootRoute != Route.NestedNav &&
             !authOrSetupRoute
         ) {
-            rootBackStack.replaceAll(Route.NestedNav)
+            val isCurrentResult = currentRootRoute is Route.AtsOptimizedCv &&
+                currentRootRoute.workspaceId == pendingCvOptimization.workspaceId &&
+                currentRootRoute.jobId == pendingCvOptimization.jobId
+            if (!isCurrentResult) {
+                rootBackStack.apply {
+                    clear()
+                    add(Route.NestedNav)
+                    add(Route.Ats)
+                    add(Route.AtsJobDetails(pendingCvOptimization.workspaceId))
+                    add(
+                        Route.AtsOptimizedCv(
+                            workspaceId = pendingCvOptimization.workspaceId,
+                            jobId = pendingCvOptimization.jobId,
+                        ),
+                    )
+                }
+            }
+            onCvOptimizationConsumed()
         }
     }
 
@@ -240,6 +266,9 @@ fun RootNavDisplay(
                         openInterviews = {
                             rootBackStack.navigateSingleTop(Route.Interviews)
                         },
+                        openAts = {
+                            rootBackStack.navigateSingleTop(Route.Ats)
+                        },
                         logout = {
                             rootBackStack.apply {
                                 clear()
@@ -274,10 +303,62 @@ fun RootNavDisplay(
                                 Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
-                        pendingSharedText = pendingSharedText,
+                    )
+                }
+                entry<Route.Ats> {
+                    AtsEntryRoot(
+                        initialSharedText = pendingSharedText,
                         onSharedTextConsumed = onSharedTextConsumed,
-                        pendingCvOptimization = pendingCvOptimization,
-                        onCvOptimizationConsumed = onCvOptimizationConsumed,
+                        onJobDetailsRequested = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsJobDetails(workspaceId))
+                        },
+                    )
+                }
+                entry<Route.AtsJobDetails> { route ->
+                    JobDetailsRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsJobDetails>() },
+                        openScore = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsScore(workspaceId))
+                        },
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
+                    )
+                }
+                entry<Route.AtsScore> { route ->
+                    ScoringRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsScore>() },
+                        openCoinsPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = true))
+                        },
+                        openCoverLetter = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsCoverLetter(workspaceId))
+                        },
+                        openReadyToPractice = { trackId, trackName, workspaceId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                    workspaceId = workspaceId,
+                                ),
+                            )
+                        },
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
+                    )
+                }
+                entry<Route.AtsCoverLetter> { route ->
+                    CoverLetterRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsCoverLetter>() },
+                        openCoinsPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = true))
+                        },
+                    )
+                }
+                entry<Route.AtsOptimizedCv> { route ->
+                    OptimizedCvRoot(
+                        jobId = route.jobId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsOptimizedCv>() },
                     )
                 }
                 entry<Route.Onboarding> {
