@@ -2,6 +2,9 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,7 +53,7 @@ fun OptimizeCvActionItem(
             enabled = !isStartingOptimization,
             leadingContent = {
                 Icon(
-                    painter = painterResource(R.drawable.ic_lightbulb_outline),
+                    imageVector = Icons.Outlined.Lightbulb,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
                 )
