@@ -24,13 +24,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class CvOptimizationService : Service() {
     @Inject lateinit var getAiJob: GetAiJobUseCase
-    @Inject @field:Dispatcher(IO) lateinit var ioDispatcher: CoroutineDispatcher
+    @Inject @Dispatcher(IO) lateinit var ioDispatcher: CoroutineDispatcher
 
     private val serviceJob = SupervisorJob()
     private lateinit var serviceScope: CoroutineScope
