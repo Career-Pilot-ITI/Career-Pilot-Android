@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -139,7 +140,7 @@ fun RootNavDisplay(
                 )
                 request.complete(result)
             } catch (cancellation: CancellationException) {
-                request.complete(androidx.compose.material3.SnackbarResult.Dismissed)
+                request.complete(SnackbarResult.Dismissed)
                 throw cancellation
             }
         }
