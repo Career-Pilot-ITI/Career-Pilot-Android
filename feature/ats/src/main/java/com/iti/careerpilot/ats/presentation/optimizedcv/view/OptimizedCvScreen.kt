@@ -2,7 +2,10 @@ package com.iti.careerpilot.ats.presentation.optimizedcv.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
@@ -40,6 +43,7 @@ fun OptimizedCvRoot(
         stateProvider = stateProvider,
         onAction = viewModel::onAction,
         onBack = onBack,
+        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
 }
 
