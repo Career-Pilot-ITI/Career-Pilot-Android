@@ -34,7 +34,7 @@ class AtsEntryViewModel @Inject constructor(
     private val _state = MutableStateFlow(AtsEntryUiState())
     val state = _state.asStateFlow()
 
-    private val effectChannel = Channel<AtsEntryEffect>(Channel.Factory.BUFFERED)
+    private val effectChannel = Channel<AtsEntryEffect>(Channel.BUFFERED)
     val effects = effectChannel.receiveAsFlow()
 
     private var activeOperation: Job? = null
