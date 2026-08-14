@@ -27,8 +27,6 @@ class AiModuleConventionPlugin : Plugin<Project> {
             add("implementation", libs.findLibrary("firebase-ai").get())
             add("implementation", libs.findLibrary("firebase-appcheck-playintegrity").get())
             add("implementation", libs.findLibrary("firebase-appcheck-debug").get())
-            add("implementation", libs.findLibrary("firebase-config").get())
-            add("implementation", libs.findLibrary("firebase-common").get())
             add("implementation", project(":core:model"))
             add("implementation", project(":core:common"))
         }

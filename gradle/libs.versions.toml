@@ -154,8 +154,6 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
-firebase-config = { group = "com.google.firebase", name = "firebase-config" }
-firebase-common = { group = "com.google.firebase", name = "firebase-common" }
 
 
 [plugins]

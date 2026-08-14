@@ -21,7 +21,6 @@ import javax.inject.Singleton
 class EvaluateBodyLanguageUseCase @Inject constructor(
     private val evaluator: BodyLanguageAiEvaluator,
     private val cache: InMemorySessionCache,
-    private val featureToggle: BodyLanguageAiFeatureToggle,
 ) {
 
     suspend operator fun invoke(
@@ -33,8 +32,7 @@ class EvaluateBodyLanguageUseCase @Inject constructor(
             return cached
         }
 
-        val isAiEnabled = featureToggle.isAiEvaluationEnabled()
-        val result = evaluator.evaluate(metrics, isAiEnabled)
+        val result = evaluator.evaluate(metrics)
         cache.put(
             sessionId = sessionId,
             evaluation = result.first,

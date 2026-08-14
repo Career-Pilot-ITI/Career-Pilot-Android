@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class BodyLanguageAiEvaluator @Inject constructor(
@@ -63,7 +64,7 @@ class BodyLanguageAiEvaluator @Inject constructor(
         }
 
         try {
-            withTimeout(timeoutMillis) {
+            withTimeout(timeoutMillis.milliseconds) {
                 val prompt = BodyLanguagePromptBuilder.buildPrompt(metrics)
                 val responseText = contentGenerator.generateContent(prompt)
 

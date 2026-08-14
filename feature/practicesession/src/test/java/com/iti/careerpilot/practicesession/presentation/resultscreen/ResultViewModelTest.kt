@@ -2,7 +2,6 @@ package com.iti.careerpilot.practicesession.presentation.resultscreen
 
 import androidx.lifecycle.SavedStateHandle
 import com.iti.careerpilot.ai.cache.InMemorySessionCache
-import com.iti.careerpilot.ai.domain.BodyLanguageAiFeatureToggle
 import com.iti.careerpilot.ai.domain.EvaluateBodyLanguageUseCase
 import com.iti.careerpilot.ai.evaluator.BodyLanguageAiEvaluator
 import com.iti.careerpilot.ai.fallback.LocalBodyLanguageFallbackEngine
@@ -108,10 +107,7 @@ class ResultViewModelTest {
             json = json,
             ioDispatcher = testDispatcher
         )
-        val featureToggle = object : BodyLanguageAiFeatureToggle {
-            override fun isAiEvaluationEnabled(): Boolean = false
-        }
-        return EvaluateBodyLanguageUseCase(evaluator, sessionCache, featureToggle)
+        return EvaluateBodyLanguageUseCase(evaluator, sessionCache)
     }
 
     @Test
