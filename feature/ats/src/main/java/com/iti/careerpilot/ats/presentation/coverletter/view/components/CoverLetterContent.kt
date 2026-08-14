@@ -10,8 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
+import com.iti.careerpilot.ats.presentation.components.RecommendationsCard
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
@@ -69,8 +71,14 @@ internal fun CoverLetterContent(
                     onAction = onAction,
                 )
             }
-            approachTips?.takeIf(String::isNotBlank)?.let { tips ->
-                item { ApproachTipsCard(tips = tips) }
+            if (approachTips.isNotEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.ats_approach_tips),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                item { RecommendationsCard(values = approachTips) }
             }
             coinCost?.let { cost ->
                 item { Text(pluralStringResource(R.plurals.ats_coins_used, cost, cost)) }

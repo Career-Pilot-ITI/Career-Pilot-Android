@@ -21,6 +21,7 @@ import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
+import com.iti.careerpilot.ats.presentation.components.RecommendationsCard
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus

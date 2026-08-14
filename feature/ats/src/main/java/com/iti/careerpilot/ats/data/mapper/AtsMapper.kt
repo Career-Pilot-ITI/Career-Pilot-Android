@@ -18,6 +18,7 @@ import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 internal fun JobWorkspaceDto.toDomain() = JobWorkspace(
@@ -124,7 +125,7 @@ internal fun AiJobDto.toDomain(): AiJob {
 
 internal fun CoverLetterDto.toDomain() = CoverLetter(
     body = coverLetter.orEmpty(),
-    approachTips = approachTips.nonBlankOrNull(),
+    approachTips = approachTips.toApproachTips(),
     coinCost = coinCost?.coerceAtLeast(0),
 )
 
@@ -132,6 +133,16 @@ private fun String?.nonBlankOrNull() = this?.trim()?.takeIf(String::isNotEmpty)
 
 private fun List<String>.nonBlankValues(): ImmutableList<String> =
     map(String::trim).filter(String::isNotEmpty).toImmutableList()
+
+private fun String?.toApproachTips(): ImmutableList<String> {
+    val normalized = nonBlankOrNull() ?: return persistentListOf()
+    val numberedTips = NUMBERED_TIP_PATTERN.findAll(normalized)
+        .map { match -> match.groupValues[1].trim() }
+        .filter(String::isNotEmpty)
+        .toImmutableList()
+    return numberedTips.takeIf { it.isNotEmpty() }
+        ?: persistentListOf(normalized)
+}
 
 private fun String?.toAiJobType() = when (this?.uppercase()) {
     "CV_OPTIMIZE" -> AiJobType.CV_OPTIMIZE
@@ -147,3 +158,6 @@ private fun String?.toAiJobStatus() = when (this?.uppercase()) {
 }
 
 private val SCORE_RANGE = 0..100
+private val NUMBERED_TIP_PATTERN = Regex(
+    pattern = """(?s)(?:^|\r?\n)\s*\d+[.)]\s*(.*?)(?=(?:\r?\n\s*\d+[.)]\s*)|\z)""",
+)

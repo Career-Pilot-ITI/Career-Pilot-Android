@@ -16,10 +16,10 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.model.PdfFile
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -91,7 +91,7 @@ private class CoverLetterRepository(
         return CareerPilotResult.Success(
             CoverLetter(
                 body = "Generated letter",
-                approachTips = null,
+                approachTips = persistentListOf(),
                 coinCost = 2,
             ),
         )

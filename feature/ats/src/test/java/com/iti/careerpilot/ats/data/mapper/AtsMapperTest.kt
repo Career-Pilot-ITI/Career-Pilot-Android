@@ -4,6 +4,7 @@ import com.iti.careerpilot.ats.data.dto.AtsScoreDto
 import com.iti.careerpilot.ats.data.dto.AtsApiResponseDto
 import com.iti.careerpilot.ats.data.dto.AiJobDto
 import com.iti.careerpilot.ats.data.dto.AtsSectionScoreDto
+import com.iti.careerpilot.ats.data.dto.CoverLetterDto
 import com.iti.careerpilot.ats.data.dto.JobDto
 import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
 import kotlinx.serialization.json.Json
@@ -143,5 +144,35 @@ class AtsMapperTest {
         assertEquals(emptyList<Any>(), optimization.sections.last().improvements)
         assertEquals(listOf("Backend Development"), optimization.recommendedTracks)
         assertEquals(50, optimization.coinCost)
+    }
+
+    @Test
+    fun `cover letter mapping splits numbered approach tips`() {
+        val mapped = CoverLetterDto(
+            coverLetter = "Generated letter",
+            approachTips = """
+                1. Add a measurable product outcome.
+                2. Mention the relevant architecture work.
+                3. Contact the hiring manager directly.
+            """.trimIndent(),
+        ).toDomain()
+
+        assertEquals(
+            listOf(
+                "Add a measurable product outcome.",
+                "Mention the relevant architecture work.",
+                "Contact the hiring manager directly.",
+            ),
+            mapped.approachTips,
+        )
+    }
+
+    @Test
+    fun `cover letter mapping preserves unnumbered approach tip as one item`() {
+        val mapped = CoverLetterDto(
+            approachTips = " Add one recent product impact metric. ",
+        ).toDomain()
+
+        assertEquals(listOf("Add one recent product impact metric."), mapped.approachTips)
     }
 }
