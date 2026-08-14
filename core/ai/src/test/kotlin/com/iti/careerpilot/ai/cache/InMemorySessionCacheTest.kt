@@ -1,6 +1,6 @@
 package com.iti.careerpilot.ai.cache
 
-import com.iti.careerpilot.ai.testing.FakeBodyLanguageData
+import com.iti.careerpilot.ai.FakeBodyLanguageData
 import com.iti.core.model.bodylanguage.FallbackReason
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

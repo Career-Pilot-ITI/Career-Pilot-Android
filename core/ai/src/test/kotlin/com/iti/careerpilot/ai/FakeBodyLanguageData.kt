@@ -1,4 +1,4 @@
-package com.iti.careerpilot.ai.testing
+package com.iti.careerpilot.ai
 
 import com.iti.core.model.bodylanguage.BodyLanguageEvaluation
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
@@ -30,8 +30,16 @@ object FakeBodyLanguageData {
         fidgetScore = 0.15f,
         keyMoments = listOf(
             KeyMoment(timestampMs = 15_000L, type = KeyMomentType.SMILE_PEAK, intensity = 0.85f),
-            KeyMoment(timestampMs = 45_000L, type = KeyMomentType.EYE_CONTACT_LOST, durationMs = 3_000L),
-            KeyMoment(timestampMs = 75_000L, type = KeyMomentType.HAND_FIDGET_SPIKE, intensity = 0.7f),
+            KeyMoment(
+                timestampMs = 45_000L,
+                type = KeyMomentType.EYE_CONTACT_LOST,
+                durationMs = 3_000L
+            ),
+            KeyMoment(
+                timestampMs = 75_000L,
+                type = KeyMomentType.HAND_FIDGET_SPIKE,
+                intensity = 0.7f
+            ),
         ),
     )
 

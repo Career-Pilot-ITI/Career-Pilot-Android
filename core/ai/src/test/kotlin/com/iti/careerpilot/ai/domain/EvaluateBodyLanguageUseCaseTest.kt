@@ -4,7 +4,7 @@ import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.ai.evaluator.AiContentGenerator
 import com.iti.careerpilot.ai.evaluator.BodyLanguageAiEvaluator
 import com.iti.careerpilot.ai.fallback.LocalBodyLanguageFallbackEngine
-import com.iti.careerpilot.ai.testing.FakeBodyLanguageData
+import com.iti.careerpilot.ai.FakeBodyLanguageData
 import com.iti.core.model.bodylanguage.FallbackReason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest

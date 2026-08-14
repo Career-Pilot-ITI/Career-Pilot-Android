@@ -1,7 +1,7 @@
 package com.iti.careerpilot.ai.evaluator
 
 import com.iti.careerpilot.ai.fallback.LocalBodyLanguageFallbackEngine
-import com.iti.careerpilot.ai.testing.FakeBodyLanguageData
+import com.iti.careerpilot.ai.FakeBodyLanguageData
 import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import com.iti.core.model.bodylanguage.FallbackReason
 import kotlinx.coroutines.Dispatchers
