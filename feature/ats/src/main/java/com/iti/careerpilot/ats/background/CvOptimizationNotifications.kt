@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.iti.careerpilot.ats.R
@@ -15,7 +16,6 @@ object CvOptimizationNotifications {
     internal const val EXTRA_WORKSPACE_ID = "workspace_id"
     internal const val EXTRA_JOB_ID = "job_id"
     internal const val EXTRA_SUCCESS = "success"
-
     private const val PROGRESS_CHANNEL_ID = "cv_optimization_progress"
     private const val RESULT_CHANNEL_ID = "cv_optimization_results"
     private const val PROGRESS_NOTIFICATION_BASE = 20_000
@@ -49,7 +49,13 @@ object CvOptimizationNotifications {
             context.getString(R.string.ats_cv_optimization_processing)
         }
         return NotificationCompat.Builder(context, PROGRESS_CHANNEL_ID)
-            .setSmallIcon(context.applicationInfo.icon)
+            .setSmallIcon(R.drawable.ic_cv_optimization_notification)
+            .setLargeIcon(
+                BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.ic_launcher_foreground_artwork,
+                ),
+            )
             .setContentTitle(context.getString(R.string.ats_cv_optimization_processing_title))
             .setContentText(
                 context.getString(
@@ -71,7 +77,13 @@ object CvOptimizationNotifications {
         jobId: Long,
         success: Boolean,
     ): Notification = NotificationCompat.Builder(context, RESULT_CHANNEL_ID)
-        .setSmallIcon(context.applicationInfo.icon)
+        .setSmallIcon(R.drawable.ic_cv_optimization_notification)
+        .setLargeIcon(
+            BitmapFactory.decodeResource(
+                context.resources,
+                R.drawable.ic_launcher_foreground_artwork,
+            ),
+        )
         .setContentTitle(
             context.getString(
                 if (success) {

@@ -2,9 +2,6 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,7 +32,7 @@ fun PracticeActionItem(
         variant = ButtonVariant.OUTLINE,
         leadingContent = {
             Icon(
-                imageVector = Icons.Outlined.Mic,
+                painter = painterResource(R.drawable.ic_record_outline),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
             )
