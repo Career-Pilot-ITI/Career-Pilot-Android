@@ -29,7 +29,6 @@ android {
 
     androidResources {
         noCompress.add("task")
-        noCompress.add("riv")
     }
 }
 
@@ -61,11 +60,9 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
     implementation(project(":feature:home"))
-    implementation(project(":core:ai"))
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
-    implementation(project(":core:bodylanguage"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:practicesession"))
     implementation(project(":feature:reports"))
