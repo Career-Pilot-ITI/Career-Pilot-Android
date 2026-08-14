@@ -2,8 +2,10 @@ package com.iti.careerpilot.ats.data.remote
 
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.core.model.PdfFile
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -11,15 +13,40 @@ class FakeAtsRemoteDataSourceTest {
     private val source = FakeAtsRemoteDataSource()
 
     @Test
-    fun `fake source exposes all documented v1 operations for one workspace`() = runTest {
-        val imported = source.importJob("https://example.com/job")
+    fun `fake source completes the full ATS workflow`() = runTest {
+        val uploadProgress = mutableListOf<Int>()
+        val replacedCv = source.replaceCurrentCv(
+            file = PdfFile(
+                name = "resume.pdf",
+                mimeType = "application/pdf",
+                sizeBytes = 3,
+                bytes = byteArrayOf(1, 2, 3),
+            ),
+            onProgress = uploadProgress::add,
+        )
+        val imported = source.importJob("https://www.linkedin.com/jobs/view/123456789")
         val workspaceId = (imported as CareerPilotResult.Success).data.id
 
-        assertTrue(source.getWorkspace(workspaceId) is CareerPilotResult.Success)
-        assertTrue(source.scoreCv(workspaceId) is CareerPilotResult.Success)
+        assertTrue(replacedCv is CareerPilotResult.Success)
+        assertEquals(listOf(35, 100), uploadProgress)
+        val workspace = source.getWorkspace(workspaceId) as CareerPilotResult.Success
+        assertEquals("Senior Frontend Engineer", workspace.data.job.title)
+
+        val score = source.scoreCv(workspaceId) as CareerPilotResult.Success
+        assertTrue(score.data.sections.isNotEmpty())
+        assertTrue(score.data.recommendations.isNotEmpty())
+
         val optimization = source.optimizeCv(workspaceId) as CareerPilotResult.Success
-        assertTrue(source.getAiJob(optimization.data.id) is CareerPilotResult.Success)
-        assertTrue(source.generateCoverLetter(workspaceId) is CareerPilotResult.Success)
+        assertEquals("PENDING", optimization.data.status)
+        val completedJob = source.getAiJob(optimization.data.id) as CareerPilotResult.Success
+        assertEquals("COMPLETED", completedJob.data.status)
+        val result = completedJob.data.result ?: error("Expected fake CV optimization result")
+        assertTrue(result.sections.first().improvements.isNotEmpty())
+        assertTrue(result.sections.last().improvements.isEmpty())
+
+        val coverLetter = source.generateCoverLetter(workspaceId) as CareerPilotResult.Success
+        assertTrue(coverLetter.data.coverLetter.orEmpty().isNotBlank())
+        assertTrue(coverLetter.data.approachTips.orEmpty().contains("2."))
     }
 
     @Test
@@ -27,5 +54,21 @@ class FakeAtsRemoteDataSourceTest {
         val result = source.getWorkspace(Long.MAX_VALUE)
 
         assertEquals(NetworkError.NOT_FOUND, (result as CareerPilotResult.Error).error)
+    }
+
+    @Test
+    fun `fake source rejects an empty replacement CV`() = runTest {
+        val result = source.replaceCurrentCv(
+            file = PdfFile(
+                name = "empty.pdf",
+                mimeType = "application/pdf",
+                sizeBytes = 0,
+                bytes = byteArrayOf(),
+            ),
+            onProgress = {},
+        )
+
+        assertFalse(result is CareerPilotResult.Success)
+        assertEquals(NetworkError.BAD_REQUEST, (result as CareerPilotResult.Error).error)
     }
 }

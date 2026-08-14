@@ -10,19 +10,22 @@ class JobUrlParserTest {
     @Test
     fun `extracts first valid https URL and preserves query and fragment`() {
         val result = JobUrlParser.firstValidHttpsUrl(
-            "Apply here: https://jobs.example.com/view/42?source=share#details then continue",
+            "Apply here: https://www.linkedin.com/jobs/view/android-engineer-123456789?source=share#details then continue",
         )
 
-        assertEquals("https://jobs.example.com/view/42?source=share#details", result)
+        assertEquals(
+            "https://www.linkedin.com/jobs/view/android-engineer-123456789?source=share#details",
+            result,
+        )
     }
 
     @Test
     fun `skips invalid candidate and returns the next valid URL`() {
         val result = JobUrlParser.firstValidHttpsUrl(
-            "https://localhost/job https://jobs.example.com/job",
+            "https://localhost/job https://www.linkedin.com/jobs/view/123456789",
         )
 
-        assertEquals("https://jobs.example.com/job", result)
+        assertEquals("https://www.linkedin.com/jobs/view/123456789", result)
     }
 
     @Test
@@ -32,7 +35,12 @@ class JobUrlParserTest {
         assertFalse(JobUrlParser.isValidHttpsUrl("https://localhost/1"))
         assertFalse(JobUrlParser.isValidHttpsUrl("https://127.0.0.1/1"))
         assertFalse(JobUrlParser.isValidHttpsUrl("https:///missing-host"))
-        assertTrue(JobUrlParser.isValidHttpsUrl("https://jobs.example.com/1?x=1#apply"))
+        assertFalse(JobUrlParser.isValidHttpsUrl("https://jobs.example.com/1?x=1#apply"))
+        assertTrue(
+            JobUrlParser.isValidHttpsUrl(
+                "https://www.linkedin.com/jobs/view/android-engineer-123456789?x=1#apply",
+            ),
+        )
     }
 
     @Test

@@ -17,7 +17,6 @@ import com.iti.common.result.CareerPilotResult
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -54,7 +53,7 @@ class CvOptimizationService : Service() {
 
         pollingJobs.computeIfAbsent(jobId) {
             serviceScope.launch {
-                delay(POLL_INTERVAL)
+                delay(CvOptimizationPollingPolicy.interval)
                 pollUntilTerminal(workspaceId, jobId)
             }.also { job ->
                 job.invokeOnCompletion { pollingJobs.remove(jobId, job) }
@@ -81,7 +80,7 @@ class CvOptimizationService : Service() {
                     AiJobStatus.PROCESSING,
                     -> {
                         updateProgress(jobId, result.data)
-                        delay(POLL_INTERVAL)
+                        delay(CvOptimizationPollingPolicy.interval)
                     }
                     AiJobStatus.COMPLETED -> {
                         finishJob(
@@ -100,7 +99,7 @@ class CvOptimizationService : Service() {
                 }
                 is CareerPilotResult.Error -> if (result.error.isRetryable()) {
                     updateWaitingForNetwork(jobId)
-                    delay(POLL_INTERVAL)
+                    delay(CvOptimizationPollingPolicy.interval)
                 } else {
                     finishJob(workspaceId, jobId, success = false)
                     return
@@ -175,7 +174,6 @@ class CvOptimizationService : Service() {
         private const val EXTRA_PROGRESS = "progress"
         private const val EXTRA_CURRENT_STEP = "current_step"
         private const val INVALID_ID = -1L
-        private val POLL_INTERVAL = 2.minutes
 
         fun start(context: Context, job: AiJob) {
             val intent = Intent(context, CvOptimizationService::class.java)

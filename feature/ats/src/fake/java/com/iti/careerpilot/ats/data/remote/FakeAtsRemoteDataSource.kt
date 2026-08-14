@@ -22,13 +22,13 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
     ): CareerPilotResult<String, NetworkError> {
         if (file.bytes.isEmpty()) return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
         onProgress(35)
-        fakeDelay()
+        fakeAtsDelay()
         onProgress(100)
         return CareerPilotResult.Success("https://cdn.careerpilot.test/cv/${file.name}")
     }
 
     override suspend fun importJob(url: String): CareerPilotResult<JobWorkspaceDto, NetworkError> {
-        fakeDelay()
+        fakeAtsDelay()
         return if (url.startsWith("https://")) CareerPilotResult.Success(WORKSPACE)
         else CareerPilotResult.Error(NetworkError.BAD_REQUEST)
     }
@@ -40,7 +40,7 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
     override suspend fun optimizeCv(workspaceId: Long) = workspaceResult(workspaceId, PENDING_OPTIMIZATION)
 
     override suspend fun getAiJob(jobId: Long): CareerPilotResult<AiJobDto, NetworkError> {
-        fakeDelay()
+        fakeAtsDelay()
         return if (jobId == COMPLETED_OPTIMIZATION.id) {
             CareerPilotResult.Success(COMPLETED_OPTIMIZATION)
         } else {
@@ -54,7 +54,7 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
         workspaceId: Long,
         value: T,
     ): CareerPilotResult<T, NetworkError> {
-        fakeDelay()
+        fakeAtsDelay()
         return if (workspaceId == WORKSPACE.id) CareerPilotResult.Success(value)
         else CareerPilotResult.Error(NetworkError.NOT_FOUND)
     }
@@ -76,7 +76,7 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
                 responsibilities = listOf("Lead delivery of user-facing features"),
                 qualifications = listOf("5+ years of relevant experience"),
                 experienceYears = 5,
-                sourceUrl = "https://example.com/jobs/11",
+                sourceUrl = "https://www.linkedin.com/jobs/view/123456789",
                 sourceType = "DIRECT",
             ),
             status = "IMPORTED",
@@ -134,8 +134,20 @@ class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
         )
         val COVER_LETTER = CoverLetterDto(
             coverLetter = "Dear Hiring Manager,\n\nI am excited to apply for the Senior Frontend Engineer role.",
-            approachTips = "Add one recent product impact metric before sending.",
+            approachTips = """
+                1. Add one recent product impact metric before sending.
+                2. Mention the architecture decisions behind your strongest project.
+                3. Contact the hiring manager with a short, role-specific message.
+            """.trimIndent(),
             coinCost = 2,
         )
+
+        const val FAKE_DELAY_MIN_MS = 50L
+        const val FAKE_DELAY_MAX_MS = 150L
     }
+
+    private suspend fun fakeAtsDelay() = fakeDelay(
+        min = FAKE_DELAY_MIN_MS,
+        max = FAKE_DELAY_MAX_MS,
+    )
 }

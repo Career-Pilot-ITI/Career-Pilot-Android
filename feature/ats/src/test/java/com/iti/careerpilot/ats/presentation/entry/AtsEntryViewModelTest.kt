@@ -20,23 +20,23 @@ import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.model.PdfFile
 import com.iti.core.model.PdfFileMetadata
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AtsEntryViewModelTest {
@@ -59,7 +59,9 @@ class AtsEntryViewModelTest {
         viewModel.onAction(AtsEntryAction.Initial)
         runCurrent()
 
-        viewModel.onAction(AtsEntryAction.JobUrlChanged("https://jobs.example.com/42"))
+        viewModel.onAction(
+            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        )
         assertFalse(viewModel.state.value.canCompare)
 
         repository.userProfile.value = UserProfile(
@@ -76,11 +78,16 @@ class AtsEntryViewModelTest {
         val viewModel = createViewModel(repository)
 
         viewModel.onAction(
-            AtsEntryAction.SharedTextReceived("Apply: https://jobs.example.com/42?source=share"),
+            AtsEntryAction.SharedTextReceived(
+                "Apply: https://www.linkedin.com/jobs/view/123456789?source=share",
+            ),
         )
         runCurrent()
 
-        assertEquals("https://jobs.example.com/42?source=share", viewModel.state.value.jobUrl)
+        assertEquals(
+            "https://www.linkedin.com/jobs/view/123456789?source=share",
+            viewModel.state.value.jobUrl,
+        )
         assertEquals(0, repository.importCount)
     }
 
@@ -93,7 +100,9 @@ class AtsEntryViewModelTest {
         val viewModel = createViewModel(repository)
         viewModel.onAction(AtsEntryAction.Initial)
         runCurrent()
-        viewModel.onAction(AtsEntryAction.JobUrlChanged("https://jobs.example.com/42"))
+        viewModel.onAction(
+            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        )
 
         viewModel.onAction(AtsEntryAction.CompareClicked)
         viewModel.onAction(AtsEntryAction.CompareClicked)
