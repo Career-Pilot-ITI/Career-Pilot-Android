@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -153,7 +155,7 @@ fun ScoringContent(
                 variant = ButtonVariant.OUTLINE,
                 leadingContent = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_email_outline),
+                        imageVector = Icons.Outlined.Email,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                     )
