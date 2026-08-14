@@ -17,6 +17,4 @@ dependencies {
     implementation(project(":core:ai"))
     implementation(project(":core:model"))
     implementation(libs.bundles.camerax)
-    implementation(libs.rive.android)
-    implementation(libs.androidx.startup)
 }

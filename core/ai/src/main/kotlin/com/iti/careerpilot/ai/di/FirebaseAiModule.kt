@@ -44,7 +44,7 @@ abstract class FirebaseAiModule {
             return BodyLanguageAiFeatureToggle {
                 try {
                     val value = remoteConfig.getValue("body_language_ai_enabled")
-                    if (value.source == com.google.firebase.remoteconfig.FirebaseRemoteConfig.VALUE_SOURCE_STATIC) {
+                    if (value.source == FirebaseRemoteConfig.VALUE_SOURCE_STATIC) {
                         true
                     } else {
                         remoteConfig.getBoolean("body_language_ai_enabled")

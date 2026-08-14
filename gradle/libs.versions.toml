@@ -39,15 +39,11 @@ browser = "1.9.0"
 paging = "3.5.0"
 mediapipe = "0.10.35"
 camerax = "1.6.1"
-rive-android = "11.7.2"
-androidx-startup = "1.1.1"
 firebaseBom = "34.17.0"
 googleServices = "4.4.2"
 
 
 [libraries]
-rive-android = { module = "app.rive:rive-android", version.ref = "rive-android" }
-androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 animated-navigation-bar = { module = "com.exyte:animated-navigation-bar", version.ref = "animatedNavigationBar" }
