@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import kotlin.time.Duration.Companion.milliseconds
 
 class BodyLanguageAiEvaluatorTest {
 
@@ -136,7 +137,7 @@ class BodyLanguageAiEvaluatorTest {
     @Test
     fun `timeout triggers TIMEOUT fallback`() = runTest {
         val generator = AiContentGenerator {
-            delay(2000L)
+            delay(2000L.milliseconds)
             FakeBodyLanguageData.sampleEvaluationJson
         }
         val evaluator = BodyLanguageAiEvaluator(

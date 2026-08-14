@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.ai.type.content
 import com.google.firebase.ai.type.generationConfig
 import com.iti.careerpilot.ai.prompt.BodyLanguagePromptBuilder
 import com.iti.common.dispatcher.CareerPilotDispatchers.IO
@@ -32,7 +33,7 @@ class FirebaseAiContentGenerator @Inject constructor(
                 responseMimeType = "application/json"
                 temperature = 0.2f
             },
-            systemInstruction = com.google.firebase.ai.type.content {
+            systemInstruction = content {
                 text(BodyLanguagePromptBuilder.SYSTEM_INSTRUCTION)
             },
         )

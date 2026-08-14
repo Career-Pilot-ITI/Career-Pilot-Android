@@ -36,7 +36,7 @@ class EvaluateBodyLanguageUseCaseTest {
             FakeBodyLanguageData.sampleEvaluationJson
         }
         val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
-        val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { true }
+        val useCase = EvaluateBodyLanguageUseCase(evaluator, cache)
 
         val (result, fallback) = useCase.invoke(100L, FakeBodyLanguageData.sampleMetrics)
 
@@ -57,7 +57,7 @@ class EvaluateBodyLanguageUseCaseTest {
             FakeBodyLanguageData.sampleEvaluationJson
         }
         val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
-        val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { true }
+        val useCase = EvaluateBodyLanguageUseCase(evaluator, cache)
 
         // Prepopulate cache with fallback reason and metrics
         cache.put(
@@ -75,23 +75,4 @@ class EvaluateBodyLanguageUseCaseTest {
         assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(200L))
     }
 
-    @Test
-    fun `kill switch disabled produces fallback and caches result with fallback reason`() = runTest {
-        val generator = AiContentGenerator { FakeBodyLanguageData.sampleEvaluationJson }
-        val evaluator = BodyLanguageAiEvaluator(generator, fallbackEngine, json, Dispatchers.Unconfined)
-        val useCase = EvaluateBodyLanguageUseCase(evaluator, cache) { false }
-
-        val (result, fallback) = useCase.invoke(300L, FakeBodyLanguageData.sampleMetrics)
-
-        assertEquals(FallbackReason.KILL_SWITCH_DISABLED, fallback)
-        assertNotNull(result)
-        assertEquals(result, cache.getEvaluation(300L)?.first)
-        assertEquals(Pair(result, FallbackReason.KILL_SWITCH_DISABLED), cache.getEvaluation(300L))
-        assertEquals(FakeBodyLanguageData.sampleMetrics, cache.getMetrics(300L))
-
-        // Subsequent call should return cached fallback reason
-        val (cachedResult, cachedFallback) = useCase.invoke(300L, FakeBodyLanguageData.sampleMetrics)
-        assertEquals(result, cachedResult)
-        assertEquals(FallbackReason.KILL_SWITCH_DISABLED, cachedFallback)
-    }
 }
