@@ -48,4 +48,4 @@ include(":core:bodylanguage")
 include(":feature:reports")
 include(":core:ai")
 include(":core:ai:testing")
-
+include(":feature:settings")

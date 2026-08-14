@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -59,6 +57,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
+import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.practicesession.R
 import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
@@ -271,13 +270,7 @@ fun PracticeSessionScreen(
             topBar = {
                 CenterAlignedTopAppBar(
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_arrow_back),
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        BackIconButton(onBack = onBack)
                     },
                     title = {
                         Row(

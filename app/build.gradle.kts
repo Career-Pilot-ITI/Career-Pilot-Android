@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(project(":core:bodylanguage"))
+    implementation(project(":feature:settings"))
     implementation(project(":feature:practicesession"))
     implementation(project(":feature:reports"))
 }
