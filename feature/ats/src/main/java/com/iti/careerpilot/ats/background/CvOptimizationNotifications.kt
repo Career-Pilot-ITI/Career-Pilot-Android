@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.iti.careerpilot.ats.R
@@ -50,12 +49,6 @@ object CvOptimizationNotifications {
         }
         return NotificationCompat.Builder(context, PROGRESS_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_cv_optimization_notification)
-            .setLargeIcon(
-                BitmapFactory.decodeResource(
-                    context.resources,
-                    R.drawable.ic_launcher_foreground_artwork,
-                ),
-            )
             .setContentTitle(context.getString(R.string.ats_cv_optimization_processing_title))
             .setContentText(
                 context.getString(
@@ -78,12 +71,6 @@ object CvOptimizationNotifications {
         success: Boolean,
     ): Notification = NotificationCompat.Builder(context, RESULT_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_cv_optimization_notification)
-        .setLargeIcon(
-            BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.ic_launcher_foreground_artwork,
-            ),
-        )
         .setContentTitle(
             context.getString(
                 if (success) {
