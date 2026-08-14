@@ -88,7 +88,7 @@ class AtsMapperTest {
             """.trimIndent(),
         )
 
-        val mapped = requireNotNull(response.data).toDomain()
+        val mapped = (response.data ?: error("Expected job workspace response data")).toDomain()
 
         assertEquals(AiJobStatus.PENDING, mapped.status)
         assertNull(mapped.result)
@@ -134,8 +134,8 @@ class AtsMapperTest {
             """.trimIndent(),
         )
 
-        val mapped = requireNotNull(response.data).toDomain()
-        val optimization = requireNotNull(mapped.result)
+        val mapped = (response.data ?: error("Expected AI job response data")).toDomain()
+        val optimization = mapped.result ?: error("Expected completed CV optimization result")
 
         assertEquals(AiJobStatus.COMPLETED, mapped.status)
         assertEquals(2, optimization.sections.size)

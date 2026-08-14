@@ -139,7 +139,16 @@ private fun JobDetailsContent(
     modifier: Modifier = Modifier,
 ) {
     val workspace by rememberUiStateValue(stateProvider) { it.workspace }
-    val currentWorkspace = requireNotNull(workspace)
+    val currentWorkspace = workspace
+    if (currentWorkspace == null) {
+        val error by rememberUiStateValue(stateProvider) { it.error }
+        AtsWorkspaceErrorContent(
+            error = error,
+            onRetry = { onAction(JobDetailsAction.Retry) },
+            modifier = modifier,
+        )
+        return
+    }
 
     Column(
         modifier = modifier

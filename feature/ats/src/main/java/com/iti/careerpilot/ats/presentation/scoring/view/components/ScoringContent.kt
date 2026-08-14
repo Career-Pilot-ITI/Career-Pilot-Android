@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.AtsSectionScore
+import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
@@ -38,8 +39,17 @@ fun ScoringContent(
 ) {
     val scoreValue by rememberUiStateValue(stateProvider) { it.score }
     val workspaceValue by rememberUiStateValue(stateProvider) { it.workspace }
-    val score = requireNotNull(scoreValue)
-    val workspace = requireNotNull(workspaceValue)
+    val score = scoreValue
+    val workspace = workspaceValue
+    if (score == null || workspace == null) {
+        val error by rememberUiStateValue(stateProvider) { it.error }
+        AtsWorkspaceErrorContent(
+            error = error,
+            onRetry = { onAction(ScoringAction.Retry) },
+            modifier = modifier,
+        )
+        return
+    }
     val requiredKeywordCount = remember(score) {
         score.matchedSkills.size + score.missingRequiredSkills.size
     }
@@ -129,7 +139,7 @@ fun ScoringContent(
             items(score.sections, key = AtsSectionScore::section) { section ->
                 SectionScoreCard(
                     section = section,
-                    lowestScore = requireNotNull(lowestSectionScore),
+                    lowestScore = lowestSectionScore ?: section.score,
                 )
             }
         }
