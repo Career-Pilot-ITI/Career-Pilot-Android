@@ -2,21 +2,26 @@ package com.iti.careerpilot
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.core.datastore.UserTokensRepo
-import com.iti.careerpilot.share.PendingSharedText
 import com.iti.careerpilot.optimization.PendingCvOptimization
+import com.iti.careerpilot.share.PendingSharedText
+import com.iti.core.datastore.UserTokensRepo
+import com.iti.core.datastore.settings.domain.UserSettingsRepo
+import com.iti.core.datastore.settings.domain.models.LanguageSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    userTokensRepo: UserTokensRepo
+    userTokensRepo: UserTokensRepo,
+    private val userSettingsRepo: UserSettingsRepo,
 ) : ViewModel() {
 
     private val _pendingSharedText = MutableStateFlow<String?>(null)
@@ -29,8 +34,11 @@ class MainViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null
+            initialValue = null,
         )
+
+    val mainUiState: Flow<MainUiState> = userSettingsRepo.settingsFlow
+        .map { MainUiState.Ready(it) }
 
     fun acceptSharedText(payload: PendingSharedText?) {
         payload ?: return
@@ -48,5 +56,13 @@ class MainViewModel @Inject constructor(
 
     fun consumeCvOptimization() {
         _pendingCvOptimization.value = null
+    }
+
+    fun saveLanguageSettings(languageSetting: LanguageSetting) {
+        viewModelScope.launch {
+            userSettingsRepo.updateUserSettings {
+                it.copy(language = languageSetting)
+            }
+        }
     }
 }

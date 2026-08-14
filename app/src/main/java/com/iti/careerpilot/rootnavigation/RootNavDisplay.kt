@@ -23,7 +23,6 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
 import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
-import com.iti.careerpilot.features.settings.SettingsRoot
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.home.presentation.interviews.screen.InterviewsRoot
 import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
@@ -34,6 +33,7 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.Pr
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
+import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
@@ -334,7 +334,11 @@ fun RootNavDisplay(
                 }
 
                 entry<Route.Settings> {
-                    SettingsRoot()
+                    SettingsRoot(
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.Settings>()
+                        }
+                    )
                 }
 
                 entry<Route.EditProfile> {

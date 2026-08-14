@@ -109,6 +109,10 @@ gradlePlugin {
             id = libs.plugins.careerpilot.feature.profile.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.ProfileConventionPlugin"
         }
+        register("careerPilotFeatureSettings") {
+            id = libs.plugins.careerpilot.feature.settings.get().pluginId
+            implementationClass = "com.iti.careerpilot.buildlogic.SettingsConventionPlugin"
+        }
         register("careerPilotFeatureHome") {
             id = libs.plugins.careerpilot.feature.home.get().pluginId
             implementationClass = "com.iti.careerpilot.buildlogic.features.HomeFeatureConventionPlugin"
