@@ -31,6 +31,7 @@ import com.iti.careerpilot.ats.presentation.scoring.view.ScoringScreen
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import kotlinx.collections.immutable.persistentListOf
 
 class AtsScreenStateTest {
 
@@ -43,13 +44,13 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 AtsEntryScreen(
-                    state = AtsEntryUiState(
+                    stateProvider = { AtsEntryUiState(
                         jobUrl = "https://example.com/jobs/1",
                         isUrlValid = true,
                         cvFileName = "resume.pdf",
                         cvSizeBytes = 2_048,
                         hasSynchronizedCv = true,
-                    ),
+                    ) },
                     onAction = { action = it },
                 )
             }
@@ -65,10 +66,10 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 AtsEntryScreen(
-                    state = AtsEntryUiState(
+                    stateProvider = { AtsEntryUiState(
                         jobUrl = "https://example.com/jobs/1",
                         isUrlValid = true,
-                    ),
+                    ) },
                     onAction = {},
                 )
             }
@@ -83,24 +84,24 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 ScoringScreen(
-                    state = ScoringUiState(
+                    stateProvider = { ScoringUiState(
                         isLoading = false,
                         workspace = workspace(),
                         score = AtsScore(
                             overallScore = 78,
                             matchPercentage = 78,
-                            matchedSkills = listOf("Kotlin"),
-                            missingRequiredSkills = listOf("Docker"),
-                            missingPreferredSkills = listOf("Terraform"),
-                            strengths = listOf("Strong architecture"),
-                            weaknesses = listOf("Add delivery metrics"),
-                            sections = listOf(AtsSectionScore("Projects", 59, "Add impact.")),
-                            recommendations = listOf("Quantify project impact"),
+                            matchedSkills = persistentListOf("Kotlin"),
+                            missingRequiredSkills = persistentListOf("Docker"),
+                            missingPreferredSkills = persistentListOf("Terraform"),
+                            strengths = persistentListOf("Strong architecture"),
+                            weaknesses = persistentListOf("Add delivery metrics"),
+                            sections = persistentListOf(AtsSectionScore("Projects", 59, "Add impact.")),
+                            recommendations = persistentListOf("Quantify project impact"),
                             coinCost = null,
                             cvScoreUpdatedAt = null,
                         ),
                         trackId = null,
-                    ),
+                    ) },
                     onAction = {},
                     onBack = {},
                 )
@@ -130,10 +131,10 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 JobDetailsScreen(
-                    state = JobDetailsUiState(
+                    stateProvider = { JobDetailsUiState(
                         isLoading = false,
                         workspace = workspace(),
-                    ),
+                    ) },
                     onAction = { action = it },
                     onBack = {},
                 )
@@ -153,14 +154,14 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 CoverLetterScreen(
-                    state = CoverLetterUiState(
+                    stateProvider = { CoverLetterUiState(
                         generatedValue = "Generated letter",
                         editedValue = "Edited letter",
                         contactName = "Sarah Chen",
                         contactEmail = "sarah@example.com",
                         isLoading = false,
                         isEditing = true,
-                    ),
+                    ) },
                     onAction = { _: CoverLetterAction -> },
                     onBack = {},
                 )
@@ -177,12 +178,12 @@ class AtsScreenStateTest {
         composeRule.setContent {
             MaterialTheme {
                 OptimizedCvScreen(
-                    state = OptimizedCvUiState(
-                        sections = listOf(
+                    stateProvider = { OptimizedCvUiState(
+                        sections = persistentListOf(
                             CvOptimizationSection(
                                 name = "Experience",
                                 score = 82,
-                                improvements = listOf(
+                                improvements = persistentListOf(
                                     CvSectionImprovement(
                                         original = "Worked on APIs.",
                                         improved = "Delivered 12 APIs.",
@@ -193,12 +194,12 @@ class AtsScreenStateTest {
                             CvOptimizationSection(
                                 name = "Skills",
                                 score = 90,
-                                improvements = emptyList(),
+                                improvements = persistentListOf(),
                             ),
                         ),
-                        recommendedTracks = emptyList(),
+                        recommendedTracks = persistentListOf(),
                         isLoading = false,
-                    ),
+                    ) },
                     onAction = {},
                     onBack = {},
                 )
@@ -225,11 +226,11 @@ class AtsScreenStateTest {
             description = "Build accessible Android products.",
             employmentType = null,
             seniorityLevel = null,
-            requiredSkills = listOf("Kotlin"),
-            preferredSkills = emptyList(),
-            responsibilities = emptyList(),
-            qualifications = emptyList(),
-            technologies = emptyList(),
+            requiredSkills = persistentListOf("Kotlin"),
+            preferredSkills = persistentListOf(),
+            responsibilities = persistentListOf(),
+            qualifications = persistentListOf(),
+            technologies = persistentListOf(),
             salaryMin = null,
             salaryMax = null,
             currency = null,

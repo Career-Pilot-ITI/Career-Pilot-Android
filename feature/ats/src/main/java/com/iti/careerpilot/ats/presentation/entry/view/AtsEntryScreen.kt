@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,10 +36,15 @@ import com.iti.careerpilot.ats.presentation.entry.view.components.AtsScreenHeade
 import com.iti.careerpilot.ats.presentation.entry.view.components.FasterShareHintCard
 import com.iti.careerpilot.ats.presentation.entry.view.components.JobUrlTextField
 import com.iti.careerpilot.ats.presentation.entry.viewmodel.AtsEntryViewModel
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CvUploadCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
 private const val PDF_MIME_TYPE = "application/pdf"
@@ -53,8 +57,8 @@ fun AtsEntryRoot(
     onJobDetailsRequested: (Long) -> Unit,
     viewModel: AtsEntryViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    LocalContext.current
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val stateProvider = rememberUiStateProvider(state)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { viewModel.onAction(AtsEntryAction.PdfSelected(it.toString())) }
     }
@@ -84,35 +88,23 @@ fun AtsEntryRoot(
     }
 
     AtsEntryScreen(
-        state = state,
+        stateProvider = stateProvider,
         onAction = viewModel::onAction,
     )
 }
 
 @Composable
 fun AtsEntryScreen(
-    state: AtsEntryUiState,
+    stateProvider: UiStateProvider<AtsEntryUiState>,
     onAction: (AtsEntryAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val jobUrlDescription = stringResource(R.string.ats_job_posting_link)
-    val importMessages = listOf(
+    val importMessages = persistentListOf(
         stringResource(R.string.ats_importing_job),
         stringResource(R.string.ats_importing_details),
         stringResource(R.string.ats_preparing_workspace),
     )
-    var importMessageIndex by rememberSaveable { mutableIntStateOf(0) }
-
-    LaunchedEffect(state.isImporting) {
-        if (!state.isImporting) {
-            importMessageIndex = 0
-            return@LaunchedEffect
-        }
-        while (true) {
-            delay(1_600)
-            importMessageIndex = (importMessageIndex + 1) % importMessages.size
-        }
-    }
 
     Column(
         modifier = modifier
@@ -151,7 +143,11 @@ fun AtsEntryScreen(
                     style = MaterialTheme.typography.labelLarge,
                 )
 
-                JobUrlTextField(state, onAction, jobUrlDescription)
+                JobUrlTextField(
+                    stateProvider = stateProvider,
+                    onAction = onAction,
+                    jobUrlDescription = jobUrlDescription,
+                )
 
                 Spacer(Modifier.height(4.dp))
 
@@ -171,16 +167,9 @@ fun AtsEntryScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                CvUploadCard(
-                    fileName = state.cvFileName.takeIf(String::isNotBlank),
-                    fileSizeBytes = state.cvSizeBytes,
-                    stage = when {
-                        state.isUploadingCv -> CvUploadCardStage.UPLOADING
-                        state.hasSynchronizedCv -> CvUploadCardStage.UPLOADED
-                        else -> CvUploadCardStage.EMPTY
-                    },
-                    uploadProgress = state.uploadProgress,
-                    onClick = { onAction(AtsEntryAction.SelectCvClicked) },
+                CvUploadSection(
+                    stateProvider = stateProvider,
+                    onAction = onAction,
                 )
             }
 
@@ -189,11 +178,66 @@ fun AtsEntryScreen(
             }
         }
 
-        CareerPilotButton(
-            text = if (state.isImporting) importMessages[importMessageIndex]
-            else stringResource(R.string.ats_compare_now),
-            onClick = { onAction(AtsEntryAction.CompareClicked) },
-            enabled = state.canCompare,
+        CompareButton(
+            stateProvider = stateProvider,
+            importMessages = importMessages,
+            onAction = onAction,
         )
     }
+}
+
+@Composable
+private fun CvUploadSection(
+    stateProvider: UiStateProvider<AtsEntryUiState>,
+    onAction: (AtsEntryAction) -> Unit,
+) {
+    val fileName by rememberUiStateValue(stateProvider) { it.cvFileName }
+    val fileSizeBytes by rememberUiStateValue(stateProvider) { it.cvSizeBytes }
+    val isUploadingCv by rememberUiStateValue(stateProvider) { it.isUploadingCv }
+    val hasSynchronizedCv by rememberUiStateValue(stateProvider) { it.hasSynchronizedCv }
+    val uploadProgress by rememberUiStateValue(stateProvider) { it.uploadProgress }
+
+    CvUploadCard(
+        fileName = fileName.takeIf(String::isNotBlank),
+        fileSizeBytes = fileSizeBytes,
+        stage = when {
+            isUploadingCv -> CvUploadCardStage.UPLOADING
+            hasSynchronizedCv -> CvUploadCardStage.UPLOADED
+            else -> CvUploadCardStage.EMPTY
+        },
+        uploadProgress = uploadProgress,
+        onClick = { onAction(AtsEntryAction.SelectCvClicked) },
+    )
+}
+
+@Composable
+private fun CompareButton(
+    stateProvider: UiStateProvider<AtsEntryUiState>,
+    importMessages: ImmutableList<String>,
+    onAction: (AtsEntryAction) -> Unit,
+) {
+    val isImporting by rememberUiStateValue(stateProvider) { it.isImporting }
+    val canCompare by rememberUiStateValue(stateProvider) { it.canCompare }
+    var importMessageIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    LaunchedEffect(isImporting) {
+        if (!isImporting) {
+            importMessageIndex = 0
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(1_600)
+            importMessageIndex = (importMessageIndex + 1) % importMessages.size
+        }
+    }
+
+    CareerPilotButton(
+        text = if (isImporting) {
+            importMessages[importMessageIndex]
+        } else {
+            stringResource(R.string.ats_compare_now)
+        },
+        onClick = { onAction(AtsEntryAction.CompareClicked) },
+        enabled = canCompare,
+    )
 }

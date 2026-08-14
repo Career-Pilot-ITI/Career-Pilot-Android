@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillStatus
 import com.iti.careerpilot.ats.presentation.util.skillPalette
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import kotlinx.collections.immutable.ImmutableList
 
 
 
@@ -26,7 +27,7 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 internal fun SkillGroupCard(
     title: String,
     countLabel: String,
-    skills: List<String>,
+    skills: ImmutableList<String>,
     status: SkillStatus,
     modifier: Modifier = Modifier,
 ) {

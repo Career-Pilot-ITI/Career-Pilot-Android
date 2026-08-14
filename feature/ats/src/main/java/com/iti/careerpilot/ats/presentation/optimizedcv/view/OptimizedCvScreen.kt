@@ -19,6 +19,9 @@ import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.components.OptimizedCvContent
 import com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel.OptimizedCvViewModel
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 
 @Composable
 fun OptimizedCvRoot(
@@ -26,14 +29,15 @@ fun OptimizedCvRoot(
     onBack: () -> Unit,
     viewModel: OptimizedCvViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val stateProvider = rememberUiStateProvider(state)
 
     LaunchedEffect(jobId) {
         viewModel.onAction(OptimizedCvAction.Initial(jobId))
     }
 
     OptimizedCvScreen(
-        state = state,
+        stateProvider = stateProvider,
         onAction = viewModel::onAction,
         onBack = onBack,
     )
@@ -42,7 +46,7 @@ fun OptimizedCvRoot(
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun OptimizedCvScreen(
-    state: OptimizedCvUiState,
+    stateProvider: UiStateProvider<OptimizedCvUiState>,
     onAction: (OptimizedCvAction) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -52,19 +56,34 @@ fun OptimizedCvScreen(
             title = stringResource(R.string.optimized_cv),
             onBack = onBack,
         )
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularWavyProgressIndicator()
-            }
-        } else {
-            OptimizedCvContent(
-                state = state,
-                onAction = onAction,
-                modifier = Modifier.fillMaxSize(),
-            )
+        OptimizedCvBody(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun OptimizedCvBody(
+    stateProvider: UiStateProvider<OptimizedCvUiState>,
+    onAction: (OptimizedCvAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isLoading by rememberUiStateValue(stateProvider) { it.isLoading }
+    if (isLoading) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularWavyProgressIndicator()
         }
+    } else {
+        OptimizedCvContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = modifier,
+        )
     }
 }

@@ -16,10 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun RecommendationsCard(
-    values: List<String>,
+    values: ImmutableList<String>,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {

@@ -22,11 +22,12 @@ import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun FeedbackListCard(
     title: String,
-    values: List<String>,
+    values: ImmutableList<String>,
     status: FeedbackStatus,
     modifier: Modifier = Modifier,
 ) {

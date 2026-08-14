@@ -29,8 +29,11 @@ import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLetterContent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.composeEmail
 import com.iti.careerpilot.ats.presentation.util.copyText
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 
@@ -41,7 +44,8 @@ fun CoverLetterRoot(
     openCoinsPaywall: () -> Unit,
     viewModel: CoverLetterViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val stateProvider = rememberUiStateProvider(state)
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val clipboardLabel = stringResource(R.string.cover_letter)
@@ -74,7 +78,7 @@ fun CoverLetterRoot(
     }
 
     CoverLetterScreen(
-        state = state,
+        stateProvider = stateProvider,
         onAction = viewModel::onAction,
         onBack = onBack,
     )
@@ -83,7 +87,7 @@ fun CoverLetterRoot(
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun CoverLetterScreen(
-    state: CoverLetterUiState,
+    stateProvider: UiStateProvider<CoverLetterUiState>,
     onAction: (CoverLetterAction) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -93,19 +97,34 @@ fun CoverLetterScreen(
             title = stringResource(R.string.cover_letter),
             onBack = onBack,
         )
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularWavyProgressIndicator()
-            }
-        } else {
-            CoverLetterContent(
-                state = state,
-                onAction = onAction,
-                modifier = Modifier.fillMaxSize(),
-            )
+        CoverLetterBody(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun CoverLetterBody(
+    stateProvider: UiStateProvider<CoverLetterUiState>,
+    onAction: (CoverLetterAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isLoading by rememberUiStateValue(stateProvider) { it.isLoading }
+    if (isLoading) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularWavyProgressIndicator()
         }
+    } else {
+        CoverLetterContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = modifier,
+        )
     }
 }

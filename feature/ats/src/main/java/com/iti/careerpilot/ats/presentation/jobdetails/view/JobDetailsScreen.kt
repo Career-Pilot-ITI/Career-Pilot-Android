@@ -27,6 +27,9 @@ import com.iti.careerpilot.ats.presentation.jobdetails.view.components.Descripti
 import com.iti.careerpilot.ats.presentation.jobdetails.view.components.JobOverviewCard
 import com.iti.careerpilot.ats.presentation.jobdetails.view.components.RequirementsCard
 import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewModel
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 
 @Composable
@@ -37,7 +40,8 @@ fun JobDetailsRoot(
     openJob: (String) -> Unit,
     viewModel: JobDetailsViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val stateProvider = rememberUiStateProvider(state)
 
     LaunchedEffect(workspaceId) {
         viewModel.onAction(JobDetailsAction.Initial(workspaceId))
@@ -52,7 +56,7 @@ fun JobDetailsRoot(
     }
 
     JobDetailsScreen(
-        state = state,
+        stateProvider = stateProvider,
         onAction = viewModel::onAction,
         onBack = onBack,
         onOpenJob = openJob,
@@ -61,7 +65,7 @@ fun JobDetailsRoot(
 
 @Composable
 fun JobDetailsScreen(
-    state: JobDetailsUiState,
+    stateProvider: UiStateProvider<JobDetailsUiState>,
     onAction: (JobDetailsAction) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -73,31 +77,69 @@ fun JobDetailsScreen(
             onBack = onBack,
         )
 
-        when {
-            state.isLoading -> AtsWorkspaceLoadingContent(modifier = Modifier.fillMaxSize())
-            state.workspace == null -> AtsWorkspaceErrorContent(
-                error = state.error,
-                onRetry = { onAction(JobDetailsAction.Retry) },
-                modifier = Modifier.fillMaxSize(),
-            )
-            else -> JobDetailsContent(
-                state = state,
-                onAction = onAction,
-                onOpenJob = onOpenJob,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+        JobDetailsBody(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            onOpenJob = onOpenJob,
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
 @Composable
-private fun JobDetailsContent(
-    state: JobDetailsUiState,
+private fun JobDetailsBody(
+    stateProvider: UiStateProvider<JobDetailsUiState>,
     onAction: (JobDetailsAction) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val workspace = requireNotNull(state.workspace)
+    val phase by rememberUiStateValue(stateProvider) { state ->
+        when {
+            state.isLoading -> JobDetailsPhase.LOADING
+            state.workspace == null -> JobDetailsPhase.ERROR
+            else -> JobDetailsPhase.CONTENT
+        }
+    }
+
+    when (phase) {
+        JobDetailsPhase.LOADING -> AtsWorkspaceLoadingContent(modifier = modifier)
+        JobDetailsPhase.ERROR -> JobDetailsErrorContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = modifier,
+        )
+        JobDetailsPhase.CONTENT -> JobDetailsContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            onOpenJob = onOpenJob,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun JobDetailsErrorContent(
+    stateProvider: UiStateProvider<JobDetailsUiState>,
+    onAction: (JobDetailsAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val error by rememberUiStateValue(stateProvider) { it.error }
+    AtsWorkspaceErrorContent(
+        error = error,
+        onRetry = { onAction(JobDetailsAction.Retry) },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun JobDetailsContent(
+    stateProvider: UiStateProvider<JobDetailsUiState>,
+    onAction: (JobDetailsAction) -> Unit,
+    onOpenJob: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val workspace by rememberUiStateValue(stateProvider) { it.workspace }
+    val currentWorkspace = requireNotNull(workspace)
 
     Column(
         modifier = modifier
@@ -110,18 +152,18 @@ private fun JobDetailsContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { Spacer(Modifier.height(2.dp)) }
-            item { JobHeaderCard(job = workspace.job, onOpenJob = onOpenJob) }
-            item { JobOverviewCard(job = workspace.job) }
+            item { JobHeaderCard(job = currentWorkspace.job, onOpenJob = onOpenJob) }
+            item { JobOverviewCard(job = currentWorkspace.job) }
 
-            if (workspace.job.description.isNotBlank()) {
-                item { DescriptionCard(workspace.job.description) }
+            if (currentWorkspace.job.description.isNotBlank()) {
+                item { DescriptionCard(currentWorkspace.job.description) }
             }
             if (
-                workspace.job.requiredSkills.isNotEmpty() ||
-                workspace.job.preferredSkills.isNotEmpty() ||
-                workspace.job.technologies.isNotEmpty()
+                currentWorkspace.job.requiredSkills.isNotEmpty() ||
+                currentWorkspace.job.preferredSkills.isNotEmpty() ||
+                currentWorkspace.job.technologies.isNotEmpty()
             ) {
-                item { RequirementsCard(workspace.job) }
+                item { RequirementsCard(currentWorkspace.job) }
             }
 
             item { Spacer(Modifier.height(8.dp)) }
@@ -133,3 +175,5 @@ private fun JobDetailsContent(
         )
     }
 }
+
+private enum class JobDetailsPhase { LOADING, ERROR, CONTENT }

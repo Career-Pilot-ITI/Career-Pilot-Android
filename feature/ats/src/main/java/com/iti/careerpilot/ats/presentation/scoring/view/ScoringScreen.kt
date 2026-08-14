@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +50,9 @@ import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoreSummary
 import com.iti.careerpilot.ats.presentation.scoring.view.components.SectionScoreCard
 import com.iti.careerpilot.ats.presentation.scoring.view.components.SkillGroupCard
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.common.snackbar.CareerPilotSnackbarController
@@ -63,7 +67,8 @@ fun ScoringRoot(
     openJob: (String) -> Unit,
     viewModel: ScoringViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+    val stateProvider = rememberUiStateProvider(state)
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -99,7 +104,7 @@ fun ScoringRoot(
     }
 
     ScoringScreen(
-        state = state,
+        stateProvider = stateProvider,
         onAction = { action ->
             if (
                 action == ScoringAction.OptimizeCv &&
@@ -121,7 +126,7 @@ fun ScoringRoot(
 
 @Composable
 fun ScoringScreen(
-    state: ScoringUiState,
+    stateProvider: UiStateProvider<ScoringUiState>,
     onAction: (ScoringAction) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -133,36 +138,61 @@ fun ScoringScreen(
             onBack = onBack,
         )
 
+        ScoringBody(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            onOpenJob = onOpenJob,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun ScoringBody(
+    stateProvider: UiStateProvider<ScoringUiState>,
+    onAction: (ScoringAction) -> Unit,
+    onOpenJob: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val phase by rememberUiStateValue(stateProvider) { state ->
         when {
-            state.isLoading -> AtsWorkspaceLoadingContent(modifier = Modifier.fillMaxSize())
-            state.workspace == null || state.score == null -> ScoringErrorContent(
-                state = state,
-                onAction = onAction,
-                modifier = Modifier.fillMaxSize(),
-            )
-            else -> ScoringContent(
-                state = state,
-                onAction = onAction,
-                onOpenJob = onOpenJob,
-                modifier = Modifier.fillMaxSize(),
-            )
+            state.isLoading -> ScoringPhase.LOADING
+            state.workspace == null || state.score == null -> ScoringPhase.ERROR
+            else -> ScoringPhase.CONTENT
         }
+    }
+
+    when (phase) {
+        ScoringPhase.LOADING -> AtsWorkspaceLoadingContent(modifier = modifier)
+        ScoringPhase.ERROR -> ScoringErrorContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            modifier = modifier,
+        )
+        ScoringPhase.CONTENT -> ScoringContent(
+            stateProvider = stateProvider,
+            onAction = onAction,
+            onOpenJob = onOpenJob,
+            modifier = modifier,
+        )
     }
 }
 
 @Composable
 private fun ScoringErrorContent(
-    state: ScoringUiState,
+    stateProvider: UiStateProvider<ScoringUiState>,
     onAction: (ScoringAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val error by rememberUiStateValue(stateProvider) { it.error }
+    val hasInsufficientCoins by rememberUiStateValue(stateProvider) { it.hasInsufficientCoins }
     Column(modifier = modifier) {
         AtsWorkspaceErrorContent(
-            error = state.error,
+            error = error,
             onRetry = { onAction(ScoringAction.Retry) },
             modifier = Modifier.weight(1f),
         )
-        if (state.hasInsufficientCoins) {
+        if (hasInsufficientCoins) {
             CareerPilotButton(
                 text = stringResource(R.string.ats_get_coins),
                 onClick = { onAction(ScoringAction.OpenCoins) },
@@ -175,14 +205,21 @@ private fun ScoringErrorContent(
 
 @Composable
 private fun ScoringContent(
-    state: ScoringUiState,
+    stateProvider: UiStateProvider<ScoringUiState>,
     onAction: (ScoringAction) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val score = requireNotNull(state.score)
-    val workspace = requireNotNull(state.workspace)
-    val requiredKeywordCount = score.matchedSkills.size + score.missingRequiredSkills.size
+    val scoreValue by rememberUiStateValue(stateProvider) { it.score }
+    val workspaceValue by rememberUiStateValue(stateProvider) { it.workspace }
+    val score = requireNotNull(scoreValue)
+    val workspace = requireNotNull(workspaceValue)
+    val requiredKeywordCount = remember(score) {
+        score.matchedSkills.size + score.missingRequiredSkills.size
+    }
+    val lowestSectionScore = remember(score.sections) {
+        score.sections.minOfOrNull(AtsSectionScore::score)
+    }
 
     LazyColumn(
         modifier = modifier,
@@ -266,7 +303,7 @@ private fun ScoringContent(
                 items(score.sections, key = AtsSectionScore::section) { section ->
                     SectionScoreCard(
                         section = section,
-                        lowestScore = score.sections.minOf(AtsSectionScore::score),
+                        lowestScore = requireNotNull(lowestSectionScore),
                     )
                 }
             }
@@ -280,40 +317,10 @@ private fun ScoringContent(
                 item { RecommendationsCard(values = score.recommendations) }
             }
             item {
-                if (state.hasInsufficientCoins) {
-                    CareerPilotButton(
-                        text = stringResource(R.string.ats_get_coins),
-                        onClick = { onAction(ScoringAction.OpenCoins) },
-                        variant = ButtonVariant.OUTLINE,
-                    )
-                } else {
-                    CareerPilotButton(
-                        text = stringResource(
-                            if (state.isStartingOptimization) {
-                                R.string.ats_cv_optimization_starting
-                            } else {
-                                R.string.ats_optimize_cv
-                            },
-                        ),
-                        onClick = { onAction(ScoringAction.OptimizeCv) },
-                        enabled = !state.isStartingOptimization,
-                        leadingContent = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_lightbulb_outline),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                            )
-                        },
-                    )
-                }
-                state.optimizationError?.let { error ->
-                    Text(
-                        text = error.asString(),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                }
+                OptimizeCvActionItem(
+                    stateProvider = stateProvider,
+                    onAction = onAction,
+                )
             }
             item {
                 CareerPilotButton(
@@ -330,27 +337,88 @@ private fun ScoringContent(
                 )
             }
             item {
-                CareerPilotButton(
-                    text = stringResource(R.string.ats_start_practice_for_job),
-                    onClick = { onAction(ScoringAction.StartPractice) },
-                    enabled = state.trackId != null,
-                    variant = ButtonVariant.OUTLINE,
-                    leadingContent = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_record_outline),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    },
+                PracticeActionItem(
+                    stateProvider = stateProvider,
+                    onAction = onAction,
                 )
-                if (state.trackId == null) {
-                    Text(
-                        text = stringResource(R.string.ats_practice_track_required),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                }
             }
     }
 }
+
+@Composable
+private fun OptimizeCvActionItem(
+    stateProvider: UiStateProvider<ScoringUiState>,
+    onAction: (ScoringAction) -> Unit,
+) {
+    val hasInsufficientCoins by rememberUiStateValue(stateProvider) { it.hasInsufficientCoins }
+    val isStartingOptimization by rememberUiStateValue(stateProvider) {
+        it.isStartingOptimization
+    }
+    val optimizationError by rememberUiStateValue(stateProvider) { it.optimizationError }
+
+    if (hasInsufficientCoins) {
+        CareerPilotButton(
+            text = stringResource(R.string.ats_get_coins),
+            onClick = { onAction(ScoringAction.OpenCoins) },
+            variant = ButtonVariant.OUTLINE,
+        )
+    } else {
+        CareerPilotButton(
+            text = stringResource(
+                if (isStartingOptimization) {
+                    R.string.ats_cv_optimization_starting
+                } else {
+                    R.string.ats_optimize_cv
+                },
+            ),
+            onClick = { onAction(ScoringAction.OptimizeCv) },
+            enabled = !isStartingOptimization,
+            leadingContent = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_lightbulb_outline),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                )
+            },
+        )
+    }
+    optimizationError?.let { error ->
+        Text(
+            text = error.asString(),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}
+
+@Composable
+private fun PracticeActionItem(
+    stateProvider: UiStateProvider<ScoringUiState>,
+    onAction: (ScoringAction) -> Unit,
+) {
+    val trackId by rememberUiStateValue(stateProvider) { it.trackId }
+    CareerPilotButton(
+        text = stringResource(R.string.ats_start_practice_for_job),
+        onClick = { onAction(ScoringAction.StartPractice) },
+        enabled = trackId != null,
+        variant = ButtonVariant.OUTLINE,
+        leadingContent = {
+            Icon(
+                painter = painterResource(R.drawable.ic_record_outline),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+        },
+    )
+    if (trackId == null) {
+        Text(
+            text = stringResource(R.string.ats_practice_track_required),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}
+
+private enum class ScoringPhase { LOADING, ERROR, CONTENT }

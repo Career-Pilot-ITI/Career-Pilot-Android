@@ -85,7 +85,7 @@ internal fun JobHeaderCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                listOf(job.companyName, job.location)
+                sequenceOf(job.companyName, job.location)
                     .filter(String::isNotBlank)
                     .joinToString(" · ")
                     .takeIf(String::isNotBlank)

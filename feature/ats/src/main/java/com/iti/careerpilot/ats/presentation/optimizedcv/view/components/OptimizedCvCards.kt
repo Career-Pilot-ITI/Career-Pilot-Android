@@ -39,6 +39,7 @@ import com.iti.careerpilot.ats.domain.model.CvOptimizationSection
 import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.presentation.util.scoreColor
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun OptimizationSectionCard(
@@ -181,7 +182,7 @@ private fun ImprovementValue(
 
 @Composable
 internal fun RecommendedTracksCard(
-    tracks: List<String>,
+    tracks: ImmutableList<String>,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {

@@ -11,11 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun SkillGroup(
     title: String,
-    values: List<String>,
+    values: ImmutableList<String>,
     containerColor: Color,
     contentColor: Color,
 ) {

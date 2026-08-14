@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -25,16 +26,22 @@ import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
+import com.iti.careerpilot.ats.presentation.util.UiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.softShadow
 
 @Composable
 fun JobUrlTextField(
-    state: AtsEntryUiState,
+    stateProvider: UiStateProvider<AtsEntryUiState>,
     onAction: (AtsEntryAction) -> Unit,
-    jobUrlDescription: String
+    jobUrlDescription: String,
 ) {
+    val jobUrl by rememberUiStateValue(stateProvider) { it.jobUrl }
+    val isBusy by rememberUiStateValue(stateProvider) { it.isBusy }
+    val isUrlValid by rememberUiStateValue(stateProvider) { it.isUrlValid }
+
     OutlinedTextField(
-        value = state.jobUrl,
+        value = jobUrl,
         onValueChange = { onAction(AtsEntryAction.JobUrlChanged(it)) },
         modifier = Modifier
             .fillMaxWidth()
@@ -51,8 +58,8 @@ fun JobUrlTextField(
             )
         },
         singleLine = true,
-        enabled = !state.isBusy,
-        isError = state.jobUrl.isNotBlank() && !state.isUrlValid,
+        enabled = !isBusy,
+        isError = jobUrl.isNotBlank() && !isUrlValid,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         prefix = {
             Row {
