@@ -16,7 +16,6 @@ class CvOptimizationNotificationReceiver : BroadcastReceiver() {
         if (workspaceId == INVALID_ID || jobId == INVALID_ID) return
 
         val success = intent.getBooleanExtra(CvOptimizationNotifications.EXTRA_SUCCESS, false)
-        CvOptimizationNotifications.createChannels(context)
         context.getSystemService(NotificationManager::class.java).notify(
             CvOptimizationNotifications.resultNotificationId(jobId),
             CvOptimizationNotifications.terminal(

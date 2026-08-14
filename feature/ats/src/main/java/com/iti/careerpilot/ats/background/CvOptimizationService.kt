@@ -39,7 +39,6 @@ class CvOptimizationService : Service() {
     override fun onCreate() {
         super.onCreate()
         serviceScope = CoroutineScope(serviceJob + ioDispatcher)
-        CvOptimizationNotifications.createChannels(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

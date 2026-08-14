@@ -10,11 +10,11 @@ import android.net.Uri
 import androidx.core.app.NotificationCompat
 import com.iti.careerpilot.ats.R
 
-internal object CvOptimizationNotifications {
-    const val ACTION_FINISHED = "com.iti.careerpilot.ats.CV_OPTIMIZATION_FINISHED"
-    const val EXTRA_WORKSPACE_ID = "workspace_id"
-    const val EXTRA_JOB_ID = "job_id"
-    const val EXTRA_SUCCESS = "success"
+object CvOptimizationNotifications {
+    internal const val ACTION_FINISHED = "com.iti.careerpilot.ats.CV_OPTIMIZATION_FINISHED"
+    internal const val EXTRA_WORKSPACE_ID = "workspace_id"
+    internal const val EXTRA_JOB_ID = "job_id"
+    internal const val EXTRA_SUCCESS = "success"
 
     private const val PROGRESS_CHANNEL_ID = "cv_optimization_progress"
     private const val RESULT_CHANNEL_ID = "cv_optimization_results"
@@ -39,7 +39,7 @@ internal object CvOptimizationNotifications {
         )
     }
 
-    fun processing(
+    internal fun processing(
         context: Context,
         progress: Int,
         currentStep: String,
@@ -49,7 +49,7 @@ internal object CvOptimizationNotifications {
             context.getString(R.string.ats_cv_optimization_processing)
         }
         return NotificationCompat.Builder(context, PROGRESS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_ats)
+            .setSmallIcon(context.applicationInfo.icon)
             .setContentTitle(context.getString(R.string.ats_cv_optimization_processing_title))
             .setContentText(
                 context.getString(
@@ -65,13 +65,13 @@ internal object CvOptimizationNotifications {
             .build()
     }
 
-    fun terminal(
+    internal fun terminal(
         context: Context,
         workspaceId: Long,
         jobId: Long,
         success: Boolean,
     ): Notification = NotificationCompat.Builder(context, RESULT_CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_ats)
+        .setSmallIcon(context.applicationInfo.icon)
         .setContentTitle(
             context.getString(
                 if (success) {
@@ -97,10 +97,10 @@ internal object CvOptimizationNotifications {
         )
         .build()
 
-    fun progressNotificationId(jobId: Long) =
+    internal fun progressNotificationId(jobId: Long) =
         PROGRESS_NOTIFICATION_BASE + (jobId % 10_000).toInt()
 
-    fun resultNotificationId(jobId: Long) =
+    internal fun resultNotificationId(jobId: Long) =
         RESULT_NOTIFICATION_BASE + (jobId % 10_000).toInt()
 
     private fun resultPendingIntent(
