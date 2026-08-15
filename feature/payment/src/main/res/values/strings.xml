@@ -106,4 +106,25 @@
     <string name="paywall_plan_name_suffix">%1$s Plan</string>
     <string name="paywall_current_plan_badge">Current Plan</string>
     <string name="paywall_back">Back</string>
+
+    <!-- My Subscription Screen -->
+    <string name="paywall_my_subscription_title">My Subscription</string>
+    <string name="paywall_my_subscription_current_plan">Current Plan</string>
+    <string name="paywall_status_active">Active</string>
+    <string name="paywall_status_cancelled">Cancelled</string>
+    <string name="paywall_status_inactive">Inactive</string>
+    <string name="paywall_started_on">Started on %1$s</string>
+    <string name="paywall_renews_on">Renews on %1$s</string>
+    <string name="paywall_expires_on">Expires on %1$s</string>
+    <string name="paywall_pending_tier">Switching to %1$s at end of period</string>
+    <string name="paywall_included_features_title">Included in your plan</string>
+    <string name="paywall_change_plan_cta">Change Plan</string>
+    <string name="paywall_top_up_coins_cta">Top up Coins</string>
+    <string name="paywall_cancel_subscription_cta">Cancel Subscription</string>
+    <string name="paywall_cancel_dialog_title">Cancel Subscription?</string>
+    <string name="paywall_cancel_dialog_message">Are you sure you want to cancel your subscription? You will still retain access to your plan benefits until the end of the current billing cycle.</string>
+    <string name="paywall_cancel_dialog_confirm">Cancel Subscription</string>
+    <string name="paywall_cancel_dialog_dismiss">Keep Subscription</string>
+    <string name="paywall_subscription_load_error">Failed to load subscription details</string>
+    <string name="paywall_subscription_retry">Retry</string>
 </resources>

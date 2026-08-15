@@ -34,6 +34,7 @@ import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.features.paywall.presentation.view.screens.GetCoinsContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.MonthlyLimitContent
+import com.iti.careerpilot.features.paywall.presentation.view.screens.MySubscriptionScreen
 import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentFailedContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentProcessingContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentSuccessfulContent
@@ -187,6 +188,13 @@ fun PaymentNavDisplay(
                     PaymentFailedContent(
                         state = state,
                         onIntent = viewModel::onIntent
+                    )
+                }
+                entry<PaymentRoute.MySubscription> {
+                    MySubscriptionScreen(
+                        onNavigateToChoosePlan = { paymentBackStack.add(PaymentRoute.ChoosePlan) },
+                        onNavigateToGetCoins = { paymentBackStack.add(PaymentRoute.GetCoins) },
+                        onNavigateBack = safePopBackStack,
                     )
                 }
             }
