@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="challenge_details_title">Challenge Details</string>
+    <string name="challenge_details_mic_permission_title">Microphone Permission</string>
+    <string name="challenge_details_mic_permission_text">This challenge requires microphone access for audio recording.</string>
+    <string name="challenge_details_camera_permission_title">Camera Permission</string>
+    <string name="challenge_details_camera_permission_text">This challenge requires camera access for video recording.</string>
+    <string name="challenge_details_allow">Allow</string>
+    <string name="challenge_details_cancel">Cancel</string>
+    <string name="challenge_details_by">Challenge by %1$s</string>
+    <string name="challenge_details_seniority">Seniority: %1$s</string>
+    <string name="challenge_details_configuration">Configuration</string>
+    <string name="challenge_details_type">Type</string>
+    <string name="challenge_details_questions_count">%1$d Questions</string>
+    <string name="challenge_details_questions_label">Questions</string>
+    <string name="challenge_details_estimated_time">Estimated Time</string>
+    <string name="challenge_details_minutes">%1$d Minutes</string>
+    <string name="challenge_details_video_analysis">Video Analysis</string>
+    <string name="challenge_details_face_analysis">Face Analysis</string>
+    <string name="challenge_details_posture_analysis">Posture Analysis</string>
+    <string name="challenge_details_hands_analysis">Hands Analysis</string>
+    <string name="challenge_details_enabled">Enabled</string>
+    <string name="challenge_details_disabled">Disabled</string>
+    <string name="challenge_details_mic_access">Microphone Access</string>
+    <string name="challenge_details_camera_access">Camera Access</string>
+    <string name="challenge_details_tap_to_grant">Tap to Grant</string>
+    <string name="challenge_details_begin">Begin Challenge</string>
+    <string name="challenge_details_prep_tips">Preparation Tips</string>
+    <string name="challenge_details_tip_quiet">Ensure you are in a quiet environment.</string>
+    <string name="challenge_details_tip_internet">Check your internet connection.</string>
+    <string name="challenge_details_tip_focus">Stay focused and answer clearly.</string>
+    <string name="challenge_details_tip_lighting">For video sessions, ensure good lighting.</string>
 </resources>

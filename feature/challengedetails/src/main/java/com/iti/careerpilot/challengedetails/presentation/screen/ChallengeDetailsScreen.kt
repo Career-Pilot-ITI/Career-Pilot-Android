@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +74,7 @@ fun ChallengeDetailsScreenRoot(
             context,
             Manifest.permission.RECORD_AUDIO,
         ) == PackageManager.PERMISSION_GRANTED
-        
+
         val cameraGranted = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA,
@@ -104,11 +103,11 @@ fun ChallengeDetailsScreenRoot(
 
     if (state.isPermissionDialogVisible) {
         PermissionsDialog(
-            title = "Microphone Permission",
-            text = "This challenge requires microphone access for audio recording.",
+            title = stringResource(R.string.challenge_details_mic_permission_title),
+            text = stringResource(R.string.challenge_details_mic_permission_text),
             icon = Icons.Filled.Mic,
-            cancel = "Cancel",
-            allow = "Allow",
+            cancel = stringResource(R.string.challenge_details_cancel),
+            allow = stringResource(R.string.challenge_details_allow),
             onDismiss = { viewModel.onAction(ChallengeDetailsAction.PermissionDialogDismissed) },
             onGranted = {
                 viewModel.onAction(
@@ -121,11 +120,11 @@ fun ChallengeDetailsScreenRoot(
 
     if (state.showCameraPermissionDialog) {
         PermissionsDialog(
-            title = "Camera Permission",
-            text = "This challenge requires camera access for video recording.",
+            title = stringResource(R.string.challenge_details_camera_permission_title),
+            text = stringResource(R.string.challenge_details_camera_permission_text),
             icon = Icons.Filled.Videocam,
-            cancel = "Cancel",
-            allow = "Allow",
+            cancel = stringResource(R.string.challenge_details_cancel),
+            allow = stringResource(R.string.challenge_details_allow),
             onDismiss = { viewModel.onAction(ChallengeDetailsAction.CameraPermissionDialogDismissed) },
             onGranted = {
                 viewModel.onAction(
@@ -148,9 +147,7 @@ fun ChallengeDetailsScreenRoot(
         }
     ) { padding ->
         ChallengeDetailsScreenContent(
-            modifier = Modifier.padding(padding),
-            state = state,
-            onAction = viewModel::onAction
+            modifier = Modifier.padding(padding), state = state, onAction = viewModel::onAction
         )
     }
 }
@@ -169,7 +166,12 @@ fun ChallengeDetailsScreenContent(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 LoadingWave(color = MaterialTheme.colorScheme.primary)
             }
         } else if (state.challenge != null) {
@@ -187,31 +189,75 @@ fun ChallengeDetailsScreenContent(
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 )
                 Text(
-                    text = "Challenge by ${challenge.creatorName}",
+                    text = stringResource(R.string.challenge_details_by, challenge.creatorName),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Seniority: ${challenge.seniorityLevel.name}",
+                    text = stringResource(
+                        R.string.challenge_details_seniority, challenge.seniorityLevel.name
+                    ),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
 
             CareerPilotCard {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Configuration", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    
-                    DetailRow(label = "Type", value = challenge.type.name.replace("_", " "))
-                    DetailRow(label = "Questions", value = "${challenge.questions.size} Questions")
-                    DetailRow(label = "Estimated Time", value = "${challenge.questions.size * 2} Minutes")
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.challenge_details_configuration),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    DetailRow(
+                        label = stringResource(R.string.challenge_details_type),
+                        value = challenge.type.name.replace("_", " ")
+                    )
+                    DetailRow(
+                        label = stringResource(R.string.challenge_details_questions_label),
+                        value = stringResource(
+                            R.string.challenge_details_questions_count, challenge.questions.size
+                        )
+                    )
+                    DetailRow(
+                        label = stringResource(R.string.challenge_details_estimated_time),
+                        value = stringResource(
+                            R.string.challenge_details_minutes, challenge.questions.size * 2
+                        )
+                    )
 
                     if (challenge.type == ChallengeType.VIDEO_AND_AUDIO && challenge.videoAnalysisConfig != null) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        Text("Video Analysis", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                        DetailRow(label = "Face Analysis", value = "Enabled", color = MaterialTheme.colorScheme.primary)
-                        DetailRow(label = "Posture Analysis", value = if (challenge.videoAnalysisConfig?.analyzePosture == true) "Enabled" else "Disabled")
-                        DetailRow(label = "Hands Analysis", value = if (challenge.videoAnalysisConfig?.analyzeHands == true) "Enabled" else "Disabled")
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            thickness = 0.5.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        )
+                        Text(
+                            stringResource(R.string.challenge_details_video_analysis),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        DetailRow(
+                            label = stringResource(R.string.challenge_details_face_analysis),
+                            value = stringResource(R.string.challenge_details_enabled),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        DetailRow(
+                            label = stringResource(R.string.challenge_details_posture_analysis),
+                            value = if (challenge.videoAnalysisConfig?.analyzePosture == true) stringResource(
+                                R.string.challenge_details_enabled
+                            ) else stringResource(R.string.challenge_details_disabled)
+                        )
+                        DetailRow(
+                            label = stringResource(R.string.challenge_details_hands_analysis),
+                            value = if (challenge.videoAnalysisConfig?.analyzeHands == true) stringResource(
+                                R.string.challenge_details_enabled
+                            ) else stringResource(R.string.challenge_details_disabled)
+                        )
                     }
                 }
             }
@@ -220,14 +266,14 @@ fun ChallengeDetailsScreenContent(
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 PermissionRow(
-                    label = "Microphone Access",
+                    label = stringResource(R.string.challenge_details_mic_access),
                     isGranted = state.isMicrophoneGranted,
                     onClick = { onAction(ChallengeDetailsAction.MicrophoneRowClicked) }
                 )
 
                 if (challenge.type == ChallengeType.VIDEO_AND_AUDIO) {
                     PermissionRow(
-                        label = "Camera Access",
+                        label = stringResource(R.string.challenge_details_camera_access),
                         isGranted = state.isCameraGranted,
                         onClick = { onAction(ChallengeDetailsAction.CameraRowClicked) }
                     )
@@ -237,7 +283,7 @@ fun ChallengeDetailsScreenContent(
             Spacer(modifier = Modifier.weight(1f))
 
             CareerPilotButton(
-                text = "Begin Challenge",
+                text = stringResource(R.string.challenge_details_begin),
                 onClick = { onAction(ChallengeDetailsAction.BeginChallengeClicked) },
                 enabled = state.canBegin,
                 modifier = Modifier.fillMaxWidth()
@@ -247,10 +293,26 @@ fun ChallengeDetailsScreenContent(
 }
 
 @Composable
-fun DetailRow(label: String, value: String, color: Color = MaterialTheme.colorScheme.onSurface) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = color)
+fun DetailRow(
+    label: String,
+    value: String,
+    color: Color = MaterialTheme.colorScheme.onSurface
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
     }
 }
 
@@ -259,18 +321,31 @@ fun PermissionRow(label: String, isGranted: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
-        color = if (isGranted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        color = if (isGranted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        else MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = 0.5f
+        )
     ) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
             if (isGranted) {
-                Icon(Icons.Default.Check, contentDescription = "Granted", tint = MaterialTheme.colorScheme.primary)
+                Icon(
+                    Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
             } else {
-                Text("Tap to Grant", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    stringResource(R.string.challenge_details_tap_to_grant),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -281,12 +356,18 @@ fun TipsCard() {
     CareerPilotCard(
         containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Preparation Tips", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-            BulletPoint("Ensure you are in a quiet environment.")
-            BulletPoint("Check your internet connection.")
-            BulletPoint("Stay focused and answer clearly.")
-            BulletPoint("For video sessions, ensure good lighting.")
+        Column(
+            modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                stringResource(R.string.challenge_details_prep_tips),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+            BulletPoint(stringResource(R.string.challenge_details_tip_quiet))
+            BulletPoint(stringResource(R.string.challenge_details_tip_internet))
+            BulletPoint(stringResource(R.string.challenge_details_tip_focus))
+            BulletPoint(stringResource(R.string.challenge_details_tip_lighting))
         }
     }
 }
