@@ -28,6 +28,7 @@ import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.challengedashboard.presentation.screen.ChallengeDashboardScreenRoot
+import com.iti.careerpilot.challengedetails.presentation.screen.ChallengeDetailsScreenRoot
 import com.iti.careerpilot.createchallenge.presentation.screen.CreateChallengeScreenRoot
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
@@ -518,6 +519,15 @@ fun RootNavDisplay(
                     ChallengeDashboardScreenRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
+                        }
+                    )
+                }
+
+                entry<Route.ChallengeDetails> { route ->
+                    ChallengeDetailsScreenRoot(
+                        challengeId = route.challengeId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDetails>()
                         }
                     )
                 }

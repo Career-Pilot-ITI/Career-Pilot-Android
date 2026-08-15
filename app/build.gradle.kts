@@ -71,4 +71,5 @@ dependencies {
     implementation(project(":feature:challenges"))
     implementation(project(":feature:createchallenge"))
     implementation(project(":feature:challengedashboard"))
+    implementation(project(":feature:challengedetails"))
 }

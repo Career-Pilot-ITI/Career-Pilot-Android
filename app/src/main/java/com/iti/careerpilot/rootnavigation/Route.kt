@@ -94,6 +94,9 @@ sealed interface Route : NavKey {
     data object ChallengeDashboard : Route
 
     @Serializable
+    data class ChallengeDetails(val challengeId: String) : Route
+
+    @Serializable
     data class ReadyToPractice(
         val trackId: Long,
         val trackName: String,
