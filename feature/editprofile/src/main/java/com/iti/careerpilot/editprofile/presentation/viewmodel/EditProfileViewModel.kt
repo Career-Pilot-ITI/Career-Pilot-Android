@@ -51,8 +51,11 @@ class EditProfileViewModel @Inject constructor(
     val events = _events.receiveAsFlow()
 
     private var original: UserProfile = UserProfile()
+    private var hasInitialized = false
 
-    init {
+    private fun initialize() {
+        if (hasInitialized) return
+        hasInitialized = true
         loadProfile()
         loadTracks()
     }
@@ -104,6 +107,7 @@ class EditProfileViewModel @Inject constructor(
 
     fun onAction(action: EditProfileAction) {
         when (action) {
+            EditProfileAction.Initial -> initialize()
             is EditProfileAction.OnDisplayNameChange ->
                 _state.update { it.copy(displayName = action.value, displayNameError = false) }
 

@@ -31,6 +31,9 @@ fun NetworkError.toUIText(): UIText {
             NetworkError.BAD_REQUEST ->
                 R.string.error_bad_request
 
+            NetworkError.INSUFFICIENT_COINS ->
+                R.string.error_insufficient_coins
+
             NetworkError.UNAUTHORIZED ->
                 R.string.error_unauthorized
 

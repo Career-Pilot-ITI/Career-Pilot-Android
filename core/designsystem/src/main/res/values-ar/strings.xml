@@ -43,4 +43,12 @@
     <string name="not_enough_coins_title">لا توجد عملات كافية</string>
     <string name="not_enough_coins_message">يتطلب هذا %1$d عملة، ولكن لديك حاليًا %2$d عملة.</string>
     <string name="buy_coins">شراء عملات</string>
+    <string name="cv_upload_tap_to_upload">اضغط لرفع سيرتك الذاتية</string>
+    <string name="cv_upload_requirements">PDF · الحد الأقصى 10 ميجابايت</string>
+    <string name="cv_upload_preparing">جارٍ تجهيز السيرة الذاتية…</string>
+    <string name="cv_upload_ready">جاهزة للرفع</string>
+    <string name="cv_upload_uploaded">تم الرفع</string>
+    <string name="cv_upload_progress">تم رفع %1$d%%</string>
+    <string name="cv_upload_file_details">%1$s • %2$s</string>
+    <string name="cv_upload_parsing">جارٍ معالجة السيرة الذاتية…</string>
 </resources>

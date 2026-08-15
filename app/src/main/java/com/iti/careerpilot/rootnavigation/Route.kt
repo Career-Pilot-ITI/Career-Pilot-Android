@@ -30,12 +30,31 @@ sealed interface Route : NavKey {
     }
 
     @Serializable
+    data object Ats : Route
+
+    @Serializable
+    data class AtsJobDetails(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsScore(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsCoverLetter(val workspaceId: Long) : Route
+
+    @Serializable
+    data class AtsOptimizedCv(
+        val workspaceId: Long,
+        val jobId: Long,
+    ) : Route
+
+    @Serializable
     data class SessionDetails(val id: Long) : Route
 
     @Serializable
     data class PracticeSession(
         val trackId: Long,
         val sessionId: Long? = null,
+        val workspaceId: Long? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,
@@ -69,5 +88,9 @@ sealed interface Route : NavKey {
     data object Interviews : Route
 
     @Serializable
-    data class ReadyToPractice(val trackId: Long, val trackName: String) : Route
+    data class ReadyToPractice(
+        val trackId: Long,
+        val trackName: String,
+        val workspaceId: Long? = null,
+    ) : Route
 }

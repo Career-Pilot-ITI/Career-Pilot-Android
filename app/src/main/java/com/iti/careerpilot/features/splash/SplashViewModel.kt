@@ -25,8 +25,16 @@ class SplashViewModel @Inject constructor(
     val navigationEvent = _navigationEvent.receiveAsFlow()
 
 
-    init {
-        decideNextScreen()
+    private var hasInitialized = false
+
+    fun onIntent(intent: SplashIntent) {
+        when (intent) {
+            SplashIntent.Initial -> {
+                if (hasInitialized) return
+                hasInitialized = true
+                decideNextScreen()
+            }
+        }
     }
 
     private fun decideNextScreen() {
@@ -50,5 +58,9 @@ class SplashViewModel @Inject constructor(
             SplashEvent.NavigateToOnboarding
         }
     }
+}
+
+sealed interface SplashIntent {
+    data object Initial : SplashIntent
 }
 

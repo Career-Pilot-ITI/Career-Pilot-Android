@@ -22,6 +22,7 @@ import io.ktor.client.request.header
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import com.iti.careerpilot.core.network.Endpoints
+import com.iti.careerpilot.core.network.BuildConfig
 import com.iti.careerpilot.core.network.auth.SessionManager
 import com.iti.careerpilot.core.network.auth.SessionManagerImpl
 import com.iti.careerpilot.core.network.model.AuthTokensDto
@@ -89,14 +90,16 @@ object NetworkModule {
                 socketTimeoutMillis = 120_000
             }
 
-            install(Logging) {
-                level = LogLevel.ALL
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d("KtorClient", message)
+            if (BuildConfig.DEBUG) {
+                install(Logging) {
+                    level = LogLevel.ALL
+                    logger = object : Logger {
+                        override fun log(message: String) {
+                            Log.d("KtorClient", message)
+                        }
                     }
+                    sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
                 }
-                sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
             }
 
             install(DefaultRequest) {

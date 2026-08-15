@@ -9,16 +9,23 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterRoot
+import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
+import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
+import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
+import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
@@ -29,6 +36,7 @@ import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
+import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
@@ -38,14 +46,18 @@ import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.onboarding.navigation.OnboardingPagerScreen
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collectLatest
-
 
 @Composable
 fun RootNavDisplay(
     startRoute: Route,
     isOnline: Boolean,
     isLoggedIn: Boolean?,
+    pendingSharedText: String?,
+    onSharedTextConsumed: () -> Unit,
+    pendingCvOptimization: PendingCvOptimization?,
+    onCvOptimizationConsumed: () -> Unit,
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -60,7 +72,58 @@ fun RootNavDisplay(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val currentRootRoute = rootBackStack.lastOrNull()
+
+    LaunchedEffect(pendingSharedText, isLoggedIn, currentRootRoute) {
+        val authOrSetupRoute = currentRootRoute == Route.Splash ||
+            currentRootRoute == Route.Login ||
+            currentRootRoute is Route.OTP ||
+            currentRootRoute == Route.Onboarding
+        if (
+            pendingSharedText != null &&
+            isLoggedIn == true &&
+            currentRootRoute != Route.Ats &&
+            !authOrSetupRoute
+        ) {
+            rootBackStack.apply {
+                clear()
+                add(Route.NestedNav)
+                add(Route.Ats)
+            }
+        }
+    }
+
+    LaunchedEffect(pendingCvOptimization, isLoggedIn, currentRootRoute) {
+        val authOrSetupRoute = currentRootRoute == Route.Splash ||
+            currentRootRoute == Route.Login ||
+            currentRootRoute is Route.OTP ||
+            currentRootRoute == Route.Onboarding
+        if (
+            pendingCvOptimization != null &&
+            isLoggedIn == true &&
+            !authOrSetupRoute
+        ) {
+            val isCurrentResult = currentRootRoute is Route.AtsOptimizedCv &&
+                currentRootRoute.workspaceId == pendingCvOptimization.workspaceId &&
+                currentRootRoute.jobId == pendingCvOptimization.jobId
+            if (!isCurrentResult) {
+                rootBackStack.apply {
+                    clear()
+                    add(Route.NestedNav)
+                    add(Route.Ats)
+                    add(Route.AtsJobDetails(pendingCvOptimization.workspaceId))
+                    add(
+                        Route.AtsOptimizedCv(
+                            workspaceId = pendingCvOptimization.workspaceId,
+                            jobId = pendingCvOptimization.jobId,
+                        ),
+                    )
+                }
+            }
+            onCvOptimizationConsumed()
+        }
+    }
 
     val hasBottomNavigationBar = currentRootRoute == Route.NestedNav
 
@@ -69,17 +132,18 @@ fun RootNavDisplay(
             snackbarHostState.currentSnackbarData?.dismiss()
 
             val event = request.event
-            val result = snackbarHostState.showSnackbar(
-                message = event.message.asString(context),
-                withDismissAction =
-                    event.type ==
-                            CareerPilotSnackbarType.DISMISSIBLE,
-                duration = event.duration,
-                actionLabel =
-                    event.actionLabel?.asString(context),
-            )
-
-            request.complete(result)
+            try {
+                val result = snackbarHostState.showSnackbar(
+                    message = event.message.asString(context),
+                    withDismissAction = event.type == CareerPilotSnackbarType.DISMISSIBLE,
+                    duration = event.duration,
+                    actionLabel = event.actionLabel?.asString(context),
+                )
+                request.complete(result)
+            } catch (cancellation: CancellationException) {
+                request.complete(SnackbarResult.Dismissed)
+                throw cancellation
+            }
         }
     }
 
@@ -192,11 +256,12 @@ fun RootNavDisplay(
                         navigateBack = {
                             rootBackStack.removeLastOrNull()
                         },
-                        openReadyToPractice = { trackId, trackName ->
+                        openReadyToPractice = { trackId, trackName, workspaceId ->
                             rootBackStack.navigateSingleTop(
                                 Route.ReadyToPractice(
                                     trackId = trackId,
                                     trackName = trackName,
+                                    workspaceId = workspaceId,
                                 ),
                             )
                         },
@@ -210,6 +275,9 @@ fun RootNavDisplay(
                         },
                         openInterviews = {
                             rootBackStack.navigateSingleTop(Route.Interviews)
+                        },
+                        openAts = {
+                            rootBackStack.navigateSingleTop(Route.Ats)
                         },
                         logout = {
                             rootBackStack.apply {
@@ -250,6 +318,62 @@ fun RootNavDisplay(
                         },
                     )
                 }
+                entry<Route.Ats> {
+                    AtsEntryRoot(
+                        initialSharedText = pendingSharedText,
+                        onSharedTextConsumed = onSharedTextConsumed,
+                        onJobDetailsRequested = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsJobDetails(workspaceId))
+                        },
+                    )
+                }
+                entry<Route.AtsJobDetails> { route ->
+                    JobDetailsRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsJobDetails>() },
+                        openScore = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsScore(workspaceId))
+                        },
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
+                    )
+                }
+                entry<Route.AtsScore> { route ->
+                    ScoringRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsScore>() },
+                        openCoinsPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = true))
+                        },
+                        openCoverLetter = { workspaceId ->
+                            rootBackStack.navigateSingleTop(Route.AtsCoverLetter(workspaceId))
+                        },
+                        openReadyToPractice = { trackId, trackName, workspaceId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                    workspaceId = workspaceId,
+                                ),
+                            )
+                        },
+                        openJob = { url -> runCatching { uriHandler.openUri(url) } },
+                    )
+                }
+                entry<Route.AtsCoverLetter> { route ->
+                    CoverLetterRoot(
+                        workspaceId = route.workspaceId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsCoverLetter>() },
+                        openCoinsPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = true))
+                        },
+                    )
+                }
+                entry<Route.AtsOptimizedCv> { route ->
+                    OptimizedCvRoot(
+                        jobId = route.jobId,
+                        onBack = { rootBackStack.popIfCurrentIs<Route.AtsOptimizedCv>() },
+                    )
+                }
                 entry<Route.Onboarding> {
                     OnboardingPagerScreen(
                         onOnboardingFinished = {
@@ -257,14 +381,14 @@ fun RootNavDisplay(
                         }
                     )
                 }
-
-                entry<Route.PracticeSession> {
+                entry<Route.PracticeSession> { route ->
                     PracticeSessionRoot(
-                        trackId = it.trackId,
-                        sessionId = it.sessionId,
-                        isVideoSession = it.isVideoSession,
-                        enablePostureTracking = it.enablePostureTracking,
-                        enableHandTracking = it.enableHandTracking,
+                        trackId = route.trackId,
+                        sessionId = route.sessionId,
+                        workspaceId = route.workspaceId,
+                        isVideoSession = route.isVideoSession,
+                        enablePostureTracking = route.enablePostureTracking,
+                        enableHandTracking = route.enableHandTracking,
                         onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(
@@ -387,18 +511,20 @@ fun RootNavDisplay(
                     ReadyToPracticeRoot(
                         trackId = route.trackId,
                         trackName = route.trackName,
+                        workspaceId = route.workspaceId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
                         },
                         openPaywall = {
                             rootBackStack.navigateSingleTop(Route.Paywall())
                         },
-                        openPractice = { trackId, isVideo, enablePosture, enableHands ->
+                        openPractice = { trackId, workspaceId, isVideo, enablePosture, enableHands ->
                             rootBackStack.apply {
                                 popIfCurrentIs<Route.ReadyToPractice>()
                                 navigateSingleTop(
                                     Route.PracticeSession(
                                         trackId = trackId,
+                                        workspaceId = workspaceId,
                                         sessionId = null,
                                         isVideoSession = isVideo,
                                         enablePostureTracking = enablePosture,

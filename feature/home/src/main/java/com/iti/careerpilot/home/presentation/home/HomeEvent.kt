@@ -9,4 +9,5 @@ sealed interface HomeEvent {
     data class NavigateToPlansPaywall(val showMySubscription: Boolean = false) : HomeEvent
     data object NavigateToCoinsPaywall : HomeEvent
     data object NavigateToReports : HomeEvent
+    data object NavigateToAts : HomeEvent
 }

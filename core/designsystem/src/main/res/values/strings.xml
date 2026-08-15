@@ -43,4 +43,12 @@
     <string name="not_enough_coins_title">Not enough coins</string>
     <string name="not_enough_coins_message">This requires %1$d coins, but you currently have %2$d coins.</string>
     <string name="buy_coins">Buy Coins</string>
+    <string name="cv_upload_tap_to_upload">Tap to upload your CV</string>
+    <string name="cv_upload_requirements">PDF · Max 10 MB</string>
+    <string name="cv_upload_preparing">Preparing your CV…</string>
+    <string name="cv_upload_ready">Ready</string>
+    <string name="cv_upload_uploaded">Uploaded</string>
+    <string name="cv_upload_progress">%1$d%% uploaded</string>
+    <string name="cv_upload_file_details">%1$s • %2$s</string>
+    <string name="cv_upload_parsing">Parsing CV…</string>
 </resources>

@@ -14,6 +14,7 @@ import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,20 +48,21 @@ class ProfileViewModel @Inject constructor(
     private val _events = Channel<ProfileEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    init {
-        viewModelScope.launch {
-            // Always ensure local avatar/CV files exist (re-download from server URLs if missing).
-            // This is a fast, local-first check — it only makes network calls if files are absent.
+    private var initializationJob: Job? = null
+
+    private fun initialize() {
+        if (initializationJob != null) return
+        initializationJob = viewModelScope.launch {
             profileRepo.downloadMissingFiles()
-        }
-        if (profileRepo.userProfile.value.id == 0L) {
-            // No cached data yet — do a full network refresh (which also downloads files).
-            refreshProfile()
+            if (profileRepo.userProfile.value.id == 0L) {
+                refreshProfile()
+            }
         }
     }
 
     fun onAction(action: ProfileAction) {
         when (action) {
+            ProfileAction.Initial -> initialize()
             is ProfileAction.OnEditProfileClick -> sendEvent(ProfileEvent.NavigateToEditProfile(action.section))
             ProfileAction.OnSettingsClick -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileAction.OnSubscriptionClick -> sendEvent(ProfileEvent.NavigateToSubscription)

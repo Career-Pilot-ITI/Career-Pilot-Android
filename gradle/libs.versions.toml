@@ -196,6 +196,7 @@ careerpilot-feature-practice-session = { id = "careerpilot.feature.practicesessi
 careerpilot-module-whisper = { id = "careerpilot.module.whisper" }
 careerpilot-module-bodylanguage = { id = "careerpilot.module.bodylanguage" }
 careerpilot-feature-reports = { id = "careerpilot.feature.reports" }
+careerpilot-feature-ats = { id = "careerpilot.feature.ats" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 careerpilot-module-ai = { id = "careerpilot.module.ai" }
 

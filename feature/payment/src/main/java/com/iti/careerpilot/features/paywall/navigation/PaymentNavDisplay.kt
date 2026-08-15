@@ -57,6 +57,10 @@ fun PaymentNavDisplay(
     val context = LocalContext.current
     val primaryColor = MaterialTheme.colorScheme.primary.toArgb()
 
+    LaunchedEffect(viewModel) {
+        viewModel.onIntent(PaywallIntent.Initial)
+    }
+
     LaunchedEffect(viewModel.effectFlow, lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effectFlow.collect { effect ->
