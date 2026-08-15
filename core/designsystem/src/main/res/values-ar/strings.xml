@@ -43,6 +43,10 @@
     <string name="not_enough_coins_title">لا توجد عملات كافية</string>
     <string name="not_enough_coins_message">يتطلب هذا %1$d عملة، ولكن لديك حاليًا %2$d عملة.</string>
     <string name="buy_coins">شراء عملات</string>
+    <string name="pricing_badge_coins">%1$d عملة</string>
+    <string name="coin_top_up_required">المطلوب</string>
+    <string name="coin_top_up_current_balance">الرصيد الحالي</string>
+    <string name="coin_top_up_description">ليس لديك رصيد كافٍ من العملات لاستخدام هذه الميزة. اشحن محفظتك للمتابعة.</string>
     <string name="cv_upload_tap_to_upload">اضغط لرفع سيرتك الذاتية</string>
     <string name="cv_upload_requirements">PDF · الحد الأقصى 10 ميجابايت</string>
     <string name="cv_upload_preparing">جارٍ تجهيز السيرة الذاتية…</string>
