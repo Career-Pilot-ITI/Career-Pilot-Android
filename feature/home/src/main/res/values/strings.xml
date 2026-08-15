@@ -35,6 +35,7 @@
 
     <!-- Practice interview card -->
     <string name="home_practice_interview">Practice Interview</string>
+    <string name="home_no_track_selected">Choose a career track in your profile to start an interview.</string>
     <string name="home_start_practice">Start practice interview</string>
 
     <!-- ATS job match card -->

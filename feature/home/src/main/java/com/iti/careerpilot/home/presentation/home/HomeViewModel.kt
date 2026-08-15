@@ -3,6 +3,7 @@ package com.iti.careerpilot.home.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
+import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
@@ -12,6 +13,7 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.sync.UserProfileSync
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,22 +70,22 @@ class HomeViewModel @Inject constructor(
 
             HomeAction.PracticeInterviewClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: 1L
+                val trackId = current.practiceTrackId ?: return promptForTrack()
                 sendEvent(
                     HomeEvent.NavigateToReadyToPractice(
                         trackId = trackId,
-                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
+                        trackName = current.practiceTrackName,
                     )
                 )
             }
 
             HomeAction.LessonClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: 1L
+                val trackId = current.practiceTrackId ?: return promptForTrack()
                 sendEvent(
                     HomeEvent.NavigateToQuiz(
                         trackId = trackId,
-                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
+                        trackName = current.practiceTrackName,
                     )
                 )
             }
@@ -195,6 +197,14 @@ class HomeViewModel @Inject constructor(
 
     private fun sendEvent(event: HomeEvent) {
         viewModelScope.launch { _events.send(event) }
+    }
+
+    private fun promptForTrack() {
+        viewModelScope.launch {
+            CareerPilotSnackbarController.show(
+                UIText.StringResource(R.string.home_no_track_selected),
+            )
+        }
     }
 
     private companion object {
