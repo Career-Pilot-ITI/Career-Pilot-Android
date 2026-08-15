@@ -5,6 +5,7 @@ import com.iti.common.model.ProfileEditSection
 sealed interface ProfileEvent {
     data class NavigateToEditProfile(val section: ProfileEditSection) : ProfileEvent
     data object NavigateToSettings : ProfileEvent
+    data object NavigateToSubscription : ProfileEvent
     data object NavigateToLogout : ProfileEvent
     data class OpenCV(val url: String) : ProfileEvent
 }

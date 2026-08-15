@@ -52,6 +52,7 @@ import java.io.File
 fun ProfileRoot(
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
+    openSubscription: () -> Unit = {},
     logout: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -63,6 +64,7 @@ fun ProfileRoot(
         when (event) {
             is ProfileEvent.NavigateToEditProfile -> openEditProfile(event.section)
             ProfileEvent.NavigateToSettings -> openSettings()
+            ProfileEvent.NavigateToSubscription -> openSubscription()
             ProfileEvent.NavigateToLogout -> logout()
             is ProfileEvent.OpenCV -> {
                 if (event.url.isNotBlank()) {
@@ -148,6 +150,7 @@ fun ProfileScreen(
             item {
                 MenuSection(
                     onOpenSettings = { onAction(ProfileAction.OnSettingsClick) },
+                    onOpenSubscription = { onAction(ProfileAction.OnSubscriptionClick) },
                     onLogOut = { onAction(ProfileAction.OnLogoutClick) },
                     onEditPersonalInfoClick = {
                         onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.PERSONAL))

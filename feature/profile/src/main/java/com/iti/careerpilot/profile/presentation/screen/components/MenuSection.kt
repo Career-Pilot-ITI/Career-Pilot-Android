@@ -21,6 +21,7 @@ fun MenuSection(
     onEditPersonalInfoClick: () -> Unit,
     onEditCareerClick: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSubscription: () -> Unit,
     onLogOut: () -> Unit,
 ) {
     CareerPilotCard(
@@ -38,6 +39,12 @@ fun MenuSection(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_business),
                 label = stringResource(R.string.career_info),
                 onClick = onEditCareerClick
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            MenuRow(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_workspace_premium),
+                label = stringResource(R.string.subscription),
+                onClick = onOpenSubscription
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
             MenuRow(
