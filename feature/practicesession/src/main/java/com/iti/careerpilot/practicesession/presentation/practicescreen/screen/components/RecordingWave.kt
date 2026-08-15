@@ -26,7 +26,6 @@ fun RecordingWave(
 ) {
     Canvas(
         modifier = modifier
-            .fillMaxWidth()
             .height(height)
     ) {
         if (volumeBars.isEmpty()) return@Canvas
@@ -40,9 +39,9 @@ fun RecordingWave(
         val startX = (size.width - totalWaveformWidth) / 2f
 
         volumeBars.forEachIndexed { index, bar ->
-            val alpha = when {
-                index == 0 || index == totalBars - 1 -> 0.2f
-                index == 1 || index == totalBars - 2 -> 0.6f
+            val alpha = when (index) {
+                0, totalBars - 1 -> 0.2f
+                1, totalBars - 2 -> 0.6f
                 else -> 1f
             }
 

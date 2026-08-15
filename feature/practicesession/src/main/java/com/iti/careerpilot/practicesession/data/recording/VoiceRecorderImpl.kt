@@ -27,7 +27,7 @@ class VoiceRecorderImpl @Inject constructor(
 ) : VoiceRecorder {
 
     companion object {
-        private const val MAX_AMPLITUDE_VALUE = 26_000L
+        private const val MAX_AMPLITUDE_VALUE = 20_000L
         const val TEMP_DIRECTORY = "voice_recordings"
         const val RECORDING_FILE_EXTENSION = "mp4"
         const val TEMP_FILE_PREFIX = "temp_recording"
@@ -86,16 +86,12 @@ class VoiceRecorderImpl @Inject constructor(
             while (isRecording) {
                 val amplitude = getAmplitude()
                 _recordingDetails.update { currentDetails ->
-                    if (!isRecording) {
-                        currentDetails
-                    } else {
-                        currentDetails.copy(
-                            amplitudes = currentDetails.amplitudes + amplitude,
-                            isRecording = true,
-                        )
-                    }
+                    currentDetails.copy(
+                        amplitudes = currentDetails.amplitudes + amplitude,
+                        isRecording = true,
+                    )
                 }
-                delay(100L.milliseconds)
+                delay(50L.milliseconds)
             }
         }
     }

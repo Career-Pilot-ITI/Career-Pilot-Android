@@ -2,14 +2,13 @@ package com.iti.careerpilot.home.presentation.ready.screen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.home.R
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+
 @Composable
 fun LandmarkFeatureChips(
     enablePosture: Boolean,
@@ -29,6 +28,15 @@ fun LandmarkFeatureChips(
     onHandsToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val chipColors = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = MaterialTheme.colorScheme.primary,
+        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+        selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimary,
+        disabledSelectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+        disabledLabelColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+        disabledLeadingIconColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+    )
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Dimens.SpaceS)
@@ -54,6 +62,7 @@ fun LandmarkFeatureChips(
                     )
                 },
                 enabled = false,
+                colors = chipColors,
             )
             // Posture
             FilterChip(
@@ -66,6 +75,7 @@ fun LandmarkFeatureChips(
                         contentDescription = null,
                     )
                 },
+                colors = chipColors,
             )
             // Hands
             FilterChip(
@@ -78,6 +88,7 @@ fun LandmarkFeatureChips(
                         contentDescription = null,
                     )
                 },
+                colors = chipColors,
             )
         }
     }

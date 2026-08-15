@@ -1,7 +1,6 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.screen
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -28,9 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.ui.draw.clip
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,16 +38,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -353,8 +349,7 @@ fun PracticeSessionScreen(
                         )
                     }
                 }
-
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(16.dp))
 
                 // Question Card (positioned below the camera stage)
                 AnimatedVisibility(
@@ -368,23 +363,30 @@ fun PracticeSessionScreen(
                         isReadingQuestion = state.isReadingQuestion,
                         onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
                         onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) },
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
 
+                Spacer(Modifier.height(16.dp))
                 // Recording Waveform & Duration
                 AnimatedVisibility(
                     visible = state.isRecording,
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
+                            .padding(vertical = 2.dp)
                     ) {
                         RecordingWave(
                             volumeBars = state.volumeBars,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier
+                                .weight(1f)
                         )
                         RecordingDurationCard(
                             durationMs = state.recordingDuration.inWholeMilliseconds,

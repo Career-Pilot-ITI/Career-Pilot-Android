@@ -177,7 +177,7 @@ class AudioPlayerImpl @Inject constructor(
                         durationPlayed = exoPlayer.currentPosition.milliseconds
                     )
                 }
-                delay(100L.milliseconds)
+                delay(10L.milliseconds)
             } while (activeTrack.value.isPlaying && exoPlayer.isPlaying)
         }
     }

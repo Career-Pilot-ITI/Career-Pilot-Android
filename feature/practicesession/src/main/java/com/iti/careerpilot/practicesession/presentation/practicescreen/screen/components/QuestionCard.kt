@@ -4,12 +4,11 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -46,18 +46,18 @@ fun QuestionCard(
     val scrollbarColor = MaterialTheme.colorScheme.primary
 
     CareerPilotCard(
-        elevation = 8.dp,
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 12.dp, end = 8.dp, bottom = 8.dp)
+                .clip(RoundedCornerShape(bottomStart = 8.dp)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -81,19 +81,18 @@ fun QuestionCard(
                     )
                 }
             }
-            Spacer(Modifier.height(6.dp))
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 110.dp)
+                    .heightIn(max = 120.dp)
                     .verticalScrollbar(scrollState = scrollState, color = scrollbarColor)
                     .verticalScroll(scrollState)
                     .padding(end = 8.dp)
             ) {
                 Text(
                     text = questionText ?: stringResource(R.string.loading_question),
-                    style = MaterialTheme.typography.bodyMedium.copy(
+                    style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Start
                     ),

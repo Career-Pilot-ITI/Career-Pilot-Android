@@ -46,10 +46,10 @@ fun RecordingDurationCard(
     )
 
     Card(
-        modifier = modifier.padding(bottom = 8.dp),
+        modifier = modifier,
         shape = CircleShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f)
+            containerColor = Color.Transparent
         )
     ) {
         Row(

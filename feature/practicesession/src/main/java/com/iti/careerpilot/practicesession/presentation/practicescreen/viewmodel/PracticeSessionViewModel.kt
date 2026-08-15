@@ -114,7 +114,7 @@ class PracticeSessionViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var volumeBarIdCounter = 0L
     private var lastWaveUpdateMs = 0L
-    private val waveUpdateIntervalMs = 120L
+    private val waveUpdateIntervalMs = 50L
 
     private val _state = MutableStateFlow(PracticeSessionState(
         volumeBars = createInitialVolumeBars()
@@ -154,13 +154,16 @@ class PracticeSessionViewModel @Inject constructor(
 
                 bodyLanguageAnalyzer.setRecordingActive(isRecordingNow)
 
-                _state.update {
-                    val normalizedAmps = amplitudeNormalizer.remapAmplitudes(details.amplitudes)
-                    val currentBars = it.volumeBars.toMutableList()
+                _state.update { state ->
+                    val currentBars = state.volumeBars.toMutableList()
                     val currentTime = System.currentTimeMillis()
-                    
-                    if (normalizedAmps.isNotEmpty() && (currentTime - lastWaveUpdateMs >= waveUpdateIntervalMs)) {
-                        val newAmp = normalizedAmps.last().coerceIn(0.12f, 1f)
+
+                    if (details.amplitudes.isNotEmpty() && (currentTime - lastWaveUpdateMs >= waveUpdateIntervalMs)) {
+                        val lastRawAmp = details.amplitudes.last()
+                        // Remap only the last amplitude instead of the whole list
+                        val normalizedAmp = amplitudeNormalizer.remapAmplitudes(listOf(lastRawAmp)).first()
+                        val newAmp = normalizedAmp.coerceIn(0.12f, 1f)
+
                         currentBars.add(VolumeBar(newAmp, volumeBarIdCounter++))
                         if (currentBars.size > WAVE_BAR_COUNT) {
                             currentBars.removeAt(0)
@@ -168,7 +171,7 @@ class PracticeSessionViewModel @Inject constructor(
                         lastWaveUpdateMs = currentTime
                     }
 
-                    it.copy(
+                    state.copy(
                         isRecording = details.isRecording,
                         recordedAudioPath = details.filePath,
                         amplitudes = details.amplitudes,

@@ -16,7 +16,6 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.map
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
@@ -39,10 +38,6 @@ class SessionRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<SessionDto, NetworkError> {
         return safeCall<CareerPilotApiResponse<SessionDto>> {
             httpClient.post(Endpoints.INTERVIEW_SESSIONS) {
-                timeout {
-                    requestTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                    socketTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                }
                 setBody(request)
             }
         }.map { it.data }
@@ -62,10 +57,6 @@ class SessionRemoteDataSourceImpl @Inject constructor(
         }
         return safeCall<FileUploadResponse> {
             httpClient.post(Endpoints.UPLOAD_FILE) {
-                timeout {
-                    requestTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                    socketTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                }
                 setBody(
                     MultiPartFormDataContent(
                         formData {
@@ -103,10 +94,6 @@ class SessionRemoteDataSourceImpl @Inject constructor(
     ): CareerPilotResult<AnswerResponseDto, NetworkError> {
         return safeCall<CareerPilotApiResponse<AnswerResponseDto>> {
             httpClient.post(Endpoints.SUBMIT_ANSWER(sessionId)) {
-                timeout {
-                    requestTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                    socketTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                }
                 setBody(request)
             }
         }.map { it.data }
@@ -116,12 +103,7 @@ class SessionRemoteDataSourceImpl @Inject constructor(
         sessionId: Long
     ): CareerPilotResult<SessionResultDto, NetworkError> {
         return safeCall<CareerPilotApiResponse<SessionResultDto>> {
-            httpClient.get(Endpoints.GET_SESSION_FEEDBACK(sessionId)) {
-                timeout {
-                    requestTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                    socketTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
-                }
-            }
+            httpClient.get(Endpoints.GET_SESSION_FEEDBACK(sessionId))
         }.map { it.data }
     }
 
@@ -131,9 +113,5 @@ class SessionRemoteDataSourceImpl @Inject constructor(
         return safeCall<CareerPilotApiResponse<OldSessionDto>> {
             httpClient.get(Endpoints.GET_SESSION_STATE(sessionId))
         }.map { it.data }
-    }
-
-    companion object {
-        private const val AI_REQUEST_TIMEOUT_MILLIS = 120_000L
     }
 }
