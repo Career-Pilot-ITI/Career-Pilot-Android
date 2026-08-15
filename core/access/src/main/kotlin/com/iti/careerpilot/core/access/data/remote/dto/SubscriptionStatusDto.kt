@@ -27,7 +27,12 @@ data class SubscriptionStatusDto(
     @SerialName("coin_balance") val coinBalance: Int = 0
 ) {
     fun toDomain(syncTime: Instant = Clock.System.now()): AccessState {
-        val parsedPlan = runCatching { Plan.valueOf(plan.uppercase()) }.getOrDefault(Plan.FREE)
+        val parsedPlan = when (plan.uppercase().trim()) {
+            "FREE" -> Plan.FREE
+            "PLUS" -> Plan.PLUS
+            "PRO", "MAX" -> Plan.MAX // backend sends "PRO"; app calls it "MAX"
+            else -> Plan.FREE
+        }
         val domainFeatures = features.map { FeatureKey.from(it) }.toSet()
         val domainQuotas = quotas.associate { q ->
             val key = FeatureKey.from(q.feature)

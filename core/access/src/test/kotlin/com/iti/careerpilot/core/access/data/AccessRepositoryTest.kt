@@ -3,6 +3,7 @@ package com.iti.careerpilot.core.access.data
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import com.iti.careerpilot.core.access.data.local.AccessLocalDataSource
 import com.iti.careerpilot.core.access.data.remote.AccessRemoteDataSource
+import com.iti.careerpilot.core.access.data.remote.dto.SubscriptionStatusDto
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.AccessState
@@ -41,6 +42,7 @@ class AccessRepositoryTest {
         override suspend fun clearUserProfile() {
             _userProfile.value = UserProfile()
         }
+        override suspend fun setBodyLanguageConsent(given: Boolean) {}
     }
 
     @Test
@@ -181,5 +183,29 @@ class AccessRepositoryTest {
         assertEquals(AccessState.Free, repository.accessState.value)
         assertEquals("", userProfileRepo.readUserProfile().account.subscriptionTier)
         assertEquals(0, userProfileRepo.readUserProfile().account.coinBalance)
+    }
+
+    @Test
+    fun `backend plan string PRO maps to Plan MAX`() {
+        val dto = SubscriptionStatusDto(
+            plan = "PRO", features = emptyList(), quotas = emptyList(), coinBalance = 0
+        )
+        assertEquals(Plan.MAX, dto.toDomain().plan)
+    }
+
+    @Test
+    fun `backend plan string pro lowercase maps to Plan MAX`() {
+        val dto = SubscriptionStatusDto(
+            plan = "pro", features = emptyList(), quotas = emptyList(), coinBalance = 0
+        )
+        assertEquals(Plan.MAX, dto.toDomain().plan)
+    }
+
+    @Test
+    fun `unknown backend plan string falls back to FREE`() {
+        val dto = SubscriptionStatusDto(
+            plan = "ENTERPRISE", features = emptyList(), quotas = emptyList(), coinBalance = 0
+        )
+        assertEquals(Plan.FREE, dto.toDomain().plan)
     }
 }
