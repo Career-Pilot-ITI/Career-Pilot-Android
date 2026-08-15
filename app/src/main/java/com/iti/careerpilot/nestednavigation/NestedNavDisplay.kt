@@ -37,6 +37,7 @@ fun NestedNavDisplay(
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openQuiz: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
 ) {
 
@@ -92,6 +93,7 @@ fun NestedNavDisplay(
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
                         openReadyToPractice = openReadyToPractice,
+                        openQuiz = openQuiz,
                         openSessionDetails = openSessionDetails,
                         openPracticeSession = { trackId, sessionId ->
                             openPracticeSession(trackId, sessionId)

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.careerpilot.android.datastore)
     alias(libs.plugins.careerpilot.android.workmanager)
     alias(libs.plugins.careerpilot.testing)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -24,6 +25,10 @@ android {
                 enable = false
             }
         }
+    }
+
+    androidResources {
+        noCompress.add("task")
     }
 }
 
@@ -55,7 +60,11 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
     implementation(project(":feature:home"))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
     implementation(project(":feature:settings"))
     implementation(project(":feature:practicesession"))
+    implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))
 }

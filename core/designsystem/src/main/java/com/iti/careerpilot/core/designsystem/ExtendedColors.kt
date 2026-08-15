@@ -20,6 +20,9 @@ data class ExtendedColors(
     val studioLive: Color,
     val studioGradientStops: List<Color>,
     val studioBrandBrush: Brush,
+    // IntelliJ-like code block colors
+    val codeBackground: Color,
+    val codeForeground: Color,
 )
 
 val LightExtendedColors = ExtendedColors(
@@ -45,6 +48,8 @@ val LightExtendedColors = ExtendedColors(
             Color(0xFF3ED6C6),
         )
     ),
+    codeBackground = Color(0xFFF8F8F8),
+    codeForeground = Color(0xFF000000),
 )
 
 val DarkExtendedColors = ExtendedColors(
@@ -70,6 +75,8 @@ val DarkExtendedColors = ExtendedColors(
             Color(0xFF3ED6C6),
         )
     ),
+    codeBackground = Color(0xFF2B2B2B),
+    codeForeground = Color(0xFFB8C5D3),
 )
 
 val LocalExtendedColors = staticCompositionLocalOf {

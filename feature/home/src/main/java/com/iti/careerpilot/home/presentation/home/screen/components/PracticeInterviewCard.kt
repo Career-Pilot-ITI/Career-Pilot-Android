@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +31,8 @@ import com.iti.careerpilot.home.R
 @Composable
 fun PracticeInterviewCard(
     trackName: String,
-    onClick: () -> Unit,
+    onInterviewClick: () -> Unit,
+    onLessonClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(
@@ -37,7 +40,7 @@ fun PracticeInterviewCard(
     ) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onClick)
+                .clickable(onClick = onInterviewClick)
                 .padding(Dimens.CardPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
@@ -85,6 +88,17 @@ fun PracticeInterviewCard(
                     tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
+        }
+        HorizontalDivider()
+        TextButton (
+            onClick = onLessonClick,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth(),
+        ) {
+            Text(
+                text = stringResource(R.string.see_lessons)
+            )
         }
     }
 }

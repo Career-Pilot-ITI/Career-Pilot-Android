@@ -18,7 +18,11 @@ class TextToSpeechManager @Inject constructor(
     private var isInitialized = false
 
     init {
-        textToSpeech = TextToSpeech(context, this)
+        try {
+            textToSpeech = TextToSpeech(context, this)
+        } catch (_: Throwable) {
+            // Stub on JVM unit test framework
+        }
     }
 
     override fun onInit(status: Int) {

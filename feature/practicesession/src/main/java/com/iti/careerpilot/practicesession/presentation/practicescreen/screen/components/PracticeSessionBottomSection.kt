@@ -2,9 +2,6 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.c
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,9 +26,9 @@ fun PracticeSessionBottomSection(
                 isPlayingAudio = isPlayingAudio,
                 playbackDurationMs = playbackDurationMs,
                 playbackPositionMs = playbackPositionMs,
-                onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
                 onTogglePlay = { onAction(PracticeSessionAction.TogglePlayingCurrentRecordedAnswer) },
                 onSeek = { ms -> onAction(PracticeSessionAction.SeekAudioTo(ms)) },
+                onDiscard = { onAction(PracticeSessionAction.ShowOrHideDiscardConfirmDialog(true)) },
                 onSubmit = { onAction(PracticeSessionAction.SubmitAnswerToCurrentQuestion) }
             )
         } else {
@@ -47,4 +44,3 @@ fun PracticeSessionBottomSection(
         }
     }
 }
-

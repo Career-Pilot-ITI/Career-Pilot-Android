@@ -26,6 +26,8 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.practicesession.R
 
 
+import androidx.compose.material3.Surface
+
 @Composable
 fun ActionBottomBar(
     isRecording: Boolean,
@@ -42,7 +44,7 @@ fun ActionBottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

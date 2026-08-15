@@ -42,7 +42,7 @@
     <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
 
     <!-- Available interviews -->
-    <string name="home_available_interviews">المقابلات المتاحة</string>
+    <string name="home_available_interviews">المقابلات</string>
     <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
 
     <!-- Recent sessions -->
@@ -84,5 +84,22 @@
     <string name="ready_permission_allow">السماح</string>
     <string name="ready_permission_cancel">ليس الآن</string>
     <string name="getting_ready">جاري الاستعداد</string>
+    <string name="start_interview">ابدأ الانترفيو</string>
+    <string name="see_lessons">الدروس</string>
+    <string name="start_lessons">ابدأ الدروس</string>
+    <string name="audio_session">جلسة صوتية</string>
+    <string name="video_session">جلسة فيديو</string>
+    <string name="pro_badge">احترافي</string>
+
+    <string name="ready_feature_face">الوجه</string>
+    <string name="ready_feature_posture">وضعية الجسم</string>
+    <string name="ready_feature_hands">اليدين</string>
+    <string name="ready_analysis_features">ميزات التحليل</string>
+
+    <string name="ready_camera_permission_title">الوصول إلى الكاميرا</string>
+    <string name="ready_camera_permission_text">يحتاج CareerPilot إلى الكاميرا لتحليل لغة الجسد أثناء المقابلة المصورة.</string>
+    <string name="ready_camera_title">الوصول إلى الكاميرا</string>
+    <string name="ready_camera_required">مطلوب للفيديو</string>
+    <string name="ready_camera_granted">تم منح الوصول</string>
 
 </resources>

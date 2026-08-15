@@ -4,10 +4,16 @@ sealed interface PracticeSessionAction {
 
     data class CreateNewPracticeSession(
         val trackId: Long,
+        val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : PracticeSessionAction
 
     data class RestartPracticeSession(
         val sessionId: Long,
+        val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : PracticeSessionAction
 
     data class ShowOrHidePermissionDialog(
@@ -45,4 +51,8 @@ sealed interface PracticeSessionAction {
     data object SubmitAnswerToCurrentQuestion: PracticeSessionAction
     data object DiscardCurrentAnswer: PracticeSessionAction
     data object ToggleQuestionCard: PracticeSessionAction
+
+    // Body language actions
+    data class ToggleCameraPreview(val visible: Boolean) : PracticeSessionAction
+    data class OnFrame(val imageProxy: androidx.camera.core.ImageProxy) : PracticeSessionAction
 }

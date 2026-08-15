@@ -3,6 +3,8 @@ package com.iti.careerpilot.home.presentation.ready
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
+import com.iti.core.datastore.models.isPaidSubscriber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadyToPracticeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReadyToPracticeState())
@@ -29,6 +32,21 @@ class ReadyToPracticeViewModel @Inject constructor(
     init {
         savedStateHandle.get<String>(KEY_TRACK_NAME)?.let { savedTrackName ->
             _state.update { it.copy(trackName = savedTrackName) }
+        }
+        observeUserProfile()
+    }
+
+    private fun observeUserProfile() {
+        viewModelScope.launch {
+            getUserProfileUseCase().collect { profile ->
+                val isPaid = profile.isPaidSubscriber()
+                _state.update {
+                    it.copy(
+                        isPaidPlan = isPaid,
+                        isVideoMode = if (isPaid) it.isVideoMode else false
+                    )
+                }
+            }
         }
     }
 
@@ -48,12 +66,56 @@ class ReadyToPracticeViewModel @Inject constructor(
                 )
             }
 
+            is ReadyToPracticeAction.CameraPermissionChanged -> _state.update {
+                it.copy(
+                    isCameraGranted = action.isGranted,
+                    showCameraPermissionDialog = false,
+                )
+            }
+
+            ReadyToPracticeAction.SelectAudioMode -> _state.update {
+                it.copy(
+                    isVideoMode = false,
+                    enablePostureTracking = false,
+                    enableHandTracking = false
+                )
+            }
+
+            is ReadyToPracticeAction.TogglePostureTracking -> _state.update {
+                it.copy(enablePostureTracking = action.enabled)
+            }
+
+            is ReadyToPracticeAction.ToggleHandTracking -> _state.update {
+                it.copy(enableHandTracking = action.enabled)
+            }
+
+            ReadyToPracticeAction.SelectVideoMode -> {
+                if (_state.value.isPaidPlan) {
+                    _state.update { 
+                        it.copy(
+                            isVideoMode = true,
+                            showCameraPermissionDialog = !it.isCameraGranted
+                        ) 
+                    }
+                } else {
+                    sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                }
+            }
+
             ReadyToPracticeAction.MicrophoneRowClicked -> _state.update {
                 if (it.isMicrophoneGranted) it else it.copy(isPermissionDialogVisible = true)
             }
 
             ReadyToPracticeAction.PermissionDialogDismissed -> _state.update {
                 it.copy(isPermissionDialogVisible = false)
+            }
+
+            ReadyToPracticeAction.CameraRowClicked -> _state.update {
+                if (it.isCameraGranted) it else it.copy(showCameraPermissionDialog = true)
+            }
+
+            ReadyToPracticeAction.CameraPermissionDialogDismissed -> _state.update {
+                it.copy(showCameraPermissionDialog = false)
             }
 
             ReadyToPracticeAction.BeginInterviewClicked -> beginInterview()
@@ -65,7 +127,15 @@ class ReadyToPracticeViewModel @Inject constructor(
     private fun beginInterview() {
         val id = trackId ?: return
         if (!_state.value.canBegin) return
-        sendEvent(ReadyToPracticeEvent.NavigateToPractice(trackId = id))
+        val s = _state.value
+        sendEvent(
+            ReadyToPracticeEvent.NavigateToPractice(
+                trackId = id,
+                isVideo = s.isVideoMode,
+                enablePosture = s.enablePostureTracking,
+                enableHands = s.enableHandTracking,
+            )
+        )
     }
 
     private fun sendEvent(event: ReadyToPracticeEvent) {

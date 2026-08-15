@@ -23,7 +23,7 @@ data class SessionQuestionResult(
     val userTranscript: String,
     val durationMs: Long,
     val speechRateWpm: Double,
-    val avgPauseMs: Int,
+    val avgPauseMs: Double,
     val silenceRatio: Double,
     val createdAt: String,
     val completedAt: String,

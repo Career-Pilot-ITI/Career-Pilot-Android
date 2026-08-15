@@ -41,6 +41,15 @@
     <string name="error_storage_file_not_found">الملف غير موجود. ربما تم نقله أو حذفه.</string>
     <string name="error_storage_permission_denied">تعذر العثور على ملف PDF المحدد. يرجى التحقق من وجود الملف ومحاولة اختياره مرة أخرى.</string>
 
+    <!-- AI and Firebase errors -->
+    <string name="error_firebase">حدثت مشكلة في خدماتنا. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_ai">يواجه المساعد الذكي مشكلة. يرجى المحاولة مرة أخرى بعد قليل.</string>
+    <string name="error_empty_response">قدم المساعد الذكي استجابة فارغة. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_ai_quota_exceeded">المساعد الذكي مشغول حاليًا. يرجى المحاولة لاحقًا.</string>
+    <string name="error_ai_prompt_blocked">تم حظر الطلب بواسطة فلاتر الأمان. يرجى محاولة طلب آخر.</string>
+    <string name="error_ai_response_stopped">توقف المساعد الذكي عن إنشاء الاستجابة. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_ai_timeout">انتهت مهلة طلب المساعد الذكي. يرجى المحاولة مرة أخرى.</string>
+
     <!-- إجراءات شريط الإشعار -->
     <string name="transcription_error_unknown">فشل التفريغ الصوتي  يرجى المحاولة مرة اخرى</string>
     <string name="snackbar_action_undo">تراجع</string>

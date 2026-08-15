@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quiz_learning_path">مسار التعلم</string>
+    <string name="quiz_learning_default_title">تعلم</string>
+    <string name="quiz_select_seniority">اختر المستوى</string>
+    <string name="quiz_select_seniority_description">اختر مستوى خبرتك لتوليد مواضيع مخصصة</string>
+    <string name="seniority_entry_level">مستوى مبتدئ</string>
+    <string name="seniority_junior">مبتدئ</string>
+    <string name="seniority_mid_level">مستوى متوسط</string>
+    <string name="seniority_senior">خبير</string>
+    <string name="seniority_lead">قائد فريق</string>
+    <string name="seniority_executive">تنفيذي</string>
+    <string name="quiz_topics_header">مواضيع مولدة بالذكاء الاصطناعي</string>
+    <string name="quiz_example_header">مثال:</string>
+    <string name="quiz_start_check">ابدأ مراجعة المعرفة</string>
+    <string name="quiz_check_title">مراجعة المعرفة</string>
+    <string name="quiz_submit">تقديم الاختبار</string>
+    <string name="quiz_complete_title">اكتمل الاختبار</string>
+    <string name="quiz_your_answer">إجابتك: %1$s</string>
+    <string name="quiz_correct_answer">الإجابة الصحيحة: %1$s</string>
+    <string name="quiz_explanation_header">السبب: %1$s</string>
+    <string name="quiz_continue">متابعة التعلم</string>
+    <string name="quiz_back_to_topics">العودة إلى المواضيع</string>
+    <string name="quiz_question_format">س%1$d: %2$s</string>
+    <string name="quiz_score_format">%1$d / %2$d</string>
+    <string name="quiz_percentage_format">%1$d%%</string>
+    <string name="quiz_not_answered">لا اجابة بعد</string>
+    <string name="quiz_loading_topics">جاري تنسيق مواضيع الدراسة التقنية…</string>
+    <string name="quiz_loading_learning_point">جاري إعداد درسك القادم…</string>
+    <string name="quiz_loading_quiz">جاري إنشاء مراجعة المعرفة…</string>
+    <string name="empty_string" />
+    <string name="error_unknown">حدث خطأ، يرجى اعادة المحاولة.</string>
+</resources>

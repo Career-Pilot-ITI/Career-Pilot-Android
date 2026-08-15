@@ -34,6 +34,24 @@ class FakeInterviewRemoteDataSource @Inject constructor() : InterviewRemoteDataS
                     name = "UI/UX Design",
                     description = "Focuses on product design and user experience.",
                     isActive = true
+                ),
+                TrackDto(
+                    id = 4L,
+                    name = "Frontend Developer",
+                    description = "Focuses on building web interfaces using modern frameworks.",
+                    isActive = true
+                ),
+                TrackDto(
+                    id = 5L,
+                    name = "QA Engineer",
+                    description = "Focuses on ensuring software quality through testing.",
+                    isActive = true
+                ),
+                TrackDto(
+                    id = 6L,
+                    name = "Data Scientist",
+                    description = "Focuses on extracting insights from data using statistical methods.",
+                    isActive = true
                 )
             )
         )
