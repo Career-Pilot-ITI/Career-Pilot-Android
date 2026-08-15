@@ -58,6 +58,7 @@ sealed interface Route : NavKey {
         val trackId: Long,
         val sessionId: Long? = null,
         val workspaceId: Long? = null,
+        val challengeId: String? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,

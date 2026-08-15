@@ -81,6 +81,7 @@ fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
     workspaceId: Long? = null,
+    challengeId: String? = null,
     isVideoSession: Boolean = false,
     enablePostureTracking: Boolean = false,
     enableHandTracking: Boolean = false,
@@ -88,24 +89,7 @@ fun PracticeSessionRoot(
     onNavigateToResult: (Long) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
-    val view = LocalView.current
-
-    DisposableEffect(view) {
-        val window = (view.context as? Activity)?.window
-        if (window != null) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            val insetsController = WindowInsetsControllerCompat(window, view)
-            insetsController.isAppearanceLightNavigationBars = false
-        }
-        onDispose {
-            val window = (view.context as? Activity)?.window
-            if (window != null) {
-                WindowCompat.setDecorFitsSystemWindows(window, true)
-            }
-        }
-    }
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
@@ -123,7 +107,7 @@ fun PracticeSessionRoot(
         }
     }
 
-    LaunchedEffect(trackId, sessionId, workspaceId) {
+    LaunchedEffect(trackId, sessionId, workspaceId, challengeId) {
         if (sessionId != null && sessionId != 0L) {
             viewModel.onAction(
                 PracticeSessionAction.RestartPracticeSession(
@@ -138,6 +122,7 @@ fun PracticeSessionRoot(
                 PracticeSessionAction.CreateNewPracticeSession(
                     trackId = trackId,
                     workspaceId = workspaceId,
+                    challengeId = challengeId,
                     isVideoSession = isVideoSession,
                     enablePostureTracking = enablePostureTracking,
                     enableHandTracking = enableHandTracking

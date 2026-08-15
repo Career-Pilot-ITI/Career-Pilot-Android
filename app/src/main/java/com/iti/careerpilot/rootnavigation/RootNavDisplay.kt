@@ -26,9 +26,9 @@ import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
-import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.challengedashboard.presentation.screen.ChallengeDashboardScreenRoot
 import com.iti.careerpilot.challengedetails.presentation.screen.ChallengeDetailsScreenRoot
+import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
 import com.iti.careerpilot.createchallenge.presentation.screen.CreateChallengeScreenRoot
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
@@ -325,7 +325,7 @@ fun RootNavDisplay(
                             rootBackStack.navigateSingleTop(
                                 Route.ChallengeDashboard,
                             )
-                        },
+                        }
                     )
                 }
                 entry<Route.Ats> {
@@ -396,6 +396,7 @@ fun RootNavDisplay(
                         trackId = route.trackId,
                         sessionId = route.sessionId,
                         workspaceId = route.workspaceId,
+                        challengeId = route.challengeId,
                         isVideoSession = route.isVideoSession,
                         enablePostureTracking = route.enablePostureTracking,
                         enableHandTracking = route.enableHandTracking,
@@ -528,6 +529,20 @@ fun RootNavDisplay(
                         challengeId = route.challengeId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ChallengeDetails>()
+                        },
+                        onNavigateToPractice = { trackId, challengeId, isVideo, posture, hands ->
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.ChallengeDetails>()
+                                navigateSingleTop(
+                                    Route.PracticeSession(
+                                        trackId = trackId,
+                                        challengeId = challengeId,
+                                        isVideoSession = isVideo,
+                                        enablePostureTracking = posture,
+                                        enableHandTracking = hands
+                                    )
+                                )
+                            }
                         }
                     )
                 }
