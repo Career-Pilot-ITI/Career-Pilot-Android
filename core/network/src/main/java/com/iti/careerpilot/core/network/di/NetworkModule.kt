@@ -90,14 +90,16 @@ object NetworkModule {
                 socketTimeoutMillis = 120_000
             }
 
-            install(Logging) {
-                level = if (BuildConfig.DEBUG) LogLevel.HEADERS else LogLevel.NONE
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d("KtorClient", message)
+            if (BuildConfig.DEBUG) {
+                install(Logging) {
+                    level = LogLevel.ALL
+                    logger = object : Logger {
+                        override fun log(message: String) {
+                            Log.d("KtorClient", message)
+                        }
                     }
+                    sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
                 }
-                sanitizeHeader { header -> header.equals(HttpHeaders.Authorization, ignoreCase = true) }
             }
 
             install(DefaultRequest) {
