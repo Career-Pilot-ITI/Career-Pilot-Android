@@ -55,11 +55,22 @@ fun FeaturePricingBadge(
                     shape = MaterialTheme.shapes.medium,
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            text = "Checking plan & access...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
@@ -166,6 +177,12 @@ private fun GrantedPricingBadge(
             Icons.Rounded.CheckCircle,
             "$remaining of $max uses remaining",
             "Included in $planDisplayName plan",
+        )
+
+        planDisplayName.equals("Free", ignoreCase = true) -> Triple(
+            Icons.Rounded.MonetizationOn,
+            "20 coins per use",
+            "Your balance: $coinBalance coins",
         )
 
         else -> Triple(
