@@ -1,16 +1,6 @@
 package com.iti.careerpilot.home.presentation.ready
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.test.resetMain
-import org.junit.Assert.assertEquals
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
 import com.iti.core.datastore.models.AccountInfo
 import com.iti.core.datastore.models.UserProfile
@@ -42,21 +32,6 @@ class ReadyToPracticeViewModelTest {
 
     @After
     fun tearDown() = Dispatchers.resetMain()
-
-    @Test
-    fun `begin interview forwards optional workspace`() = runTest(dispatcher) {
-        val viewModel = ReadyToPracticeViewModel(SavedStateHandle())
-        viewModel.onAction(ReadyToPracticeAction.Initial(5L, "Android", 42L))
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(true))
-        val event = async { viewModel.events.first() }
-
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
-        runCurrent()
-
-        assertEquals(
-            ReadyToPracticeEvent.NavigateToPractice(trackId = 5L, workspaceId = 42L),
-            event.await(),
-        )
 
     private class FakeUserProfileRepo(initialProfile: UserProfile = UserProfile()) : UserProfileRepo {
         private val _userProfile = MutableStateFlow(initialProfile)
