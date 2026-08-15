@@ -6,7 +6,7 @@ sealed interface HomeEvent {
     data class NavigateToSessionDetails(val sessionId: Long) : HomeEvent
     data class NavigateToPracticeSession(val trackId: Long, val sessionId: Long) : HomeEvent
     data object NavigateToInterviews : HomeEvent
-    data object NavigateToPlansPaywall : HomeEvent
+    data class NavigateToPlansPaywall(val showMySubscription: Boolean = false) : HomeEvent
     data object NavigateToCoinsPaywall : HomeEvent
     data object NavigateToReports : HomeEvent
 }

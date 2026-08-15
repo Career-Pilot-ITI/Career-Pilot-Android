@@ -99,7 +99,7 @@ fun NestedNavDisplay(
                             openPracticeSession(trackId, sessionId)
                         },
                         openInterviews = openInterviews,
-                        openPlansPaywall = { openPaywall(false, false) },
+                        openPlansPaywall = { showMySubscription -> openPaywall(false, showMySubscription) },
                         openCoinsPaywall = { openPaywall(true, false) },
                         openReports = {
                             nestedBackStack.apply {

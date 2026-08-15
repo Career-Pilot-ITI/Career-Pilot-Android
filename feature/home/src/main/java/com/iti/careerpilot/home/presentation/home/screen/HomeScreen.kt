@@ -53,7 +53,7 @@ fun HomeRoot(
     openSessionDetails: (Long) -> Unit,
     openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     openInterviews: () -> Unit,
-    openPlansPaywall: () -> Unit,
+    openPlansPaywall: (showMySubscription: Boolean) -> Unit,
     openCoinsPaywall: () -> Unit,
     openReports: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -84,7 +84,7 @@ fun HomeRoot(
                 openPracticeSession(event.trackId, event.sessionId)
 
             HomeEvent.NavigateToInterviews -> openInterviews()
-            HomeEvent.NavigateToPlansPaywall -> openPlansPaywall()
+            is HomeEvent.NavigateToPlansPaywall -> openPlansPaywall(event.showMySubscription)
             HomeEvent.NavigateToCoinsPaywall -> openCoinsPaywall()
             HomeEvent.NavigateToReports -> openReports()
         }
@@ -155,8 +155,8 @@ fun HomeScreen(
                     item {
                         SubscriptionCard(
                             planLabel = state.planLabel,
-                            isSubscribed = state.isSubscribed,
-                            onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                            subscriptionTier = state.subscriptionTier,
+                            onCardClick = { onAction(HomeAction.UpgradeClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp

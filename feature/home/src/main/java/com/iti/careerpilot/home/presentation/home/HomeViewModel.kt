@@ -2,6 +2,8 @@ package com.iti.careerpilot.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.domain.AccessRepository
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.home.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
@@ -11,7 +13,6 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.toUIText
-import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -30,6 +31,7 @@ class HomeViewModel @Inject constructor(
     private val getInterviewTracks: GetTracksUseCase,
     private val getScoreSummary: GetScoreSummaryUseCase,
     private val refreshAccessUseCase: RefreshAccessUseCase,
+    private val accessRepository: AccessRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -40,6 +42,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeProfile()
+        observeAccessState()
         load(isRefresh = false)
     }
 
@@ -69,7 +72,12 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
-            HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
+            HomeAction.UpgradeClicked -> {
+                val currentTier = _state.value.subscriptionTier.uppercase()
+                val isMax = currentTier in setOf("PRO", "MAX")
+                sendEvent(HomeEvent.NavigateToPlansPaywall(showMySubscription = isMax))
+            }
+
             HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
@@ -106,8 +114,19 @@ class HomeViewModel @Inject constructor(
                         userName = profile.personal.displayName,
                         practiceTrackName = profile.career.trackName,
                         practiceTrackId = profile.career.trackId?.takeIf { id -> id != 0L },
-                        coins = profile.account.coinBalance,
-                        subscriptionTier = profile.account.subscriptionTier,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeAccessState() {
+        viewModelScope.launch {
+            accessRepository.accessState.collect { access ->
+                _state.update {
+                    it.copy(
+                        coins = access.coinBalance,
+                        subscriptionTier = access.plan.name,
                     )
                 }
             }
@@ -174,4 +193,3 @@ class HomeViewModel @Inject constructor(
         const val RECENT_SESSIONS_COUNT = 3
     }
 }
-
