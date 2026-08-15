@@ -137,6 +137,36 @@ class PaywallStateTest {
         assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_plus, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("plus"))
         assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_free, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("free"))
     }
+
+    @Test
+    fun `successfulCoinCount returns purchasedCoinCount when set`() {
+        val state = PaywallState(
+            purchasedCoinCount = 1000,
+            selectedCoinPackId = "coins_100",
+            coinPacks = persistentListOf(CoinPack(id = "coins_100", coins = 100, priceEgp = 50))
+        )
+        assertEquals(1000, state.successfulCoinCount)
+    }
+
+    @Test
+    fun `successfulCoinCount falls back to selected pack coins when purchasedCoinCount is null`() {
+        val state = PaywallState(
+            purchasedCoinCount = null,
+            selectedCoinPackId = "coins_500",
+            coinPacks = persistentListOf(CoinPack(id = "coins_500", coins = 500, priceEgp = 200))
+        )
+        assertEquals(500, state.successfulCoinCount)
+    }
+
+    @Test
+    fun `successfulCoinCount falls back to 100 when both purchasedCoinCount and selected pack are null`() {
+        val state = PaywallState(
+            purchasedCoinCount = null,
+            selectedCoinPackId = null,
+            coinPacks = persistentListOf()
+        )
+        assertEquals(100, state.successfulCoinCount)
+    }
 }
 
 

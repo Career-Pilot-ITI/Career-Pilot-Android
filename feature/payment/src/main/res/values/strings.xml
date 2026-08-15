@@ -83,6 +83,10 @@
     <string name="paywall_successful_subtitle">Welcome to Plus. Your account has been upgraded.</string>
     <string name="paywall_successful_subtitle_plan">Welcome to %1$s! Your account has been upgraded successfully.</string>
     <string name="paywall_successful_subtitle_coins">Successfully added %1$d coins to your wallet!</string>
+    <string name="paywall_coins_successful_title">Coins Added Successfully!</string>
+    <string name="paywall_coins_successful_subtitle">+%1$d Coins credited to your wallet. Your new balance is %2$d coins.</string>
+    <string name="paywall_coins_successful_info">Your coins are ready to use! You can now start AI Mock Interviews, run ATS Resume Scans, and optimize your CV.</string>
+    <string name="paywall_coins_successful_wallet_balance">Wallet Balance</string>
     <string name="paywall_coins_benefit_added">Added %1$d coins to your wallet balance</string>
     <string name="paywall_coins_benefit_unlock">Use coins for AI interview feedback &amp; extra practice</string>
     <string name="paywall_coins_benefit_no_expiry">Coins never expire and stay in your account</string>

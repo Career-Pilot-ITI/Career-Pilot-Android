@@ -32,6 +32,7 @@ data class PaywallState(
     val failureReason: PaymentFailureReason = PaymentFailureReason.DECLINED,
     val preCheckoutBalance: Int? = null,
     val preCheckoutTier: String? = null,
+    val purchasedCoinCount: Int? = null,
     val usedFreeSessions: Int = 5,
     val maxFreeSessions: Int = 5,
     val resetDate: String = "1st of next month",
@@ -110,5 +111,5 @@ data class PaywallState(
         get() = selectedPlan?.nameRes ?: R.string.paywall_plan_plus
 
     val successfulCoinCount: Int
-        get() = selectedCoinPack?.coins ?: 500
+        get() = purchasedCoinCount ?: selectedCoinPack?.coins ?: 100
 }

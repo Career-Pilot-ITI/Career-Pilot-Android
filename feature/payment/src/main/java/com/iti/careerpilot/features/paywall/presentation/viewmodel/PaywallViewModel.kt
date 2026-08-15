@@ -326,7 +326,12 @@ class PaywallViewModel @Inject constructor(
         val packId = mutableState.value.selectedCoinPackId
         val pack = mutableState.value.coinPacks.find { it.id == packId }
         if (pack != null) {
-            mutableState.update { it.copy(checkoutItemType = CheckoutItemType.COIN_PACK) }
+            mutableState.update {
+                it.copy(
+                    checkoutItemType = CheckoutItemType.COIN_PACK,
+                    purchasedCoinCount = pack.coins
+                )
+            }
             executePaymentCheckout { topUpWalletUseCase(pack.coins, "EGP", "card") }
         }
     }
@@ -361,7 +366,16 @@ class PaywallViewModel @Inject constructor(
                 )
 
                 when (result) {
-                    PollResult.Success -> _effectChannel.send(PaywallEffect.NavigateToPaymentSuccessful)
+                    PollResult.Success -> {
+                        val latestProfile = userProfileRepo.readUserProfile()
+                        mutableState.update {
+                            it.copy(
+                                coinBalance = latestProfile.account.coinBalance,
+                                currentSubscriptionTier = latestProfile.account.subscriptionTier
+                            )
+                        }
+                        _effectChannel.send(PaywallEffect.NavigateToPaymentSuccessful)
+                    }
                     is PollResult.Failed -> {
                         mutableState.update { it.copy(failureReason = result.reason) }
                         _effectChannel.send(PaywallEffect.NavigateToPaymentFailed(result.reason))

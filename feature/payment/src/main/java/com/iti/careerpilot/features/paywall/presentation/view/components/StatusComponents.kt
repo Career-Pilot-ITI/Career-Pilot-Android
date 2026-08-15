@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.CreditCard
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,11 +50,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.CareerPilotPalette as CareerPilotColors
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
 import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.payment.R
 import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.sin
@@ -206,6 +211,81 @@ fun SuccessBenefitsCard(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun CoinPurchaseSuccessCard(
+    coinCount: Int,
+    totalBalance: Int,
+    modifier: Modifier = Modifier
+) {
+    CareerPilotCard(
+        elevation = Dimens.SpaceS,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.SpaceL)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(Dimens.SpaceM)
+                    )
+                    .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceM),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    GradientIcon(
+                        icon = Icons.Rounded.Star,
+                        modifier = Modifier.size(Dimens.IconSizeMedium),
+                        leftColor = CareerPilotPalette.yellow,
+                        middleColor = CareerPilotPalette.amberLight,
+                        rightColor = CareerPilotPalette.amber
+                    )
+                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                    Text(
+                        text = stringResource(R.string.paywall_coins_successful_wallet_balance),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.paywall_coin_pack, totalBalance),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = CareerPilotPalette.amber
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Dimens.SpaceM))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = CareerPilotColors.green,
+                    modifier = Modifier
+                        .padding(top = Dimens.SpaceXXXS)
+                        .size(Dimens.SpaceL)
+                )
+                Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                Text(
+                    text = stringResource(R.string.paywall_coins_successful_info),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

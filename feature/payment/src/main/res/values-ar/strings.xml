@@ -80,6 +80,10 @@
     <string name="paywall_successful_subtitle">مرحباً بك في بلس. تم ترقية حسابك.</string>
     <string name="paywall_successful_subtitle_plan">مرحباً بك في %1$s! تم ترقية حسابك بنجاح.</string>
     <string name="paywall_successful_subtitle_coins">تم إضافة %1$d عملة بنجاح إلى محفظتك!</string>
+    <string name="paywall_coins_successful_title">تمت إضافة العملات بنجاح!</string>
+    <string name="paywall_coins_successful_subtitle">+%1$d عملة تمت إضافتها إلى محفظتك. رصيدك الجديد هو %2$d عملة.</string>
+    <string name="paywall_coins_successful_info">عملاتك جاهزة للاستخدام! يمكنك الآن بدء المقابلات التجريبية بالذكاء الاصطناعي، وإجراء فحص ATS للسيرة الذاتية، وتحسين سيرتك الذاتية.</string>
+    <string name="paywall_coins_successful_wallet_balance">رصيد المحفظة</string>
     <string name="paywall_coins_benefit_added">تمت إضافة %1$d عملة إلى رصيد محفظتك</string>
     <string name="paywall_coins_benefit_unlock">استخدم العملات لملاحظات الذكاء الاصطناعي والجلسات الإضافية</string>
     <string name="paywall_coins_benefit_no_expiry">العملات لا تنتهي صلاحيتها وتبقى في حسابك</string>

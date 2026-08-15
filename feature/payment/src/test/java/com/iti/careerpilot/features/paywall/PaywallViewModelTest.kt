@@ -15,6 +15,7 @@ import com.iti.careerpilot.features.paywall.domain.usecase.DowngradeSubscription
 import com.iti.careerpilot.features.paywall.domain.usecase.PollPaymentStatusUseCase
 import com.iti.careerpilot.features.paywall.domain.usecase.TopUpWalletUseCase
 import com.iti.careerpilot.features.paywall.domain.usecase.UpgradeSubscriptionUseCase
+import com.iti.careerpilot.features.paywall.presentation.viewmodel.CheckoutItemType
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallEffect
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallIntent
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallViewModel
@@ -497,5 +498,52 @@ class PaywallViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(false, viewModel.state.value.isLoadingCoinPacks)
+    }
+
+    @Test
+    fun `BuyCoinsRequested sets purchasedCoinCount and checkoutItemType in state`() = runTest {
+        val viewModel = makeViewModel()
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        testScheduler.advanceUntilIdle()
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_500"))
+
+        viewModel.onIntent(PaywallIntent.BuyCoinsRequested)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(CheckoutItemType.COIN_PACK, viewModel.state.value.checkoutItemType)
+        assertEquals(500, viewModel.state.value.purchasedCoinCount)
+        assertEquals(500, viewModel.state.value.successfulCoinCount)
+    }
+
+    @Test
+    fun `PollPaymentStatus on successful coin purchase updates coinBalance and emits NavigateToPaymentSuccessful`() = runTest {
+        val userRepo = FakeUserProfileRepo()
+        userRepo.updateUserProfile { current -> current.copy(account = current.account.copy(coinBalance = 100)) }
+
+        val customApi = object : PaymentRemoteDataSource by successApi() {
+            override suspend fun getWalletBalance() = CoinBalanceResponseDto(balance = 600)
+            override suspend fun getPaymentHistory() = PaymentHistoryPageDto()
+        }
+
+        val viewModel = makeViewModel(api = customApi, userRepo = userRepo)
+        testScheduler.advanceUntilIdle()
+        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+        testScheduler.advanceUntilIdle()
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_500"))
+        viewModel.onIntent(PaywallIntent.BuyCoinsRequested)
+        testScheduler.advanceUntilIdle()
+
+        val effects = mutableListOf<PaywallEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.effectFlow.toList(effects)
+        }
+
+        viewModel.onIntent(PaywallIntent.PollPaymentStatus)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(600, viewModel.state.value.coinBalance)
+        assertEquals(500, viewModel.state.value.successfulCoinCount)
+        assertTrue(effects.any { it is PaywallEffect.NavigateToPaymentSuccessful })
+        job.cancel()
     }
 }
