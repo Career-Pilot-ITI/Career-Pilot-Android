@@ -1,0 +1,20 @@
+package com.iti.careerpilot.ats.presentation.scoring.state
+
+import androidx.compose.runtime.Immutable
+import com.iti.careerpilot.ats.domain.model.AtsScore
+import com.iti.careerpilot.ats.domain.model.JobWorkspace
+import com.iti.common.util.UIText
+
+@Immutable
+data class ScoringUiState(
+    val workspace: JobWorkspace? = null,
+    val score: AtsScore? = null,
+    val isLoading: Boolean = true,
+    val wasInterrupted: Boolean = false,
+    val error: UIText? = null,
+    val hasInsufficientCoins: Boolean = false,
+    val isStartingOptimization: Boolean = false,
+    val optimizationError: UIText? = null,
+    val trackId: Long? = null,
+    val trackName: String = "",
+)

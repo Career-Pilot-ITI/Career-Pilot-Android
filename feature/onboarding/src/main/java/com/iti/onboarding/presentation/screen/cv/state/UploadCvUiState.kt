@@ -1,20 +1,21 @@
 package com.iti.onboarding.presentation.screen.cv.state
 
 import androidx.compose.runtime.Immutable
+import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
 
 @Immutable
 data class UploadCvUiState(
     val selectedFile: SelectedCvUiModel? = null,
-    val stage: CvUploadStage = CvUploadStage.EMPTY,
+    val stage: CvUploadCardStage = CvUploadCardStage.EMPTY,
     val uploadProgress: Int = 0,
 ) {
     val isSubmitting: Boolean
-        get() = stage == CvUploadStage.PREPARING ||
-            stage == CvUploadStage.UPLOADING ||
-            stage == CvUploadStage.PARSING
+        get() = stage == CvUploadCardStage.PREPARING ||
+            stage == CvUploadCardStage.UPLOADING ||
+            stage == CvUploadCardStage.PARSING
 
     val canAnalyze: Boolean
-        get() = stage == CvUploadStage.UPLOADED
+        get() = stage == CvUploadCardStage.UPLOADED
 
     val isFormValid: Boolean
         get() = canAnalyze
@@ -26,12 +27,3 @@ data class SelectedCvUiModel(
     val name: String,
     val sizeBytes: Long,
 )
-
-enum class CvUploadStage {
-    EMPTY,
-    PREPARING,
-    SELECTED,
-    UPLOADING,
-    PARSING,
-    UPLOADED,
-}

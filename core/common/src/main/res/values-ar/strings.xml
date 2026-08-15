@@ -12,6 +12,7 @@
     <string name="error_serialization">أرسل الخادم استجابة غير صالحة.</string>
     <string name="error_empty_result">لم يتم العثور على نتائج.</string>
     <string name="error_bad_request">الطلب غير صالح. تحقق من البيانات ثم حاول مرة أخرى.</string>
+    <string name="error_insufficient_coins">ليس لديك عملات كافية لهذا الإجراء.</string>
     <string name="error_unauthorized">انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.</string>
     <string name="error_forbidden">لا يمكنك الوصول إلى هذا حاليًا.</string>
     <string name="error_not_found">لم نتمكن من العثور على ما تبحث عنه.</string>

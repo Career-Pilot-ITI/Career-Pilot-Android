@@ -28,6 +28,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,9 +55,11 @@ class ProfileInfoViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ProfileInfoUiState())
     val state: StateFlow<ProfileInfoUiState> = _state.asStateFlow()
+    private var profileObservationJob: Job? = null
 
-    init {
-        viewModelScope.launch {
+    private fun observeProfile() {
+        if (profileObservationJob != null) return
+        profileObservationJob = viewModelScope.launch {
             getUserProfileUseCase().collect { profile ->
                 _state.update { currentState ->
                     val cvSkills = profile.career.skills
@@ -100,6 +103,7 @@ class ProfileInfoViewModel @Inject constructor(
 
     fun onIntent(intent: ProfileInfoIntent) {
         when (intent) {
+            ProfileInfoIntent.Initial -> observeProfile()
             is ProfileInfoIntent.OnAvatarClicked -> setImageSourceSheetVisible(true)
 
             is ProfileInfoIntent.OnImageSourceSelected -> handleImageSourceSelected(intent.source)

@@ -52,6 +52,10 @@ fun ProfileInfoScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel) {
+        viewModel.onIntent(ProfileInfoIntent.Initial)
+    }
+
     ProfileScreenContent(
         state = state,
         effectFlow = viewModel.effect,

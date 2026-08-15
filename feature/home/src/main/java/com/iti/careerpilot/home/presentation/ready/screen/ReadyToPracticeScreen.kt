@@ -63,16 +63,17 @@ import com.iti.careerpilot.home.presentation.ready.screen.components.TipsCard
 fun ReadyToPracticeRoot(
     trackId: Long,
     trackName: String,
+    workspaceId: Long? = null,
     onBack: () -> Unit,
-    openPractice: (trackId: Long, isVideo: Boolean, enablePosture: Boolean, enableHands: Boolean) -> Unit,
+    openPractice: (trackId: Long, workspaceId: Long?, isVideo: Boolean, enablePosture: Boolean, enableHands: Boolean) -> Unit,
     openPaywall: () -> Unit = {},
     viewModel: ReadyToPracticeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    LaunchedEffect(trackId, trackName) {
-        viewModel.initialise(trackId = trackId, trackName = trackName)
+    LaunchedEffect(trackId, trackName, workspaceId) {
+        viewModel.onAction(ReadyToPracticeAction.Initial(trackId, trackName, workspaceId))
     }
 
     LaunchedEffect(Unit) {
@@ -98,6 +99,7 @@ fun ReadyToPracticeRoot(
         when (event) {
             is ReadyToPracticeEvent.NavigateToPractice -> openPractice(
                 event.trackId,
+                event.workspaceId,
                 event.isVideo,
                 event.enablePosture,
                 event.enableHands,

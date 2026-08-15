@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,6 +59,10 @@ fun ProfileRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val chooserTitle = stringResource(R.string.open_cv_with)
+
+    LaunchedEffect(viewModel) {
+        viewModel.onAction(ProfileAction.Initial)
+    }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {

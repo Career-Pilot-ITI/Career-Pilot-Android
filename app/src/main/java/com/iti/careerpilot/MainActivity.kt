@@ -21,8 +21,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
+import com.iti.careerpilot.optimization.toPendingCvOptimization
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
+import com.iti.careerpilot.share.toPendingSharedText
 import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.common.network.NetworkMonitor
 import com.iti.core.datastore.settings.domain.models.LanguageSetting
@@ -43,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        viewModel.acceptSharedText(intent.toPendingSharedText())
+        viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
         enableEdgeToEdge()
         splashScreen.setKeepOnScreenCondition {
             mainUiState == MainUiState.Loading
@@ -69,6 +73,8 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
             val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
+            val pendingSharedText by viewModel.pendingSharedText.collectAsStateWithLifecycle()
+            val pendingCvOptimization by viewModel.pendingCvOptimization.collectAsStateWithLifecycle()
             val isDarkTheme = shouldShowDarkTheme(mainUiState)
             LaunchedEffect(isDarkTheme) {
                 enableEdgeToEdge(
@@ -88,6 +94,10 @@ class MainActivity : AppCompatActivity() {
                         startRoute = Route.Splash,
                         isOnline = isOnline,
                         isLoggedIn = isLoggedIn,
+                        pendingSharedText = pendingSharedText,
+                        onSharedTextConsumed = viewModel::consumeSharedText,
+                        pendingCvOptimization = pendingCvOptimization,
+                        onCvOptimizationConsumed = viewModel::consumeCvOptimization,
                     )
                 }
             }
@@ -97,6 +107,8 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        viewModel.acceptSharedText(intent.toPendingSharedText())
+        viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
     }
 }
 

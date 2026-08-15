@@ -17,6 +17,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import com.iti.careerpilot.home.presentation.home.HomeAction
 import com.iti.careerpilot.home.presentation.home.HomeEvent
 import com.iti.careerpilot.home.presentation.home.HomeState
 import com.iti.careerpilot.home.presentation.home.HomeViewModel
+import com.iti.careerpilot.home.presentation.home.screen.components.AtsJobMatchCard
 import com.iti.careerpilot.home.presentation.home.screen.components.EmptySessionsCard
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeHeader
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeShimmerLoading
@@ -56,9 +58,14 @@ fun HomeRoot(
     openPlansPaywall: () -> Unit,
     openCoinsPaywall: () -> Unit,
     openReports: () -> Unit,
+    openAts: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) {
+        viewModel.onAction(HomeAction.Initial)
+    }
 
     var isInitialResume by remember { mutableStateOf(true) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -87,6 +94,7 @@ fun HomeRoot(
             HomeEvent.NavigateToPlansPaywall -> openPlansPaywall()
             HomeEvent.NavigateToCoinsPaywall -> openCoinsPaywall()
             HomeEvent.NavigateToReports -> openReports()
+            HomeEvent.NavigateToAts -> openAts()
         }
     }
 
@@ -185,6 +193,7 @@ fun HomeScreen(
                                 )
                         )
                     }
+                    
                     item {
                         PracticeInterviewCard(
                             trackName = state.practiceTrackName,
@@ -194,6 +203,13 @@ fun HomeScreen(
                                 .padding(
                                     horizontal = 20.dp
                                 )
+                        )
+                    }
+
+                    item {
+                        AtsJobMatchCard(
+                            onClick = { onAction(HomeAction.AtsJobMatchClicked) },
+                            modifier = Modifier.padding(horizontal = 20.dp),
                         )
                     }
 

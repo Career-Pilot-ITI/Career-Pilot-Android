@@ -67,5 +67,6 @@ dependencies {
     implementation(project(":feature:practicesession"))
     implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))
+    implementation(project(":feature:ats"))
     implementation(project(":feature:challenges"))
 }

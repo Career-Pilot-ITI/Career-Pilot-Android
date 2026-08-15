@@ -42,6 +42,7 @@ fun ProfileInfoUiState.updateData(
 ): ProfileInfoUiState = copy(data = transform(data))
 
 sealed interface ProfileInfoIntent {
+    data object Initial : ProfileInfoIntent
     data object OnAvatarClicked : ProfileInfoIntent
     data class OnImageSourceSelected(val source: ImageSource) : ProfileInfoIntent
     data class OnImagePicked(val uri: Uri) : ProfileInfoIntent

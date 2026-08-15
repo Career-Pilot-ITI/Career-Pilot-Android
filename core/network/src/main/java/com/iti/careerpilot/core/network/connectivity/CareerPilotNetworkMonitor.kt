@@ -19,11 +19,8 @@ class CareerPilotNetworkMonitor @Inject constructor(
     @ApplicationContext context: Context,
 ) : NetworkMonitor {
 
-    private val connectivityManager = requireNotNull(
-        context.getSystemService<ConnectivityManager>(),
-    ) {
-        "ConnectivityManager is unavailable on this device."
-    }
+    private val connectivityManager = context.getSystemService<ConnectivityManager>()
+        ?: error("ConnectivityManager is unavailable on this device.")
 
     private var currentNetwork: Network? = connectivityManager.activeNetwork
     private var currentCapabilities: NetworkCapabilities? =
