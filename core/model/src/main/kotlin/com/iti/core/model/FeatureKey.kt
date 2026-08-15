@@ -13,6 +13,8 @@ data class FeatureKey(val key: String) {
         val VideoInterview = FeatureKey("VIDEO_INTERVIEW")
         val AtsFeatures = FeatureKey("ATS_FEATURES")
         val Quizzes = FeatureKey("QUIZZES")
+        val CoverLetter = FeatureKey("COVER_LETTER")
+        val JobParse = FeatureKey("JOB_PARSE")
 
         fun from(raw: String): FeatureKey = FeatureKey(raw.trim().uppercase())
     }
@@ -30,6 +32,8 @@ data class FeatureKey(val key: String) {
         VideoInterview -> "Video interview with body language analysis"
         AtsFeatures -> "ATS CV scoring & optimization"
         Quizzes -> "Quiz-based interview practice"
+        CoverLetter -> "AI cover letter generation"
+        JobParse -> "Job description parsing"
         else -> key.replace('_', ' ').lowercase()
             .replaceFirstChar { it.uppercase() }
     }

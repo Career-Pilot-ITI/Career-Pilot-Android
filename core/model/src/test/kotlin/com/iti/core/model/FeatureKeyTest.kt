@@ -15,6 +15,8 @@ class FeatureKeyTest {
         assertEquals("VIDEO_INTERVIEW", FeatureKey.VideoInterview.key)
         assertEquals("ATS_FEATURES", FeatureKey.AtsFeatures.key)
         assertEquals("QUIZZES", FeatureKey.Quizzes.key)
+        assertEquals("COVER_LETTER", FeatureKey.CoverLetter.key)
+        assertEquals("JOB_PARSE", FeatureKey.JobParse.key)
     }
 
     @Test
@@ -27,6 +29,8 @@ class FeatureKeyTest {
         assertEquals("Video interview with body language analysis", FeatureKey.VideoInterview.displayName())
         assertEquals("ATS CV scoring & optimization", FeatureKey.AtsFeatures.displayName())
         assertEquals("Quiz-based interview practice", FeatureKey.Quizzes.displayName())
+        assertEquals("AI cover letter generation", FeatureKey.CoverLetter.displayName())
+        assertEquals("Job description parsing", FeatureKey.JobParse.displayName())
     }
 
     @Test
