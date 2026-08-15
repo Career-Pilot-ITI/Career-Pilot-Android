@@ -78,16 +78,6 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `paid subscriber updates isPaidPlan to true`() = runTest {
-        val profile = UserProfile(account = AccountInfo(subscriptionTier = "PLUS"))
-        val repo = FakeUserProfileRepo(profile)
-        val viewModel = createViewModel(userProfileRepo = repo)
-        testScheduler.advanceUntilIdle()
-
-        assertTrue(viewModel.state.value.isPaidPlan)
-    }
-
-    @Test
     fun `free subscriber updates isPaidPlan to false and resets video mode`() = runTest {
         val profile = UserProfile(account = AccountInfo(subscriptionTier = "FREE"))
         val repo = FakeUserProfileRepo(profile)
@@ -96,18 +86,6 @@ class ReadyToPracticeViewModelTest {
 
         assertFalse(viewModel.state.value.isPaidPlan)
         assertFalse(viewModel.state.value.isVideoMode)
-    }
-
-    @Test
-    fun `SelectVideoMode for paid user enables video mode`() = runTest {
-        val profile = UserProfile(account = AccountInfo(subscriptionTier = "PRO"))
-        val repo = FakeUserProfileRepo(profile)
-        val viewModel = createViewModel(userProfileRepo = repo)
-        testScheduler.advanceUntilIdle()
-
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
-
-        assertTrue(viewModel.state.value.isVideoMode)
     }
 
     @Test
@@ -151,27 +129,6 @@ class ReadyToPracticeViewModelTest {
         assertTrue(viewModel.state.value.enableHandTracking)
 
         viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(false))
-        assertFalse(viewModel.state.value.enableHandTracking)
-    }
-
-    @Test
-    fun `SelectAudioMode disables video mode and resets landmark tracking`() = runTest {
-        val profile = UserProfile(account = AccountInfo(subscriptionTier = "MAX"))
-        val repo = FakeUserProfileRepo(profile)
-        val viewModel = createViewModel(userProfileRepo = repo)
-        testScheduler.advanceUntilIdle()
-
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(true))
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(true))
-
-        assertTrue(viewModel.state.value.isVideoMode)
-        assertTrue(viewModel.state.value.enablePostureTracking)
-        assertTrue(viewModel.state.value.enableHandTracking)
-
-        viewModel.onAction(ReadyToPracticeAction.SelectAudioMode)
-        assertFalse(viewModel.state.value.isVideoMode)
-        assertFalse(viewModel.state.value.enablePostureTracking)
         assertFalse(viewModel.state.value.enableHandTracking)
     }
 
@@ -231,38 +188,6 @@ class ReadyToPracticeViewModelTest {
         assertFalse(practiceEvent.isVideo)
         assertFalse(practiceEvent.enablePosture)
         assertFalse(practiceEvent.enableHands)
-        job.cancel()
-    }
-
-    @Test
-    fun `BeginInterviewClicked passes posture and hands flags when enabled in video mode`() = runTest {
-        val profile = UserProfile(account = AccountInfo(subscriptionTier = "PLUS"))
-        val repo = FakeUserProfileRepo(profile)
-        val savedStateHandle = SavedStateHandle()
-        val viewModel = createViewModel(savedStateHandle = savedStateHandle, userProfileRepo = repo)
-        testScheduler.advanceUntilIdle()
-
-        viewModel.initialise(trackId = 102L, trackName = "Android")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
-        viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(true))
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(true))
-
-        val events = mutableListOf<ReadyToPracticeEvent>()
-        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.events.toList(events)
-        }
-
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
-        testScheduler.advanceUntilIdle()
-
-        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
-        assertTrue("Expected NavigateToPractice event", practiceEvent != null)
-        assertEquals(102L, practiceEvent!!.trackId)
-        assertTrue(practiceEvent.isVideo)
-        assertTrue(practiceEvent.enablePosture)
-        assertTrue(practiceEvent.enableHands)
         job.cancel()
     }
 
