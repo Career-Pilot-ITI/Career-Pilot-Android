@@ -31,7 +31,10 @@ class AccessRepositoryImpl @Inject constructor(
     override suspend fun refresh(): Result<Unit> = withContext(ioDispatcher) {
         runCatching {
             val dto = remote.getSubscriptionStatus()
-            val domainState = dto.toDomain()
+            val walletCoins = remote.getWalletBalance()
+            val cachedProfile = userProfileRepo.userProfile.value
+            val effectiveCoins = dto.effectiveCoinBalance ?: walletCoins.takeIf { it > 0 } ?: cachedProfile.account.coinBalance
+            val domainState = dto.toDomain(coinBalanceFallback = effectiveCoins)
             local.save(domainState)
             userProfileRepo.updateUserProfile { profile ->
                 profile.copy(

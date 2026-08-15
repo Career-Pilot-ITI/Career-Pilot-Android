@@ -186,6 +186,21 @@ class AccessRepositoryTest {
     }
 
     @Test
+    fun `backend tier string PLUS maps to Plan PLUS with correct features`() {
+        val dto = SubscriptionStatusDto(
+            tier = "PLUS",
+            isActive = true,
+            renewalDate = "2026-09-15T12:00:00"
+        )
+        val domain = dto.toDomain()
+        assertEquals(Plan.PLUS, domain.plan)
+        assertTrue(FeatureKey.AtsFeatures in domain.features)
+        assertTrue(FeatureKey.CvAiAnalysis in domain.features)
+        assertFalse(FeatureKey.VideoInterview in domain.features)
+        assertFalse(FeatureKey.Quizzes in domain.features)
+    }
+
+    @Test
     fun `backend plan string PRO maps to Plan MAX`() {
         val dto = SubscriptionStatusDto(
             plan = "PRO", features = emptyList(), quotas = emptyList(), coinBalance = 0

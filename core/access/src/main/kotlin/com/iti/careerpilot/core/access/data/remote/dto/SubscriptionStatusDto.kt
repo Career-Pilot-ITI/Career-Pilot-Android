@@ -20,14 +20,30 @@ data class QuotaDto(
 
 @Serializable
 data class SubscriptionStatusDto(
-    @SerialName("plan") val plan: String,
+    @SerialName("tier") val tier: String? = null,
+    @SerialName("plan") val plan: String? = null,
+    @SerialName("isActive") val isActive: Boolean? = null,
+    @SerialName("startedAt") val startedAt: String? = null,
+    @SerialName("renewalDate") val renewalDate: String? = null,
+    @SerialName("cancelledAt") val cancelledAt: String? = null,
+    @SerialName("pendingTier") val pendingTier: String? = null,
     @SerialName("features") val features: List<String> = emptyList(),
     @SerialName("quotas") val quotas: List<QuotaDto> = emptyList(),
     @SerialName("expires_at") val expiresAt: String? = null,
-    @SerialName("coin_balance") val coinBalance: Int = 0
+    @SerialName("coin_balance") val coinBalance: Int? = null,
+    @SerialName("coinBalance") val camelCoinBalance: Int? = null
 ) {
-    fun toDomain(syncTime: Instant = Clock.System.now()): AccessState {
-        val parsedPlan = when (plan.uppercase().trim()) {
+    val effectivePlanString: String
+        get() = tier ?: plan ?: "FREE"
+
+    val effectiveCoinBalance: Int?
+        get() = coinBalance ?: camelCoinBalance
+
+    fun toDomain(
+        syncTime: Instant = Clock.System.now(),
+        coinBalanceFallback: Int = 0
+    ): AccessState {
+        val parsedPlan = when (effectivePlanString.uppercase().trim()) {
             "FREE" -> Plan.FREE
             "PLUS" -> Plan.PLUS
             "PRO", "MAX" -> Plan.MAX // backend sends "PRO"; app calls it "MAX"
@@ -39,7 +55,8 @@ data class SubscriptionStatusDto(
             key to FeatureQuota(key, q.remaining, q.max, q.coinCost)
         }
 
-        val parsedExpiresAt = expiresAt?.let { runCatching { Instant.parse(it) }.getOrNull() }
+        val rawExpiry = expiresAt ?: renewalDate
+        val parsedExpiresAt = rawExpiry?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
         return AccessState(
             plan = parsedPlan,
@@ -47,7 +64,7 @@ data class SubscriptionStatusDto(
             quotas = domainQuotas,
             expiresAt = parsedExpiresAt,
             lastSyncedAt = syncTime,
-            coinBalance = coinBalance
+            coinBalance = effectiveCoinBalance ?: coinBalanceFallback
         )
     }
 }
