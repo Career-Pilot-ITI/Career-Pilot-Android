@@ -1,6 +1,7 @@
 package com.iti.careerpilot.home.presentation.ready
 
 import androidx.lifecycle.SavedStateHandle
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -598,11 +599,17 @@ class ReadyToPracticeViewModelTest {
 
     @Test
     fun `BeginInterviewClicked in video mode when Locked shows video gate sheet`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.MockInterviews,
+            remaining = 3,
+            max = 3,
+            coinCost = 5,
+        )
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
                 features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = emptyMap(),
+                quotas = mapOf(FeatureKey.MockInterviews to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
                 coinBalance = 0,
@@ -677,5 +684,117 @@ class ReadyToPracticeViewModelTest {
 
         assertTrue(events.any { it is ReadyToPracticeEvent.NavigateBack })
         job.cancel()
+    }
+
+    @Test
+    fun `initial state contains exact pricing from FeaturePricingMap for voice 5 coins and video 15 coins`() = runTest {
+        val viewModel = createViewModel()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(5, viewModel.state.value.voiceCoinCost)
+        assertEquals(15, viewModel.state.value.videoCoinCost)
+        assertEquals(FeaturePricingMap.coinCost(FeatureKey.VoicePracticeMode), viewModel.state.value.voiceCoinCost)
+        assertEquals(FeaturePricingMap.coinCost(FeatureKey.VideoInterview), viewModel.state.value.videoCoinCost)
+    }
+
+    @Test
+    fun `StartPracticeClicked with insufficient coins in audio mode blocks and opens coin top up sheet`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.MockInterviews,
+            remaining = 0,
+            max = 3,
+            coinCost = 5,
+        )
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.FREE,
+                features = PlanAccessMap.featuresFor(Plan.FREE),
+                quotas = mapOf(FeatureKey.MockInterviews to quota),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 2,
+            )
+        )
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle = savedStateHandle, accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.initialise(trackId = 201L, trackName = "Kotlin Dev")
+        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+
+        val events = mutableListOf<ReadyToPracticeEvent>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.events.toList(events)
+        }
+
+        viewModel.onAction(ReadyToPracticeAction.StartPracticeClicked)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertTrue(events.isEmpty())
+        job.cancel()
+    }
+
+    @Test
+    fun `StartPracticeClicked with sufficient coins emits NavigateToPractice`() = runTest {
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.PLUS,
+                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 50,
+            )
+        )
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle = savedStateHandle, accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.initialise(trackId = 202L, trackName = "Kotlin Dev")
+        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+
+        val events = mutableListOf<ReadyToPracticeEvent>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.events.toList(events)
+        }
+
+        viewModel.onAction(ReadyToPracticeAction.StartPracticeClicked)
+        testScheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
+        assertTrue("Expected NavigateToPractice event", practiceEvent != null)
+        assertEquals(202L, practiceEvent!!.trackId)
+        job.cancel()
+    }
+
+    @Test
+    fun `SelectVideoMode with insufficient coins 15 coins required opens coin top up sheet`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.VideoInterview,
+            remaining = 0,
+            max = 5,
+            coinCost = 15,
+        )
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
+                quotas = mapOf(FeatureKey.VideoInterview to quota),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 10,
+            )
+        )
+        val viewModel = createViewModel(accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
     }
 }

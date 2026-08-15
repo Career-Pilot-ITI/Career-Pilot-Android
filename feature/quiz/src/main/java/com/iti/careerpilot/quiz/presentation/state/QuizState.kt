@@ -1,11 +1,13 @@
 package com.iti.careerpilot.quiz.presentation.state
 
 import androidx.compose.runtime.Immutable
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.quiz.domain.model.LearningPoint
 import com.iti.careerpilot.quiz.domain.model.LearningQuiz
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
 import com.iti.common.util.UIText
 import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
 import com.iti.core.model.Plan
 
 @Immutable
@@ -26,12 +28,13 @@ data class QuizState(
     val quizAnswers: Map<Int, Int> = emptyMap(), // QuestionIndex to SelectedOptionIndex
     val showQuizResults: Boolean = false,
     val quizScore: Int = 0,
+    val quizCoinCost: Int = FeaturePricingMap.coinCost(FeatureKey.Quizzes),
     val quizAccess: FeatureAccess = FeatureAccess.Unknown,
     val coinBalance: Int = 0,
     val planDisplayName: String = "Free",
     val showGateSheet: Boolean = false,
     val gatePlanFeatures: List<String> = emptyList(),
-    val gateRequiredPlan: Plan = Plan.PLUS,
+    val gateRequiredPlan: Plan = Plan.MAX,
     val showCoinTopUpSheet: Boolean = false,
     val coinTopUpRequiredCost: Int = 0,
 )

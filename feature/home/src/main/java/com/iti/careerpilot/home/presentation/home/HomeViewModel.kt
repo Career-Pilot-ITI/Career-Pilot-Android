@@ -44,11 +44,15 @@ class HomeViewModel @Inject constructor(
     private var hasInitialized = false
     private var profileObservationJob: Job? = null
 
+    init {
+        observeProfile()
+        observeAccessState()
+        load(isRefresh = false)
+    }
+
     private fun initialize() {
         if (hasInitialized) return
         hasInitialized = true
-        observeProfile()
-        observeAccessState()
         load(isRefresh = false)
     }
 

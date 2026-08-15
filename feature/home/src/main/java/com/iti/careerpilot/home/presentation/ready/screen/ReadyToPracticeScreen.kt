@@ -258,6 +258,10 @@ fun ReadyToPracticeScreen(
                             fontWeight = if (isAudioSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                         )
+                        FeaturePricingBadge(
+                            coinCost = state.voiceCoinCost,
+                            compact = true,
+                        )
                     }
                 }
 
@@ -322,6 +326,10 @@ fun ReadyToPracticeScreen(
                                 )
                             }
                         }
+                        FeaturePricingBadge(
+                            coinCost = state.videoCoinCost,
+                            compact = true,
+                        )
                     }
                 }
             }

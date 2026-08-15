@@ -39,6 +39,10 @@ class ReadyToPracticeViewModel @Inject constructor(
     private val workspaceId: Long?
         get() = savedStateHandle[KEY_WORKSPACE_ID]
 
+    init {
+        observeAccess()
+    }
+
     private fun initialize(trackId: Long, trackName: String, workspaceId: Long?) {
         if (!savedStateHandle.contains(KEY_TRACK_ID)) {
             savedStateHandle[KEY_TRACK_ID] = trackId
@@ -48,7 +52,6 @@ class ReadyToPracticeViewModel @Inject constructor(
         _state.update {
             it.copy(trackName = savedStateHandle.get<String>(KEY_TRACK_NAME).orEmpty())
         }
-        observeAccess()
     }
 
     private fun observeAccess() {
@@ -165,7 +168,24 @@ class ReadyToPracticeViewModel @Inject constructor(
                     is FeatureAccess.StaleCacheBlocked -> {
                         viewModelScope.launch { refreshAccess() }
                     }
-                    is FeatureAccess.Unknown -> Unit
+                    is FeatureAccess.Unknown -> {
+                        val cost = _state.value.videoCoinCost
+                        if (_state.value.coinBalance < cost) {
+                            _state.update {
+                                it.copy(
+                                    showCoinTopUpSheet = true,
+                                    coinTopUpRequiredCost = cost
+                                )
+                            }
+                        } else {
+                            _state.update {
+                                it.copy(
+                                    isVideoMode = true,
+                                    showCameraPermissionDialog = !it.isCameraGranted
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -185,7 +205,8 @@ class ReadyToPracticeViewModel @Inject constructor(
                 it.copy(showCameraPermissionDialog = false)
             }
 
-            ReadyToPracticeAction.BeginInterviewClicked -> beginInterview()
+            ReadyToPracticeAction.BeginInterviewClicked,
+            ReadyToPracticeAction.StartPracticeClicked -> beginInterview()
 
             ReadyToPracticeAction.CancelClicked -> sendEvent(ReadyToPracticeEvent.NavigateBack)
 
@@ -233,7 +254,19 @@ class ReadyToPracticeViewModel @Inject constructor(
                 viewModelScope.launch { refreshAccess() }
                 return
             }
-            else -> Unit
+            is FeatureAccess.Unknown -> {
+                val cost = if (s.isVideoMode) s.videoCoinCost else s.voiceCoinCost
+                if (s.coinBalance < cost) {
+                    _state.update {
+                        it.copy(
+                            showCoinTopUpSheet = true,
+                            coinTopUpRequiredCost = cost
+                        )
+                    }
+                    return
+                }
+            }
+            is FeatureAccess.Granted -> Unit
         }
 
         sendEvent(

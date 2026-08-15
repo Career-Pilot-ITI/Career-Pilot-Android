@@ -1,5 +1,6 @@
 package com.iti.careerpilot.quiz.presentation.viewmodel
 
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -563,5 +564,79 @@ class QuizViewModelTest {
 
         assertEquals(QuizStep.SelectSeniority, viewModel.state.value.currentStep)
         assertTrue(viewModel.state.value.topics.isEmpty())
+    }
+
+    @Test
+    fun `initial state contains exact pricing from FeaturePricingMap for quizzes 10 coins`() = runTest {
+        val viewModel = createViewModel()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(10, viewModel.state.value.quizCoinCost)
+        assertEquals(FeaturePricingMap.coinCost(FeatureKey.Quizzes), viewModel.state.value.quizCoinCost)
+    }
+
+    @Test
+    fun `SenioritySelected when user has insufficient coins blocks topic generation and opens coin top up sheet`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.Quizzes,
+            remaining = 0,
+            max = 5,
+            coinCost = 10,
+        )
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
+                quotas = mapOf(FeatureKey.Quizzes to quota),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 4, // Insufficient for 10 coins
+            )
+        )
+        val fakeQuizRepo = FakeQuizRepo()
+        val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(0, fakeQuizRepo.generateTopicsCallCount)
+        assertEquals(QuizStep.SelectSeniority, viewModel.state.value.currentStep)
+    }
+
+    @Test
+    fun `SenioritySelected when user has sufficient coins and granted access starts topic generation`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.Quizzes,
+            remaining = 0,
+            max = 5,
+            coinCost = 10,
+        )
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
+                quotas = mapOf(FeatureKey.Quizzes to quota),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 20, // Sufficient for 10 coins
+            )
+        )
+        val fakeQuizRepo = FakeQuizRepo().apply {
+            topicsResult = CareerPilotResult.Success(dummyTopics)
+        }
+        val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        viewModel.onAction(QuizAction.Init("Android Engineer"))
+        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        testScheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(1, fakeQuizRepo.generateTopicsCallCount)
+        assertEquals(dummyTopics, viewModel.state.value.topics)
+        assertEquals(QuizStep.Topics, viewModel.state.value.currentStep)
     }
 }

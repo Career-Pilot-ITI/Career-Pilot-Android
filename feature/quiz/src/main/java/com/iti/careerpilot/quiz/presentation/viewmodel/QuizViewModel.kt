@@ -101,7 +101,21 @@ class QuizViewModel @Inject constructor(
                     is FeatureAccess.StaleCacheBlocked -> {
                         viewModelScope.launch { refreshAccess() }
                     }
-                    else -> {
+                    is FeatureAccess.Unknown -> {
+                        val cost = _state.value.quizCoinCost
+                        if (_state.value.coinBalance < cost) {
+                            _state.update {
+                                it.copy(
+                                    showCoinTopUpSheet = true,
+                                    coinTopUpRequiredCost = cost,
+                                )
+                            }
+                        } else {
+                            _state.update { it.copy(seniority = action.level) }
+                            generateTopics()
+                        }
+                    }
+                    is FeatureAccess.Granted -> {
                         _state.update { it.copy(seniority = action.level) }
                         generateTopics()
                     }
