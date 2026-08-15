@@ -48,7 +48,7 @@ data class SessionQuestionResultDto(
     @SerialName("speechRateWpm")
     val speechRateWpm: Double?,
     @SerialName("avgPauseMs")
-    val avgPauseMs: Int?,
+    val avgPauseMs: Double?,
     @SerialName("silenceRatio")
     val silenceRatio: Double?,
     @SerialName("createdAt")

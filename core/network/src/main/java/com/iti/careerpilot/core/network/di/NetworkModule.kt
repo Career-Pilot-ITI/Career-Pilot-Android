@@ -84,9 +84,9 @@ object NetworkModule {
             }
 
             install(HttpTimeout) {
-                connectTimeoutMillis = 15_000
-                requestTimeoutMillis = 30_000
-                socketTimeoutMillis = 30_000
+                connectTimeoutMillis = 120_000
+                requestTimeoutMillis = 120_000
+                socketTimeoutMillis = 120_000
             }
 
             install(Logging) {

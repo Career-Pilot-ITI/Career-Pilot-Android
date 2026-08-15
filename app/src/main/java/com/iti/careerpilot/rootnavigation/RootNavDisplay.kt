@@ -250,9 +250,14 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = it.trackId,
                         sessionId = it.sessionId,
+                        isVideoSession = it.isVideoSession,
+                        enablePostureTracking = it.enablePostureTracking,
+                        enableHandTracking = it.enableHandTracking,
                         onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
-                            rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeResult(sessionId)
+                            )
                         },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
@@ -339,13 +344,19 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
                         },
-                        openPractice = { trackId ->
+                        openPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall())
+                        },
+                        openPractice = { trackId, isVideo, enablePosture, enableHands ->
                             rootBackStack.apply {
                                 popIfCurrentIs<Route.ReadyToPractice>()
                                 navigateSingleTop(
                                     Route.PracticeSession(
                                         trackId = trackId,
                                         sessionId = null,
+                                        isVideoSession = isVideo,
+                                        enablePostureTracking = enablePosture,
+                                        enableHandTracking = enableHands,
                                     ),
                                 )
                             }
