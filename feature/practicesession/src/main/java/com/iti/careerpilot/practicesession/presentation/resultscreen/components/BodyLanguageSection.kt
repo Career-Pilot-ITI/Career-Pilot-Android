@@ -1,0 +1,664 @@
+package com.iti.careerpilot.practicesession.presentation.resultscreen.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlin.math.roundToInt
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.iti.careerpilot.core.designsystem.Dimens
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
+import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.CareerPilotTheme
+import com.iti.careerpilot.practicesession.R
+import com.iti.careerpilot.practicesession.presentation.resultscreen.BodyLanguageUiState
+import com.iti.careerpilot.practicesession.presentation.resultscreen.ScoreItem
+import com.iti.core.model.bodylanguage.BodyLanguageEvaluation
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
+import com.iti.core.model.bodylanguage.ConfidenceBand
+import com.iti.core.model.bodylanguage.FallbackReason
+import com.iti.core.model.bodylanguage.MetricEvaluation
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+
+@Composable
+fun BodyLanguageSection(
+    uiState: BodyLanguageUiState,
+    metrics: BodyLanguageMetrics? = null,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedContent(
+        targetState = uiState,
+        modifier = modifier,
+        transitionSpec = {
+            (fadeIn(animationSpec = tween(500)) + slideInVertically(animationSpec = tween(500)) { it / 6 })
+                .togetherWith(fadeOut(animationSpec = tween(300)))
+        },
+        label = "body_language_section_state"
+    ) { state ->
+        when (state) {
+            BodyLanguageUiState.Loading -> {
+                LoadingBodyLanguageCard()
+            }
+            is BodyLanguageUiState.Success -> {
+                EvaluationBodyLanguageCard(
+                    evaluation = state.evaluation,
+                    fallbackReason = null,
+                    metrics = metrics,
+                )
+            }
+            is BodyLanguageUiState.FallbackUsed -> {
+                EvaluationBodyLanguageCard(
+                    evaluation = state.evaluation,
+                    fallbackReason = state.reason,
+                    metrics = metrics,
+                )
+            }
+            BodyLanguageUiState.Idle -> {
+                if (metrics != null) {
+                    RawMetricsBodyLanguageCard(metrics = metrics)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BodyLanguageSection(
+    metrics: BodyLanguageMetrics,
+    modifier: Modifier = Modifier,
+) {
+    BodyLanguageSection(
+        uiState = BodyLanguageUiState.Idle,
+        metrics = metrics,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LoadingBodyLanguageCard(modifier: Modifier = Modifier) {
+    val loadingText = stringResource(R.string.body_language_analyzing)
+    CareerPilotCard(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .padding(Dimens.SpaceXL)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = loadingText
+                },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(Dimens.SpaceXL)
+                )
+                Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                Text(
+                    text = loadingText,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            LinearWavyProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EvaluationBodyLanguageCard(
+    evaluation: BodyLanguageEvaluation,
+    fallbackReason: FallbackReason?,
+    metrics: BodyLanguageMetrics? = null,
+    modifier: Modifier = Modifier,
+) {
+    val cardContentDesc = stringResource(
+        R.string.body_language_evaluation_score_desc,
+        evaluation.overallScore
+    )
+
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    val animatedOverallScore by animateIntAsState(
+        targetValue = if (startAnimation) evaluation.overallScore else 0,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "hero_overall_score"
+    )
+
+    val hasPosture = evaluation.posture.score >= 0 && (metrics == null || metrics.poseDetectionPercentage > 0f)
+    val hasHands = evaluation.handGestures.score >= 0 && (metrics == null || metrics.handsDetectionPercentage > 0f)
+
+    val axes = buildList {
+        add(RadarAxis(stringResource(R.string.radar_eye_contact), evaluation.eyeContact.score))
+        add(RadarAxis(stringResource(R.string.radar_facial_expressions), evaluation.facialExpression.score))
+        if (hasPosture) {
+            add(RadarAxis(stringResource(R.string.radar_posture), evaluation.posture.score))
+        }
+        if (hasHands) {
+            add(RadarAxis(stringResource(R.string.radar_hand_stability), evaluation.handGestures.score))
+        }
+    }
+
+    CareerPilotCard(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(Dimens.SpaceXL),
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
+        ) {
+            // Header Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = cardContentDesc },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(Dimens.SpaceXL)
+                    )
+                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                    Text(
+                        text = stringResource(R.string.body_language_evaluation),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
+                ConfidenceBandBadge(evaluation.confidenceBand)
+            }
+
+            // Fallback Banner if on-device heuristic engine was used
+            if (fallbackReason != null) {
+                FallbackDisclaimerBanner()
+            }
+
+            // Hero Score Box
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(Dimens.SpaceM),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(Dimens.SpaceL),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(R.string.overall_score),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(Dimens.SpaceXS))
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape,
+                            modifier = Modifier.size(56.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = "$animatedOverallScore",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(Dimens.SpaceL))
+                    Text(
+                        text = evaluation.summary,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            // Radar Chart Visual Summary
+            BodyLanguageRadarChart(axes = axes)
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+
+            Text(
+                text = stringResource(R.string.body_language_metrics),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+            )
+
+            // Detailed Metric Breakdown Cards (only rendered for tracked dimensions)
+            if (evaluation.eyeContact.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.eye_contact),
+                    icon = Icons.Default.RemoveRedEye,
+                    metric = evaluation.eyeContact
+                )
+            }
+
+            if (evaluation.facialExpression.score >= 0) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.facial_expression),
+                    icon = Icons.Default.Face,
+                    metric = evaluation.facialExpression
+                )
+            }
+
+            if (hasPosture) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.posture),
+                    icon = Icons.Default.Accessibility,
+                    metric = evaluation.posture
+                )
+            }
+
+            if (hasHands) {
+                MetricBreakdownCard(
+                    label = stringResource(R.string.hand_gestures),
+                    icon = Icons.Default.TouchApp,
+                    metric = evaluation.handGestures
+                )
+            }
+
+            // Actionable Coaching Tips
+            if (evaluation.actionableTips.isNotEmpty()) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(Dimens.SpaceL)
+                    )
+                    Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                    Text(
+                        text = stringResource(R.string.actionable_coaching_tips),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+                evaluation.actionableTips.forEach { tip ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(Dimens.SpaceS),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(Dimens.SpaceM)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(Dimens.SpaceL)
+                                    .padding(top = 2.dp)
+                            )
+                            Spacer(modifier = Modifier.width(Dimens.SpaceS))
+                            Text(
+                                text = tip,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfidenceBandBadge(confidenceBand: ConfidenceBand) {
+    val (backgroundColor, textColor, label) = when (confidenceBand) {
+        ConfidenceBand.HIGH -> Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+            stringResource(R.string.confidence_high)
+        )
+        ConfidenceBand.MODERATE -> Triple(
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.onTertiaryContainer,
+            stringResource(R.string.confidence_moderate)
+        )
+        ConfidenceBand.LOW -> Triple(
+            MaterialTheme.colorScheme.errorContainer,
+            MaterialTheme.colorScheme.onErrorContainer,
+            stringResource(R.string.confidence_low)
+        )
+    }
+
+    Surface(
+        color = backgroundColor,
+        shape = RoundedCornerShape(Dimens.SpaceS),
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = Dimens.SpaceS, vertical = Dimens.SpaceXS),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = textColor,
+        )
+    }
+}
+
+@Composable
+private fun FallbackDisclaimerBanner() {
+    Surface(
+        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(Dimens.SpaceM),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(Dimens.SpaceM),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.size(Dimens.SpaceL)
+            )
+            Spacer(modifier = Modifier.width(Dimens.SpaceS))
+            Text(
+                text = stringResource(R.string.fallback_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MetricBreakdownCard(
+    label: String,
+    icon: ImageVector,
+    metric: MetricEvaluation,
+    modifier: Modifier = Modifier,
+) {
+    var startAnimation by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    val normalizedScore = metric.score.coerceIn(0, 100)
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (startAnimation) normalizedScore / 100f else 0f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "metric_progress_anim"
+    )
+    val animatedScoreInt = (animatedProgress * 100).roundToInt()
+
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        shape = RoundedCornerShape(Dimens.SpaceM),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimens.SpaceM),
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceS)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(Dimens.SpaceXXL)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    GradientIcon(icon = icon)
+                }
+                Spacer(modifier = Modifier.width(Dimens.SpaceM))
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "$animatedScoreInt%",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
+                strokeCap = StrokeCap.Round
+            )
+
+            if (metric.observation.isNotBlank()) {
+                Text(
+                    text = metric.observation,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (metric.tip.isNotBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(Dimens.SpaceL)
+                    )
+                    Spacer(modifier = Modifier.width(Dimens.SpaceXS))
+                    Text(
+                        text = metric.tip,
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RawMetricsBodyLanguageCard(
+    metrics: BodyLanguageMetrics,
+    modifier: Modifier = Modifier,
+) {
+    val eyeContactScore = metrics.eyeContactPercentage.toInt().coerceIn(0, 100)
+    val postureScore = (100 - metrics.slouchPercentage).toInt().coerceIn(0, 100)
+    val handGesturesScore = ((1f - metrics.fidgetScore) * 100).toInt().coerceIn(0, 100)
+    val facialExpressionScore = (metrics.averageSmile * 100).toInt().coerceIn(0, 100)
+    val telemetryMetricsDesc = stringResource(R.string.body_language_telemetry_metrics_desc)
+
+    val axes = buildList {
+        add(RadarAxis(stringResource(R.string.radar_eye_contact), eyeContactScore))
+        add(RadarAxis(stringResource(R.string.radar_facial_expressions), facialExpressionScore))
+        if (metrics.poseDetectionPercentage > 0f) {
+            add(RadarAxis(stringResource(R.string.radar_posture), postureScore))
+        }
+        if (metrics.handsDetectionPercentage > 0f) {
+            add(RadarAxis(stringResource(R.string.radar_hand_stability), handGesturesScore))
+        }
+    }
+
+    CareerPilotCard(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .padding(Dimens.SpaceXL)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = telemetryMetricsDesc
+                },
+            verticalArrangement = Arrangement.spacedBy(Dimens.SpaceL)
+        ) {
+            Text(
+                text = stringResource(R.string.body_language_metrics),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                )
+            )
+
+            BodyLanguageRadarChart(axes = axes)
+
+            ScoreItem(
+                label = stringResource(R.string.eye_contact),
+                score = eyeContactScore,
+                icon = Icons.Default.RemoveRedEye,
+            )
+            ScoreItem(
+                label = stringResource(R.string.smile),
+                score = facialExpressionScore,
+                icon = Icons.Default.Face,
+            )
+            if (metrics.poseDetectionPercentage > 0f) {
+                ScoreItem(
+                    label = stringResource(R.string.good_posture),
+                    score = postureScore,
+                    icon = Icons.Default.Accessibility,
+                )
+            }
+            if (metrics.handsDetectionPercentage > 0f) {
+                ScoreItem(
+                    label = stringResource(R.string.hand_composure),
+                    score = handGesturesScore,
+                    icon = Icons.Default.TouchApp,
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun BodyLanguageSectionLoadingPreview() {
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(uiState = BodyLanguageUiState.Loading)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun BodyLanguageSectionSuccessPreview() {
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(
+                uiState = BodyLanguageUiState.Success(
+                    evaluation = BodyLanguageEvaluation(
+                        overallScore = 85,
+                        eyeContact = MetricEvaluation(80, "Maintained consistent eye contact.", "Look at camera when speaking."),
+                        posture = MetricEvaluation(90, "Excellent upright posture.", "Keep shoulders relaxed."),
+                        facialExpression = MetricEvaluation(85, "Warm and engaging smile.", "Nod occasionally to show engagement."),
+                        handGestures = MetricEvaluation(80, "Natural hand gestures.", "Avoid tapping or fidgeting."),
+                        confidenceBand = ConfidenceBand.HIGH,
+                        summary = "Candidate demonstrates confident body language with strong posture and eye contact.",
+                        actionableTips = listOf(
+                            "Maintain eye contact especially during key summary statements.",
+                            "Keep hands visible in upper chest frame for better engagement."
+                        )
+                    )
+                )
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun BodyLanguageSectionFallbackPreview() {
+    CareerPilotTheme {
+        Surface {
+            BodyLanguageSection(
+                uiState = BodyLanguageUiState.FallbackUsed(
+                    evaluation = BodyLanguageEvaluation(
+                        overallScore = 72,
+                        eyeContact = MetricEvaluation(70, "Eye contact percentage 70%.", "Focus on screen center."),
+                        posture = MetricEvaluation(75, "Slouch percentage 25%.", "Sit up straight."),
+                        facialExpression = MetricEvaluation(70, "Average smile 0.4.", "Smile more at beginning."),
+                        handGestures = MetricEvaluation(75, "Fidget score 0.25.", "Keep hands steady."),
+                        confidenceBand = ConfidenceBand.MODERATE,
+                        summary = "Guidance generated from on-device posture and face tracking data.",
+                        actionableTips = listOf(
+                            "Practice speaking to camera directly.",
+                            "Ensure good lighting on your face."
+                        )
+                    ),
+                    reason = FallbackReason.OFFLINE
+                )
+            )
+        }
+    }
+}

@@ -37,6 +37,11 @@ media3 = "1.10.1"
 sherpaOnnx = "v1.13.4"
 browser = "1.9.0"
 paging = "3.5.0"
+firebaseBom = "34.17.0"
+googleServices = "4.5.0"
+mediapipe = "1.0.0"
+camerax = "1.6.1"
+
 
 [libraries]
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
@@ -140,6 +145,16 @@ immutable-collections = { group = "org.jetbrains.kotlinx", name = "kotlinx-colle
 #exoplayer
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 sherpa-onnx = { group = "com.github.k2-fsa", name = "sherpa-onnx", version.ref = "sherpaOnnx" }
+mediapipe-tasks-vision = { module = "com.google.mediapipe:tasks-vision", version.ref = "mediapipe" }
+camerax-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
+camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camerax-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -178,8 +193,13 @@ feature-onboarding = { id = "feature.onboarding" }
 careerpilot-feature-editprofile = { id = "careerpilot.feature.editprofile" }
 careerpilot-feature-practice-session = { id = "careerpilot.feature.practicesession" }
 careerpilot-module-whisper = { id = "careerpilot.module.whisper" }
+careerpilot-module-bodylanguage = { id = "careerpilot.module.bodylanguage" }
 careerpilot-feature-reports = { id = "careerpilot.feature.reports" }
 careerpilot-feature-ats = { id = "careerpilot.feature.ats" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+careerpilot-module-ai = { id = "careerpilot.module.ai" }
+
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-client-auth", "ktor-serialization-kotlinx-json"]
+camerax = ["camerax-core", "camerax-camera2", "camerax-lifecycle", "camerax-compose"]

@@ -41,6 +41,7 @@ import com.iti.careerpilot.home.presentation.interviews.screen.components.TrackR
 @Composable
 fun InterviewsRoot(
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openQuiz: (trackId: Long, trackName: String) -> Unit,
     onBack: () -> Unit,
     viewModel: InterviewsViewModel = hiltViewModel(),
 ) {
@@ -54,6 +55,8 @@ fun InterviewsRoot(
         when (event) {
             is InterviewsEvent.NavigateToReadyToPractice ->
                 openReadyToPractice(event.trackId, event.trackName)
+            is InterviewsEvent.NavigateToQuiz ->
+                openQuiz(event.trackId, event.trackName)
         }
     }
 
@@ -145,9 +148,12 @@ fun InterviewsScreen(
                         items(items = state.tracks, key = { it.id }) { track ->
                             TrackRow(
                                 track = track,
-                                onClick = {
-                                    onAction(InterviewsAction.TrackClicked(track.id, track.name))
+                                onPracticeClick = {
+                                    onAction(InterviewsAction.PracticeTrackClicked(track.id, track.name))
                                 },
+                                onLessonClick = {
+                                    onAction(InterviewsAction.LessonTrackClicked(track.id, track.name))
+                                }
                             )
                         }
                     }

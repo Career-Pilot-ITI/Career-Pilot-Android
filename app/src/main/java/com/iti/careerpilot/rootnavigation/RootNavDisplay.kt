@@ -39,6 +39,7 @@ import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
+import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
@@ -264,6 +265,14 @@ fun RootNavDisplay(
                                 ),
                             )
                         },
+                        openQuiz = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Quiz(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
                         openInterviews = {
                             rootBackStack.navigateSingleTop(Route.Interviews)
                         },
@@ -374,9 +383,14 @@ fun RootNavDisplay(
                         trackId = route.trackId,
                         sessionId = route.sessionId,
                         workspaceId = route.workspaceId,
+                        isVideoSession = route.isVideoSession,
+                        enablePostureTracking = route.enablePostureTracking,
+                        enableHandTracking = route.enableHandTracking,
                         onNavigateToResult = { sessionId ->
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
-                            rootBackStack.navigateSingleTop(Route.PracticeResult(sessionId))
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeResult(sessionId)
+                            )
                         },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
@@ -423,6 +437,16 @@ fun RootNavDisplay(
                     )
                 }
 
+                entry<Route.Quiz> {
+                    QuizRoot(
+                        trackId = it.trackId,
+                        trackName = it.trackName,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.Quiz>()
+                        }
+                    )
+                }
+
                 entry<Route.EditProfile> {
                     EditProfileRoot(
                         section = it.section,
@@ -450,6 +474,14 @@ fun RootNavDisplay(
                                 ),
                             )
                         },
+                        openQuiz = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Quiz(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Interviews>()
                         },
@@ -464,14 +496,23 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
                         },
-                        openPractice = { trackId, workspaceId ->
-                            rootBackStack.popIfCurrentIs<Route.ReadyToPractice>()
-                            rootBackStack.navigateSingleTop(
-                                Route.PracticeSession(
-                                    trackId = trackId,
-                                    workspaceId = workspaceId,
-                                ),
-                            )
+                        openPaywall = {
+                            rootBackStack.navigateSingleTop(Route.Paywall())
+                        },
+                        openPractice = { trackId, workspaceId, isVideo, enablePosture, enableHands ->
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.ReadyToPractice>()
+                                navigateSingleTop(
+                                    Route.PracticeSession(
+                                        trackId = trackId,
+                                        workspaceId = workspaceId,
+                                        sessionId = null,
+                                        isVideoSession = isVideo,
+                                        enablePostureTracking = enablePosture,
+                                        enableHandTracking = enableHands,
+                                    ),
+                                )
+                            }
                         },
                     )
                 }

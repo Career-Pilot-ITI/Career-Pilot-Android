@@ -9,7 +9,7 @@ import kotlin.math.roundToInt
  */
 class AmplitudeNormalizer @Inject constructor() {
 
-    private val amplitudeMinOutputThreshold = 0.1f
+    private val amplitudeMinOutputThreshold = 0.05f
     private val minOutput = 0.25f
     private val maxOutput = 1f
 

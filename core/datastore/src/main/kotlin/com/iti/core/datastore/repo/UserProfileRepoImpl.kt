@@ -45,4 +45,12 @@ class UserProfileRepoImpl @Inject constructor(
             Log.e(ERROR_TAG, "Failed to clear user profile: ${e.localizedMessage}", e)
         }
     }
+
+    override suspend fun setBodyLanguageConsent(given: Boolean) {
+        updateUserProfile { profile ->
+            profile.copy(
+                account = profile.account.copy(bodyLanguageConsentGiven = given)
+            )
+        }
+    }
 }

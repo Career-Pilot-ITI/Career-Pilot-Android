@@ -38,9 +38,18 @@ class InterviewsViewModel @Inject constructor(
                 applyFilter()
             }
 
-            is InterviewsAction.TrackClicked -> viewModelScope.launch {
+            is InterviewsAction.PracticeTrackClicked -> viewModelScope.launch {
                 _events.send(
                     InterviewsEvent.NavigateToReadyToPractice(
+                        trackId = action.trackId,
+                        trackName = action.trackName,
+                    )
+                )
+            }
+
+            is InterviewsAction.LessonTrackClicked -> viewModelScope.launch {
+                _events.send(
+                    InterviewsEvent.NavigateToQuiz(
                         trackId = action.trackId,
                         trackName = action.trackName,
                     )

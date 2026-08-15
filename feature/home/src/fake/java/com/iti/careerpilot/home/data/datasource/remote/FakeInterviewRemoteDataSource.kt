@@ -43,6 +43,45 @@ class FakeInterviewRemoteDataSource @Inject constructor() : InterviewRemoteDataS
                     startedAt = "2023-10-21T11:00:00Z",
                     completedAt = null,
                     createdAt = "2023-10-21T11:00:00Z"
+                ),
+                InterviewSessionDto(
+                    id = 3L,
+                    trackId = 3L,
+                    trackName = "Backend Developer",
+                    status = "COMPLETED",
+                    overallScore = 78,
+                    durationSeconds = 900,
+                    targetDurationMinutes = 15,
+                    maxQuestions = 8,
+                    startedAt = "2023-10-22T09:00:00Z",
+                    completedAt = "2023-10-22T09:15:00Z",
+                    createdAt = "2023-10-22T09:00:00Z"
+                ),
+                InterviewSessionDto(
+                    id = 4L,
+                    trackId = 1L,
+                    trackName = "Android Developer",
+                    status = "COMPLETED",
+                    overallScore = 92,
+                    durationSeconds = 720,
+                    targetDurationMinutes = 15,
+                    maxQuestions = 10,
+                    startedAt = "2023-10-23T14:00:00Z",
+                    completedAt = "2023-10-23T14:12:00Z",
+                    createdAt = "2023-10-23T14:00:00Z"
+                ),
+                InterviewSessionDto(
+                    id = 5L,
+                    trackId = 4L,
+                    trackName = "Frontend Developer",
+                    status = "COMPLETED",
+                    overallScore = 80,
+                    durationSeconds = 840,
+                    targetDurationMinutes = 20,
+                    maxQuestions = 12,
+                    startedAt = "2023-10-24T16:00:00Z",
+                    completedAt = "2023-10-24T16:14:00Z",
+                    createdAt = "2023-10-24T16:00:00Z"
                 )
             )
         )
@@ -70,6 +109,24 @@ class FakeInterviewRemoteDataSource @Inject constructor() : InterviewRemoteDataS
                     id = 3L,
                     name = "Backend Developer",
                     description = "Focuses on server-side logic and databases.",
+                    isActive = true
+                ),
+                TrackDto(
+                    id = 4L,
+                    name = "Frontend Developer",
+                    description = "Focuses on building web interfaces using modern frameworks.",
+                    isActive = true
+                ),
+                TrackDto(
+                    id = 5L,
+                    name = "QA Engineer",
+                    description = "Focuses on ensuring software quality through testing.",
+                    isActive = true
+                ),
+                TrackDto(
+                    id = 6L,
+                    name = "Data Scientist",
+                    description = "Focuses on extracting insights from data using statistical methods.",
                     isActive = true
                 )
             )

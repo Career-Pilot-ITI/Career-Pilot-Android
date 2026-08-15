@@ -36,6 +36,7 @@ fun NestedNavDisplay(
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
     openReadyToPractice: (trackId: Long, trackName: String, workspaceId: Long?) -> Unit,
+    openQuiz: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
     openAts: () -> Unit,
 ) {
@@ -96,6 +97,7 @@ fun NestedNavDisplay(
                         openReadyToPractice = { trackId, trackName ->
                             openReadyToPractice(trackId, trackName, null)
                         },
+                        openQuiz = openQuiz,
                         openSessionDetails = openSessionDetails,
                         openPracticeSession = { trackId, sessionId ->
                             openPracticeSession(trackId, sessionId)

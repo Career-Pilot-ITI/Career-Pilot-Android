@@ -3,56 +3,70 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmode
 import android.os.SystemClock
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import androidx.camera.core.ImageProxy
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
-import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction.*
+import com.iti.careerpilot.ai.cache.InMemorySessionCache
+import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
+import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
+import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
+import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
+import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
+import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
+import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
+import com.iti.careerpilot.practicesession.domain.models.Session
 import com.iti.careerpilot.practicesession.domain.recording.RecordingAnswerClassifier
 import com.iti.careerpilot.practicesession.domain.recording.VoiceRecorder
+import com.iti.careerpilot.practicesession.domain.repo.SessionRepo
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
+import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction.*
 import com.iti.careerpilot.practicesession.presentation.practicescreen.event.PracticeSessionEvent
 import com.iti.careerpilot.practicesession.presentation.practicescreen.state.PracticeSessionState
+import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
 import com.iti.careerpilot.whisper.domain.WhisperEngine
+import com.iti.common.dispatcher.CareerPilotDispatchers.Default
+import com.iti.common.dispatcher.Dispatcher
+import com.iti.common.error.NetworkError
+import com.iti.common.error.TranscriptionError
+import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
+import com.iti.common.util.toUIText
+import com.iti.core.datastore.models.isPaidSubscriber
+import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.model.bodylanguage.BodyLanguageMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
-import com.iti.careerpilot.practicesession.domain.models.CreateSessionRequest
-import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
-import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
-import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
-import com.iti.common.result.CareerPilotResult
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+
 import kotlin.time.Duration
-import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
-import com.iti.careerpilot.practicesession.domain.models.Session
-import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
-import com.iti.careerpilot.practicesession.presentation.practicescreen.action.PracticeSessionAction
-import com.iti.careerpilot.practicesession.presentation.practicescreen.state.VolumeBar
-import com.iti.common.error.NetworkError
-import com.iti.common.error.TranscriptionError
-import com.iti.common.result.onError
-import com.iti.common.result.onSuccess
-import com.iti.common.util.toUIText
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+
+import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.milliseconds
+
 
 const val QUESTION_COUNT = 10
 const val SESSION_DURATION = 20
@@ -67,12 +81,19 @@ class PracticeSessionViewModel @Inject constructor(
     private val whisperEngine: WhisperEngine,
     private val textToSpeechManager: TextToSpeechManager,
     private val amplitudeNormalizer: AmplitudeNormalizer,
+    private val bodyLanguageAnalyzer: BodyLanguageAnalyzer,
+    private val userProfileRepo: UserProfileRepo,
+    private val sessionCache: InMemorySessionCache,
+    @Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private companion object {
         const val TAG = "PracticeSessionVM"
         const val KEY_ACTIVE_SESSION_ID = "practice_active_session_id"
         const val KEY_SESSION_STARTED_AT_MS = "practice_session_started_at_ms"
+        const val KEY_IS_VIDEO_SESSION = "practice_is_video_session"
+        const val KEY_ENABLE_POSTURE = "enable_posture_tracking"
+        const val KEY_ENABLE_HANDS = "enable_hand_tracking"
         const val MAX_RESTORABLE_SESSION_AGE_MS = 24L * 60L * 60L * 1000L
     }
 
@@ -88,10 +109,12 @@ class PracticeSessionViewModel @Inject constructor(
                 savedStateHandle[KEY_SESSION_STARTED_AT_MS] = value
             }
         }
+    private var recorderJob: Job? = null
+    private var playerJob: Job? = null
     private var timerJob: Job? = null
     private var volumeBarIdCounter = 0L
     private var lastWaveUpdateMs = 0L
-    private val waveUpdateIntervalMs = 120L
+    private val waveUpdateIntervalMs = 50L
 
     private val _state = MutableStateFlow(PracticeSessionState(
         volumeBars = createInitialVolumeBars()
@@ -123,18 +146,24 @@ class PracticeSessionViewModel @Inject constructor(
     val event: Flow<PracticeSessionEvent> = _event.receiveAsFlow()
 
     private fun observeRecorder() {
-        viewModelScope.launch {
+        recorderJob?.cancel()
+        recorderJob = viewModelScope.launch {
             voiceRecorder.recordingDetails.collect { details ->
                 val wasRecording = _state.value.isRecording
                 val isRecordingNow = details.isRecording
 
-                _state.update {
-                    val normalizedAmps = amplitudeNormalizer.remapAmplitudes(details.amplitudes)
-                    val currentBars = it.volumeBars.toMutableList()
+                bodyLanguageAnalyzer.setRecordingActive(isRecordingNow)
+
+                _state.update { state ->
+                    val currentBars = state.volumeBars.toMutableList()
                     val currentTime = System.currentTimeMillis()
-                    
-                    if (normalizedAmps.isNotEmpty() && (currentTime - lastWaveUpdateMs >= waveUpdateIntervalMs)) {
-                        val newAmp = normalizedAmps.last().coerceIn(0.12f, 1f)
+
+                    if (details.amplitudes.isNotEmpty() && (currentTime - lastWaveUpdateMs >= waveUpdateIntervalMs)) {
+                        val lastRawAmp = details.amplitudes.last()
+                        // Remap only the last amplitude instead of the whole list
+                        val normalizedAmp = amplitudeNormalizer.remapAmplitudes(listOf(lastRawAmp)).first()
+                        val newAmp = normalizedAmp.coerceIn(0.12f, 1f)
+
                         currentBars.add(VolumeBar(newAmp, volumeBarIdCounter++))
                         if (currentBars.size > WAVE_BAR_COUNT) {
                             currentBars.removeAt(0)
@@ -142,7 +171,7 @@ class PracticeSessionViewModel @Inject constructor(
                         lastWaveUpdateMs = currentTime
                     }
 
-                    it.copy(
+                    state.copy(
                         isRecording = details.isRecording,
                         recordedAudioPath = details.filePath,
                         amplitudes = details.amplitudes,
@@ -188,7 +217,7 @@ class PracticeSessionViewModel @Inject constructor(
     private fun startSessionTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            while (true) {
+            while (isActive) {
                 refreshSessionTimer()
                 delay(1000.milliseconds)
             }
@@ -202,7 +231,8 @@ class PracticeSessionViewModel @Inject constructor(
     }
 
     private fun observePlayer() {
-        viewModelScope.launch {
+        playerJob?.cancel()
+        playerJob = viewModelScope.launch {
             audioPlayer.activeTrack.collect { track ->
                 _state.update {
                     it.copy(
@@ -219,11 +249,19 @@ class PracticeSessionViewModel @Inject constructor(
     fun onAction(action: PracticeSessionAction) {
         when (action) {
             is CreateNewPracticeSession -> createNewSession(
-                trackId = action.trackId,
-                workspaceId = action.workspaceId,
+                action.trackId,
+                action.workspaceId,
+                action.isVideoSession,
+                action.enablePostureTracking,
+                action.enableHandTracking
             )
 
-            is RestartPracticeSession -> restartOldSession(action.sessionId)
+            is RestartPracticeSession -> restartOldSession(
+                action.sessionId,
+                action.isVideoSession,
+                action.enablePostureTracking,
+                action.enableHandTracking
+            )
 
             is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
@@ -262,6 +300,9 @@ class PracticeSessionViewModel @Inject constructor(
 
             is ToggleAutoReadQuestion -> toggleAutoReadQuestion(action.enabled)
 
+            // Body language
+            is ToggleCameraPreview -> toggleCameraPreview(action.visible)
+            is OnFrame -> handleOnFrame(action.imageProxy)
         }
     }
 
@@ -352,19 +393,56 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update { it.copy(showLeaveConfirm = show) }
     }
 
-    private fun restartOldSession(sessionId: Long) {
+    private fun restartOldSession(
+        sessionId: Long,
+        isVideoSession: Boolean = false,
+        enablePostureTracking: Boolean = false,
+        enableHandTracking: Boolean = false
+    ) {
+        val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
+        val effectiveHands = savedStateHandle.get<Boolean>(KEY_ENABLE_HANDS) ?: enableHandTracking
+        savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
+        savedStateHandle[KEY_ENABLE_POSTURE] = effectivePosture
+        savedStateHandle[KEY_ENABLE_HANDS] = effectiveHands
+        _state.update {
+            it.copy(
+                isVideoSessionSelected = effectiveIsVideo,
+                enablePostureTracking = effectivePosture,
+                enableHandTracking = effectiveHands
+            )
+        }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
         loadSession {
             sessionRepo.restartOldSession(sessionId)
         }
     }
 
-    private fun createNewSession(trackId: Long, workspaceId: Long?) {
+    private fun createNewSession(
+        trackId: Long,
+        workspaceId: Long? = null,
+        isVideoSession: Boolean = false,
+        enablePostureTracking: Boolean = false,
+        enableHandTracking: Boolean = false
+    ) {
+        val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
+        val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
+        val effectiveHands = savedStateHandle.get<Boolean>(KEY_ENABLE_HANDS) ?: enableHandTracking
+        savedStateHandle[KEY_IS_VIDEO_SESSION] = effectiveIsVideo
+        savedStateHandle[KEY_ENABLE_POSTURE] = effectivePosture
+        savedStateHandle[KEY_ENABLE_HANDS] = effectiveHands
+        _state.update {
+            it.copy(
+                isVideoSessionSelected = effectiveIsVideo,
+                enablePostureTracking = effectivePosture,
+                enableHandTracking = effectiveHands
+            )
+        }
         if (_state.value.currentSession != null || _state.value.isLoadingSession) return
 
         val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
         if (restoredSessionId != null && restoredSessionId > 0L) {
-            restartOldSession(restoredSessionId)
+            restartOldSession(restoredSessionId, effectiveIsVideo, effectivePosture, effectiveHands)
             return
         }
 
@@ -425,6 +503,11 @@ class PracticeSessionViewModel @Inject constructor(
         if (_state.value.autoReadQuestion) {
             readQuestion()
         }
+        if (_state.value.isVideoSessionSelected) {
+            checkBodyLanguageAccess()
+        } else {
+            _state.update { it.copy(bodyLanguageEnabled = false) }
+        }
     }
 
     private fun resolveSessionStartMs(serverStartedAt: String): Long {
@@ -475,6 +558,8 @@ class PracticeSessionViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     isUploadingAndTranscribingAudio = true,
+                    isSendingAnswer = false,
+                    isLoadingSession = false,
                     isEmptyAnswer = isEmptyAnswer,
                     uploadProgress = 0,
                 )
@@ -503,12 +588,24 @@ class PracticeSessionViewModel @Inject constructor(
                             uploadAnswer(sessionId, audioAttachment.url, safeTranscript)
                         }
                         .onError { error ->
-                            _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                            _state.update {
+                                it.copy(
+                                    isUploadingAndTranscribingAudio = false,
+                                    isSendingAnswer = false,
+                                    isLoadingSession = false,
+                                )
+                            }
                             _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
                         }
                 }
                 .onFailure { _ ->
-                    _state.update { it.copy(isUploadingAndTranscribingAudio = false) }
+                    _state.update {
+                        it.copy(
+                            isUploadingAndTranscribingAudio = false,
+                            isSendingAnswer = false,
+                            isLoadingSession = false,
+                        )
+                    }
                     _event.send(PracticeSessionEvent.ShowError(TranscriptionError.UNKNOWN.toUIText()))
                 }
         }
@@ -529,7 +626,7 @@ class PracticeSessionViewModel @Inject constructor(
 
     private suspend fun transcribeAudio(audioPath: String): Result<String> {
         val startedAt = SystemClock.elapsedRealtime()
-        val result = withContext(Dispatchers.Default) {
+        val result = withContext(defaultDispatcher) {
             whisperEngine.transcribe(audioPath)
         }
         Log.d(TAG, "Local transcription finished in ${SystemClock.elapsedRealtime() - startedAt} ms")
@@ -546,7 +643,8 @@ class PracticeSessionViewModel @Inject constructor(
         _state.update {
             it.copy(
                 isUploadingAndTranscribingAudio = false,
-                isSendingAnswer = true
+                isSendingAnswer = true,
+                isLoadingSession = false,
             )
         }
         val elapsedSeconds = sessionStartedAtMs?.let {
@@ -573,7 +671,9 @@ class PracticeSessionViewModel @Inject constructor(
         }.onError {
             _state.update {
                 it.copy(
-                    isSendingAnswer = false
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
                 )
             }
             _event.send(PracticeSessionEvent.ShowError(it.toUIText()))
@@ -584,19 +684,42 @@ class PracticeSessionViewModel @Inject constructor(
         sessionId: Long,
         answerResponse: AnswerResponse
     ) {
-        if (answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true)) {
+        val isReadyToComplete = answerResponse.sessionStatus.contains("READY_TO_COMPLETE", ignoreCase = true) ||
+                answerResponse.sessionStatus.contains("COMPLETED", ignoreCase = true) ||
+                (answerResponse.nextQuestion == null && answerResponse.score != null)
+
+        if (isReadyToComplete) {
+            // Finalize body language if running
+            if (bodyLanguageAnalyzer.isRunning) {
+                val metrics = bodyLanguageAnalyzer.finalizeSession()
+                sessionCache.putMetrics(sessionId, metrics)
+                bodyLanguageAnalyzer.stop()
+            }
+
             timerJob?.cancel()
             savedStateHandle.remove<Long>(KEY_ACTIVE_SESSION_ID)
             sessionStartedAtMs = null
-            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
-            return
-        }
-        answerResponse.nextQuestion?.let {
             _state.update {
                 it.copy(
                     isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                    recordedAudioPath = null
+                )
+            }
+            _event.send(PracticeSessionEvent.NavigateToResult(sessionId))
+            return
+        }
+
+        val nextQuestion = answerResponse.nextQuestion
+        if (nextQuestion != null) {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
                     currentSession = it.currentSession?.copy(
-                        currentQuestion = answerResponse.nextQuestion
+                        currentQuestion = nextQuestion
                     ),
                     recordedAudioPath = null,
                     transcription = null,
@@ -616,12 +739,69 @@ class PracticeSessionViewModel @Inject constructor(
                     )
                 }
             }
+        } else {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                )
+            }
         }
     }
 
-    override fun onCleared() {
+    // region Body language
+
+    private fun checkBodyLanguageAccess() {
+        if (!_state.value.isVideoSessionSelected) return
+        viewModelScope.launch {
+            userProfileRepo.userProfile.first().let { profile ->
+                if (!profile.isPaidSubscriber()) {
+                    _state.update { it.copy(bodyLanguageEnabled = false) }
+                    return@launch
+                }
+                
+                _state.update {
+                    it.copy(
+                        bodyLanguageEnabled = true,
+                        bodyLanguageConsentGiven = true,
+                        isBodyLanguageAnalyzing = true
+                    )
+                }
+
+                if (!bodyLanguageAnalyzer.isRunning) {
+                    bodyLanguageAnalyzer.start()
+                }
+                if (_state.value.enablePostureTracking) {
+                    bodyLanguageAnalyzer.enablePostureTracking(true)
+                }
+                if (_state.value.enableHandTracking) {
+                    bodyLanguageAnalyzer.enableHandTracking(true)
+                }
+            }
+        }
+    }
+
+    private fun handleOnFrame(imageProxy: ImageProxy) {
+        bodyLanguageAnalyzer.processImage(imageProxy)
+    }
+
+    private fun toggleCameraPreview(visible: Boolean) {
+        _state.update { it.copy(isCameraPreviewVisible = visible) }
+    }
+
+    // endregion
+
+    public override fun onCleared() {
+        timerJob?.cancel()
+        timerJob = null
+        recorderJob?.cancel()
+        recorderJob = null
+        playerJob?.cancel()
+        playerJob = null
         textToSpeechManager.shutdown()
         voiceRecorder.cancel()
         audioPlayer.stop()
+        bodyLanguageAnalyzer.stop()
     }
 }

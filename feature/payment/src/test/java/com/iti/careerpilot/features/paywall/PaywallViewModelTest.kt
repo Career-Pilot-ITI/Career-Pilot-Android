@@ -119,6 +119,13 @@ class PaywallViewModelTest {
         override suspend fun clearUserProfile() {
             _userProfile.value = UserProfile()
         }
+        override suspend fun setBodyLanguageConsent(given: Boolean) {
+            updateUserProfile { profile ->
+                profile.copy(
+                    account = profile.account.copy(bodyLanguageConsentGiven = given)
+                )
+            }
+        }
     }
 
     private fun successApi() = object : PaymentRemoteDataSource {

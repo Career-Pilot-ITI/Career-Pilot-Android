@@ -27,7 +27,7 @@ class VoiceRecorderImpl @Inject constructor(
 ) : VoiceRecorder {
 
     companion object {
-        private const val MAX_AMPLITUDE_VALUE = 26_000L
+        private const val MAX_AMPLITUDE_VALUE = 20_000L
         const val TEMP_DIRECTORY = "voice_recordings"
         const val RECORDING_FILE_EXTENSION = "mp4"
         const val TEMP_FILE_PREFIX = "temp_recording"
@@ -71,6 +71,7 @@ class VoiceRecorderImpl @Inject constructor(
 
             isRecording = true
             isPaused = false
+            _recordingDetails.update { it.copy(isRecording = true) }
 
             startTrackingDuration()
             startTrackingAmplitudes()
@@ -90,7 +91,7 @@ class VoiceRecorderImpl @Inject constructor(
                         isRecording = true,
                     )
                 }
-                delay(100L.milliseconds)
+                delay(50L.milliseconds)
             }
         }
     }
@@ -113,14 +114,19 @@ class VoiceRecorderImpl @Inject constructor(
         durationJob = applicationScope.launch {
             var lastTime = System.currentTimeMillis()
             while (isRecording && !isPaused) {
-                delay(10L.milliseconds)
+                delay(100L.milliseconds)
+                if (!isRecording || isPaused) break
                 val currentTime = System.currentTimeMillis()
                 val elapsedTime = currentTime - lastTime
 
                 _recordingDetails.update {
-                    it.copy(
-                        duration = it.duration + elapsedTime.milliseconds
-                    )
+                    if (!isRecording) {
+                        it
+                    } else {
+                        it.copy(
+                            duration = it.duration + elapsedTime.milliseconds
+                        )
+                    }
                 }
                 lastTime = System.currentTimeMillis()
             }
@@ -154,12 +160,12 @@ class VoiceRecorderImpl @Inject constructor(
     }
 
     private fun cleanup() {
-        recorder?.release()
-        recorder = null
         isRecording = false
         isPaused = false
         durationJob?.cancel()
         amplitudeJob?.cancel()
+        recorder?.release()
+        recorder = null
     }
 
     private fun newMediaRecorder(): MediaRecorder {
@@ -175,20 +181,26 @@ class VoiceRecorderImpl @Inject constructor(
         if (!isRecording || isPaused) {
             return
         }
-        _recordingDetails.update { it.copy(isRecording = false) }
         isPaused = true
+        _recordingDetails.update { it.copy(isRecording = false) }
         recorder?.pause()
         durationJob?.cancel()
         amplitudeJob?.cancel()
     }
 
     override fun stop() {
+        isRecording = false
+        durationJob?.cancel()
+        amplitudeJob?.cancel()
         try {
             recorder?.apply {
                 stop()
                 release()
             }
+        } catch (_: Exception) {
+            // Safe ignore for short duration recordings
         } finally {
+            recorder = null
             _recordingDetails.update {
                 it.copy(
                     filePath = tempFile.path,
