@@ -70,6 +70,7 @@ import com.iti.careerpilot.features.paywall.presentation.viewmodel.MySubscriptio
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.MySubscriptionUiState
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.MySubscriptionViewModel
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.DateTimeUtil
 import com.iti.common.util.UIText
 import com.iti.core.model.SubscriptionInfo
 import com.iti.careerpilot.payment.R
@@ -371,7 +372,7 @@ private fun SubscriptionDetailsCard(
             Spacer(modifier = Modifier.height(Dimens.SpaceM))
 
             // Metadata Rows
-            val startedAt = info.startedAt
+            val startedAt = DateTimeUtil.formatSubscriptionDate(info.startedAt)
             if (!startedAt.isNullOrBlank()) {
                 SubscriptionMetaRow(
                     icon = Icons.Rounded.CalendarToday,
@@ -380,7 +381,7 @@ private fun SubscriptionDetailsCard(
                 Spacer(modifier = Modifier.height(Dimens.SpaceS))
             }
 
-            val renewalDate = info.renewalDate
+            val renewalDate = DateTimeUtil.formatSubscriptionDate(info.renewalDate)
             if (!renewalDate.isNullOrBlank() && info.cancelledAt == null && info.isActive) {
                 SubscriptionMetaRow(
                     icon = Icons.Rounded.Schedule,
@@ -389,7 +390,7 @@ private fun SubscriptionDetailsCard(
                 Spacer(modifier = Modifier.height(Dimens.SpaceS))
             }
 
-            val cancelledAt = info.cancelledAt
+            val cancelledAt = DateTimeUtil.formatSubscriptionDate(info.cancelledAt)
             if (!cancelledAt.isNullOrBlank()) {
                 val expiryDate = renewalDate ?: cancelledAt
                 SubscriptionMetaRow(
