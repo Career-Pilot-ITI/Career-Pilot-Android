@@ -17,4 +17,12 @@
     <string name="select_theme">Select Theme</string>
     <string name="done">Done</string>
 
+    <!-- Plan & Coins -->
+    <string name="settings_current_plan">Current Plan</string>
+    <string name="settings_plan_format">%1$s Plan</string>
+    <string name="settings_coins_count">%1$d Coins</string>
+    <string name="settings_manage_subscription">Manage Subscription</string>
+    <string name="settings_upgrade_plan">Upgrade Plan</string>
+    <string name="settings_get_coins">Get Coins</string>
+
 </resources>

@@ -10,5 +10,6 @@ sealed interface SettingsAction {
 
     data class LanguageDialogToggle(val open: Boolean) : SettingsAction
     data class ThemeDialogToggle(val open: Boolean) : SettingsAction
-
+    data object ManageSubscriptionClicked : SettingsAction
+    data object CoinsClicked : SettingsAction
 }

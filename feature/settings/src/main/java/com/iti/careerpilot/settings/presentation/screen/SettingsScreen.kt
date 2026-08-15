@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +23,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.settings.R
 import com.iti.careerpilot.settings.presentation.action.SettingsAction
+import com.iti.careerpilot.settings.presentation.componnents.AccountPlanSettingsCard
 import com.iti.careerpilot.settings.presentation.componnents.LanguageDialog
 import com.iti.careerpilot.settings.presentation.componnents.OpenDialogSettingsCard
 import com.iti.careerpilot.settings.presentation.componnents.ThemeDialog
+import com.iti.careerpilot.settings.presentation.event.SettingsEvent
 import com.iti.careerpilot.settings.presentation.state.SettingsState
 import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.careerpilot.settings.presentation.viewmodel.SettingsViewModel
@@ -33,9 +36,20 @@ import com.iti.careerpilot.settings.presentation.viewmodel.getTitleId
 @Composable
 fun SettingsRoot(
     onBack: () -> Unit,
+    openPaywall: (showGetCoins: Boolean, showMySubscription: Boolean) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is SettingsEvent.NavigateToPaywall -> {
+                    openPaywall(event.showGetCoins, event.showMySubscription)
+                }
+            }
+        }
+    }
 
     SettingsScreen(
         onBack = onBack,
@@ -81,6 +95,15 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item {
+                AccountPlanSettingsCard(
+                    planDisplayName = state.planDisplayName,
+                    isMaxPlan = state.isMaxPlan,
+                    coinBalance = state.coinBalance,
+                    onManageSubscriptionClick = { onAction(SettingsAction.ManageSubscriptionClicked) },
+                    onCoinsClick = { onAction(SettingsAction.CoinsClicked) },
+                )
+            }
             item {
                 OpenDialogSettingsCard(
                     onAction = { onAction(SettingsAction.LanguageDialogToggle(true)) },

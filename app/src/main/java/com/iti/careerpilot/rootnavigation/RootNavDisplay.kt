@@ -312,6 +312,14 @@ fun RootNavDisplay(
                     SettingsRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Settings>()
+                        },
+                        openPaywall = { showGetCoins, showMySubscription ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Paywall(
+                                    showGetCoins = showGetCoins,
+                                    showMySubscription = showMySubscription,
+                                )
+                            )
                         }
                     )
                 }
