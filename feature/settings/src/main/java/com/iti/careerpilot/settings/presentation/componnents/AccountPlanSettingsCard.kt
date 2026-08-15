@@ -54,13 +54,13 @@ fun AccountPlanSettingsCard(
     }
 
     val iconBgColor = when {
-        isMaxPlan || planDisplayName.equals("Max", ignoreCase = true) -> Color(0xFFFFB800).copy(alpha = 0.15f)
+        isMaxPlan || planDisplayName.equals("Max", ignoreCase = true) -> com.iti.careerpilot.core.designsystem.CareerPilotPalette.amber.copy(alpha = 0.15f)
         isPlus -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
 
     val iconTintColor = when {
-        isMaxPlan || planDisplayName.equals("Max", ignoreCase = true) -> Color(0xFFFFB800)
+        isMaxPlan || planDisplayName.equals("Max", ignoreCase = true) -> com.iti.careerpilot.core.designsystem.CareerPilotPalette.amber
         isPlus -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -130,7 +130,7 @@ fun AccountPlanSettingsCard(
                         Icon(
                             imageVector = Icons.Rounded.MonetizationOn,
                             contentDescription = null,
-                            tint = Color(0xFFFFB800),
+                            tint = com.iti.careerpilot.core.designsystem.CareerPilotPalette.amber,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(

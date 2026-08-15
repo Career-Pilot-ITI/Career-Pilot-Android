@@ -14,6 +14,7 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -22,7 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.iti.careerpilot.core.designsystem.R
 import androidx.compose.ui.unit.dp
 import com.iti.core.model.FeatureAccess
 import com.iti.core.model.FeatureQuota
@@ -60,13 +63,13 @@ fun FeaturePricingBadge(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        CircularProgressIndicator(
                             modifier = Modifier.size(18.dp),
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Text(
-                            text = "Checking plan & access...",
+                            text = androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_checking),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -94,13 +97,16 @@ fun FeaturePricingBadge(
                         )
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = "Requires ${currentAccess.requiredPlan.displayName()} plan",
+                                text = androidx.compose.ui.res.stringResource(
+                                    com.iti.careerpilot.core.designsystem.R.string.pricing_badge_requires_plan,
+                                    currentAccess.requiredPlan.displayName()
+                                ),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                             )
                             Text(
-                                text = "Tap to upgrade and unlock this feature",
+                                text = androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_tap_to_upgrade),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.75f),
                             )
@@ -128,13 +134,19 @@ fun FeaturePricingBadge(
                         )
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = "${currentAccess.coinCost} coins needed to continue",
+                                text = androidx.compose.ui.res.stringResource(
+                                    com.iti.careerpilot.core.designsystem.R.string.pricing_badge_coins_needed,
+                                    currentAccess.coinCost
+                                ),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                             )
                             Text(
-                                text = "Your balance: $coinBalance coins (insufficient)",
+                                text = androidx.compose.ui.res.stringResource(
+                                    com.iti.careerpilot.core.designsystem.R.string.pricing_badge_balance_insufficient,
+                                    coinBalance
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.75f),
                             )
@@ -169,26 +181,26 @@ private fun GrantedPricingBadge(
     val (icon: ImageVector, title: String, subtitle: String) = when {
         coinCost != null && coinCost > 0 -> Triple(
             Icons.Rounded.MonetizationOn,
-            "$coinCost coins per use",
-            "Your balance: $coinBalance coins",
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_coins_per_use, coinCost),
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_balance, coinBalance),
         )
 
         remaining != null && max != null -> Triple(
             Icons.Rounded.CheckCircle,
-            "$remaining of $max uses remaining",
-            "Included in $planDisplayName plan",
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_quota_remaining, remaining, max),
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_included_in_plan, planDisplayName),
         )
 
         planDisplayName.equals("Free", ignoreCase = true) -> Triple(
             Icons.Rounded.MonetizationOn,
-            "20 coins per use",
-            "Your balance: $coinBalance coins",
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_coins_per_use, 20),
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_balance, coinBalance),
         )
 
         else -> Triple(
             Icons.Rounded.CheckCircle,
-            "Included in $planDisplayName plan",
-            "No usage limits",
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_included_in_plan, planDisplayName),
+            androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.pricing_badge_unlimited),
         )
     }
 

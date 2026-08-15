@@ -26,4 +26,15 @@
     <string name="get_more_coins_action">Get More Coins (Balance: %1$d / Need: %2$d)</string>
     <string name="network_required_title">Network Connection Required</string>
     <string name="network_required_message">Please connect to the internet to verify your subscription access.</string>
+
+    <string name="pricing_badge_checking">Checking plan &amp; access…</string>
+    <string name="pricing_badge_requires_plan">Requires %1$s plan</string>
+    <string name="pricing_badge_tap_to_upgrade">Tap to upgrade and unlock this feature</string>
+    <string name="pricing_badge_coins_needed">%1$d coins needed to continue</string>
+    <string name="pricing_badge_balance_insufficient">Your balance: %1$d coins (insufficient)</string>
+    <string name="pricing_badge_coins_per_use">%1$d coins per use</string>
+    <string name="pricing_badge_balance">Your balance: %1$d coins</string>
+    <string name="pricing_badge_quota_remaining">%1$d of %2$d uses remaining</string>
+    <string name="pricing_badge_included_in_plan">Included in %1$s plan</string>
+    <string name="pricing_badge_unlimited">No usage limits</string>
 </resources>

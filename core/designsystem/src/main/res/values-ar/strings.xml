@@ -26,4 +26,15 @@
     <string name="get_more_coins_action">الحصول على المزيد من العملات (الرصيد: %1$d / المطلوب: %2$d)</string>
     <string name="network_required_title">يلزم الاتصال بالشبكة</string>
     <string name="network_required_message">يرجى الاتصال بالإنترنت للتحقق من وصول الاشتراك الخاص بك.</string>
+
+    <string name="pricing_badge_checking">جاري التحقق من الخطة والوصول…</string>
+    <string name="pricing_badge_requires_plan">تتطلب خطة %1$s</string>
+    <string name="pricing_badge_tap_to_upgrade">انقر للترقية وفتح هذه الميزة</string>
+    <string name="pricing_badge_coins_needed">يلزم %1$d عملة للمتابعة</string>
+    <string name="pricing_badge_balance_insufficient">رصيدك: %1$d عملة (غير كافٍ)</string>
+    <string name="pricing_badge_coins_per_use">%1$d عملة لكل استخدام</string>
+    <string name="pricing_badge_balance">رصيدك: %1$d عملة</string>
+    <string name="pricing_badge_quota_remaining">%1$d من %2$d استخدامات متبقية</string>
+    <string name="pricing_badge_included_in_plan">متضمنة في خطة %1$s</string>
+    <string name="pricing_badge_unlimited">استخدام غير محدود</string>
 </resources>
