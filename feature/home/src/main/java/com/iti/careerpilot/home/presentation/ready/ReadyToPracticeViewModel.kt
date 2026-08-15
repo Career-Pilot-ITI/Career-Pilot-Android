@@ -3,8 +3,14 @@ package com.iti.careerpilot.home.presentation.ready
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.PlanAccessMap
+import com.iti.careerpilot.core.access.domain.AccessRepository
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
-import com.iti.core.datastore.models.isPaidSubscriber
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +24,9 @@ import javax.inject.Inject
 class ReadyToPracticeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getUserProfileUseCase: GetUserProfileUseCase,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
+    private val refreshAccess: RefreshAccessUseCase,
+    private val accessRepository: AccessRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReadyToPracticeState())
@@ -33,17 +42,43 @@ class ReadyToPracticeViewModel @Inject constructor(
         savedStateHandle.get<String>(KEY_TRACK_NAME)?.let { savedTrackName ->
             _state.update { it.copy(trackName = savedTrackName) }
         }
-        observeUserProfile()
+        observeAccess()
     }
 
-    private fun observeUserProfile() {
+    private fun observeAccess() {
         viewModelScope.launch {
-            getUserProfileUseCase().collect { profile ->
-                val isPaid = profile.isPaidSubscriber()
+            checkFeatureAccess(FeatureKey.VideoInterview).collect { access ->
                 _state.update {
                     it.copy(
-                        isPaidPlan = isPaid,
-                        isVideoMode = if (isPaid) it.isVideoMode else false
+                        videoInterviewAccess = access,
+                        videoGatePlanFeatures = if (access is FeatureAccess.Locked) {
+                            PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() }
+                        } else it.videoGatePlanFeatures,
+                        videoGateRequiredPlan = if (access is FeatureAccess.Locked) access.requiredPlan else it.videoGateRequiredPlan
+                    )
+                }
+                if (access is FeatureAccess.StaleCacheBlocked) {
+                    refreshAccess()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            checkFeatureAccess(FeatureKey.MockInterviews).collect { access ->
+                _state.update { it.copy(audioInterviewAccess = access) }
+                if (access is FeatureAccess.StaleCacheBlocked) {
+                    refreshAccess()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            accessRepository.accessState.collect { accessState ->
+                _state.update {
+                    it.copy(
+                        coinBalance = accessState.coinBalance,
+                        planDisplayName = accessState.plan.displayName(),
+                        isPaidPlan = accessState.plan != Plan.FREE
                     )
                 }
             }
@@ -90,15 +125,36 @@ class ReadyToPracticeViewModel @Inject constructor(
             }
 
             ReadyToPracticeAction.SelectVideoMode -> {
-                if (_state.value.isPaidPlan) {
-                    _state.update { 
-                        it.copy(
-                            isVideoMode = true,
-                            showCameraPermissionDialog = !it.isCameraGranted
-                        ) 
+                when (val access = _state.value.videoInterviewAccess) {
+                    is FeatureAccess.Granted -> {
+                        _state.update {
+                            it.copy(
+                                isVideoMode = true,
+                                showCameraPermissionDialog = !it.isCameraGranted
+                            )
+                        }
                     }
-                } else {
-                    sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                    is FeatureAccess.Locked -> {
+                        _state.update {
+                            it.copy(
+                                showVideoGateSheet = true,
+                                videoGatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
+                                videoGateRequiredPlan = access.requiredPlan
+                            )
+                        }
+                    }
+                    is FeatureAccess.CoinTopUpRequired -> {
+                        _state.update {
+                            it.copy(
+                                showCoinTopUpSheet = true,
+                                coinTopUpRequiredCost = access.coinCost
+                            )
+                        }
+                    }
+                    is FeatureAccess.StaleCacheBlocked -> {
+                        viewModelScope.launch { refreshAccess() }
+                    }
+                    is FeatureAccess.Unknown -> Unit
                 }
             }
 
@@ -121,6 +177,20 @@ class ReadyToPracticeViewModel @Inject constructor(
             ReadyToPracticeAction.BeginInterviewClicked -> beginInterview()
 
             ReadyToPracticeAction.CancelClicked -> sendEvent(ReadyToPracticeEvent.NavigateBack)
+
+            ReadyToPracticeAction.DismissVideoGateSheet -> _state.update { it.copy(showVideoGateSheet = false) }
+
+            ReadyToPracticeAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+
+            ReadyToPracticeAction.UpgradeFromVideoGate -> {
+                _state.update { it.copy(showVideoGateSheet = false) }
+                sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+            }
+
+            ReadyToPracticeAction.BuyCoinsClicked -> {
+                _state.update { it.copy(showCoinTopUpSheet = false) }
+                sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+            }
         }
     }
 
@@ -128,6 +198,33 @@ class ReadyToPracticeViewModel @Inject constructor(
         val id = trackId ?: return
         if (!_state.value.canBegin) return
         val s = _state.value
+
+        val currentAccess = if (s.isVideoMode) s.videoInterviewAccess else s.audioInterviewAccess
+        when (currentAccess) {
+            is FeatureAccess.Locked -> {
+                if (s.isVideoMode) {
+                    _state.update { it.copy(showVideoGateSheet = true) }
+                } else {
+                    sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                }
+                return
+            }
+            is FeatureAccess.CoinTopUpRequired -> {
+                _state.update {
+                    it.copy(
+                        showCoinTopUpSheet = true,
+                        coinTopUpRequiredCost = currentAccess.coinCost
+                    )
+                }
+                return
+            }
+            is FeatureAccess.StaleCacheBlocked -> {
+                viewModelScope.launch { refreshAccess() }
+                return
+            }
+            else -> Unit
+        }
+
         sendEvent(
             ReadyToPracticeEvent.NavigateToPractice(
                 trackId = id,

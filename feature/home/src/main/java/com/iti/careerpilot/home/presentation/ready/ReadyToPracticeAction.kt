@@ -13,4 +13,8 @@ sealed interface ReadyToPracticeAction {
     data object CameraPermissionDialogDismissed : ReadyToPracticeAction
     data object BeginInterviewClicked : ReadyToPracticeAction
     data object CancelClicked : ReadyToPracticeAction
+    data object DismissVideoGateSheet : ReadyToPracticeAction
+    data object DismissCoinTopUpSheet : ReadyToPracticeAction
+    data object UpgradeFromVideoGate : ReadyToPracticeAction
+    data object BuyCoinsClicked : ReadyToPracticeAction
 }

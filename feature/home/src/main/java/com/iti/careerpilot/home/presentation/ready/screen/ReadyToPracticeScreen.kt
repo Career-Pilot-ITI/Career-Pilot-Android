@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,6 +49,9 @@ import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.presentation.components.CareerPilotTopBar
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeAction
@@ -59,6 +63,7 @@ import com.iti.careerpilot.home.presentation.ready.screen.components.LandmarkFea
 import com.iti.careerpilot.home.presentation.ready.screen.components.MicrophoneRow
 import com.iti.careerpilot.home.presentation.ready.screen.components.TipsCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadyToPracticeRoot(
     trackId: Long,
@@ -138,6 +143,25 @@ fun ReadyToPracticeRoot(
                 )
             },
             neededPermissions = arrayOf(Manifest.permission.CAMERA),
+        )
+    }
+
+    if (state.showVideoGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = stringResource(R.string.video_session),
+            requiredPlan = state.videoGateRequiredPlan,
+            planFeatures = state.videoGatePlanFeatures,
+            onUpgradeClick = { viewModel.onAction(ReadyToPracticeAction.UpgradeFromVideoGate) },
+            onDismiss = { viewModel.onAction(ReadyToPracticeAction.DismissVideoGateSheet) },
+        )
+    }
+
+    if (state.showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = state.coinTopUpRequiredCost,
+            currentBalance = state.coinBalance,
+            onBuyCoins = { viewModel.onAction(ReadyToPracticeAction.BuyCoinsClicked) },
+            onDismiss = { viewModel.onAction(ReadyToPracticeAction.DismissCoinTopUpSheet) },
         )
     }
 
@@ -322,6 +346,13 @@ fun ReadyToPracticeScreen(
                     onClick = { onAction(ReadyToPracticeAction.CameraRowClicked) },
                 )
             }
+
+            FeaturePricingBadge(
+                access = if (state.isVideoMode) state.videoInterviewAccess else state.audioInterviewAccess,
+                coinBalance = state.coinBalance,
+                planDisplayName = state.planDisplayName,
+                onUpgradeClick = { onAction(ReadyToPracticeAction.UpgradeFromVideoGate) },
+            )
 
             Spacer(modifier = Modifier.height(Dimens.SpaceM))
 
