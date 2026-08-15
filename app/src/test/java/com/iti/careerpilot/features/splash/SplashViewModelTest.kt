@@ -113,6 +113,7 @@ class SplashViewModelTest {
             viewModel.navigationEvent.toList(emittedEvents)
         }
 
+        viewModel.onIntent(SplashIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(0, accessRepository.refreshCallCount)
@@ -131,6 +132,7 @@ class SplashViewModelTest {
             viewModel.navigationEvent.toList(emittedEvents)
         }
 
+        viewModel.onIntent(SplashIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, accessRepository.refreshCallCount)
@@ -149,6 +151,7 @@ class SplashViewModelTest {
             viewModel.navigationEvent.toList(emittedEvents)
         }
 
+        viewModel.onIntent(SplashIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, accessRepository.refreshCallCount)
@@ -168,6 +171,7 @@ class SplashViewModelTest {
             viewModel.navigationEvent.toList(emittedEvents)
         }
 
+        viewModel.onIntent(SplashIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, accessRepository.refreshCallCount)

@@ -96,6 +96,7 @@ class ProfileViewModelTest {
     @Test
     fun `init downloads missing files and refreshes profile when profile id is 0`() = runTest {
         val viewModel = createViewModel()
+        viewModel.onAction(ProfileAction.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, profileRepo.downloadMissingFilesCallCount)
@@ -107,6 +108,7 @@ class ProfileViewModelTest {
         profileRepo._userProfile.value = UserProfile(id = 42L)
 
         val viewModel = createViewModel()
+        viewModel.onAction(ProfileAction.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, profileRepo.downloadMissingFilesCallCount)
