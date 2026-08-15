@@ -1,4 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_challenge_title">ابدأ تحدي</string>
+    <string name="create_challenge_success_title">تم إنشاء التحدي بنجاح</string>
+    <string name="create_challenge_code_label">كود الدعوة</string>
+    <string name="create_challenge_copy_code">اضغط لنسخ الكود</string>
+    <string name="create_challenge_copied">تم نسخ الكود إلى الحافظة</string>
+    <string name="create_challenge_done">تم</string>
+    <string name="create_challenge_general_info">معلومات عامة</string>
+    <string name="create_challenge_track">المسار</string>
+    <string name="create_challenge_select_track">اختر المسار</string>
+    <string name="create_challenge_seniority">مستوى الخبرة</string>
+    <string name="create_challenge_visibility">الخصوصية</string>
+    <string name="create_challenge_public">عام</string>
+    <string name="create_challenge_private">خاص</string>
+    <string name="create_challenge_type">نوع التحدي</string>
+    <string name="create_challenge_audio_only">صوت فقط</string>
+    <string name="create_challenge_video_audio">فيديو وصوت</string>
+    <string name="create_challenge_analyze_face">تحليل الوجه فقط</string>
+    <string name="create_challenge_analyze_posture">تحليل وضعية الجسم</string>
+    <string name="create_challenge_analyze_hands">تحليل إيماءات اليد</string>
+    <string name="create_challenge_delete_confirm_title">حذف السؤال؟</string>
+    <string name="create_challenge_delete_confirm_text">هل أنت متأكد أنك تريد حذف هذا السؤال؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="create_challenge_delete_confirm_cancel">إلغاء</string>
+    <string name="create_challenge_delete_confirm_delete">حذف</string>
+    <string name="create_challenge_error_duplicate_questions">يرجى التأكد من أن جميع الأسئلة فريدة.</string>
+    <string name="create_challenge_questions">الأسئلة (10 على الأقل)</string>
+    <string name="create_challenge_approx_duration">المدة التقريبية: %1$d دقيقة</string>
+    <string name="create_challenge_submit">إنشاء التحدي</string>
+    <string name="create_challenge_error_min_questions">يرجى تقديم 10 أسئلة على الأقل</string>
+    <string name="create_challenge_error_ai_validation">فشل التحقق من الأسئلة: حدد الذكاء الاصطناعي أنها ليست أسئلة تقنية صالحة.</string>
+    <string name="create_challenge_error_save">فشل في حفظ التحدي</string>
+    <string name="creating_challenge">جاري حفظ التحدي…</string>
+    <string name="enter_technical_question">ادخل سؤال تقنى</string>
+    <string name="question">السؤال %1$d</string>
+    <string name="remove_question">ازالة السؤال</string>
 </resources>

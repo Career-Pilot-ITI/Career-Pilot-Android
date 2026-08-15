@@ -1,4 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="create_challenge_title">Create Challenge</string>
+    <string name="create_challenge_success_title">Challenge Created Successfully</string>
+    <string name="create_challenge_code_label">Invitation Code</string>
+    <string name="create_challenge_copy_code">Click to copy code</string>
+    <string name="create_challenge_copied">Code copied to clipboard</string>
+    <string name="create_challenge_done">Done</string>
+    <string name="create_challenge_general_info">General Information</string>
+    <string name="create_challenge_track">Track</string>
+    <string name="create_challenge_select_track">Select Track</string>
+    <string name="create_challenge_seniority">Seniority Level</string>
+    <string name="create_challenge_visibility">Visibility</string>
+    <string name="create_challenge_public">Public</string>
+    <string name="create_challenge_private">Private</string>
+    <string name="create_challenge_type">Challenge Type</string>
+    <string name="create_challenge_audio_only">Audio Only</string>
+    <string name="create_challenge_video_audio">Video and Audio</string>
+    <string name="create_challenge_analyze_face">Analyze Face Only</string>
+    <string name="create_challenge_analyze_posture">Analyze Posture</string>
+    <string name="create_challenge_analyze_hands">Analyze Hands Gestures</string>
+    <string name="create_challenge_delete_confirm_title">Delete Question?</string>
+    <string name="create_challenge_delete_confirm_text">Are you sure you want to delete this question? This action cannot be undone.</string>
+    <string name="create_challenge_delete_confirm_cancel">Cancel</string>
+    <string name="create_challenge_delete_confirm_delete">Delete</string>
+    <string name="create_challenge_error_duplicate_questions">Please make sure all questions are unique.</string>
+    <string name="create_challenge_questions">Questions (minimum 10)</string>
+    <string name="create_challenge_approx_duration">Approx. duration: %1$d mins</string>
+    <string name="create_challenge_submit">Create Challenge</string>
+    <string name="create_challenge_error_min_questions">Please provide at least 10 questions</string>
+    <string name="create_challenge_error_ai_validation">Questions validation failed: AI determined they are not valid technical questions.</string>
+    <string name="create_challenge_error_save">Failed to save challenge</string>
+    <string name="creating_challenge">Creating Challenge…</string>
+    <string name="enter_technical_question">Enter technical question</string>
+    <string name="question">Question %1$d</string>
+    <string name="remove_question">Remove question</string>
 </resources>

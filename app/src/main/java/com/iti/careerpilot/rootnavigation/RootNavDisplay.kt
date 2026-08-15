@@ -504,6 +504,12 @@ fun RootNavDisplay(
                     CreateChallengeScreenRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.CreateChallenge>()
+                        },
+                        onNavigateToDashboard = {
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.CreateChallenge>()
+                                navigateSingleTop(Route.ChallengeDashboard)
+                            }
                         }
                     )
                 }
