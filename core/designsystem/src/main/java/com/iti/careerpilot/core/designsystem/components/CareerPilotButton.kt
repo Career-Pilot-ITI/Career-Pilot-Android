@@ -5,9 +5,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
@@ -36,7 +40,8 @@ fun CareerPilotButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     variant: ButtonVariant = ButtonVariant.PRIMARY,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    leadingContent: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -64,7 +69,10 @@ fun CareerPilotButton(
                     disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.labelLarge)
+                CareerPilotButtonContent(
+                    text = text,
+                    leadingContent = leadingContent,
+                )
             }
         }
         ButtonVariant.SECONDARY -> {
@@ -81,7 +89,10 @@ fun CareerPilotButton(
                     disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.labelLarge)
+                CareerPilotButtonContent(
+                    text = text,
+                    leadingContent = leadingContent,
+                )
             }
         }
         ButtonVariant.GHOST -> {
@@ -96,7 +107,10 @@ fun CareerPilotButton(
                     disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.labelLarge)
+                CareerPilotButtonContent(
+                    text = text,
+                    leadingContent = leadingContent,
+                )
             }
         }
         ButtonVariant.OUTLINE -> {
@@ -112,9 +126,30 @@ fun CareerPilotButton(
                     disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.labelLarge)
+                CareerPilotButtonContent(
+                    text = text,
+                    leadingContent = leadingContent,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun CareerPilotButtonContent(
+    text: String,
+    leadingContent: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (leadingContent != null) {
+            leadingContent()
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
 }
 

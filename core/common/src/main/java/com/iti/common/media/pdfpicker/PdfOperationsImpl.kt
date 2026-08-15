@@ -13,11 +13,14 @@ import com.iti.core.model.PdfFile
 import com.iti.core.model.PdfFileMetadata
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class PdfOperationsImpl @Inject constructor(
@@ -60,6 +63,10 @@ class PdfOperationsImpl @Inject constructor(
                 return@withContext CareerPilotResult.Error(
                     StorageError.FILE_TOO_LARGE,
                 )
+            }
+
+            if (bytes.isEmpty()) {
+                return@withContext CareerPilotResult.Error(StorageError.INCOMPATIBLE_FILE)
             }
 
             CareerPilotResult.Success(
@@ -114,31 +121,60 @@ class PdfOperationsImpl @Inject constructor(
         }
     }
 
-    override suspend fun storePdfInternally(uri: String): CareerPilotResult<String, StorageError> =
+    override suspend fun storePdfInternally(file: PdfFile): CareerPilotResult<String, StorageError> =
         withContext(ioDispatcher) {
+            var temporaryFile: File? = null
             try {
-                val parsedUri = uri.toUri()
-
-                val inputStream = context.contentResolver.openInputStream(parsedUri)
-                    ?: return@withContext CareerPilotResult.Error(StorageError.FileNotFound)
-
-                val fileName = "cv_${System.currentTimeMillis()}.pdf"
-                val destinationFile = File(context.filesDir, fileName)
-
-                inputStream.use { input ->
-                    destinationFile.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
+                if (file.bytes.isEmpty()) {
+                    return@withContext CareerPilotResult.Error(StorageError.INCOMPATIBLE_FILE)
                 }
-
+                val cvDirectory = File(context.filesDir, CV_DIRECTORY).apply { mkdirs() }
+                if (!cvDirectory.isDirectory) {
+                    return@withContext CareerPilotResult.Error(StorageError.UNKNOWN)
+                }
+                temporaryFile = File.createTempFile(CV_TEMP_PREFIX, TEMP_EXTENSION, cvDirectory)
+                temporaryFile.outputStream().buffered().use { output ->
+                    output.write(file.bytes)
+                    output.flush()
+                }
+                coroutineContext.ensureActive()
+                val destinationFile = File(
+                    cvDirectory,
+                    "${CV_FILE_PREFIX}${System.currentTimeMillis()}_${sanitizeFileName(file.name)}",
+                )
+                if (!temporaryFile.renameTo(destinationFile)) {
+                    temporaryFile.copyTo(destinationFile, overwrite = false)
+                    temporaryFile.delete()
+                }
+                cvDirectory.listFiles()
+                    ?.filter { it != destinationFile && it.isFile }
+                    ?.forEach(File::delete)
                 val savedUriString = Uri.fromFile(destinationFile).toString()
                 CareerPilotResult.Success(savedUriString)
+            } catch (cancellation: CancellationException) {
+                temporaryFile?.delete()
+                throw cancellation
             } catch (_: SecurityException) {
+                temporaryFile?.delete()
                 CareerPilotResult.Error(StorageError.PermissionDenied)
-            } catch (_: Exception) {
+            } catch (_: IOException) {
+                temporaryFile?.delete()
                 CareerPilotResult.Error(StorageError.UNKNOWN)
             }
         }
+
+    private fun sanitizeFileName(name: String): String {
+        val safeBase = name.substringAfterLast('/').substringAfterLast('\\')
+            .replace(UNSAFE_FILE_NAME_CHARS, "_")
+            .trim('.', ' ', '_')
+            .take(MAX_FILE_NAME_LENGTH)
+            .ifBlank { DEFAULT_FILE_NAME }
+        return if (safeBase.endsWith(PDF_EXTENSION, ignoreCase = true)) {
+            safeBase
+        } else {
+            "$safeBase$PDF_EXTENSION"
+        }
+    }
 
     private fun readMetadata(uri: Uri): PdfFileMetadata {
         var name = DEFAULT_FILE_NAME
@@ -205,5 +241,11 @@ class PdfOperationsImpl @Inject constructor(
         const val DEFAULT_FILE_NAME = "resume.pdf"
         const val MAX_CV_SIZE_BYTES = 10 * 1024 * 1024
         const val DEFAULT_BUFFER_SIZE = 8 * 1024
+        const val CV_DIRECTORY = "cv"
+        const val CV_FILE_PREFIX = "cv_"
+        const val CV_TEMP_PREFIX = "pending_"
+        const val TEMP_EXTENSION = ".tmp"
+        const val MAX_FILE_NAME_LENGTH = 96
+        val UNSAFE_FILE_NAME_CHARS = Regex("[^A-Za-z0-9._-]")
     }
 }

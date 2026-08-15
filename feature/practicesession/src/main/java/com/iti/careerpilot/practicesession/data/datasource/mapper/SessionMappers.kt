@@ -34,7 +34,8 @@ fun CurrentQuestionDto.toDomain(): CurrentQuestion = CurrentQuestion(
 fun CreateSessionRequest.toDto(): CreateSessionRequestDto = CreateSessionRequestDto(
     trackId = trackId,
     questionCount = questionCount,
-    durationMinutes = durationMinutes
+    durationMinutes = durationMinutes,
+    workspaceId = workspaceId,
 )
 
 fun FileUploadResponse.toDomain(): AudioAttachment = AudioAttachment(

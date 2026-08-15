@@ -16,4 +16,12 @@
     <string name="parsing_cv_subtitle">This may take a moment…</string>
 
     <string name="back">Back</string>
+    <string name="cv_upload_tap_to_upload">Tap to upload your CV</string>
+    <string name="cv_upload_requirements">PDF · Max 10 MB</string>
+    <string name="cv_upload_preparing">Preparing your CV…</string>
+    <string name="cv_upload_ready">Ready</string>
+    <string name="cv_upload_uploaded">Uploaded</string>
+    <string name="cv_upload_progress">%1$d%% uploaded</string>
+    <string name="cv_upload_file_details">%1$s • %2$s</string>
+    <string name="cv_upload_parsing">Parsing CV…</string>
 </resources>

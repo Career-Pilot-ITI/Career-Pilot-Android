@@ -2,6 +2,7 @@
     <string name="app_name">Career Pilot</string>
 
     <string name="home">Home</string>
+    <string name="ats">ATS</string>
     <string name="reports">Reports</string>
     <string name="profile">Profile</string>
     <string name="offline_mode">Offline mode</string>

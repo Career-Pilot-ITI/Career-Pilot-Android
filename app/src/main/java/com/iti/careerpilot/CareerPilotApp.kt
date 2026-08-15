@@ -1,6 +1,7 @@
 package com.iti.careerpilot
 
 import android.app.Application
+import com.iti.careerpilot.ats.background.CvOptimizationNotifications
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
@@ -12,6 +13,7 @@ import dagger.hilt.android.HiltAndroidApp
 class CareerPilotApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        CvOptimizationNotifications.createChannels(this)
         Firebase.initialize(context = this)
         if (BuildConfig.DEBUG) {
             Firebase.appCheck.installAppCheckProviderFactory(

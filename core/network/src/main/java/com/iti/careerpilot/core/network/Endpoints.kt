@@ -28,6 +28,15 @@ object Endpoints {
 
     const val ANALYZE_CV = "$BASE_URL/api/v1/profile/cv/analyze"
 
+    const val ATS_WORKSPACES = "$BASE_URL/api/v1/workspaces"
+    const val ATS_IMPORT_JOB_URL = "$ATS_WORKSPACES/import/url"
+    fun atsWorkspace(workspaceId: Long) = "$ATS_WORKSPACES/$workspaceId"
+    fun atsScoreCv(workspaceId: Long) = "${atsWorkspace(workspaceId)}/score-cv"
+    fun atsOptimizeCv(workspaceId: Long) = "${atsWorkspace(workspaceId)}/cv/optimize"
+    fun atsCoverLetter(workspaceId: Long) = "${atsWorkspace(workspaceId)}/cover-letter"
+    const val AI_JOBS = "$BASE_URL/api/v1/ai-jobs"
+    fun aiJob(jobId: Long) = "$AI_JOBS/$jobId"
+
     const val INTERVIEW_SESSIONS = "$BASE_URL/api/v1/interviews/sessions"
     fun SUBMIT_ANSWER(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/answer"
     fun GET_SESSION_FEEDBACK(sessionId: Long) = "$INTERVIEW_SESSIONS/$sessionId/feedback"

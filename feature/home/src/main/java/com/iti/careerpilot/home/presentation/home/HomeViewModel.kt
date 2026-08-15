@@ -17,6 +17,7 @@ import com.iti.core.datastore.sync.UserProfileSync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,13 +41,19 @@ class HomeViewModel @Inject constructor(
     private val _events = Channel<HomeEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    init {
+    private var hasInitialized = false
+    private var profileObservationJob: Job? = null
+
+    private fun initialize() {
+        if (hasInitialized) return
+        hasInitialized = true
         observeProfile()
         load(isRefresh = false)
     }
 
     fun onAction(action: HomeAction) {
         when (action) {
+            HomeAction.Initial -> initialize()
             HomeAction.Refresh -> load(isRefresh = true)
 
             HomeAction.PracticeInterviewClicked -> {
@@ -74,6 +81,7 @@ class HomeViewModel @Inject constructor(
             HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
             HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
+            HomeAction.AtsJobMatchClicked -> sendEvent(HomeEvent.NavigateToAts)
             HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
             HomeAction.SeeAllInterviewsClicked -> sendEvent(HomeEvent.NavigateToInterviews)
 
@@ -101,7 +109,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeProfile() {
-        viewModelScope.launch {
+        if (profileObservationJob != null) return
+        profileObservationJob = viewModelScope.launch {
             getUserProfile().collect { profile ->
                 _state.update {
                     it.copy(

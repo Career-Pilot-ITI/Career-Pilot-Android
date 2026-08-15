@@ -9,5 +9,5 @@ import com.iti.core.model.PdfFileMetadata
 interface PdfOperations {
     suspend fun readPdf(uri: String): CareerPilotResult<PdfFile, StorageError>
     suspend fun getPdfMetaData(uri: Uri): CareerPilotResult<PdfFileMetadata, StorageError>
-    suspend fun storePdfInternally(uri: String): CareerPilotResult<String, StorageError>
+    suspend fun storePdfInternally(file: PdfFile): CareerPilotResult<String, StorageError>
 }

@@ -41,6 +41,11 @@
     <string name="home_practice_interview">التدريب على المقابلة</string>
     <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
 
+    <!-- ATS job match card -->
+    <string name="home_ats_job_match">مطابقة الوظائف</string>
+    <string name="home_ats_new">جديد</string>
+    <string name="home_ats_subtitle">ألصق رابط وظيفة · اكتشف مدى توافق سيرتك الذاتية</string>
+
     <!-- Available interviews -->
     <string name="home_available_interviews">المقابلات</string>
     <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
