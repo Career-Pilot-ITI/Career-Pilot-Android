@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CenterStage(
     isReadingQuestion: Boolean,
+    isRecording: Boolean,
     onToggleListening: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -18,7 +19,7 @@ fun CenterStage(
         contentAlignment = Alignment.Center
     ) {
         AiTalkingAnimation(
-            isPulsing = isReadingQuestion,
+            isPulsing = isReadingQuestion || isRecording,
             onClick = onToggleListening
         )
     }

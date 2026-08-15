@@ -26,6 +26,10 @@ android {
             }
         }
     }
+
+    androidResources {
+        noCompress.add("task")
+    }
 }
 
 dependencies {
@@ -56,6 +60,10 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:editprofile"))
     implementation(project(":feature:home"))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(project(":feature:settings"))
     implementation(project(":feature:practicesession"))
     implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))

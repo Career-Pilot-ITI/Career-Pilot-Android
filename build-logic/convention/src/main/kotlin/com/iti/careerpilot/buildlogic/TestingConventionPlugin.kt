@@ -26,6 +26,7 @@ class TestingConventionPlugin : Plugin<Project> {
                 }
                 testOptions {
                     unitTests.isIncludeAndroidResources = true
+                    unitTests.isReturnDefaultValues = true
                 }
             }
             configureUnitTestingDependencies()
@@ -39,6 +40,7 @@ class TestingConventionPlugin : Plugin<Project> {
                 }
                 testOptions {
                     unitTests.isIncludeAndroidResources = true
+                    unitTests.isReturnDefaultValues = true
                 }
             }
             configureUnitTestingDependencies()
