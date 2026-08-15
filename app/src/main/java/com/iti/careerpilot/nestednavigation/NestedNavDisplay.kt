@@ -40,6 +40,7 @@ fun NestedNavDisplay(
     openQuiz: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
     openAts: () -> Unit,
+    openCreateChallenge: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -117,7 +118,9 @@ fun NestedNavDisplay(
                     )
                 }
                 entry<Route.NestedNav.Challenges> {
-                    ChallengesScreenRoot()
+                    ChallengesScreenRoot(
+                        openCreateChallenge = openCreateChallenge
+                    )
                 }
                 entry<Route.NestedNav.SessionHistory> {
                     SessionHistoryRoot(

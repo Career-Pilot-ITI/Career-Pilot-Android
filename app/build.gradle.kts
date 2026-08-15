@@ -69,4 +69,5 @@ dependencies {
     implementation(project(":feature:reports"))
     implementation(project(":feature:ats"))
     implementation(project(":feature:challenges"))
+    implementation(project(":feature:createchallenge"))
 }

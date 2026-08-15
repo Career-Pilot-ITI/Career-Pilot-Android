@@ -27,6 +27,7 @@ import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
+import com.iti.careerpilot.createchallenge.presentation.screen.CreateChallengeScreenRoot
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
 import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
@@ -313,6 +314,11 @@ fun RootNavDisplay(
                                 Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
+                        openCreateChallenge = {
+                            rootBackStack.navigateSingleTop(
+                                Route.CreateChallenge,
+                            )
+                        }
                     )
                 }
                 entry<Route.Ats> {
@@ -485,6 +491,14 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Interviews>()
                         },
+                    )
+                }
+
+                entry<Route.CreateChallenge> {
+                    CreateChallengeScreenRoot(
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.CreateChallenge>()
+                        }
                     )
                 }
 
