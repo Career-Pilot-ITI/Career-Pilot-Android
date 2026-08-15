@@ -2,6 +2,10 @@ package com.iti.careerpilot.quiz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.PlanAccessMap
+import com.iti.careerpilot.core.access.domain.AccessRepository
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.quiz.domain.repository.QuizRepository
 import com.iti.careerpilot.quiz.presentation.action.QuizAction
 import com.iti.careerpilot.quiz.presentation.event.QuizEvent
@@ -13,6 +17,9 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +32,9 @@ import javax.inject.Inject
 @HiltViewModel
 class QuizViewModel @Inject constructor(
     private val quizRepo: QuizRepository,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
+    private val refreshAccess: RefreshAccessUseCase,
+    private val accessRepository: AccessRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(QuizState())
@@ -33,6 +43,36 @@ class QuizViewModel @Inject constructor(
     private val _events = Channel<QuizEvent>()
     val events = _events.receiveAsFlow()
 
+    init {
+        viewModelScope.launch {
+            checkFeatureAccess(FeatureKey.Quizzes).collect { access ->
+                _state.update {
+                    it.copy(
+                        quizAccess = access,
+                        gatePlanFeatures = if (access is FeatureAccess.Locked) {
+                            PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() }
+                        } else it.gatePlanFeatures,
+                        gateRequiredPlan = if (access is FeatureAccess.Locked) access.requiredPlan else it.gateRequiredPlan
+                    )
+                }
+                if (access is FeatureAccess.StaleCacheBlocked) {
+                    refreshAccess()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            accessRepository.accessState.collect { accessState ->
+                _state.update {
+                    it.copy(
+                        coinBalance = accessState.coinBalance,
+                        planDisplayName = accessState.plan.displayName(),
+                    )
+                }
+            }
+        }
+    }
+
     fun onAction(action: QuizAction) {
         when (action) {
             is QuizAction.Init -> {
@@ -40,8 +80,32 @@ class QuizViewModel @Inject constructor(
             }
 
             is QuizAction.SenioritySelected -> {
-                _state.update { it.copy(seniority = action.level) }
-                generateTopics()
+                when (val access = _state.value.quizAccess) {
+                    is FeatureAccess.Locked -> {
+                        _state.update {
+                            it.copy(
+                                showGateSheet = true,
+                                gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
+                                gateRequiredPlan = access.requiredPlan,
+                            )
+                        }
+                    }
+                    is FeatureAccess.CoinTopUpRequired -> {
+                        _state.update {
+                            it.copy(
+                                showCoinTopUpSheet = true,
+                                coinTopUpRequiredCost = access.coinCost,
+                            )
+                        }
+                    }
+                    is FeatureAccess.StaleCacheBlocked -> {
+                        viewModelScope.launch { refreshAccess() }
+                    }
+                    else -> {
+                        _state.update { it.copy(seniority = action.level) }
+                        generateTopics()
+                    }
+                }
             }
 
             is QuizAction.TopicSelected -> {
@@ -83,6 +147,17 @@ class QuizViewModel @Inject constructor(
                     RetryType.GENERATE_QUIZ -> generateNextQuiz()
                     null -> {}
                 }
+            }
+
+            QuizAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            QuizAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            QuizAction.UpgradeFromGate -> {
+                _state.update { it.copy(showGateSheet = false) }
+                viewModelScope.launch { _events.send(QuizEvent.NavigateToPaywall(false)) }
+            }
+            QuizAction.BuyCoinsClicked -> {
+                _state.update { it.copy(showCoinTopUpSheet = false) }
+                viewModelScope.launch { _events.send(QuizEvent.NavigateToPaywall(true)) }
             }
         }
     }

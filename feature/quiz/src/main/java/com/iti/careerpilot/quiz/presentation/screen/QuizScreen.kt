@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.quiz.R
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
@@ -44,11 +47,13 @@ import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.careerpilot.quiz.presentation.viewmodel.QuizViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizRoot(
     trackId: Long,
     trackName: String,
     onBack: () -> Unit,
+    openPaywall: (showGetCoins: Boolean) -> Unit = {},
     viewModel: QuizViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -60,6 +65,7 @@ fun QuizRoot(
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             QuizEvent.QuizCompleted -> onBack()
+            is QuizEvent.NavigateToPaywall -> openPaywall(event.showGetCoins)
         }
     }
 
@@ -68,6 +74,25 @@ fun QuizRoot(
         onAction = viewModel::onAction,
         onBack = onBack,
     )
+
+    if (state.showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = stringResource(R.string.quiz_feature_name),
+            requiredPlan = state.gateRequiredPlan,
+            planFeatures = state.gatePlanFeatures,
+            onUpgradeClick = { viewModel.onAction(QuizAction.UpgradeFromGate) },
+            onDismiss = { viewModel.onAction(QuizAction.DismissGateSheet) },
+        )
+    }
+
+    if (state.showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = state.coinTopUpRequiredCost,
+            currentBalance = state.coinBalance,
+            onBuyCoins = { viewModel.onAction(QuizAction.BuyCoinsClicked) },
+            onDismiss = { viewModel.onAction(QuizAction.DismissCoinTopUpSheet) },
+        )
+    }
 }
 
 @Composable
@@ -162,7 +187,8 @@ private fun QuizStepContent(
 
             QuizStep.SelectSeniority -> {
                 SelectSeniorityContent(
-                    onSenioritySelected = { level -> onAction(QuizAction.SenioritySelected(level.apiKey)) },
+                    state = state,
+                    onAction = onAction,
                     modifier = Modifier.fillMaxSize(),
                 )
             }

@@ -5,6 +5,8 @@ import com.iti.careerpilot.quiz.domain.model.LearningPoint
 import com.iti.careerpilot.quiz.domain.model.LearningQuiz
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
 import com.iti.common.util.UIText
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.Plan
 
 @Immutable
 data class QuizState(
@@ -23,7 +25,15 @@ data class QuizState(
     val currentStep: QuizStep = QuizStep.SelectSeniority,
     val quizAnswers: Map<Int, Int> = emptyMap(), // QuestionIndex to SelectedOptionIndex
     val showQuizResults: Boolean = false,
-    val quizScore: Int = 0
+    val quizScore: Int = 0,
+    val quizAccess: FeatureAccess = FeatureAccess.Unknown,
+    val coinBalance: Int = 0,
+    val planDisplayName: String = "Free",
+    val showGateSheet: Boolean = false,
+    val gatePlanFeatures: List<String> = emptyList(),
+    val gateRequiredPlan: Plan = Plan.PLUS,
+    val showCoinTopUpSheet: Boolean = false,
+    val coinTopUpRequiredCost: Int = 0,
 )
 
 sealed interface QuizStep {

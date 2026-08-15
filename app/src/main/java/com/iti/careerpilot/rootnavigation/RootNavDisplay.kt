@@ -319,6 +319,9 @@ fun RootNavDisplay(
                         trackName = it.trackName,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Quiz>()
+                        },
+                        openPaywall = { showGetCoins ->
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = showGetCoins))
                         }
                     )
                 }

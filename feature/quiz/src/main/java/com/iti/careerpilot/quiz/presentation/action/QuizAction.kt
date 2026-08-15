@@ -13,4 +13,8 @@ sealed interface QuizAction {
     data class AnswerSelected(val questionIndex: Int, val optionIndex: Int) : QuizAction
     data object SubmitQuiz : QuizAction
     data object Retry : QuizAction
+    data object DismissGateSheet : QuizAction
+    data object DismissCoinTopUpSheet : QuizAction
+    data object UpgradeFromGate : QuizAction
+    data object BuyCoinsClicked : QuizAction
 }
