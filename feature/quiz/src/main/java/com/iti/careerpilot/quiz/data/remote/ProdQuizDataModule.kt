@@ -1,7 +1,5 @@
-package com.iti.careerpilot.quiz.di
+package com.iti.careerpilot.quiz.data.remote
 
-import com.iti.careerpilot.quiz.data.remote.QuizRemoteDataSource
-import com.iti.careerpilot.quiz.data.remote.QuizRemoteDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

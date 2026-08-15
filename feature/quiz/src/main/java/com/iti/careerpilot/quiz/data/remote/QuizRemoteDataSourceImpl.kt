@@ -37,10 +37,18 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             Generate a list of relevant technical study topics for this track and seniority.
             Each topic should have a unique id, title, and a brief description.
             Do not generate learning content or quizzes yet.
+
+            Return the response as a JSON object:
+            {
+              "topics": [
+                { "id": "...", "title": "...", "description": "..." }
+              ]
+            }
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        val text = response.text ?: throw Exception("Empty AI response")
+        json.decodeFromString(cleanJson(text))
     }
 
     override suspend fun generateNextLearningPoint(
@@ -59,10 +67,22 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             Avoid repeating concepts already covered.
             If the topic is sufficiently covered, set topicCompleted to true.
             Otherwise, provide the title, concise explanation, and a practical example for the next learning point.
+
+            Return the response as a JSON object:
+            {
+              "topicCompleted": boolean,
+              "coveredConcept": "...",
+              "learningPoint": {
+                "title": "...",
+                "explanation": "...",
+                "example": "..."
+              }
+            }
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        val text = response.text ?: throw Exception("Empty AI response")
+        json.decodeFromString(cleanJson(text))
     }
 
     override suspend fun generateQuiz(
@@ -79,10 +99,33 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             
             Generate 3 to 5 multiple-choice questions testing the user's understanding of the learning point above.
             Each question must have exactly 4 options, a correctAnswerIndex (0-3), and an explanation for the correct answer.
+
+            Return the response as a JSON object:
+            {
+              "questions": [
+                {
+                  "id": "...",
+                  "question": "...",
+                  "options": ["...", "...", "...", "..."],
+                  "correctAnswerIndex": number,
+                  "explanation": "..."
+                }
+              ]
+            }
         """.trimIndent()
 
         val response = model.generateContent(prompt)
-        json.decodeFromString(response.text ?: throw Exception("Empty AI response"))
+        val text = response.text ?: throw Exception("Empty AI response")
+        json.decodeFromString(cleanJson(text))
+    }
+
+    private fun cleanJson(jsonString: String): String {
+        return jsonString
+            .trim()
+            .removePrefix("```json")
+            .removePrefix("```")
+            .removeSuffix("```")
+            .trim()
     }
 
     companion object {
@@ -109,7 +152,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             12. Questions should test understanding, not only memorization.
             13. Technical information must be accurate.
             14. Do not invent APIs, framework behavior, or language features.
-            15. Return responses using the requested JSON schema.
+            15. Return responses using the requested JSON schema. Never return a top-level JSON array; always wrap it in the specified object structure.
             16. Never make navigation decisions.
             17. Never tell the application which screen to open.
         """
