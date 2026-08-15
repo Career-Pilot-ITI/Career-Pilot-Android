@@ -127,5 +127,16 @@ class PaywallStateTest {
 
         assertEquals(pack, state.selectedCoinPack)
     }
+
+    @Test
+    fun `SubscriptionTier getNameRes maps pro and max to paywall_plan_max`() {
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_max, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("pro"))
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_max, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("max"))
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_max, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("PRO"))
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_max, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("MAX"))
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_plus, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("plus"))
+        assertEquals(com.iti.careerpilot.payment.R.string.paywall_plan_free, com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier.getNameRes("free"))
+    }
 }
+
 

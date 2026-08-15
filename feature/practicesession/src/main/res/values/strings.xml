@@ -124,6 +124,6 @@
     <string name="seconds_short">%1$ds</string>
     <string name="audio_session">Audio Session</string>
     <string name="video_session">Video Session</string>
-    <string name="pro_badge">PRO</string>
+    <string name="pro_badge">MAX</string>
     <string name="body_language_telemetry_metrics_desc">Body language telemetry metrics</string>
 </resources>

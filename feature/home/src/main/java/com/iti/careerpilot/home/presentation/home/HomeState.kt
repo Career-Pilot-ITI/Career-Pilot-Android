@@ -31,8 +31,7 @@ data class HomeState(
     val planLabel: String
         get() = when (subscriptionTier.uppercase()) {
             "PLUS" -> "Plus"
-            "PRO" -> "Pro"
-            "MAX" -> "Max"
+            "PRO", "MAX" -> "Max"
             else -> "Free"
         }
 

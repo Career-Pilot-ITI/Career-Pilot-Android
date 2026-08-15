@@ -9,7 +9,7 @@
     <string name="paywall_payment_history_empty">سيظهر سجل المدفوعات بعد أول عملية شراء.</string>
     <string name="paywall_plan_free">مجانية</string>
     <string name="paywall_plan_plus">بلس</string>
-    <string name="paywall_plan_pro">برو</string>
+    <string name="paywall_plan_pro">ماكس</string>
     <string name="paywall_plan_max">ماكس</string>
     <string name="paywall_coin_pack">%1$d عملة</string>
     <string name="paywall_price">%1$d جنيه مصري</string>

@@ -297,7 +297,11 @@ private fun SubscriptionDetailsCard(
     info: SubscriptionInfo,
     modifier: Modifier = Modifier
 ) {
-    val tierDisplayName = info.tier.lowercase().replaceFirstChar { it.uppercase() }
+    val tierDisplayName = when (info.tier.uppercase().trim()) {
+        "PRO", "MAX" -> stringResource(R.string.paywall_plan_max)
+        "PLUS" -> stringResource(R.string.paywall_plan_plus)
+        else -> stringResource(R.string.paywall_plan_free)
+    }
     val planIcon = when (info.tier.uppercase().trim()) {
         "PLUS" -> Icons.Rounded.Star
         "PRO", "MAX" -> Icons.Rounded.WorkspacePremium
@@ -402,7 +406,11 @@ private fun SubscriptionDetailsCard(
 
             val pendingTier = info.pendingTier
             if (!pendingTier.isNullOrBlank()) {
-                val pendingTierName = pendingTier.lowercase().replaceFirstChar { it.uppercase() }
+                val pendingTierName = when (pendingTier.uppercase().trim()) {
+                    "PRO", "MAX" -> stringResource(R.string.paywall_plan_max)
+                    "PLUS" -> stringResource(R.string.paywall_plan_plus)
+                    else -> stringResource(R.string.paywall_plan_free)
+                }
                 Spacer(modifier = Modifier.height(Dimens.SpaceXS))
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),

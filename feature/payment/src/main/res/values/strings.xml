@@ -9,7 +9,7 @@
     <string name="paywall_payment_history_empty">Payment history will appear after your first purchase.</string>
     <string name="paywall_plan_free">Free</string>
     <string name="paywall_plan_plus">Plus</string>
-    <string name="paywall_plan_pro">Pro</string>
+    <string name="paywall_plan_pro">Max</string>
     <string name="paywall_plan_max">Max</string>
     <string name="paywall_coin_pack">%1$d coins</string>
     <string name="paywall_price">EGP %1$d</string>

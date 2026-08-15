@@ -31,7 +31,11 @@ fun StatsRow(profile: UserProfile) {
             label = stringResource(R.string.coins),
             value = profile.account.coinBalance.toString()
         )
-        val plan = runCatching { Plan.valueOf(profile.account.subscriptionTier.uppercase()) }.getOrDefault(Plan.FREE)
+        val plan = when (profile.account.subscriptionTier.uppercase()) {
+            "MAX", "PRO" -> Plan.MAX
+            "PLUS" -> Plan.PLUS
+            else -> Plan.FREE
+        }
         val formattedPlan = when (plan) {
             Plan.MAX -> stringResource(R.string.max)
             Plan.PLUS -> stringResource(R.string.plus)

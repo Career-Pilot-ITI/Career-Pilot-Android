@@ -185,7 +185,7 @@ private fun ProfileScreenPreview() {
                     account = AccountInfo(
                         username = "amina.h",
                         email = "amina@example.com",
-                        subscriptionTier = "Pro",
+                        subscriptionTier = "Max",
                         coinBalance = 240
                     ),
                     career = CareerInfo(
