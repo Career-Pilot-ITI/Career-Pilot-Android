@@ -31,6 +31,7 @@ import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
+import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
@@ -199,6 +200,14 @@ fun RootNavDisplay(
                                 ),
                             )
                         },
+                        openQuiz = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Quiz(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
                         openInterviews = {
                             rootBackStack.navigateSingleTop(Route.Interviews)
                         },
@@ -304,6 +313,16 @@ fun RootNavDisplay(
                     )
                 }
 
+                entry<Route.Quiz> {
+                    QuizRoot(
+                        trackId = it.trackId,
+                        trackName = it.trackName,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.Quiz>()
+                        }
+                    )
+                }
+
                 entry<Route.EditProfile> {
                     EditProfileRoot(
                         section = it.section,
@@ -326,6 +345,14 @@ fun RootNavDisplay(
                         openReadyToPractice = { trackId, trackName ->
                             rootBackStack.navigateSingleTop(
                                 Route.ReadyToPractice(
+                                    trackId = trackId,
+                                    trackName = trackName,
+                                ),
+                            )
+                        },
+                        openQuiz = { trackId, trackName ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Quiz(
                                     trackId = trackId,
                                     trackName = trackName,
                                 ),

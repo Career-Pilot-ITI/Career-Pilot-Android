@@ -37,10 +37,10 @@ media3 = "1.10.1"
 sherpaOnnx = "v1.13.4"
 browser = "1.9.0"
 paging = "3.5.0"
+firebaseBom = "34.17.0"
+googleServices = "4.5.0"
 mediapipe = "1.0.0"
 camerax = "1.6.1"
-firebaseBom = "34.17.0"
-googleServices = "4.4.2"
 
 
 [libraries]
@@ -154,7 +154,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
-
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

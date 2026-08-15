@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +39,6 @@ import com.iti.careerpilot.home.presentation.home.HomeViewModel
 import com.iti.careerpilot.home.presentation.home.screen.components.EmptySessionsCard
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeHeader
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeShimmerLoading
-import com.iti.careerpilot.home.presentation.home.screen.components.InterviewTrackCard
 import com.iti.careerpilot.home.presentation.home.screen.components.OverallScoreCard
 import com.iti.careerpilot.home.presentation.home.screen.components.PracticeInterviewCard
 import com.iti.careerpilot.home.presentation.home.screen.components.SectionHeader
@@ -52,6 +49,7 @@ import com.iti.careerpilot.home.presentation.home.screen.components.rememberGree
 @Composable
 fun HomeRoot(
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openQuiz: (trackId: Long, trackName: String) -> Unit,
     openSessionDetails: (Long) -> Unit,
     openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     openInterviews: () -> Unit,
@@ -75,6 +73,9 @@ fun HomeRoot(
         when (event) {
             is HomeEvent.NavigateToReadyToPractice ->
                 openReadyToPractice(event.trackId, event.trackName)
+
+            is HomeEvent.NavigateToQuiz ->
+                openQuiz(event.trackId, event.trackName)
 
             is HomeEvent.NavigateToSessionDetails ->
                 openSessionDetails(event.sessionId)
@@ -173,57 +174,27 @@ fun HomeScreen(
                                 )
                         )
                     }
-
                     item {
-                        PracticeInterviewCard(
-                            trackName = state.practiceTrackName,
-                            onClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                        SectionHeader(
+                            title = stringResource(R.string.home_available_interviews),
+                            actionLabel = stringResource(R.string.home_see_all),
+                            onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp
                                 )
                         )
                     }
-
-                    if (state.availableInterviews.isNotEmpty()) {
-                        item {
-                            SectionHeader(
-                                title = stringResource(R.string.home_available_interviews),
-                                actionLabel = stringResource(R.string.home_see_all),
-                                onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
-                                modifier = Modifier
-                                    .padding(
-                                        horizontal = 20.dp
-                                    )
-                            )
-                        }
-
-                        item {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(
+                    item {
+                        PracticeInterviewCard(
+                            trackName = state.practiceTrackName,
+                            onInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                            onLessonClick = { onAction(HomeAction.LessonClicked) },
+                            modifier = Modifier
+                                .padding(
                                     horizontal = 20.dp
                                 )
-                            ) {
-                                items(
-                                    items = state.availableInterviews,
-                                    key = { track -> track.id },
-                                ) { track ->
-                                    InterviewTrackCard(
-                                        track = track,
-                                        onClick = {
-                                            onAction(
-                                                HomeAction.InterviewTrackClicked(
-                                                    trackId = track.id,
-                                                    trackName = track.name,
-                                                )
-                                            )
-                                        },
-                                    )
-                                }
-                            }
-                        }
+                        )
                     }
 
                     item {

@@ -38,7 +38,7 @@
     <string name="home_start_practice">Start practice interview</string>
 
     <!-- Available interviews -->
-    <string name="home_available_interviews">Available Interviews</string>
+    <string name="home_available_interviews">Interviews</string>
     <string name="home_available_interviews_subtitle">Pick a track and start practising</string>
 
     <!-- Recent sessions -->
@@ -88,6 +88,9 @@
     <string name="ready_camera_required">Required for video</string>
     <string name="ready_camera_granted">Granted</string>
     <string name="getting_ready">Getting Ready</string>
+    <string name="start_interview">Start interview</string>
+    <string name="see_lessons">See lessons</string>
+    <string name="start_lessons">Start Lessons</string>
     <string name="audio_session">Audio Session</string>
     <string name="video_session">Video Session</string>
     <string name="pro_badge">PRO</string>

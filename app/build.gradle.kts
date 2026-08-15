@@ -65,5 +65,6 @@ dependencies {
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(project(":feature:settings"))
     implementation(project(":feature:practicesession"))
+    implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))
 }

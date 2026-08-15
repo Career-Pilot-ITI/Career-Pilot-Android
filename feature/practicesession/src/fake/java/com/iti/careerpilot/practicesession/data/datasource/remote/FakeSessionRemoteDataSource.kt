@@ -23,7 +23,7 @@ import javax.inject.Singleton
 class FakeSessionRemoteDataSource @Inject constructor() : SessionRemoteDataSource {
 
     private var questionCounter = 1
-    private val totalQuestions = 4
+    private val totalQuestions = 8
 
     private val questions = listOf(
         "Can you describe the full Android Activity lifecycle from initial creation to final destruction, and explain in comprehensive detail how the system handles complex configuration changes such as screen rotation, fold/unfold transitions, and multi-window split screening? Furthermore, elaborate on the architectural differences between onSaveInstanceState, SavedStateHandle, and ViewModel retention, explain how the Android OS determines when to kill background processes under severe memory pressure, and provide a real-world scenario illustrating how you would recover volatile transient state after unexpected process termination without degrading user experience.",
