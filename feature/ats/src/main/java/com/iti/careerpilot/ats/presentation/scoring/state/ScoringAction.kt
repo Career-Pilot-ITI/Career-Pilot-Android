@@ -7,4 +7,8 @@ sealed interface ScoringAction {
     data object GenerateCoverLetter : ScoringAction
     data object OptimizeCv : ScoringAction
     data object StartPractice : ScoringAction
+    data object DismissGateSheet : ScoringAction
+    data object DismissCoinTopUpSheet : ScoringAction
+    data object UpgradeFromGate : ScoringAction
+    data object BuyCoinsClicked : ScoringAction
 }

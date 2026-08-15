@@ -17,11 +17,18 @@ import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.testing.FakeAccessRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.datastore.models.CareerInfo
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
 import com.iti.core.model.PdfFile
+import com.iti.core.model.Plan
+import kotlin.time.Clock
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
@@ -50,9 +57,13 @@ class ScoringViewModelTest {
     @After fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `opening score loads workspace and scores automatically`() = runTest(dispatcher) {
+    fun `opening score with sufficient coins loads workspace and scores automatically`() = runTest(dispatcher) {
         val repository = ScoringRepository()
-        val viewModel = createViewModel(repository, SavedStateHandle())
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
 
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
@@ -65,7 +76,11 @@ class ScoringViewModelTest {
     @Test
     fun `duplicate initial actions execute one paid score request`() = runTest(dispatcher) {
         val repository = ScoringRepository().apply { holdScore = CompletableDeferred() }
-        val viewModel = createViewModel(repository, SavedStateHandle())
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
         viewModel.onAction(ScoringAction.Initial(1L))
         viewModel.onAction(ScoringAction.Initial(1L))
         runCurrent()
@@ -77,16 +92,19 @@ class ScoringViewModelTest {
     }
 
     @Test
-    fun `insufficient coins exposes Paywall recovery`() = runTest(dispatcher) {
-        val repository = ScoringRepository().apply {
-            scoreResult = CareerPilotResult.Error(NetworkError.INSUFFICIENT_COINS)
-        }
-        val viewModel = createViewModel(repository, SavedStateHandle())
+    fun `opening score with insufficient coins displays coin top up sheet and blocks score request`() = runTest(dispatcher) {
+        val repository = ScoringRepository()
+        val accessRepo = createAccessRepository(
+            coins = 0,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.hasInsufficientCoins)
-        assertFalse(viewModel.state.value.wasInterrupted)
+        assertEquals(0, repository.scoreCalls)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
@@ -96,7 +114,11 @@ class ScoringViewModelTest {
                 career = CareerInfo(trackId = 5L, trackName = "Android"),
             )
         }
-        val viewModel = createViewModel(repository, SavedStateHandle())
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
@@ -115,9 +137,13 @@ class ScoringViewModelTest {
     }
 
     @Test
-    fun `optimize starts one background job and emits tracking effect`() = runTest(dispatcher) {
+    fun `optimize with sufficient coins starts background job and emits tracking effect`() = runTest(dispatcher) {
         val repository = ScoringRepository()
-        val viewModel = createViewModel(repository, SavedStateHandle())
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
         viewModel.onAction(ScoringAction.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
@@ -129,12 +155,73 @@ class ScoringViewModelTest {
         assertEquals(ScoringEffect.StartOptimizationTracking(OPTIMIZATION_JOB), effect.await())
     }
 
-    private fun createViewModel(repository: ScoringRepository, state: SavedStateHandle) = ScoringViewModel(
+    @Test
+    fun `optimize with insufficient coins displays coin top up sheet and blocks optimize request`() = runTest(dispatcher) {
+        val repository = ScoringRepository()
+        val accessRepo = createAccessRepository(
+            coins = 2,
+            features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
+        viewModel.onAction(ScoringAction.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onAction(ScoringAction.OptimizeCv)
+        advanceUntilIdle()
+
+        assertEquals(0, repository.optimizeCalls)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+    }
+
+    @Test
+    fun `optimize when locked displays gate sheet and blocks optimize request`() = runTest(dispatcher) {
+        val repository = ScoringRepository()
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures), // Missing CvAiAnalysis
+            plan = Plan.FREE,
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
+        viewModel.onAction(ScoringAction.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onAction(ScoringAction.OptimizeCv)
+        advanceUntilIdle()
+
+        assertEquals(0, repository.optimizeCalls)
+        assertTrue(viewModel.state.value.showGateSheet)
+    }
+
+    private fun createAccessRepository(
+        coins: Int,
+        features: Set<FeatureKey>,
+        plan: Plan = Plan.PLUS,
+    ): FakeAccessRepository {
+        val accessState = AccessState(
+            plan = plan,
+            features = features,
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = coins,
+        )
+        return FakeAccessRepository(initialState = accessState)
+    }
+
+    private fun createViewModel(
+        repository: ScoringRepository,
+        state: SavedStateHandle,
+        accessRepository: FakeAccessRepository = createAccessRepository(10, setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis)),
+    ) = ScoringViewModel(
         getWorkspace = GetWorkspaceUseCase(repository),
         scoreCv = ScoreCvUseCase(repository),
         observeCurrentProfile = ObserveCurrentProfileUseCase(repository),
         optimizeCv = OptimizeCvUseCase(repository),
         savedStateHandle = state,
+        checkFeatureAccess = CheckFeatureAccessUseCase(accessRepository),
+        refreshAccess = RefreshAccessUseCase(accessRepository),
+        accessRepository = accessRepository,
     )
 }
 

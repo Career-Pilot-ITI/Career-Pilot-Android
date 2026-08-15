@@ -2,6 +2,8 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,6 +33,7 @@ import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 
 @Composable
 fun ScoringContent(
@@ -160,18 +164,26 @@ fun ScoringContent(
             )
         }
         item {
-            CareerPilotButton(
-                text = stringResource(R.string.ats_generate_cover_letter),
-                onClick = { onAction(ScoringAction.GenerateCoverLetter) },
-                variant = ButtonVariant.OUTLINE,
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Email,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                    )
-                },
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CareerPilotButton(
+                    text = stringResource(R.string.ats_generate_cover_letter),
+                    onClick = { onAction(ScoringAction.GenerateCoverLetter) },
+                    variant = ButtonVariant.OUTLINE,
+                    modifier = Modifier.weight(1f),
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.Email,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    },
+                )
+                com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge(coinCost = 2, compact = true)
+            }
         }
         item {
             PracticeActionItem(

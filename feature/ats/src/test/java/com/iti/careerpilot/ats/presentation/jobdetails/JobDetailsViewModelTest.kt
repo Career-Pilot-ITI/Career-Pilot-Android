@@ -10,15 +10,22 @@ import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
 import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewModel
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.testing.FakeAccessRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
 import com.iti.core.model.PdfFile
+import com.iti.core.model.Plan
+import kotlin.time.Clock
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -28,6 +35,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -41,7 +50,8 @@ class JobDetailsViewModelTest {
     @Test
     fun `job details loads workspace without scoring`() = runTest(dispatcher) {
         val repository = JobDetailsRepository()
-        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(repository))
+        val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(repository, accessRepo)
 
         viewModel.onAction(JobDetailsAction.Initial(1L))
         advanceUntilIdle()
@@ -52,8 +62,9 @@ class JobDetailsViewModelTest {
     }
 
     @Test
-    fun `start scoring emits score route with workspace id`() = runTest(dispatcher) {
-        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(JobDetailsRepository()))
+    fun `start scoring with sufficient coins emits score route with workspace id`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
         viewModel.onAction(JobDetailsAction.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
@@ -63,6 +74,60 @@ class JobDetailsViewModelTest {
 
         assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
     }
+
+    @Test
+    fun `start scoring with insufficient coins shows coin top up sheet and blocks navigation`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onAction(JobDetailsAction.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onAction(JobDetailsAction.StartScoring)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+    }
+
+    @Test
+    fun `start scoring when locked shows gate sheet and blocks navigation`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onAction(JobDetailsAction.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onAction(JobDetailsAction.StartScoring)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+    }
+
+    private fun createAccessRepository(
+        coins: Int,
+        features: Set<FeatureKey>,
+        plan: Plan = Plan.PLUS,
+    ): FakeAccessRepository {
+        val accessState = AccessState(
+            plan = plan,
+            features = features,
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = coins,
+        )
+        return FakeAccessRepository(initialState = accessState)
+    }
+
+    private fun createViewModel(
+        repository: JobDetailsRepository,
+        accessRepository: FakeAccessRepository,
+    ) = JobDetailsViewModel(
+        getWorkspace = GetWorkspaceUseCase(repository),
+        checkFeatureAccess = CheckFeatureAccessUseCase(accessRepository),
+        refreshAccess = RefreshAccessUseCase(accessRepository),
+        accessRepository = accessRepository,
+    )
 }
 
 private class JobDetailsRepository : AtsRepository {

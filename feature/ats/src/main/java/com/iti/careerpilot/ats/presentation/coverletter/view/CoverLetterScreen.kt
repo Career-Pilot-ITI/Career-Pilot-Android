@@ -32,9 +32,13 @@ import com.iti.careerpilot.ats.presentation.util.composeEmail
 import com.iti.careerpilot.ats.presentation.util.copyText
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoverLetterRoot(
     workspaceId: Long,
@@ -81,6 +85,32 @@ fun CoverLetterRoot(
         onBack = onBack,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val showCoinTopUpSheet by rememberUiStateValue(stateProvider) { it.showCoinTopUpSheet }
+    val coinTopUpRequiredCost by rememberUiStateValue(stateProvider) { it.coinTopUpRequiredCost }
+    val coinBalance by rememberUiStateValue(stateProvider) { it.coinBalance }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = stringResource(R.string.cover_letter),
+            requiredPlan = gateRequiredPlan,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { viewModel.onAction(CoverLetterAction.UpgradeFromGate) },
+            onDismiss = { viewModel.onAction(CoverLetterAction.DismissGateSheet) },
+        )
+    }
+
+    if (showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = coinTopUpRequiredCost,
+            currentBalance = coinBalance,
+            onBuyCoins = { viewModel.onAction(CoverLetterAction.BuyCoinsClicked) },
+            onDismiss = { viewModel.onAction(CoverLetterAction.DismissCoinTopUpSheet) },
+        )
+    }
 }
 
 @Composable

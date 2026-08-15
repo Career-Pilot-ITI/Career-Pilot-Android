@@ -7,6 +7,7 @@ import com.iti.careerpilot.ats.domain.model.AiJobStatus
 import com.iti.careerpilot.ats.domain.usecase.GetAiJobUseCase
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
@@ -21,6 +22,7 @@ import kotlinx.collections.immutable.persistentListOf
 @HiltViewModel
 class OptimizedCvViewModel @Inject constructor(
     private val getAiJob: GetAiJobUseCase,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow(OptimizedCvUiState())
     val state = _state.asStateFlow()

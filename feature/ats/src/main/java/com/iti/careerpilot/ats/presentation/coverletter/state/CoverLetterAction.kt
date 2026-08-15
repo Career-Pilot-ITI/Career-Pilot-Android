@@ -8,4 +8,8 @@ sealed interface CoverLetterAction {
     data object Copy : CoverLetterAction
     data object Email : CoverLetterAction
     data object OpenCoins : CoverLetterAction
+    data object DismissGateSheet : CoverLetterAction
+    data object DismissCoinTopUpSheet : CoverLetterAction
+    data object UpgradeFromGate : CoverLetterAction
+    data object BuyCoinsClicked : CoverLetterAction
 }

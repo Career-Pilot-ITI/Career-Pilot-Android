@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -31,8 +32,13 @@ import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoringBody
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.iti.common.snackbar.CareerPilotSnackbarController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoringRoot(
     workspaceId: Long,
@@ -99,6 +105,33 @@ fun ScoringRoot(
         onOpenJob = openJob,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val gateFeatureName by rememberUiStateValue(stateProvider) { it.gateFeatureName }
+    val showCoinTopUpSheet by rememberUiStateValue(stateProvider) { it.showCoinTopUpSheet }
+    val coinTopUpRequiredCost by rememberUiStateValue(stateProvider) { it.coinTopUpRequiredCost }
+    val coinBalance by rememberUiStateValue(stateProvider) { it.coinBalance }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
+            requiredPlan = gateRequiredPlan,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { viewModel.onAction(ScoringAction.UpgradeFromGate) },
+            onDismiss = { viewModel.onAction(ScoringAction.DismissGateSheet) },
+        )
+    }
+
+    if (showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = coinTopUpRequiredCost,
+            currentBalance = coinBalance,
+            onBuyCoins = { viewModel.onAction(ScoringAction.BuyCoinsClicked) },
+            onDismiss = { viewModel.onAction(ScoringAction.DismissCoinTopUpSheet) },
+        )
+    }
 }
 
 @Composable
