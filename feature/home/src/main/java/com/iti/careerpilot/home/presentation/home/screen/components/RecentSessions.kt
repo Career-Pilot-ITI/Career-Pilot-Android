@@ -27,14 +27,9 @@ import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.rememberSessionTimestamp
 import com.iti.careerpilot.home.R
-import com.iti.careerpilot.home.domain.model.InterviewSession
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 
 @Composable
 fun SectionHeader(
@@ -79,17 +74,21 @@ fun SessionRow(
     onResume: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val rowClick = if (session.isCompleted) onClick else onResume
+    val rowClick = when {
+        session.isCompleted -> onClick
+        session.isResumable -> onResume
+        else -> null
+    }
 
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
-                .clickable(onClick = rowClick)
+                .then(if (rowClick != null) Modifier.clickable(onClick = rowClick) else Modifier)
                 .padding(Dimens.CardPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceL),
         ) {
-            ScoreBadge(score = session.overallScore)
+            ScoreBadge(score = session.score)
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -109,14 +108,14 @@ fun SessionRow(
                 )
             }
 
-            if (session.isCompleted) {
+            if (session.isResumable) {
+                ContinueChip(onClick = onResume)
+            } else if (session.isCompleted) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = CareerPilotPalette.gray400,
                 )
-            } else {
-                ContinueChip(onClick = onResume)
             }
         }
     }
@@ -172,27 +171,6 @@ private fun ScoreBadge(score: Int?) {
         )
     }
 }
-
-@Composable
-private fun rememberSessionTimestamp(instant: Instant?): String {
-    if (instant == null) return stringResource(R.string.home_session_unscored)
-
-    val dateTime = instant.atZone(ZoneId.systemDefault())
-    val sessionDate = dateTime.toLocalDate()
-    val daysApart = LocalDate.now().toEpochDay() - sessionDate.toEpochDay()
-
-    val time = TIME_FORMATTER.format(LocalTime.of(dateTime.hour, dateTime.minute))
-
-    return when (daysApart) {
-        0L -> stringResource(R.string.home_session_today, time)
-        1L -> stringResource(R.string.home_session_yesterday, time)
-        else -> "${DAY_FORMATTER.format(sessionDate)}, $time"
-    }
-}
-
-private val TIME_FORMATTER: DateTimeFormatter =
-    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-private val DAY_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE")
 
 private const val HIGH_SCORE = 80
 private const val MID_SCORE = 60

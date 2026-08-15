@@ -2,7 +2,7 @@ package com.iti.careerpilot.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.home.domain.model.InterviewSession
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
@@ -43,6 +43,16 @@ class HomeViewModel @Inject constructor(
     init {
         observeProfile()
         load(isRefresh = false)
+    }
+
+    private var hasEnteredScreen = false
+
+    fun onScreenEntered() {
+        if (hasEnteredScreen) {
+            load(isRefresh = true)
+        } else {
+            hasEnteredScreen = true
+        }
     }
 
     fun onAction(action: HomeAction) {
