@@ -28,7 +28,7 @@ import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.domain.model.ScoreSummary
 
 @Composable
-fun OverallScoreCard(
+fun LatestScoreCard(
     summary: ScoreSummary?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -70,7 +70,7 @@ private fun ScoreContent(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.home_overall_score),
+                text = stringResource(R.string.home_latest_score),
                 style = MaterialTheme.typography.labelMedium,
                 color = CareerPilotPalette.gray600,
             )
@@ -114,7 +114,7 @@ private fun EmptyScoreContent() {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.home_overall_score),
+                text = stringResource(R.string.home_latest_score),
                 style = MaterialTheme.typography.labelMedium,
                 color = CareerPilotPalette.gray600,
             )

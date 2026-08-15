@@ -41,7 +41,7 @@ import com.iti.careerpilot.home.presentation.home.screen.components.AtsJobMatchC
 import com.iti.careerpilot.home.presentation.home.screen.components.EmptySessionsCard
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeHeader
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeShimmerLoading
-import com.iti.careerpilot.home.presentation.home.screen.components.OverallScoreCard
+import com.iti.careerpilot.home.presentation.home.screen.components.LatestScoreCard
 import com.iti.careerpilot.home.presentation.home.screen.components.PracticeInterviewCard
 import com.iti.careerpilot.home.presentation.home.screen.components.SectionHeader
 import com.iti.careerpilot.home.presentation.home.screen.components.SessionRow
@@ -174,7 +174,7 @@ fun HomeScreen(
                     }
 
                     item {
-                        OverallScoreCard(
+                        LatestScoreCard(
                             summary = state.scoreSummary,
                             onClick = { onAction(HomeAction.ScoreCardClicked) },
                             modifier = Modifier

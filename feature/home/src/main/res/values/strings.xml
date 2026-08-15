@@ -19,8 +19,8 @@
     </plurals>
     <string name="home_free_sessions_used">%1$d of %2$d free sessions used</string>
 
-    <!-- Overall score card -->
-    <string name="home_overall_score">OVERALL SCORE</string>
+    <!-- Latest score card -->
+    <string name="home_latest_score">LATEST SCORE</string>
     <string name="home_score_excellent">Excellent Work</string>
     <string name="home_score_good">Good Progress</string>
     <string name="home_score_keep_going">Keep Going</string>
