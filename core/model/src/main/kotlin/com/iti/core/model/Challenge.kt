@@ -1,4 +1,4 @@
-package com.iti.careerpilot.createchallenge.domain.models
+package com.iti.core.model
 
 import kotlinx.serialization.Serializable
 

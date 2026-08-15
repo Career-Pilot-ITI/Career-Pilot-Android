@@ -81,13 +81,13 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
 import com.iti.careerpilot.createchallenge.R
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeType
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeVisibility
-import com.iti.careerpilot.createchallenge.domain.models.SeniorityLevel
 import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAction
 import com.iti.careerpilot.createchallenge.presentation.event.CreateChallengeEvent
 import com.iti.careerpilot.createchallenge.presentation.state.CreateChallengeState
 import com.iti.careerpilot.createchallenge.presentation.viewmodel.CreateChallengeViewModel
+import com.iti.core.model.ChallengeType
+import com.iti.core.model.ChallengeVisibility
+import com.iti.core.model.SeniorityLevel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,7 +100,7 @@ fun CreateChallengeScreenRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.onAction(CreateChallengeAction.Initialize)
+        viewModel.onAction(CreateChallengeAction.Initial)
     }
 
     ObserveEvent(viewModel.events) { event ->

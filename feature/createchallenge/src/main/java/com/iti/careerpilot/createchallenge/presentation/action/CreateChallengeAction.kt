@@ -1,12 +1,13 @@
 package com.iti.careerpilot.createchallenge.presentation.action
 
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeType
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeVisibility
-import com.iti.careerpilot.createchallenge.domain.models.SeniorityLevel
+import com.iti.core.model.ChallengeType
+import com.iti.core.model.ChallengeVisibility
+import com.iti.core.model.SeniorityLevel
 import com.iti.core.model.Track
 
+
 sealed interface CreateChallengeAction {
-    data object Initialize : CreateChallengeAction
+    data object Initial : CreateChallengeAction
     data class OnTrackSelected(val track: Track) : CreateChallengeAction
     data class OnVisibilityChanged(val visibility: ChallengeVisibility) : CreateChallengeAction
     data class OnSeniorityLevelChanged(val level: SeniorityLevel) : CreateChallengeAction
@@ -19,6 +20,7 @@ sealed interface CreateChallengeAction {
     data object OnConfirmDeleteQuestion : CreateChallengeAction
     data object OnDismissDeleteConfirmation : CreateChallengeAction
     data object OnSubmit : CreateChallengeAction
+    data object OnDismissError : CreateChallengeAction
     data object OnDismissSuccess : CreateChallengeAction
     data object OnBackClicked : CreateChallengeAction
 }

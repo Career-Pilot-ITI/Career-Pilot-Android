@@ -3,10 +3,6 @@ package com.iti.careerpilot.createchallenge.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.createchallenge.R
-import com.iti.careerpilot.createchallenge.domain.models.Challenge
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeQuestion
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeType
-import com.iti.careerpilot.createchallenge.domain.models.VideoAnalysisConfig
 import com.iti.careerpilot.createchallenge.domain.repository.CreateChallengeRepository
 import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAction
 import com.iti.careerpilot.createchallenge.presentation.event.CreateChallengeEvent
@@ -17,7 +13,11 @@ import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.model.Challenge
+import com.iti.core.model.ChallengeQuestion
+import com.iti.core.model.ChallengeType
 import com.iti.core.model.Track
+import com.iti.core.model.VideoAnalysisConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -75,7 +75,7 @@ class CreateChallengeViewModel @Inject constructor(
 
     fun onAction(action: CreateChallengeAction) {
         when (action) {
-            CreateChallengeAction.Initialize -> initialize()
+            CreateChallengeAction.Initial -> initialize()
             is CreateChallengeAction.OnTrackSelected -> _state.update { it.copy(selectedTrack = action.track) }
             is CreateChallengeAction.OnVisibilityChanged -> _state.update { it.copy(visibility = action.visibility) }
             is CreateChallengeAction.OnSeniorityLevelChanged -> _state.update { it.copy(seniorityLevel = action.level) }
@@ -104,7 +104,9 @@ class CreateChallengeViewModel @Inject constructor(
             }
             CreateChallengeAction.OnDismissDeleteConfirmation -> _state.update { it.copy(questionToDeleteIndex = null) }
             CreateChallengeAction.OnSubmit -> submitChallenge()
+            CreateChallengeAction.OnDismissError -> _state.update { it.copy(error = null) }
             CreateChallengeAction.OnDismissSuccess -> {
+                _state.update { it.copy(isSuccessDialogVisible = false, invitationCode = null) }
                 viewModelScope.launch { _events.send(CreateChallengeEvent.NavigateToDashboard) }
             }
             CreateChallengeAction.OnBackClicked -> {
@@ -141,7 +143,7 @@ class CreateChallengeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _state.update { it.copy(isSubmitting = true) }
+            _state.update { it.copy(isSubmitting = true, error = null) }
 
             repository.validateQuestions(nonEmptyQuestions)
                 .onSuccess {
@@ -174,7 +176,7 @@ class CreateChallengeViewModel @Inject constructor(
 
                     repository.createChallenge(challenge)
                         .onSuccess {
-                            _state.update { it.copy(isSubmitting = false, invitationCode = challengeId) }
+                            _state.update { it.copy(isSubmitting = false, isSuccessDialogVisible = true, invitationCode = challengeId) }
                         }
                         .onError { _ ->
                             _state.update { it.copy(isSubmitting = false) }

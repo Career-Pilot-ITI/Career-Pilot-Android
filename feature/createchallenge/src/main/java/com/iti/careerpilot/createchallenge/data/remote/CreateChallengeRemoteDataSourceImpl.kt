@@ -8,12 +8,12 @@ import com.google.firebase.ai.type.generationConfig
 import com.google.firebase.firestore.firestore
 import com.iti.careerpilot.core.network.Endpoints
 import com.iti.careerpilot.core.network.util.safeCall
-import com.iti.careerpilot.createchallenge.domain.models.Challenge
-import com.iti.careerpilot.createchallenge.domain.models.ChallengeVisibility
 import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.safeFirebaseCall
+import com.iti.core.model.Challenge
+import com.iti.core.model.ChallengeVisibility
 import com.iti.core.model.FirestoreCollections
 import com.iti.core.model.Track
 import io.ktor.client.HttpClient

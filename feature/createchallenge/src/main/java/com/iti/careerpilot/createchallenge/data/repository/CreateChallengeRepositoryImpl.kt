@@ -1,11 +1,11 @@
 package com.iti.careerpilot.createchallenge.data.repository
 
 import com.iti.careerpilot.createchallenge.data.remote.CreateChallengeRemoteDataSource
-import com.iti.careerpilot.createchallenge.domain.models.Challenge
 import com.iti.careerpilot.createchallenge.domain.repository.CreateChallengeRepository
 import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.core.model.Challenge
 import com.iti.core.model.Track
 import javax.inject.Inject
 
