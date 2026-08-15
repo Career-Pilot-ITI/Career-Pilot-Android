@@ -25,13 +25,18 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -63,13 +68,32 @@ import com.iti.common.util.toUIText
 @Composable
 fun SessionHistoryRoot(
     openSessionDetails: (Long) -> Unit,
+    openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     viewModel: SessionHistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sessions = viewModel.sessions.collectAsLazyPagingItems()
+
+    LaunchedEffect(Unit) {
+        if (viewModel.onScreenEntered()) {
+            sessions.refresh()
+        }
+    }
+
+    var isInitialResume by remember { mutableStateOf(true) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (isInitialResume) {
+            isInitialResume = false
+        } else {
+            sessions.refresh()
+        }
+    }
+
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             is SessionHistoryEvent.NavigateToSessionDetails -> openSessionDetails(event.sessionId)
+            is SessionHistoryEvent.NavigateToPracticeSession ->
+                openPracticeSession(event.trackId, event.sessionId)
         }
     }
     SessionHistoryScreen(
@@ -176,12 +200,9 @@ private fun SessionHistoryContent(
     modifier: Modifier = Modifier,
 ) {
     val loadedSessions = sessions.itemSnapshotList.items
-    val averageScore = remember {
-        if (loadedSessions.isEmpty()) {
-            0
-        } else {
-            loadedSessions.sumOf(SessionSummaryUiModel::score) / loadedSessions.size
-        }
+    val averageScore = remember(loadedSessions) {
+        val scores = loadedSessions.mapNotNull(SessionSummaryUiModel::score)
+        if (scores.isEmpty()) 0 else scores.sum() / scores.size
     }
 
     LazyColumn(
@@ -207,7 +228,16 @@ private fun SessionHistoryContent(
             SessionHistoryCard(
                 session = session,
                 onClick = {
-                    onAction(SessionHistoryAction.SessionClicked(session.id))
+                    if (session.isResumable) {
+                        onAction(
+                            SessionHistoryAction.ResumeSessionClicked(
+                                sessionId = session.id,
+                                trackId = session.trackId,
+                            ),
+                        )
+                    } else {
+                        onAction(SessionHistoryAction.SessionClicked(session.id))
+                    }
                 },
             )
         }

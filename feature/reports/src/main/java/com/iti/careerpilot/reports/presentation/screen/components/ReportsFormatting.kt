@@ -1,39 +1,12 @@
 package com.iti.careerpilot.reports.presentation.screen.components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import com.iti.careerpilot.reports.R
 import com.iti.careerpilot.reports.domain.model.CoachingImpact
 import com.iti.careerpilot.reports.domain.model.PerformanceTier
 import com.iti.careerpilot.reports.presentation.screen.details.uimodels.PerformanceMetricType
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
-
-@Composable
-fun localizedSessionDate(completedAt: Instant): String {
-    val locale = LocalConfiguration.current.locales[0]
-    val today = stringResource(R.string.reports_today)
-    val yesterday = stringResource(R.string.reports_yesterday)
-    return remember(completedAt, locale, today, yesterday) {
-        val zoneId = ZoneId.systemDefault()
-        val completedDate = completedAt.atZone(zoneId).toLocalDate()
-        val currentDate = LocalDate.now(zoneId)
-        when (completedDate) {
-            currentDate -> today
-            currentDate.minusDays(1) -> yesterday
-            else -> DateTimeFormatter
-                .ofLocalizedDate(FormatStyle.MEDIUM)
-                .withLocale(locale)
-                .format(completedDate)
-        }
-    }
-}
 
 fun formatQuestionDuration(
     durationSeconds: Int,

@@ -9,8 +9,18 @@ data class SessionHistoryState(
 
 sealed interface SessionHistoryAction {
     data class SessionClicked(val sessionId: Long) : SessionHistoryAction
+
+    data class ResumeSessionClicked(
+        val sessionId: Long,
+        val trackId: Long?,
+    ) : SessionHistoryAction
 }
 
 sealed interface SessionHistoryEvent {
     data class NavigateToSessionDetails(val sessionId: Long) : SessionHistoryEvent
+
+    data class NavigateToPracticeSession(
+        val trackId: Long,
+        val sessionId: Long,
+    ) : SessionHistoryEvent
 }

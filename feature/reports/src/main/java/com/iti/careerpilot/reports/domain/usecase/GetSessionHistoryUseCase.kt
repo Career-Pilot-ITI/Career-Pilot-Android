@@ -1,13 +1,13 @@
 package com.iti.careerpilot.reports.domain.usecase
 
-import com.iti.careerpilot.reports.domain.repository.ReportsRepository
+import com.iti.careerpilot.core.interviews.domain.repository.InterviewSessionRepository
 import javax.inject.Inject
 
 class GetSessionHistoryUseCase @Inject constructor(
-    private val repository: ReportsRepository,
+    private val sessionRepository: InterviewSessionRepository,
 ) {
     suspend operator fun invoke(
         page: Int,
         size: Int,
-    ) = repository.getSessionHistoryPage(page = page, size = size)
+    ) = sessionRepository.getSessions(page = page, size = size)
 }
