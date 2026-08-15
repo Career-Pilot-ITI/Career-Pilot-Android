@@ -22,6 +22,9 @@ sealed interface Route : NavKey {
         data object Home : Route
 
         @Serializable
+        data object Challenges : Route
+
+        @Serializable
         data object SessionHistory : Route
 
         @Serializable

@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.challenges.presentation.screen.ChallengesScreenRoot
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
@@ -115,6 +116,9 @@ fun NestedNavDisplay(
                         openAts = openAts,
                     )
                 }
+                entry<Route.NestedNav.Challenges> {
+                    ChallengesScreenRoot()
+                }
                 entry<Route.NestedNav.SessionHistory> {
                     SessionHistoryRoot(
                         openSessionDetails = openSessionDetails,
@@ -133,6 +137,7 @@ fun NestedNavDisplay(
 }
 
 private fun NavKey?.isBottomDestination() = this == Route.NestedNav.Home ||
+    this == Route.NestedNav.Challenges ||
     this == Route.NestedNav.SessionHistory ||
     this == Route.NestedNav.Profile
 
@@ -143,12 +148,16 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
                 0
             }
 
-            Route.NestedNav.SessionHistory -> {
+            Route.NestedNav.Challenges -> {
                 1
             }
 
-            else -> {
+            Route.NestedNav.SessionHistory -> {
                 2
+            }
+
+            else -> {
+                3
             }
         }
     } ?: 0

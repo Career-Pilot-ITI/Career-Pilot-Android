@@ -12,14 +12,13 @@ import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 
 @Composable
 fun ChallengesScreenRoot(
-    onBack: () -> Unit,
     viewModel: ChallengesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            ChallengesEvent.NavigateBack -> onBack()
+            ChallengesEvent.NavigateToCreateChallenge -> {}
         }
     }
 

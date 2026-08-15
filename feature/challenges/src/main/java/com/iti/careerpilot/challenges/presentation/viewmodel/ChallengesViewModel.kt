@@ -27,9 +27,9 @@ class ChallengesViewModel @Inject constructor(
 
     fun onAction(action: ChallengesAction) {
         when (action) {
-            ChallengesAction.OnBackClicked -> {
+            ChallengesAction.CreateChallengeClicked -> {
                 viewModelScope.launch {
-                    _events.send(ChallengesEvent.NavigateBack)
+                    _events.send(ChallengesEvent.NavigateToCreateChallenge)
                 }
             }
         }

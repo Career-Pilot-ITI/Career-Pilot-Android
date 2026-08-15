@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Career Pilot</string>
     <string name="home">الرئيسية</string>
+    <string name="challenges">التحديات</string>
     <string name="ats">مطابقة الوظائف</string>
     <string name="reports">التقارير</string>
     <string name="profile">الملف الشخصي</string>
