@@ -23,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ReadyToPracticeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getUserProfileUseCase: GetUserProfileUseCase,
     private val checkFeatureAccess: CheckFeatureAccessUseCase,
     private val refreshAccess: RefreshAccessUseCase,
     private val accessRepository: AccessRepository,

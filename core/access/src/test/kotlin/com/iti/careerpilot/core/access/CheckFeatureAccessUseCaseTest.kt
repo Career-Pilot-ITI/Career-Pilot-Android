@@ -76,7 +76,7 @@ class CheckFeatureAccessUseCaseTest {
     // ── Scenario 3: Quota exhausted with coinCost > 0 → CoinTopUpRequired
 
     @Test
-    fun `quota exhausted with positive coinCost returns CoinTopUpRequired`() = runTest {
+    fun `quota exhausted with positive coinCost and insufficient coins returns CoinTopUpRequired`() = runTest {
         val quota = FeatureQuota(
             feature = FeatureKey.MockInterviews,
             remaining = 0,
@@ -99,6 +99,29 @@ class CheckFeatureAccessUseCaseTest {
         assertEquals(FeatureKey.MockInterviews, topUp.feature)
         assertEquals(50, topUp.coinCost)
         assertEquals(30, topUp.currentCoins)
+    }
+
+    @Test
+    fun `quota exhausted with positive coinCost and sufficient coins returns Granted`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.MockInterviews,
+            remaining = 0,
+            max = 10,
+            coinCost = 20
+        )
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.PLUS,
+            features = PlanAccessMap.featuresFor(Plan.PLUS),
+            quotas = mapOf(FeatureKey.MockInterviews to quota),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 50
+        )
+
+        val result = useCase(FeatureKey.MockInterviews).first()
+
+        assertTrue(result is FeatureAccess.Granted)
+        assertEquals(quota, (result as FeatureAccess.Granted).quota)
     }
 
     // ── Scenario 4: Quota exhausted with coinCost == 0 → Locked ────────

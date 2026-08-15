@@ -289,7 +289,7 @@ fun ReadyToPracticeScreen(
                                 tint = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                                 modifier = Modifier.size(26.dp)
                             )
-                            if (!state.isPaidPlan) {
+                            if (!state.isMaxPlan) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Lock,
@@ -306,7 +306,7 @@ fun ReadyToPracticeScreen(
                                 fontWeight = if (isVideoSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                             )
-                            if (!state.isPaidPlan) {
+                            if (!state.isMaxPlan) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.pro_badge),

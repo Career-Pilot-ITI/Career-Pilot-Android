@@ -58,23 +58,27 @@ fun CoinTopUpBottomSheet(
                 modifier = Modifier.size(48.dp),
             )
             Text(
-                text = "Not enough coins",
+                text = androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.not_enough_coins_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "This requires $coinCost coins, but you currently have $currentBalance coins.",
+                text = androidx.compose.ui.res.stringResource(
+                    com.iti.careerpilot.core.designsystem.R.string.not_enough_coins_message,
+                    coinCost,
+                    currentBalance
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
             Button(onClick = onBuyCoins, modifier = Modifier.fillMaxWidth()) {
-                Text("Buy Coins")
+                Text(androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.buy_coins))
             }
             TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                Text("Not now")
+                Text(androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.not_now))
             }
         }
     }

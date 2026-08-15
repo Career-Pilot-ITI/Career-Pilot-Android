@@ -73,7 +73,6 @@ class ReadyToPracticeViewModelTest {
 
     private fun createViewModel(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        userProfileRepo: UserProfileRepo = FakeUserProfileRepo(),
         accessRepository: FakeAccessRepository = FakeAccessRepository(
             AccessState(
                 plan = Plan.MAX,
@@ -87,7 +86,6 @@ class ReadyToPracticeViewModelTest {
     ): ReadyToPracticeViewModel {
         return ReadyToPracticeViewModel(
             savedStateHandle = savedStateHandle,
-            getUserProfileUseCase = GetUserProfileUseCase(userProfileRepo),
             checkFeatureAccess = CheckFeatureAccessUseCase(accessRepository),
             refreshAccess = RefreshAccessUseCase(accessRepository),
             accessRepository = accessRepository,

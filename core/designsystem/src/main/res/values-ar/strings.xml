@@ -37,4 +37,10 @@
     <string name="pricing_badge_quota_remaining">%1$d من %2$d استخدامات متبقية</string>
     <string name="pricing_badge_included_in_plan">متضمنة في خطة %1$s</string>
     <string name="pricing_badge_unlimited">استخدام غير محدود</string>
+
+    <string name="feature_gate_subtitle">%1$s متاح في خطة %2$s.</string>
+    <string name="not_now">ليس الآن</string>
+    <string name="not_enough_coins_title">لا توجد عملات كافية</string>
+    <string name="not_enough_coins_message">يتطلب هذا %1$d عملة، ولكن لديك حاليًا %2$d عملة.</string>
+    <string name="buy_coins">شراء عملات</string>
 </resources>

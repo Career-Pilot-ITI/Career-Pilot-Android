@@ -71,13 +71,17 @@ fun FeatureGateBottomSheet(
                 modifier = Modifier.size(48.dp),
             )
             Text(
-                text = "Upgrade to $planDisplayName",
+                text = androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.upgrade_to_plan, planDisplayName),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "$featureName is available on the $planDisplayName plan.",
+                text = androidx.compose.ui.res.stringResource(
+                    com.iti.careerpilot.core.designsystem.R.string.feature_gate_subtitle,
+                    featureName,
+                    planDisplayName
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -112,10 +116,10 @@ fun FeatureGateBottomSheet(
             Spacer(Modifier.height(4.dp))
 
             Button(onClick = onUpgradeClick, modifier = Modifier.fillMaxWidth()) {
-                Text("Upgrade to $planDisplayName")
+                Text(androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.upgrade_to_plan, planDisplayName))
             }
             TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                Text("Not now")
+                Text(androidx.compose.ui.res.stringResource(com.iti.careerpilot.core.designsystem.R.string.not_now))
             }
         }
     }

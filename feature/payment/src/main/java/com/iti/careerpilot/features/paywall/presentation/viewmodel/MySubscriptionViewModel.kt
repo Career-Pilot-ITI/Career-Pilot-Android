@@ -61,6 +61,7 @@ class MySubscriptionViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            isCancelling = false,
                             subscriptionInfo = info,
                             planFeatures = features,
                             error = null,
@@ -71,6 +72,7 @@ class MySubscriptionViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            isCancelling = false,
                             error = "Failed to load subscription details",
                         )
                     }

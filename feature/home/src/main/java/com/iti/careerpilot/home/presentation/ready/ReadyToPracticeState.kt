@@ -25,4 +25,5 @@ data class ReadyToPracticeState(
     val coinTopUpRequiredCost: Int = 0,
 ) {
     val canBegin: Boolean get() = isMicrophoneGranted && (!isVideoMode || isCameraGranted)
+    val isMaxPlan: Boolean get() = planDisplayName.equals("Max", ignoreCase = true)
 }

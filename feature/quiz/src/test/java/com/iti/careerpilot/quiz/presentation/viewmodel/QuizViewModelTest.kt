@@ -128,8 +128,8 @@ class QuizViewModelTest {
         quizRepo: FakeQuizRepo = FakeQuizRepo(),
         accessRepository: FakeAccessRepository = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
@@ -195,8 +195,8 @@ class QuizViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showGateSheet)
-        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
-        val expectedFeatures = PlanAccessMap.featuresFor(Plan.PLUS).map { it.displayName() }
+        assertEquals(Plan.MAX, viewModel.state.value.gateRequiredPlan)
+        val expectedFeatures = PlanAccessMap.featuresFor(Plan.MAX).map { it.displayName() }
         assertEquals(expectedFeatures, viewModel.state.value.gatePlanFeatures)
         assertEquals(0, fakeQuizRepo.generateTopicsCallCount)
         assertEquals(QuizStep.SelectSeniority, viewModel.state.value.currentStep)
@@ -212,8 +212,8 @@ class QuizViewModelTest {
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = mapOf(FeatureKey.Quizzes to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
@@ -238,8 +238,8 @@ class QuizViewModelTest {
     fun `StaleCacheBlocked access triggers refresh on init and on SenioritySelected`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now() - 25.hours,
@@ -261,11 +261,11 @@ class QuizViewModelTest {
     }
 
     @Test
-    fun `PLUS user with Granted access successfully selects seniority and generates topics`() = runTest {
+    fun `MAX user with Granted access successfully selects seniority and generates topics`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
@@ -364,8 +364,8 @@ class QuizViewModelTest {
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = mapOf(FeatureKey.Quizzes to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
@@ -427,8 +427,8 @@ class QuizViewModelTest {
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.PLUS,
-                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
                 quotas = mapOf(FeatureKey.Quizzes to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),

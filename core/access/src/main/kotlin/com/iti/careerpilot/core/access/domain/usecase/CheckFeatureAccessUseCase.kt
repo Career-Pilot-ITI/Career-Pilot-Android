@@ -27,11 +27,15 @@ class CheckFeatureAccessUseCase @Inject constructor(
             if (quota?.remaining == 0) {
                 val cost = quota.coinCost
                 if (cost != null && cost > 0) {
-                    FeatureAccess.CoinTopUpRequired(
-                        feature = feature,
-                        coinCost = cost,
-                        currentCoins = state.coinBalance
-                    )
+                    if (state.coinBalance < cost) {
+                        FeatureAccess.CoinTopUpRequired(
+                            feature = feature,
+                            coinCost = cost,
+                            currentCoins = state.coinBalance
+                        )
+                    } else {
+                        FeatureAccess.Granted(quota = quota)
+                    }
                 } else {
                     FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
                 }

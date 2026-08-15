@@ -37,4 +37,10 @@
     <string name="pricing_badge_quota_remaining">%1$d of %2$d uses remaining</string>
     <string name="pricing_badge_included_in_plan">Included in %1$s plan</string>
     <string name="pricing_badge_unlimited">No usage limits</string>
+
+    <string name="feature_gate_subtitle">%1$s is available on the %2$s plan.</string>
+    <string name="not_now">Not now</string>
+    <string name="not_enough_coins_title">Not enough coins</string>
+    <string name="not_enough_coins_message">This requires %1$d coins, but you currently have %2$d coins.</string>
+    <string name="buy_coins">Buy Coins</string>
 </resources>
