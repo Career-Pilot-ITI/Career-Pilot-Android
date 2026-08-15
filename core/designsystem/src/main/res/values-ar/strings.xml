@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="session_timestamp_today">اليوم، %1$s</string>
+    <string name="session_timestamp_yesterday">أمس، %1$s</string>
+    <string name="session_timestamp_recent">%1$s، %2$s</string>
+    <string name="session_timestamp_unknown">التاريخ غير متاح</string>
     <string name="avatar_picker_content_description">الصورة الشخصية</string>
     <string name="avatar_picker_add_photo">إضافة صورة</string>
     <string name="image_source_take_photo">التقاط صورة</string>

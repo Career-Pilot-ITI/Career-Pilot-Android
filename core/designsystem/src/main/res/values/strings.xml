@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="session_timestamp_today">Today, %1$s</string>
+    <string name="session_timestamp_yesterday">Yesterday, %1$s</string>
+    <string name="session_timestamp_recent">%1$s, %2$s</string>
+    <string name="session_timestamp_unknown">Date unavailable</string>
     <string name="avatar_picker_content_description">Profile photo</string>
     <string name="avatar_picker_add_photo">Add photo</string>
     <string name="image_source_take_photo">Take Photo</string>
