@@ -39,6 +39,10 @@ fun SplashRoot(
     onNavigateToOnboarding: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(viewModel) {
+        viewModel.onIntent(SplashIntent.Initial)
+    }
+
     ObserveEvent(viewModel.navigationEvent) { event ->
         when (event) {
             SplashEvent.NavigateToHome -> onNavigateToHome()

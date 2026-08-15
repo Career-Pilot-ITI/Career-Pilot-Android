@@ -37,6 +37,11 @@
     <string name="home_practice_interview">Practice Interview</string>
     <string name="home_start_practice">Start practice interview</string>
 
+    <!-- ATS job match card -->
+    <string name="home_ats_job_match">ATS Job Match</string>
+    <string name="home_ats_new">NEW</string>
+    <string name="home_ats_subtitle">Paste a job link · See how your CV scores</string>
+
     <!-- Available interviews -->
     <string name="home_available_interviews">Interviews</string>
     <string name="home_available_interviews_subtitle">Pick a track and start practising</string>

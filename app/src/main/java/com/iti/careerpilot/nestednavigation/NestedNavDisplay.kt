@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -24,8 +25,6 @@ import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.rootnavigation.navigateSingleTop
 import com.iti.common.model.ProfileEditSection
 
-import androidx.compose.ui.graphics.Color
-
 @Composable
 fun NestedNavDisplay(
     currentRootRoute: NavKey?,
@@ -36,9 +35,10 @@ fun NestedNavDisplay(
     openSessionDetails: (Long) -> Unit,
     openSettings: () -> Unit,
     openEditProfile: (ProfileEditSection) -> Unit,
-    openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openReadyToPractice: (trackId: Long, trackName: String, workspaceId: Long?) -> Unit,
     openQuiz: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
+    openAts: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -46,7 +46,8 @@ fun NestedNavDisplay(
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
-            CareerPilotBottomNavBar(
+            if (nestedBackStack.lastOrNull().isBottomDestination()) {
+                CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
             ) {
@@ -67,6 +68,7 @@ fun NestedNavDisplay(
                         label = stringResource(destination.title),
                     )
                 }
+            }
             }
         }
     ) { innerPadding ->
@@ -92,7 +94,9 @@ fun NestedNavDisplay(
             entryProvider = entryProvider {
                 entry<Route.NestedNav.Home> {
                     HomeRoot(
-                        openReadyToPractice = openReadyToPractice,
+                        openReadyToPractice = { trackId, trackName ->
+                            openReadyToPractice(trackId, trackName, null)
+                        },
                         openQuiz = openQuiz,
                         openSessionDetails = openSessionDetails,
                         openPracticeSession = { trackId, sessionId ->
@@ -108,6 +112,7 @@ fun NestedNavDisplay(
                                 navigateSingleTop(Route.NestedNav.SessionHistory)
                             }
                         },
+                        openAts = openAts,
                     )
                 }
                 entry<Route.NestedNav.SessionHistory> {
@@ -129,6 +134,10 @@ fun NestedNavDisplay(
         )
     }
 }
+
+private fun NavKey?.isBottomDestination() = this == Route.NestedNav.Home ||
+    this == Route.NestedNav.SessionHistory ||
+    this == Route.NestedNav.Profile
 
 private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
     return this.lastOrNull()?.let {

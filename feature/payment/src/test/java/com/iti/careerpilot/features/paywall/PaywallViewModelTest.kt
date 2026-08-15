@@ -173,7 +173,7 @@ class PaywallViewModelTest {
             userProfileRepo = userRepo,
             userSyncManager = userSyncManager,
             ioDispatcher = testDispatcher
-        )
+        ).also { it.onIntent(PaywallIntent.Initial) }
     }
 
     @Before
@@ -207,7 +207,7 @@ class PaywallViewModelTest {
     }
 
     @Test
-    fun `init with error does not crash and handles silently`() = runTest {
+    fun `initial intent with error does not crash and handles silently`() = runTest {
         val viewModel = makeViewModel(repo = errorRepo(), api = errorApi())
         testScheduler.advanceUntilIdle()
 

@@ -80,6 +80,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
+    workspaceId: Long? = null,
     isVideoSession: Boolean = false,
     enablePostureTracking: Boolean = false,
     enableHandTracking: Boolean = false,
@@ -122,7 +123,7 @@ fun PracticeSessionRoot(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(trackId, sessionId, workspaceId) {
         if (sessionId != null && sessionId != 0L) {
             viewModel.onAction(
                 PracticeSessionAction.RestartPracticeSession(
@@ -136,6 +137,7 @@ fun PracticeSessionRoot(
             viewModel.onAction(
                 PracticeSessionAction.CreateNewPracticeSession(
                     trackId = trackId,
+                    workspaceId = workspaceId,
                     isVideoSession = isVideoSession,
                     enablePostureTracking = enablePostureTracking,
                     enableHandTracking = enableHandTracking

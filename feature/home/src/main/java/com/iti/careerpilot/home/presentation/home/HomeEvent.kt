@@ -9,4 +9,5 @@ sealed interface HomeEvent {
     data object NavigateToPlansPaywall : HomeEvent
     data object NavigateToCoinsPaywall : HomeEvent
     data object NavigateToReports : HomeEvent
+    data object NavigateToAts : HomeEvent
 }

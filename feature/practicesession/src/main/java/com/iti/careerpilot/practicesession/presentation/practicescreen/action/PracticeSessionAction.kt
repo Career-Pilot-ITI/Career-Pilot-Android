@@ -4,6 +4,7 @@ sealed interface PracticeSessionAction {
 
     data class CreateNewPracticeSession(
         val trackId: Long,
+        val workspaceId: Long? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,

@@ -52,6 +52,7 @@ suspend inline fun <reified T> responseToCareerPilotResult(
 
         400 -> CareerPilotResult.Error(NetworkError.BAD_REQUEST)
         401 -> CareerPilotResult.Error(NetworkError.UNAUTHORIZED)
+        402 -> CareerPilotResult.Error(NetworkError.INSUFFICIENT_COINS)
         403 -> CareerPilotResult.Error(NetworkError.UNAUTHORIZED)
         404 -> CareerPilotResult.Error(NetworkError.NOT_FOUND)
         408 -> CareerPilotResult.Error(NetworkError.TIME_OUT)
