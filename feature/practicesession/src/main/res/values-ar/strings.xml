@@ -34,6 +34,7 @@
     <!-- Session screen chrome -->
     <string name="toggle_question_card">إظهار/إخفاء بطاقة السؤال</string>
     <string name="session_status_icon">حالة الجلسة</string>
+    <string name="scroll_for_more">مرر للمزيد</string>
     <string name="loading_question">جارٍ تحميل السؤال…</string>
     <string name="question_number">السؤال %1$s</string>
 
@@ -65,7 +66,66 @@
     <string name="no_results_found">لا يوجد نتائج</string>
     <string name="error_creating_results">حدث خطأ أثناء إنشاء نتائجك. يرجى المحاولة مرة أخرى.</string>
     <string name="no_transcript_available">لا يوجد نص متاح</string>
-    <string name="loading_session">تحميل الجلسة</string>
+    <string name="loading_session">نجهّز جلستك</string>
+    <string name="loading_session_message">لحظات قليلة، نستعيد جلسة التدريب ونحضّر لك السؤال التالي.</string>
+    <string name="processing_answer_title">رائع، نجهّز إجابتك</string>
+    <string name="submitting_answer_title">أوشكنا على الانتهاء</string>
+    <string name="uploading_recording_progress">نرفع تسجيلك… %1$d%%</string>
+    <string name="transcribing_on_device">نقوم بتحليل صوتك وإجابتك مباشرة على جهازك. لن يستغرق الأمر سوى لحظات.</string>
+    <string name="transcribing_answer_title">نحلل صوتك وإجابتك</string>
+    <string name="empty_answer_detected">لم نسمع إجابة هذه المرة، لذلك سنسجّل السؤال كـ «بدون إجابة» ونكمل.</string>
+    <string name="submitting_answer_message">إجابتك جاهزة. نحفظها الآن ونحضّر لك السؤال التالي.</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="more_details">المزيد من التفاصيل</string>
+
+    <!-- Body language / camera -->
+    <string name="camera_permission">إذن الكاميرا</string>
+    <string name="please_allow_camera_permission_for_body_language">اسمح بالوصول إلى الكاميرا لتفعيل تحليل لغة الجسد أثناء جلسة التدريب.</string>
+    <string name="body_language_consent_title">تحليل لغة الجسد</string>
+    <string name="body_language_consent_message">سنستخدم الكاميرا الأمامية لتحليل وضعية الجسم والتواصل البصري والإيماءات أثناء المقابلة. تتم جميع المعالجة على جهازك — لا يغادر أي فيديو هاتفك أبدًا.</string>
+    <string name="no_thanks">لا شكرًا</string>
+    <string name="enable_body_language">حسنًا، فعّل</string>
+    <string name="camera_preview">معاينة الكاميرا</string>
+    <string name="show_camera_during_session">إظهار معاينة الكاميرا أثناء الجلسة</string>
+
+    <!-- Radar Chart & Body Language Evaluation -->
+    <string name="radar_eye_contact">التواصل البصري</string>
+    <string name="radar_posture">وضعية الجسم</string>
+    <string name="radar_hand_stability">ثبات اليدين</string>
+    <string name="radar_facial_expressions">تعبيرات الوجه</string>
+    <string name="body_language_evaluation">تقييم لغة الجسد</string>
+    <string name="body_language_analyzing">جارٍ تحليل لغة الجسد بالذكاء الاصطناعي...</string>
+    <string name="body_language_metrics">مقاييس لغة الجسد</string>
+    <string name="metric_breakdown">تفاصيل المقاييس</string>
+    <string name="actionable_coaching_tips">نصائح التدريب العملية</string>
+    <string name="key_moments">اللحظات الرئيسية</string>
+    <string name="strengths">نقاط القوة</string>
+    <string name="areas_for_improvement">مجالات التحسين</string>
+    <string name="fallback_disclaimer">تقييم الذكاء الاصطناعي غير متاح — يتم عرض التوجيه بناءً على مقاييس الجهاز</string>
+    <string name="eye_contact">التواصل البصري</string>
+    <string name="posture">وضعية الجسم</string>
+    <string name="facial_expression">تعبيرات الوجه</string>
+    <string name="hand_gestures">إيماءات اليدين</string>
+    <string name="smile">الابتسامة</string>
+    <string name="good_posture">الوضعية الجيدة</string>
+    <string name="hand_composure">هدوء اليدين</string>
+
+    <!-- Key Moment Types -->
+    <string name="moment_looked_away">النظر بعيدًا</string>
+    <string name="moment_slouched">الانحناء</string>
+    <string name="moment_hand_fidget">حركة اليدين / اللمس</string>
+    <string name="moment_face_lost">الوجه غير ظاهر</string>
+    <string name="moment_smiled">ابتسامة</string>
+    <string name="moment_posture_shift">تغير الوضعية</string>
+
+    <!-- Additional localized badges & formatters -->
+    <string name="body_language_evaluation_score_desc">تقييم لغة الجسد %1$d/100</string>
+    <string name="confidence_high">عالي</string>
+    <string name="confidence_moderate">متوسط</string>
+    <string name="confidence_low">منخفض</string>
+    <string name="seconds_short">%1$dث</string>
+    <string name="audio_session">جلسة صوتية</string>
+    <string name="video_session">جلسة فيديو</string>
+    <string name="pro_badge">احترافي</string>
+    <string name="body_language_telemetry_metrics_desc">مقاييس لغة الجسد الأولية</string>
 </resources>

@@ -19,6 +19,7 @@ data class PracticeSessionState(
     val recordingDuration: Duration = Duration.ZERO,
     val isUploadingAndTranscribingAudio: Boolean = false,
     val isSendingAnswer: Boolean = false,
+    val isEmptyAnswer: Boolean = false,
     val uploadProgress: Int = 0,
     val playbackDurationMs: Long = 0,
     val playbackPositionMs: Long = 0,
@@ -33,4 +34,13 @@ data class PracticeSessionState(
     val showLeaveConfirm: Boolean = false,
     val showSettingsBottomSheet: Boolean = false,
     val autoReadQuestion: Boolean = true,
+
+    // Body language
+    val isVideoSessionSelected: Boolean = false,
+    val bodyLanguageEnabled: Boolean = false,
+    val bodyLanguageConsentGiven: Boolean = false,
+    val isCameraPreviewVisible: Boolean = true,
+    val isBodyLanguageAnalyzing: Boolean = false,
+    val enablePostureTracking: Boolean = false,
+    val enableHandTracking: Boolean = false,
 )

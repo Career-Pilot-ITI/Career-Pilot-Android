@@ -86,8 +86,6 @@ class PaymentRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun confirmPayment(merchantOrderId: String) {
-        httpClient.post("${Endpoints.PAYMENT_CONFIRM}/$merchantOrderId") {
-            contentType(ContentType.Application.Json)
-        }
+        // Confirmation is handled server-side via Paymob webhooks. No REST endpoint required.
     }
 }

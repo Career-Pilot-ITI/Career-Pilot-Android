@@ -33,6 +33,7 @@
     <!-- Session screen chrome -->
     <string name="toggle_question_card">Toggle question card</string>
     <string name="session_status_icon">Session status</string>
+    <string name="scroll_for_more">Scroll for more</string>
     <string name="loading_question">Loading question…</string>
     <string name="question_number">Question %1$s</string>
     <string name="session_settings">Session Settings</string>
@@ -63,7 +64,66 @@
     <string name="no_results_found">No results, yet</string>
     <string name="error_creating_results">An error occurred while creating your results. Please try again.</string>
     <string name="no_transcript_available">No transcript available</string>
-    <string name="loading_session">Loading Session</string>
+    <string name="loading_session">Getting your session ready</string>
+    <string name="loading_session_message">Just a moment — we’re bringing back your practice session and getting the next question ready for you.</string>
+    <string name="processing_answer_title">Nice work — we’re saving your answer</string>
+    <string name="submitting_answer_title">Almost there</string>
+    <string name="uploading_recording_progress">Uploading your recording… %1$d%%</string>
+    <string name="transcribing_on_device">We’re analyzing your voice and processing your answer on your device. This should only take a moment.</string>
+    <string name="empty_answer_detected">We didn’t hear an answer this time, so we’ll mark this question as unanswered and keep going.</string>
+    <string name="transcribing_answer_title">Analyzing your voice</string>
+    <string name="submitting_answer_message">Your answer is ready. We’re saving it now and getting the next question ready for you.</string>
     <string name="retry">Retry</string>
     <string name="more_details">More details</string>
+
+    <!-- Body language / camera -->
+    <string name="camera_permission">Camera Permission</string>
+    <string name="please_allow_camera_permission_for_body_language">Allow camera access to enable body language analysis during your practice session.</string>
+    <string name="body_language_consent_title">Body Language Analysis</string>
+    <string name="body_language_consent_message">We\'ll use your front camera to analyze posture, eye contact, and gestures during the interview. All processing happens on your device — no video ever leaves your phone.</string>
+    <string name="no_thanks">No thanks</string>
+    <string name="enable_body_language">Got it, enable</string>
+    <string name="camera_preview">Camera Preview</string>
+    <string name="show_camera_during_session">Show camera preview during the session</string>
+
+    <!-- Radar Chart & Body Language Evaluation -->
+    <string name="radar_eye_contact">Eye Contact</string>
+    <string name="radar_posture">Posture</string>
+    <string name="radar_hand_stability">Hand Stability</string>
+    <string name="radar_facial_expressions">Facial Expressions</string>
+    <string name="body_language_evaluation">Body Language Evaluation</string>
+    <string name="body_language_analyzing">Analyzing video body language with AI...</string>
+    <string name="body_language_metrics">Body Language Metrics</string>
+    <string name="metric_breakdown">Metric Breakdown</string>
+    <string name="actionable_coaching_tips">Actionable Coaching Tips</string>
+    <string name="key_moments">Key Moments</string>
+    <string name="strengths">Strengths</string>
+    <string name="areas_for_improvement">Areas for Improvement</string>
+    <string name="fallback_disclaimer">AI evaluation unavailable — showing guidance based on on-device metrics</string>
+    <string name="eye_contact">Eye Contact</string>
+    <string name="posture">Posture</string>
+    <string name="facial_expression">Facial Expression</string>
+    <string name="hand_gestures">Hand Gestures</string>
+    <string name="smile">Smile</string>
+    <string name="good_posture">Good Posture</string>
+    <string name="hand_composure">Hand Composure</string>
+
+    <!-- Key Moment Types -->
+    <string name="moment_looked_away">Looked away</string>
+    <string name="moment_slouched">Slouched</string>
+    <string name="moment_hand_fidget">Hand fidget / touch</string>
+    <string name="moment_face_lost">Face not visible</string>
+    <string name="moment_smiled">Smiled</string>
+    <string name="moment_posture_shift">Posture shift</string>
+
+    <!-- Additional localized badges & formatters -->
+    <string name="body_language_evaluation_score_desc">Body Language Evaluation %1$d/100</string>
+    <string name="confidence_high">HIGH</string>
+    <string name="confidence_moderate">MODERATE</string>
+    <string name="confidence_low">LOW</string>
+    <string name="seconds_short">%1$ds</string>
+    <string name="audio_session">Audio Session</string>
+    <string name="video_session">Video Session</string>
+    <string name="pro_badge">PRO</string>
+    <string name="body_language_telemetry_metrics_desc">Body language telemetry metrics</string>
 </resources>

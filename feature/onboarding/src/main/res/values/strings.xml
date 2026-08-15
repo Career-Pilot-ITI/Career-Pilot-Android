@@ -57,6 +57,7 @@
     <string name="getting_tracks">Getting Tracks</string>
     <string name="submitting">Submitting…</string>
     <string name="uploading">Uploading…</string>
+    <string name="parsing_cv">Parsing CV…</string>
 
     <string-array name="profile_info_default_skills">
         <item>React</item>

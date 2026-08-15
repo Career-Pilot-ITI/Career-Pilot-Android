@@ -21,7 +21,10 @@ import com.iti.careerpilot.practicesession.R
 @Composable
 fun PracticeSessionSettingsBottomSheet(
     autoReadQuestion: Boolean,
+    showCameraPreviewToggle: Boolean,
+    isCameraPreviewVisible: Boolean,
     onAutoReadToggle: (Boolean) -> Unit,
+    onCameraPreviewToggle: (Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberBottomSheetState(
@@ -50,6 +53,15 @@ fun PracticeSessionSettingsBottomSheet(
                 checked = autoReadQuestion,
                 onCheckedChange = onAutoReadToggle
             )
+
+            if (showCameraPreviewToggle) {
+                SettingsSwitchRow(
+                    label = stringResource(R.string.camera_preview),
+                    description = stringResource(R.string.show_camera_during_session),
+                    checked = isCameraPreviewVisible,
+                    onCheckedChange = onCameraPreviewToggle,
+                )
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
     <string name="uploading">جاري التحميل…</string>
     <string name="animation_percentage">%1$d%%</string>
     <string name="upload_failed">فشل التحميل</string>
+    <string name="parsing_cv_subtitle">قد يستغرق هذا لحظة…</string>
 
     <string name="back">رجوع</string>
 

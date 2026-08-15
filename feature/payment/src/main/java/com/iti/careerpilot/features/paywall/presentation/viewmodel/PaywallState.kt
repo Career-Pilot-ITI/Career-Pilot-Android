@@ -26,7 +26,7 @@ data class PaywallState(
     val coinBalance: Int = 0,
     val currentSubscriptionTier: String = "",
     val selectedPlanId: String? = null,
-    val selectedCoinPackId: String = "coins_500",
+    val selectedCoinPackId: String? = null,
     val checkoutItemType: CheckoutItemType = CheckoutItemType.SUBSCRIPTION,
     val merchantOrderId: String? = null,
     val failureReason: PaymentFailureReason = PaymentFailureReason.DECLINED,
@@ -72,30 +72,7 @@ data class PaywallState(
             )
         )
     ),
-    val coinPacks: ImmutableList<CoinPack> = persistentListOf(
-        CoinPack(
-            id = "coins_100",
-            coins = 100,
-            priceEgp = 50,
-            subtitleRes = R.string.paywall_pack_sub_100
-        ),
-        CoinPack(
-            id = "coins_500",
-            coins = 500,
-            priceEgp = 200,
-            originalPriceEgp = null,
-            subtitleRes = R.string.paywall_pack_sub_500,
-            badge = com.iti.careerpilot.features.paywall.domain.model.CoinPackBadge.MOST_POPULAR
-        ),
-        CoinPack(
-            id = "coins_1000",
-            coins = 1000,
-            priceEgp = 350,
-            originalPriceEgp = null,
-            subtitleRes = R.string.paywall_pack_sub_1000,
-            badge = com.iti.careerpilot.features.paywall.domain.model.CoinPackBadge.BEST_VALUE
-        )
-    ),
+    val coinPacks: ImmutableList<CoinPack> = persistentListOf(),
     val unlockedFeatures: ImmutableList<Int> = persistentListOf(
         R.string.paywall_feature_detailed_radar,
         R.string.paywall_feature_priority_ai,

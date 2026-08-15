@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +31,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
-import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.presentation.home.HomeAction
 import com.iti.careerpilot.home.presentation.home.HomeEvent
@@ -41,7 +38,7 @@ import com.iti.careerpilot.home.presentation.home.HomeState
 import com.iti.careerpilot.home.presentation.home.HomeViewModel
 import com.iti.careerpilot.home.presentation.home.screen.components.EmptySessionsCard
 import com.iti.careerpilot.home.presentation.home.screen.components.HomeHeader
-import com.iti.careerpilot.home.presentation.home.screen.components.InterviewTrackCard
+import com.iti.careerpilot.home.presentation.home.screen.components.HomeShimmerLoading
 import com.iti.careerpilot.home.presentation.home.screen.components.OverallScoreCard
 import com.iti.careerpilot.home.presentation.home.screen.components.PracticeInterviewCard
 import com.iti.careerpilot.home.presentation.home.screen.components.SectionHeader
@@ -52,6 +49,7 @@ import com.iti.careerpilot.home.presentation.home.screen.components.rememberGree
 @Composable
 fun HomeRoot(
     openReadyToPractice: (trackId: Long, trackName: String) -> Unit,
+    openQuiz: (trackId: Long, trackName: String) -> Unit,
     openSessionDetails: (Long) -> Unit,
     openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     openInterviews: () -> Unit,
@@ -76,6 +74,9 @@ fun HomeRoot(
             is HomeEvent.NavigateToReadyToPractice ->
                 openReadyToPractice(event.trackId, event.trackName)
 
+            is HomeEvent.NavigateToQuiz ->
+                openQuiz(event.trackId, event.trackName)
+
             is HomeEvent.NavigateToSessionDetails ->
                 openSessionDetails(event.sessionId)
 
@@ -93,12 +94,6 @@ fun HomeRoot(
         state = state,
         onAction = viewModel::onAction,
     )
-
-    if (state.isLoading) {
-        LoadingDialog(
-            title = stringResource(R.string.getting_ready),
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -125,66 +120,60 @@ fun HomeScreen(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.navigationBars),
     ) { innerPadding ->
-        PullToRefreshBox(
-            state = pullToRefreshState,
-            isRefreshing = state.isRefreshing,
-            onRefresh = { onAction(HomeAction.Refresh) },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            indicator = {
-                PullToRefreshDefaults.LoadingIndicator(
-                    state = pullToRefreshState,
-                    isRefreshing = state.isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    color = colors.primary,
-                    containerColor = colors.surface,
-                )
-            },
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    vertical = 16.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
+        if (state.isLoading) {
+            HomeShimmerLoading(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            )
+        } else {
+            PullToRefreshBox(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
+                onRefresh = { onAction(HomeAction.Refresh) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                indicator = {
+                    PullToRefreshDefaults.LoadingIndicator(
+                        state = pullToRefreshState,
+                        isRefreshing = state.isRefreshing,
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        color = colors.primary,
+                        containerColor = colors.surface,
+                    )
+                },
             ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        vertical = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.SpaceXL),
+                ) {
 
-                item {
-                    SubscriptionCard(
-                        planLabel = state.planLabel,
-                        isSubscribed = state.isSubscribed,
-                        onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 20.dp
-                            )
-                    )
-                }
+                    item {
+                        SubscriptionCard(
+                            planLabel = state.planLabel,
+                            isSubscribed = state.isSubscribed,
+                            onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = 20.dp
+                                )
+                        )
+                    }
 
-                item {
-                    OverallScoreCard(
-                        summary = state.scoreSummary,
-                        onClick = { onAction(HomeAction.ScoreCardClicked) },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 20.dp
-                            )
-                    )
-                }
-
-                item {
-                    PracticeInterviewCard(
-                        trackName = state.practiceTrackName,
-                        onClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 20.dp
-                            )
-                    )
-                }
-
-                if (state.availableInterviews.isNotEmpty()) {
+                    item {
+                        OverallScoreCard(
+                            summary = state.scoreSummary,
+                            onClick = { onAction(HomeAction.ScoreCardClicked) },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = 20.dp
+                                )
+                        )
+                    }
                     item {
                         SectionHeader(
                             title = stringResource(R.string.home_available_interviews),
@@ -196,73 +185,57 @@ fun HomeScreen(
                                 )
                         )
                     }
+                    item {
+                        PracticeInterviewCard(
+                            trackName = state.practiceTrackName,
+                            onInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                            onLessonClick = { onAction(HomeAction.LessonClicked) },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = 20.dp
+                                )
+                        )
+                    }
 
                     item {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.SpaceM),
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(
-                                horizontal = 20.dp
-                            )
-                        ) {
-                            items(
-                                items = state.availableInterviews,
-                                key = { track -> track.id },
-                            ) { track ->
-                                InterviewTrackCard(
-                                    track = track,
-                                    onClick = {
-                                        onAction(
-                                            HomeAction.InterviewTrackClicked(
-                                                trackId = track.id,
-                                                trackName = track.name,
-                                            )
-                                        )
-                                    },
+                        SectionHeader(
+                            title = stringResource(R.string.home_recent_sessions),
+                            actionLabel = stringResource(R.string.home_see_all)
+                                .takeIf { state.recentSessions.isNotEmpty() },
+                            onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
+                                .takeIf { state.recentSessions.isNotEmpty() },
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = 20.dp
                                 )
-                            }
+                        )
+                    }
+
+                    if (state.recentSessions.isEmpty()) {
+                        item {
+                            EmptySessionsCard(
+                                onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = 20.dp
+                                    )
+                            )
                         }
-                    }
-                }
-
-                item {
-                    SectionHeader(
-                        title = stringResource(R.string.home_recent_sessions),
-                        actionLabel = stringResource(R.string.home_see_all)
-                            .takeIf { state.recentSessions.isNotEmpty() },
-                        onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
-                            .takeIf { state.recentSessions.isNotEmpty() },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = 20.dp
+                    } else {
+                        items(
+                            items = state.recentSessions,
+                            key = { session -> session.id },
+                        ) { session ->
+                            SessionRow(
+                                session = session,
+                                onClick = { onAction(HomeAction.SessionClicked(session.id)) },
+                                onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
+                                modifier = Modifier
+                                    .padding(
+                                        horizontal = 20.dp
+                                    )
                             )
-                    )
-                }
-
-                if (state.recentSessions.isEmpty()) {
-                    item {
-                        EmptySessionsCard(
-                            onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 20.dp
-                                )
-                        )
-                    }
-                } else {
-                    items(
-                        items = state.recentSessions,
-                        key = { session -> session.id },
-                    ) { session ->
-                        SessionRow(
-                            session = session,
-                            onClick = { onAction(HomeAction.SessionClicked(session.id)) },
-                            onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
-                            modifier = Modifier
-                                .padding(
-                                    horizontal = 20.dp
-                                )
-                        )
+                        }
                     }
                 }
             }

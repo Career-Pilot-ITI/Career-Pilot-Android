@@ -3,6 +3,8 @@ package com.iti.careerpilot.features.paywall.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.features.paywall.data.remote.UserSyncManager
+import com.iti.careerpilot.features.paywall.domain.model.CoinPack
+import com.iti.careerpilot.features.paywall.domain.model.CoinPackBadge
 import com.iti.careerpilot.features.paywall.domain.model.PaymentFailureReason
 import com.iti.careerpilot.features.paywall.domain.model.SubscriptionTier
 import com.iti.careerpilot.features.paywall.domain.repository.PaymentRepository
@@ -24,6 +26,7 @@ import com.iti.core.model.CheckoutSession
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +61,7 @@ class PaywallViewModel @Inject constructor(
 
     private val isPolling = AtomicBoolean(false)
     private var hasUserSelectedPlan = false
+    private var pollingJob: Job? = null
 
     init {
         val initialProfile = userProfileRepo.userProfile.value
@@ -84,11 +88,6 @@ class PaywallViewModel @Inject constructor(
                 )
             }
         }.launchIn(viewModelScope)
-
-        loadWalletBalance()
-        loadCurrentSubscription()
-        loadSubscriptionTiers()
-        loadCoinPacks()
     }
 
     private fun loadWalletBalance() {
@@ -147,14 +146,34 @@ class PaywallViewModel @Inject constructor(
             when (val result = getCoinPacksUseCase()) {
                 is CareerPilotResult.Success -> {
                     val prices = result.data
+                    val defaultPacks = listOf(
+                        CoinPack(id = "coins_100", coins = 100, priceEgp = 50),
+                        CoinPack(id = "coins_500", coins = 500, priceEgp = 200, badge = CoinPackBadge.MOST_POPULAR),
+                        CoinPack(id = "coins_1000", coins = 1000, priceEgp = 350, badge = CoinPackBadge.BEST_VALUE)
+                    )
+                    val packsList = if (prices.isNotEmpty()) {
+                        prices.map { (coins, price) ->
+                            CoinPack(
+                                id = "coins_$coins",
+                                coins = coins,
+                                priceEgp = price.toInt(),
+                                badge = when (coins) {
+                                    500 -> CoinPackBadge.MOST_POPULAR
+                                    1000 -> CoinPackBadge.BEST_VALUE
+                                    else -> null
+                                }
+                            )
+                        }.sortedBy { it.coins }
+                    } else {
+                        defaultPacks
+                    }
+                    val immutablePacks = packsList.toImmutableList()
                     mutableState.update { currentState ->
-                        val updatedPacks = currentState.coinPacks.map { pack ->
-                            val price = prices[pack.coins]?.toInt() ?: pack.priceEgp
-                            pack.copy(priceEgp = price, originalPriceEgp = null)
-                        }.toImmutableList()
+                        val selectedId = currentState.selectedCoinPackId ?: "coins_500"
                         currentState.copy(
                             isLoadingCoinPacks = false,
-                            coinPacks = updatedPacks
+                            coinPacks = immutablePacks,
+                            selectedCoinPackId = selectedId
                         )
                     }
                 }
@@ -190,6 +209,14 @@ class PaywallViewModel @Inject constructor(
 
     fun onIntent(intent: PaywallIntent) {
         when (intent) {
+            PaywallIntent.LoadSubscriptionPlans -> {
+                loadCurrentSubscription()
+                loadSubscriptionTiers()
+            }
+            PaywallIntent.LoadCoinPacks -> {
+                loadWalletBalance()
+                loadCoinPacks()
+            }
             PaywallIntent.CheckoutRequested,
             PaywallIntent.ConfirmUpgradeRequested -> {
                 val selectedPlan = mutableState.value.selectedPlan
@@ -222,7 +249,6 @@ class PaywallViewModel @Inject constructor(
         when (mutableState.value.checkoutItemType) {
             CheckoutItemType.COIN_PACK -> handleBuyCoinsRequested()
             CheckoutItemType.SUBSCRIPTION -> handleUpgradeRequested()
-            else -> emitEffect(PaywallEffect.NavigateToChoosePlan)
         }
     }
 
@@ -314,9 +340,9 @@ class PaywallViewModel @Inject constructor(
     }
 
     private fun pollPaymentStatus() {
-        if (!isPolling.compareAndSet(false, true)) return
-
-        viewModelScope.launch(ioDispatcher) {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch(ioDispatcher) {
+            isPolling.set(true)
             try {
                 val baselineBalance = mutableState.value.preCheckoutBalance ?: mutableState.value.coinBalance
                 val baselineTier = mutableState.value.preCheckoutTier ?: mutableState.value.currentSubscriptionTier
@@ -325,9 +351,6 @@ class PaywallViewModel @Inject constructor(
                 val pack = mutableState.value.coinPacks.find { it.id == mutableState.value.selectedCoinPackId }
                 val expectedCoinDelta = if (mutableState.value.checkoutItemType == CheckoutItemType.COIN_PACK) pack?.coins ?: 0 else 0
                 val merchantOrderId = mutableState.value.merchantOrderId
-                if (!merchantOrderId.isNullOrBlank()) {
-                    runCatching { confirmPaymentUseCase(merchantOrderId) }
-                }
 
                 val result = pollPaymentStatusUseCase(
                     baselineBalance = baselineBalance,

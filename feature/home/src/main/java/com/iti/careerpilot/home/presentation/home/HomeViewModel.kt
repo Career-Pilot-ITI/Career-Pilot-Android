@@ -58,6 +58,17 @@ class HomeViewModel @Inject constructor(
                 )
             }
 
+            HomeAction.LessonClicked -> {
+                val current = _state.value
+                val trackId = current.practiceTrackId ?: 1L
+                sendEvent(
+                    HomeEvent.NavigateToQuiz(
+                        trackId = trackId,
+                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
+                    )
+                )
+            }
+
             HomeAction.UpgradeClicked -> sendEvent(HomeEvent.NavigateToPlansPaywall)
             HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
             HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
@@ -155,7 +166,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
     private fun sendEvent(event: HomeEvent) {
         viewModelScope.launch { _events.send(event) }
     }
@@ -164,3 +174,4 @@ class HomeViewModel @Inject constructor(
         const val RECENT_SESSIONS_COUNT = 3
     }
 }
+

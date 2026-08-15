@@ -36,15 +36,19 @@ sealed interface Route : NavKey {
     data class PracticeSession(
         val trackId: Long,
         val sessionId: Long? = null,
+        val isVideoSession: Boolean = false,
+        val enablePostureTracking: Boolean = false,
+        val enableHandTracking: Boolean = false,
     ) : Route
 
     @Serializable
-    data class PracticeResult(
-        val sessionId: Long,
-    ) : Route
+    data class PracticeResult(val sessionId: Long) : Route
 
     @Serializable
     data class QuestionBreakdown(val sessionId: Long) : Route
+
+    @Serializable
+    data class Quiz(val trackId: Long, val trackName: String)  : Route
 
     @Serializable
     data object Settings : Route

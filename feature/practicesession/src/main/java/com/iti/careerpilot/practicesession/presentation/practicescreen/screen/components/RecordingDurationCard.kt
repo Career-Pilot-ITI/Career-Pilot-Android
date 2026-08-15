@@ -20,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.util.formatDuration
+
+import androidx.compose.material3.CardDefaults
 
 @Composable
 fun RecordingDurationCard(
@@ -44,8 +46,11 @@ fun RecordingDurationCard(
     )
 
     Card(
-        modifier = modifier.padding(bottom = 8.dp),
-        shape = MaterialTheme.shapes.medium,
+        modifier = modifier,
+        shape = CircleShape,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -60,7 +65,9 @@ fun RecordingDurationCard(
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .alpha(if (isRecording) alpha else 1f)
+                    .graphicsLayer {
+                        this.alpha = if (isRecording) alpha else 1f
+                    }
                     .background(color = Color.Red, shape = CircleShape)
             )
         }

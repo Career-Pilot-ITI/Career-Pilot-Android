@@ -143,6 +143,9 @@ class UploadCvViewModel @Inject constructor(
                 displayProgress++
                 onProgress(displayProgress)
             }
+            if (displayProgress >= 100 && !isDone && _state.value.stage != CvUploadStage.PARSING) {
+                _state.update { it.copy(stage = CvUploadStage.PARSING) }
+            }
             if (isDone && displayProgress >= 100) break
             delay(20.milliseconds)
         }
@@ -162,7 +165,7 @@ class UploadCvViewModel @Inject constructor(
             viewModelScope.launch {
                 _effects.emit(UploadCvEffect.NavigateNext)
             }
-        } else if (selectedUriString != null && _state.value.stage != CvUploadStage.UPLOADING) {
+        } else if (selectedUriString != null && _state.value.stage != CvUploadStage.UPLOADING && _state.value.stage != CvUploadStage.PARSING) {
             prepareAndUpload(selectedUriString!!)
         }
     }

@@ -16,13 +16,16 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.map
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
+import io.ktor.client.request.forms.InputProvider
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.utils.io.streams.asInput
+import kotlinx.io.buffered
 import java.io.File
 import javax.inject.Inject
 
@@ -53,20 +56,24 @@ class SessionRemoteDataSourceImpl @Inject constructor(
             else -> "audio/mpeg"
         }
         return safeCall<FileUploadResponse> {
-            httpClient.submitFormWithBinaryData(
-                url = Endpoints.UPLOAD_FILE,
-                formData = formData {
-                    append("type", "audios")
-                    append(
-                        key = "file",
-                        value = file.readBytes(),
-                        headers = Headers.build {
-                            append(HttpHeaders.ContentType, contentType)
-                            append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+            httpClient.post(Endpoints.UPLOAD_FILE) {
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("type", "audios")
+                            append(
+                                key = "file",
+                                value = InputProvider(size = file.length()) {
+                                    file.inputStream().asInput().buffered()
+                                },
+                                headers = Headers.build {
+                                    append(HttpHeaders.ContentType, contentType)
+                                    append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+                                }
+                            )
                         }
                     )
-                }
-            ) {
+                )
                 onUpload { bytesSentTotal, contentLength ->
                     if (contentLength != null && contentLength > 0) {
                         val percent = ((bytesSentTotal * 100) / contentLength).toInt().coerceIn(0, 100)

@@ -18,7 +18,6 @@ object Endpoints {
     // Payments
     const val PAYMENT_INITIATE = "${BASE_URL}/api/v1/payments/initiate"
     const val PAYMENT_HISTORY = "${BASE_URL}/api/v1/payments/history"
-    const val PAYMENT_CONFIRM = "${BASE_URL}/api/v1/payments/confirm"
 
     // Subscriptions
     const val SUBSCRIPTION_CURRENT = "${BASE_URL}/api/v1/subscriptions/current"

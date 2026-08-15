@@ -13,6 +13,7 @@
     <string name="uploading">Uploading…</string>
     <string name="animation_percentage">%1$d%%</string>
     <string name="upload_failed">Upload Failed</string>
+    <string name="parsing_cv_subtitle">This may take a moment…</string>
 
     <string name="back">Back</string>
 

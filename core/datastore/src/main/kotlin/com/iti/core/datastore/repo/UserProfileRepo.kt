@@ -8,4 +8,5 @@ interface UserProfileRepo {
     suspend fun readUserProfile(): UserProfile
     suspend fun updateUserProfile(updateBlock: (UserProfile) -> UserProfile)
     suspend fun clearUserProfile()
+    suspend fun setBodyLanguageConsent(given: Boolean)
 }

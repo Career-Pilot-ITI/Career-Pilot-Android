@@ -12,5 +12,5 @@ data class ReportsApiResponseDto<T>(
     @SerialName("timestamp")
     val timestamp: String? = null,
     @SerialName("data")
-    val data: T,
+    val data: T? = null,
 )

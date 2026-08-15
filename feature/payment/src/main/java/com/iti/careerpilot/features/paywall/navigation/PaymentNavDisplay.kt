@@ -39,6 +39,7 @@ import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentPro
 import com.iti.careerpilot.features.paywall.presentation.view.screens.PaymentSuccessfulContent
 import com.iti.careerpilot.features.paywall.presentation.view.screens.SubscriptionPlansContent
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallEffect
+import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallIntent
 import com.iti.careerpilot.features.paywall.presentation.viewmodel.PaywallViewModel
 import com.iti.careerpilot.features.paywall.util.CustomTabManager
 
@@ -139,6 +140,9 @@ fun PaymentNavDisplay(
             },
             entryProvider = entryProvider {
                 entry<PaymentRoute.ChoosePlan> {
+                    LaunchedEffect(Unit) {
+                        viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
+                    }
                     SubscriptionPlansContent(
                         state = state,
                         onIntent = viewModel::onIntent,
@@ -150,6 +154,9 @@ fun PaymentNavDisplay(
                     }
                 }
                 entry<PaymentRoute.GetCoins> {
+                    LaunchedEffect(Unit) {
+                        viewModel.onIntent(PaywallIntent.LoadCoinPacks)
+                    }
                     GetCoinsContent(
                         state = state,
                         onIntent = viewModel::onIntent,

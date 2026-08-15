@@ -2,17 +2,65 @@ package com.iti.careerpilot.reports.data.datasource.remote
 
 import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionsPageDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.PageableDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.QuestionScoreDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
+import com.iti.careerpilot.reports.data.datasource.remote.dto.SortDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.fakeDelay
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class FakeReportsRemoteDataSource @Inject constructor() : ReportsRemoteDataSource {
-    override suspend fun getSessions(): CareerPilotResult<List<InterviewSessionDto>, NetworkError> {
+    override suspend fun getSessions(
+        page: Int,
+        size: Int,
+    ): CareerPilotResult<InterviewSessionsPageDto, NetworkError> {
         fakeDelay()
-        return CareerPilotResult.Success(fakeSessions)
+        if (page < 0 || size <= 0) {
+            return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
+        }
+
+        val totalElements = fakeSessions.size
+        val totalPages = if (totalElements == 0) {
+            0
+        } else {
+            (totalElements + size - 1) / size
+        }
+        val offset = page.toLong() * size
+        val fromIndex = minOf(offset, totalElements.toLong()).toInt()
+        val toIndex = minOf(offset + size, totalElements.toLong()).toInt()
+        val content = fakeSessions.subList(fromIndex, toIndex)
+        val sort = SortDto(
+            unsorted = true,
+            sorted = false,
+            empty = true,
+        )
+        return CareerPilotResult.Success(
+            InterviewSessionsPageDto(
+                totalElements = totalElements.toLong(),
+                totalPages = totalPages,
+                pageable = PageableDto(
+                    unpaged = false,
+                    paged = true,
+                    pageNumber = page,
+                    pageSize = size,
+                    offset = offset,
+                    sort = sort,
+                ),
+                last = totalPages == 0 || page >= totalPages - 1,
+                first = page == 0,
+                numberOfElements = content.size,
+                size = size,
+                content = content,
+                number = page,
+                sort = sort,
+                empty = content.isEmpty(),
+            ),
+        )
     }
 
     override suspend fun getSession(
@@ -136,6 +184,12 @@ private fun InterviewSessionDto.createQuestion(
     )
 }
 
+private val FAKE_TRACKS = listOf(
+    "Android Development",
+    "Backend Development",
+    "UI/UX Design",
+)
+
 private val fakeSessions = listOf(
     InterviewSessionDto(
         id = 101L,
@@ -176,10 +230,30 @@ private val fakeSessions = listOf(
         completedAt = "2026-07-12T11:25:00Z",
         createdAt = "2026-07-12T11:10:00Z",
     ),
-)
+) + List(ADDITIONAL_FAKE_SESSION_COUNT) { index ->
+    val timestamp = Instant.parse("2026-07-10T10:00:00Z")
+        .minus(index.toLong(), ChronoUnit.DAYS)
+        .toString()
+    val score = MAX_SCORE - ((index + 4) * 3 % SCORE_VARIATION)
+    InterviewSessionDto(
+        id = 104L + index,
+        trackId = (index % FAKE_TRACKS.size + 1).toLong(),
+        trackName = FAKE_TRACKS[index % FAKE_TRACKS.size],
+        status = "COMPLETED",
+        overallScore = score,
+        durationSeconds = 900 + index * 30,
+        targetDurationMinutes = 20,
+        maxQuestions = 3,
+        startedAt = timestamp,
+        completedAt = timestamp,
+        createdAt = timestamp,
+    )
+}
 
 private const val MIN_SCORE = 0
 private const val MAX_SCORE = 100
+private const val ADDITIONAL_FAKE_SESSION_COUNT = 30
+private const val SCORE_VARIATION = 40
 private const val FEEDBACK_ID_OFFSET = 1_000L
 private const val QUESTION_ID_MULTIPLIER = 10L
 private const val SCORE_ID_OFFSET = 10_000L
