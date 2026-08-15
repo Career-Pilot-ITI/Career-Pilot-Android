@@ -149,7 +149,7 @@ mediapipe-tasks-vision = { module = "com.google.mediapipe:tasks-vision", version
 camerax-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
-camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
+camerax-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
@@ -201,4 +201,4 @@ careerpilot-module-ai = { id = "careerpilot.module.ai" }
 
 [bundles]
 ktor = ["ktor-client-okhttp", "ktor-client-core", "ktor-client-logging", "ktor-client-content-negotiation", "ktor-client-auth", "ktor-serialization-kotlinx-json"]
-camerax = ["camerax-core", "camerax-camera2", "camerax-lifecycle", "camerax-view"]
+camerax = ["camerax-core", "camerax-camera2", "camerax-lifecycle", "camerax-compose"]

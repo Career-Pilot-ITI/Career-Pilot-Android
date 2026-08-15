@@ -3,12 +3,15 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.screen.c
 import android.graphics.Matrix
 import android.util.Log
 import android.util.Size
+import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -22,7 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +43,15 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
+import com.google.common.util.concurrent.ListenableFuture
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executors
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 private const val TAG = "CameraPreviewPip"
 
@@ -61,7 +67,7 @@ fun CameraPreviewPip(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+    var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pip_border_rotation")
     val angle = infiniteTransition.animateFloat(
@@ -133,76 +139,50 @@ fun CameraPreviewPip(
         }
     }
 
-    DisposableEffect(lifecycleOwner, previewView) {
-        val currentPreviewView = previewView ?: return@DisposableEffect onDispose {}
+    LaunchedEffect(lifecycleOwner) {
         val cameraExecutor = Executors.newSingleThreadExecutor()
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        var cameraProvider: ProcessCameraProvider? = null
-        var isDisposed = false
+        val cameraProvider = ProcessCameraProvider.getInstance(context).await(context)
 
-        fun bindCamera() {
-            if (isDisposed) return
-            try {
-                val provider = cameraProviderFuture.get()
-                if (isDisposed) return
-                cameraProvider = provider
-
-                val previewUseCase = Preview.Builder()
-                    .build()
-                    .also {
-                        it.setSurfaceProvider(currentPreviewView.surfaceProvider)
-                    }
-
-                @Suppress("DEPRECATION")
-                val imageAnalysisUseCase = ImageAnalysis.Builder()
-                    .setTargetResolution(Size(320, 240))
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                    .build()
-
-                imageAnalysisUseCase.setAnalyzer(cameraExecutor) { imageProxy ->
-                    if (!isDisposed) {
-                        onFrame(imageProxy)
-                    } else {
-                        imageProxy.close()
-                    }
+        val previewUseCase = Preview.Builder()
+            .build()
+            .also {
+                it.setSurfaceProvider { request ->
+                    surfaceRequest = request
                 }
-
-                provider.unbindAll()
-                if (!isDisposed) {
-                    provider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_FRONT_CAMERA,
-                        previewUseCase,
-                        imageAnalysisUseCase,
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to bind camera use cases", e)
             }
+
+        val resolutionSelector = ResolutionSelector.Builder()
+            .setResolutionStrategy(
+                ResolutionStrategy(
+                    Size(320, 240),
+                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                )
+            )
+            .build()
+
+        val imageAnalysisUseCase = ImageAnalysis.Builder()
+            .setResolutionSelector(resolutionSelector)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+            .build()
+
+        imageAnalysisUseCase.setAnalyzer(cameraExecutor) { imageProxy ->
+            onFrame(imageProxy)
         }
 
-        val listener = Runnable {
-            bindCamera()
-        }
-
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                bindCamera()
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        cameraProviderFuture.addListener(listener, ContextCompat.getMainExecutor(context))
-
-        onDispose {
-            isDisposed = true
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            try {
-                cameraProvider?.unbindAll()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error unbinding camera provider", e)
-            }
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_FRONT_CAMERA,
+                previewUseCase,
+                imageAnalysisUseCase,
+            )
+            awaitCancellation()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to bind camera use cases", e)
+        } finally {
+            cameraProvider.unbindAll()
             cameraExecutor.shutdown()
         }
     }
@@ -213,17 +193,24 @@ fun CameraPreviewPip(
         exit = fadeOut(),
         modifier = modifier,
     ) {
-        AndroidView(
-            factory = { ctx ->
-                PreviewView(ctx).apply {
-                    implementationMode = PreviewView.ImplementationMode.PERFORMANCE
-                    scaleType = PreviewView.ScaleType.FILL_CENTER
-                    previewView = this
-                }
-            },
-            modifier = previewModifier
-                .clip(shape)
-                .then(borderModifier),
-        )
+        surfaceRequest?.let { request ->
+            CameraXViewfinder(
+                surfaceRequest = request,
+                modifier = previewModifier
+                    .clip(shape)
+                    .then(borderModifier),
+            )
+        }
     }
 }
+
+private suspend fun <T> ListenableFuture<T>.await(context: android.content.Context): T =
+    suspendCancellableCoroutine { cont ->
+        addListener({
+            try {
+                cont.resume(get())
+            } catch (e: Exception) {
+                cont.resumeWithException(e)
+            }
+        }, ContextCompat.getMainExecutor(context))
+    }
