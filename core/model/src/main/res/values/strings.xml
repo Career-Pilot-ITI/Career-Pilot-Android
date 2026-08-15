@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ChallengeVisibility -->
+    <string name="challenge_visibility_public">Public</string>
+    <string name="challenge_visibility_private">Private</string>
+
+    <!-- SeniorityLevel -->
+    <string name="seniority_intern">Intern</string>
+    <string name="seniority_junior">Junior</string>
+    <string name="seniority_mid_level">Mid Level</string>
+    <string name="seniority_senior">Senior</string>
+    <string name="seniority_lead">Lead</string>
+
+    <!-- ChallengeType -->
+    <string name="challenge_type_audio">Audio Only</string>
+    <string name="challenge_type_video_audio">Video and Audio</string>
+</resources>

@@ -23,9 +23,26 @@ enum class ChallengeVisibility {
     PUBLIC, PRIVATE
 }
 
+fun ChallengeVisibility.getTitleRes(): Int {
+    return when (this) {
+        ChallengeVisibility.PUBLIC -> R.string.challenge_visibility_public
+        ChallengeVisibility.PRIVATE -> R.string.challenge_visibility_private
+    }
+}
+
 @Serializable
 enum class SeniorityLevel {
     INTERN, JUNIOR, MID_LEVEL, SENIOR, LEAD
+}
+
+fun SeniorityLevel.getTitleRes(): Int {
+    return when (this) {
+        SeniorityLevel.INTERN -> R.string.seniority_intern
+        SeniorityLevel.JUNIOR -> R.string.seniority_junior
+        SeniorityLevel.MID_LEVEL -> R.string.seniority_mid_level
+        SeniorityLevel.SENIOR -> R.string.seniority_senior
+        SeniorityLevel.LEAD -> R.string.seniority_lead
+    }
 }
 
 @Serializable
@@ -37,6 +54,13 @@ data class ChallengeQuestion(
 @Serializable
 enum class ChallengeType {
     AUDIO_ONLY, VIDEO_AND_AUDIO
+}
+
+fun ChallengeType.getTitleRes(): Int {
+    return when (this) {
+        ChallengeType.AUDIO_ONLY -> R.string.challenge_type_audio
+        ChallengeType.VIDEO_AND_AUDIO -> R.string.challenge_type_video_audio
+    }
 }
 
 @Serializable

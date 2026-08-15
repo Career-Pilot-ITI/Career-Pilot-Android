@@ -88,6 +88,7 @@ import com.iti.careerpilot.createchallenge.presentation.viewmodel.CreateChalleng
 import com.iti.core.model.ChallengeType
 import com.iti.core.model.ChallengeVisibility
 import com.iti.core.model.SeniorityLevel
+import com.iti.core.model.getTitleRes
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,9 +133,9 @@ fun CreateChallengeScreenRoot(
         LoadingDialog(title = stringResource(R.string.creating_challenge))
     }
 
-    state.invitationCode?.let { code ->
+    if (state.isSuccessDialogVisible && state.invitationCode != null) {
         SuccessDialog(
-            code = code,
+            code = state.invitationCode!!,
             onDismiss = { viewModel.onAction(CreateChallengeAction.OnDismissSuccess) }
         )
     }
@@ -440,7 +441,7 @@ fun CreateChallengeScreenContent(
                                         ), contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = level.name,
+                                            text = stringResource(level.getTitleRes()),
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                         )
@@ -470,11 +471,7 @@ fun CreateChallengeScreenContent(
                             options = ChallengeVisibility.entries.toList(),
                             selected = state.visibility,
                             onSelected = { onAction(CreateChallengeAction.OnVisibilityChanged(it)) },
-                            labelProvider = {
-                                if (it == ChallengeVisibility.PUBLIC) stringResource(R.string.create_challenge_public) else stringResource(
-                                    R.string.create_challenge_private
-                                )
-                            }
+                            labelProvider = { stringResource(it.getTitleRes()) }
                         )
                     }
 
@@ -489,11 +486,7 @@ fun CreateChallengeScreenContent(
                             options = ChallengeType.entries.toList(),
                             selected = state.challengeType,
                             onSelected = { onAction(CreateChallengeAction.OnChallengeTypeChanged(it)) },
-                            labelProvider = {
-                                if (it == ChallengeType.AUDIO_ONLY) stringResource(R.string.create_challenge_audio_only) else stringResource(
-                                    R.string.create_challenge_video_audio
-                                )
-                            }
+                            labelProvider = { stringResource(it.getTitleRes()) }
                         )
                     }
 
