@@ -32,6 +32,11 @@ class ChallengesViewModel @Inject constructor(
                     _events.send(ChallengesEvent.NavigateToCreateChallenge)
                 }
             }
+            ChallengesAction.ChallengeDashboardClicked -> {
+                viewModelScope.launch {
+                    _events.send(ChallengesEvent.NavigateToChallengeDashboard)
+                }
+            }
         }
     }
 }

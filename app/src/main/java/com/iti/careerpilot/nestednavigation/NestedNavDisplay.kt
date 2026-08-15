@@ -41,6 +41,7 @@ fun NestedNavDisplay(
     openInterviews: () -> Unit,
     openAts: () -> Unit,
     openCreateChallenge: () -> Unit,
+    openChallengeDashboard: () -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -119,7 +120,8 @@ fun NestedNavDisplay(
                 }
                 entry<Route.NestedNav.Challenges> {
                     ChallengesScreenRoot(
-                        openCreateChallenge = openCreateChallenge
+                        openCreateChallenge = openCreateChallenge,
+                        openChallengeDashboard = openChallengeDashboard
                     )
                 }
                 entry<Route.NestedNav.SessionHistory> {

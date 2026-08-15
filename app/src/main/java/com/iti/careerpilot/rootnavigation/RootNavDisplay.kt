@@ -27,6 +27,7 @@ import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
+import com.iti.careerpilot.challengedashboard.presentation.screen.ChallengeDashboardScreenRoot
 import com.iti.careerpilot.createchallenge.presentation.screen.CreateChallengeScreenRoot
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
@@ -318,7 +319,12 @@ fun RootNavDisplay(
                             rootBackStack.navigateSingleTop(
                                 Route.CreateChallenge,
                             )
-                        }
+                        },
+                        openChallengeDashboard = {
+                            rootBackStack.navigateSingleTop(
+                                Route.ChallengeDashboard,
+                            )
+                        },
                     )
                 }
                 entry<Route.Ats> {
@@ -498,6 +504,14 @@ fun RootNavDisplay(
                     CreateChallengeScreenRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.CreateChallenge>()
+                        }
+                    )
+                }
+
+                entry<Route.ChallengeDashboard> {
+                    ChallengeDashboardScreenRoot(
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
                         }
                     )
                 }

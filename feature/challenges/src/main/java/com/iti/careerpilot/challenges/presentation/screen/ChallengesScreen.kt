@@ -31,6 +31,7 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 @Composable
 fun ChallengesScreenRoot(
     openCreateChallenge: () -> Unit,
+    openChallengeDashboard: () -> Unit,
     viewModel: ChallengesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -38,6 +39,7 @@ fun ChallengesScreenRoot(
     ObserveEvent(viewModel.events) { event ->
         when (event) {
             ChallengesEvent.NavigateToCreateChallenge -> openCreateChallenge()
+            ChallengesEvent.NavigateToChallengeDashboard -> openChallengeDashboard()
         }
     }
 
@@ -79,6 +81,12 @@ fun ChallengesScreenContent(
                 text = "Open create challenge",
                 onClick = {
                     onAction(ChallengesAction.CreateChallengeClicked)
+                }
+            )
+            CareerPilotButton(
+                text = "Open challenge dashboard",
+                onClick = {
+                    onAction(ChallengesAction.ChallengeDashboardClicked)
                 }
             )
         }
