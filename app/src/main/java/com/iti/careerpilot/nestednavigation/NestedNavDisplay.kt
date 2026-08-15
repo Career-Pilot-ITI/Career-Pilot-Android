@@ -4,13 +4,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -49,14 +55,16 @@ fun NestedNavDisplay(
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
-            if (nestedBackStack.lastOrNull().isBottomDestination()) {
-                CareerPilotBottomNavBar(
+            CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
             ) {
                 BottomBarDestination.entries.forEach { destination ->
                     BottomNavBarItem(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .fillMaxWidth()
+                            .height(80.dp),
                         onClick = {
                             nestedBackStack.apply {
                                 clear()
@@ -71,7 +79,6 @@ fun NestedNavDisplay(
                         label = stringResource(destination.title),
                     )
                 }
-            }
             }
         }
     ) { innerPadding ->
@@ -142,9 +149,9 @@ fun NestedNavDisplay(
 }
 
 private fun NavKey?.isBottomDestination() = this == Route.NestedNav.Home ||
-    this == Route.NestedNav.Challenges ||
-    this == Route.NestedNav.SessionHistory ||
-    this == Route.NestedNav.Profile
+        this == Route.NestedNav.Challenges ||
+        this == Route.NestedNav.SessionHistory ||
+        this == Route.NestedNav.Profile
 
 private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
     return this.lastOrNull()?.let {
