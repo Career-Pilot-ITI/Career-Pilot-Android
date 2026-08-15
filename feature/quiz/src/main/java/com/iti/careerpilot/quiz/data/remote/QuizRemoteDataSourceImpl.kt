@@ -67,6 +67,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             Avoid repeating concepts already covered.
             If the topic is sufficiently covered, set topicCompleted to true.
             Otherwise, provide the title, concise explanation, and a practical example for the next learning point.
+            Set isCode to true if the example field contains pure source code without natural language explanations.
 
             Return the response as a JSON object:
             {
@@ -75,7 +76,8 @@ class QuizRemoteDataSourceImpl @Inject constructor(
               "learningPoint": {
                 "title": "...",
                 "explanation": "...",
-                "example": "..."
+                "example": "...",
+                "isCode": boolean
               }
             }
         """.trimIndent()
@@ -155,6 +157,7 @@ class QuizRemoteDataSourceImpl @Inject constructor(
             15. Return responses using the requested JSON schema. Never return a top-level JSON array; always wrap it in the specified object structure.
             16. Never make navigation decisions.
             17. Never tell the application which screen to open.
+            18. Use simple markdown for text emphasis: **bold** for key terms, *italic* for emphasis, and `inline code` for technical identifiers, classes, or methods.
         """
     }
 }

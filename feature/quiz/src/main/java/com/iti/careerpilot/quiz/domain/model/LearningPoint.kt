@@ -3,7 +3,8 @@ package com.iti.careerpilot.quiz.domain.model
 data class LearningPoint(
     val title: String,
     val explanation: String,
-    val example: String
+    val example: String,
+    val isCode: Boolean
 )
 
 

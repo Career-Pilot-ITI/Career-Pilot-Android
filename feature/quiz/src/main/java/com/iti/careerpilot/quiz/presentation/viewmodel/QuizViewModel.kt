@@ -8,8 +8,10 @@ import com.iti.careerpilot.quiz.presentation.event.QuizEvent
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.careerpilot.quiz.presentation.state.RetryType
+import com.iti.careerpilot.quiz.R
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -87,10 +89,25 @@ class QuizViewModel @Inject constructor(
 
     private fun generateTopics() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading, error = null, retryType = null) }
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    loadingMessage = UIText.StringResource(R.string.quiz_loading_topics),
+                    currentStep = QuizStep.Loading,
+                    error = null,
+                    retryType = null,
+                )
+            }
             quizRepo.generateTopics(_state.value.trackName, _state.value.seniority)
                 .onSuccess { topics ->
-                    _state.update { it.copy(isLoading = false, topics = topics, currentStep = QuizStep.Topics) }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            loadingMessage = null,
+                            topics = topics,
+                            currentStep = QuizStep.Topics
+                        )
+                    }
                 }
                 .onError { error ->
                     _state.update {
@@ -110,7 +127,15 @@ class QuizViewModel @Inject constructor(
         val covered = _state.value.coveredConcepts[topic.id] ?: emptyList()
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, currentStep = QuizStep.Loading, error = null, retryType = null) }
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    loadingMessage = UIText.StringResource(R.string.quiz_loading_learning_point),
+                    currentStep = QuizStep.Loading,
+                    error = null,
+                    retryType = null,
+                )
+            }
             quizRepo.generateNextLearningPoint(
                 _state.value.trackName,
                 _state.value.seniority,
@@ -119,7 +144,14 @@ class QuizViewModel @Inject constructor(
             ).onSuccess { response ->
                 if (response.topicCompleted) {
                     markTopicCompleted(topic.id)
-                    _state.update { it.copy(isLoading = false, currentStep = QuizStep.Topics, selectedTopic = null) }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            loadingMessage = null,
+                            currentStep = QuizStep.Topics,
+                            selectedTopic = null
+                        )
+                    }
                 } else {
                     val lp = response.learningPoint ?: return@onSuccess
                     val newCovered = if (response.coveredConcept != null) {
@@ -129,6 +161,7 @@ class QuizViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            loadingMessage = null,
                             currentLearningPoint = lp,
                             coveredConcepts = it.coveredConcepts + (topic.id to newCovered),
                             currentStep = QuizStep.LearningPoint
@@ -139,6 +172,7 @@ class QuizViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isLoading = false,
+                        loadingMessage = null,
                         error = error.toUIText(),
                         retryType = RetryType.GENERATE_LEARNING_POINT,
                         currentStep = QuizStep.Error
@@ -153,12 +187,20 @@ class QuizViewModel @Inject constructor(
         val lp = _state.value.currentLearningPoint ?: return
 
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null, retryType = null) }
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    loadingMessage = UIText.StringResource(R.string.quiz_loading_quiz),
+                    error = null,
+                    retryType = null
+                )
+            }
             quizRepo.generateQuiz(topic.title, lp)
                 .onSuccess { quiz ->
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            loadingMessage = null,
                             currentQuiz = quiz,
                             quizAnswers = emptyMap(),
                             currentStep = QuizStep.Quiz
@@ -169,6 +211,7 @@ class QuizViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
+                            loadingMessage = null,
                             error = error.toUIText(),
                             retryType = RetryType.GENERATE_QUIZ,
                             currentStep = QuizStep.Error

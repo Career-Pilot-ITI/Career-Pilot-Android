@@ -47,7 +47,8 @@ class QuizRepositoryImpl @Inject constructor(
                     LearningPoint(
                         title = it.title,
                         explanation = it.explanation,
-                        example = it.example
+                        example = it.example,
+                        isCode = it.isCode
                     )
                 }
             )

@@ -9,6 +9,7 @@ import com.iti.common.util.UIText
 @Immutable
 data class QuizState(
     val isLoading: Boolean = false,
+    val loadingMessage: UIText? = null,
     val error: UIText? = null,
     val retryType: RetryType? = null,
     val trackName: String = "",

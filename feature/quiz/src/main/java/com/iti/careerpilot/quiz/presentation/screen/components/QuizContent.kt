@@ -54,7 +54,7 @@ fun QuizContent(
     ) {
         item {
             Text(
-                text = stringResource(R.string.quiz_check_title),
+                text = parseMarkdown(stringResource(R.string.quiz_check_title)),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -98,7 +98,7 @@ private fun QuizQuestionCard(
             verticalArrangement = Arrangement.spacedBy(Dimens.SpaceM)
         ) {
             Text(
-                text = stringResource(R.string.quiz_question_format, index + 1, question.question),
+                text = parseMarkdown(stringResource(R.string.quiz_question_format, index + 1, question.question)),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -148,7 +148,7 @@ private fun QuizOptionRow(
             )
         )
         Text(
-            text = text,
+            text = parseMarkdown(text),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = Dimens.SpaceM),
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface

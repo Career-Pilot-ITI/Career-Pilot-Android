@@ -1,7 +1,6 @@
 package com.iti.careerpilot.quiz.presentation.screen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
-import com.iti.careerpilot.core.designsystem.components.LoadingWave
+import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.quiz.R
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
 import com.iti.careerpilot.quiz.presentation.action.QuizAction
@@ -94,15 +93,10 @@ fun QuizScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            AnimatedVisibility(
-                visible = state.isLoading && state.currentStep != QuizStep.Loading,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(Dimens.SpaceL),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                LoadingWave(color = MaterialTheme.colorScheme.primary)
+            if (state.isLoading) {
+                LoadingDialog(
+                    title = state.loadingMessage?.asString() ?: ""
+                )
             }
         }
     }
@@ -126,9 +120,6 @@ private fun QuizTopBar(
                     else -> state.selectedTopic?.title
                         ?: stringResource(R.string.empty_string)
                 },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
             )
         },
         navigationIcon = {
@@ -165,7 +156,7 @@ private fun QuizStepContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    LoadingWave(color = MaterialTheme.colorScheme.primary)
+                    // LoadingDialog will be shown as an overlay
                 }
             }
 

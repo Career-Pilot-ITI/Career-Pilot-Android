@@ -25,7 +25,8 @@ data class LearningPointResponseDto(
 data class LearningPointDto(
     val title: String,
     val explanation: String,
-    val example: String
+    val example: String,
+    val isCode: Boolean
 )
 
 @Serializable
