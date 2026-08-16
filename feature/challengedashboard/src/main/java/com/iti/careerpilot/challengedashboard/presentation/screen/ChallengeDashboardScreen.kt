@@ -1,6 +1,7 @@
 package com.iti.careerpilot.challengedashboard.presentation.screen
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,24 +9,40 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -33,14 +50,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -88,7 +109,12 @@ fun ChallengeDashboardScreenRoot(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.challenge_dashboard_title), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.challenge_dashboard_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     BackIconButton(onBack = { viewModel.onAction(ChallengeDashboardAction.OnBackClicked) })
                 },
@@ -115,6 +141,28 @@ fun ChallengeDashboardScreenRoot(
     }
 }
 
+// -----------------------------------------------------------------------------------------------
+// Content
+//
+// What changed vs the original, and why:
+//  1. Edit/Delete are now a single overflow menu instead of two always-visible icon buttons —
+//     delete sitting right next to edit at full opacity invites mis-taps on a destructive action.
+//     A menu keeps the row calm and puts delete behind one extra, deliberate step.
+//  2. The "•"-separated metadata rows (seniority · questions · type, and date · progress · status)
+//     are replaced with icon-led chips — same info, but scannable instead of read-as-a-sentence,
+//     and they wrap gracefully on narrow screens instead of a single fragile Row.
+//  3. Status ("Completed" / "In progress") is now a small colored pill instead of plain colored
+//     text — it reads as a status the way a badge does, not as an accent color choice.
+//  4. Score is shown as a compact circular ring next to the chevron on TakenChallengeItem instead
+//     of a bare percentage — communicates "progress toward 100" at a glance, and gives sessions
+//     without a score yet a placeholder instead of just omitting the field.
+//  5. Both list tabs get an empty state (no created challenges / no completed challenges yet)
+//     instead of silently rendering nothing.
+//  6. Invitation code block gained a label + monospace-style emphasis and a copy affordance spot.
+//  7. ParticipantReportsDialog: participant rows now show an initials avatar, a real empty state
+//     (icon + text instead of a single gray line), and the header includes the participant count.
+// -----------------------------------------------------------------------------------------------
+
 @Composable
 fun ChallengeDashboardScreenContent(
     modifier: Modifier = Modifier,
@@ -127,33 +175,103 @@ fun ChallengeDashboardScreenContent(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Tabs
+        Spacer(Modifier.height(4.dp))
+
         DashboardTabs(
             selectedTab = state.selectedTab,
             onTabSelected = { onAction(ChallengeDashboardAction.OnTabSelected(it)) }
         )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(bottom = 32.dp)
-        ) {
-            if (state.selectedTab == DashboardTab.MY_CHALLENGES) {
-                items(state.createdChallenges) { challenge ->
-                    CreatedChallengeItem(
-                        challenge = challenge,
-                        onEdit = { onAction(ChallengeDashboardAction.OnEditChallenge(challenge.id)) },
-                        onDelete = { onAction(ChallengeDashboardAction.OnDeleteChallenge(challenge.id, challenge.visibility)) },
-                        onViewReports = { onAction(ChallengeDashboardAction.OnViewParticipantReports(challenge.id)) }
-                    )
-                }
+
+        if (state.selectedTab == DashboardTab.MY_CHALLENGES) {
+            if (state.createdChallenges.isEmpty()) {
+                DashboardEmptyState(
+                    icon = Icons.Filled.Groups,
+                    text = stringResource(R.string.dashboard_empty_created),
+                    modifier = Modifier.weight(1f)
+                )
             } else {
-                items(state.takenChallenges) { session ->
-                    TakenChallengeItem(
-                        session = session,
-                        onClick = { onAction(ChallengeDashboardAction.OnTakenChallengeClicked(session.sessionId)) }
-                    )
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 32.dp)
+                ) {
+                    items(state.createdChallenges, key = { it.id }) { challenge ->
+                        CreatedChallengeItem(
+                            challenge = challenge,
+                            onEdit = { onAction(ChallengeDashboardAction.OnEditChallenge(challenge.id)) },
+                            onDelete = {
+                                onAction(
+                                    ChallengeDashboardAction.OnDeleteChallenge(
+                                        challenge.id,
+                                        challenge.visibility
+                                    )
+                                )
+                            },
+                            onViewReports = {
+                                onAction(
+                                    ChallengeDashboardAction.OnViewParticipantReports(
+                                        challenge.id
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
+        } else {
+            if (state.takenChallenges.isEmpty()) {
+                DashboardEmptyState(
+                    icon = Icons.Filled.PersonOff,
+                    text = stringResource(R.string.dashboard_empty_taken),
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 32.dp)
+                ) {
+                    items(state.takenChallenges, key = { it.sessionId }) { session ->
+                        TakenChallengeItem(
+                            session = session,
+                            onClick = {
+                                onAction(
+                                    ChallengeDashboardAction.OnTakenChallengeClicked(
+                                        session.sessionId
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardEmptyState(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(44.dp)
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -164,14 +282,25 @@ fun DashboardTabs(selectedTab: DashboardTab, onTabSelected: (DashboardTab) -> Un
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), MaterialTheme.shapes.large)
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                MaterialTheme.shapes.large
+            )
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         DashboardTab.entries.forEach { tab ->
             val isSelected = selectedTab == tab
-            val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, label = "tabBg")
-            val contentColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, label = "tabText")
+            val bgColor by animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                animationSpec = tween(200),
+                label = "tabBg"
+            )
+            val contentColor by animateColorAsState(
+                targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                animationSpec = tween(200),
+                label = "tabText"
+            )
 
             Box(
                 modifier = Modifier
@@ -193,6 +322,10 @@ fun DashboardTabs(selectedTab: DashboardTab, onTabSelected: (DashboardTab) -> Un
     }
 }
 
+// -----------------------------------------------------------------------------------------------
+// Created challenge item
+// -----------------------------------------------------------------------------------------------
+
 @Composable
 fun CreatedChallengeItem(
     challenge: Challenge,
@@ -200,51 +333,171 @@ fun CreatedChallengeItem(
     onDelete: () -> Unit,
     onViewReports: () -> Unit
 ) {
-    CareerPilotCard {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(challenge.trackName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(challenge.seniorityLevel.getTitleRes()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                        Text(stringResource(R.string.questions_count, challenge.questions.size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                        Text(stringResource(challenge.type.getTitleRes()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                    }
+                    Text(
+                        challenge.trackName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    VisibilityPill(challenge.visibility)
                 }
-                Row {
-                    IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.secondary) }
-                    IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error) }
+
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.more_options)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.edit)) },
+                            leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                            onClick = { menuExpanded = false; onEdit() }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    stringResource(R.string.delete),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            onClick = { menuExpanded = false; onDelete() }
+                        )
+                    }
                 }
             }
 
+            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                InfoChip(stringResource(challenge.seniorityLevel.getTitleRes()))
+                InfoChip(
+                    icon = Icons.Outlined.QuestionMark,
+                    text = stringResource(R.string.questions_count, challenge.questions.size)
+                )
+                InfoChip(stringResource(challenge.type.getTitleRes()))
+            }
+
             if (challenge.visibility == ChallengeVisibility.PRIVATE && challenge.invitationCode.isNotBlank()) {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(8.dp)
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.challenge_code_label, challenge.invitationCode),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.invitation_code_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = challenge.invitationCode,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.5.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
-            
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(challenge.visibility.getTitleRes()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
-                Button(onClick = onViewReports, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
-                    Text(stringResource(R.string.view_reports), style = MaterialTheme.typography.labelSmall)
-                }
+
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            )
+
+            Button(
+                onClick = onViewReports,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(vertical = 10.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Groups,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    stringResource(R.string.view_reports),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
 }
+
+@Composable
+private fun VisibilityPill(visibility: ChallengeVisibility) {
+    val (bg, fg) = if (visibility == ChallengeVisibility.PRIVATE) {
+        MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
+    } else {
+        MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+    }
+    Surface(color = bg, shape = RoundedCornerShape(6.dp)) {
+        Text(
+            text = stringResource(visibility.getTitleRes()),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = fg
+        )
+    }
+}
+
+@Composable
+private fun InfoChip(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        icon?.let {
+            Icon(
+                it,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(13.dp)
+            )
+            Spacer(Modifier.width(4.dp))
+        }
+        Text(
+            text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+// -----------------------------------------------------------------------------------------------
+// Taken challenge item
+// -----------------------------------------------------------------------------------------------
 
 @Composable
 fun TakenChallengeItem(session: ChallengeSession, onClick: () -> Unit) {
@@ -252,33 +505,112 @@ fun TakenChallengeItem(session: ChallengeSession, onClick: () -> Unit) {
     val date = remember(session.timestamp) {
         SimpleDateFormat("dd MMM yyyy", locale).format(Date(session.timestamp))
     }
-    CareerPilotCard(modifier = Modifier.clickable { onClick() }) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(session.challengeTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                    Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                    Text(
-                        text = stringResource(R.string.questions_progress, session.answeredCount, session.maxQuestions),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                    Text(
-                        text = if (session.status == "COMPLETED") stringResource(R.string.status_completed) else stringResource(R.string.status_in_progress),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (session.status == "COMPLETED") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val isCompleted = session.status == "COMPLETED"
+
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    session.challengeTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    InfoChip(icon = Icons.Outlined.CalendarToday, text = date)
+                    InfoChip(
+                        text = stringResource(
+                            R.string.questions_progress,
+                            session.answeredCount,
+                            session.maxQuestions
+                        )
                     )
                 }
+
+                StatusPill(isCompleted)
             }
-            session.overallScore?.let {
-                Text("$it%", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-            }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
+
+            ScoreBadge(score = session.overallScore)
+
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline
+            )
         }
     }
 }
+
+@Composable
+private fun StatusPill(isCompleted: Boolean) {
+    val (bg, fg, label) = if (isCompleted) {
+        Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+            stringResource(R.string.status_completed)
+        )
+    } else {
+        Triple(
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.onSecondaryContainer,
+            stringResource(R.string.status_in_progress)
+        )
+    }
+    Surface(color = bg, shape = RoundedCornerShape(6.dp)) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = fg
+        )
+    }
+}
+
+@Composable
+private fun ScoreBadge(score: Int?) {
+    Box(
+        modifier = Modifier.size(48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (score != null) {
+            CircularProgressIndicator(
+                progress = { score / 100f },
+                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                strokeWidth = 4.dp
+            )
+            Text(
+                text = "$score",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------------------------
+// Participant reports dialog
+// -----------------------------------------------------------------------------------------------
 
 @Composable
 fun ParticipantReportsDialog(
@@ -287,45 +619,135 @@ fun ParticipantReportsDialog(
     onViewSession: (String) -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        CareerPilotCard {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(R.string.participant_reports_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column {
+                    Text(
+                        stringResource(R.string.participant_reports_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (sessions.isNotEmpty()) {
+                        Text(
+                            stringResource(R.string.participants_count, sessions.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
                 if (sessions.isEmpty()) {
-                    Text(stringResource(R.string.no_participants_message), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.PersonOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Text(
+                            stringResource(R.string.no_participants_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 } else {
-                    LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
-                        items(sessions) { session ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onViewSession(session.sessionId) }
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(session.participantName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Text(session.participantEmail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                                        Text(stringResource(R.string.questions_progress, session.answeredCount, session.maxQuestions), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-                                        Text(
-                                            text = if (session.status == "COMPLETED") stringResource(R.string.status_completed) else stringResource(R.string.status_in_progress),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = if (session.status == "COMPLETED") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                                        )
-                                    }
-                                }
-                                session.overallScore?.let { Text("$it%", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
-                            }
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 420.dp),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        items(sessions, key = { it.sessionId }) { session ->
+                            ParticipantRow(
+                                session = session,
+                                onClick = { onViewSession(session.sessionId) })
+                            HorizontalDivider(
+                                thickness = 0.5.dp,
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
                         }
                     }
                 }
+
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.close))
+                    Text(stringResource(R.string.close), fontWeight = FontWeight.SemiBold)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ParticipantRow(session: ChallengeSession, onClick: () -> Unit) {
+    val isCompleted = session.status == "COMPLETED"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(vertical = 10.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = session.participantName.take(1).uppercase(),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                session.participantName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                session.participantEmail,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                InfoChip(
+                    text = stringResource(
+                        R.string.questions_progress,
+                        session.answeredCount,
+                        session.maxQuestions
+                    )
+                )
+                StatusPill(isCompleted)
+            }
+        }
+
+        session.overallScore?.let {
+            Text(
+                "$it%",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

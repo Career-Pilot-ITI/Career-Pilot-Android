@@ -12,4 +12,11 @@
     <string name="questions_progress">%1$d/%2$d Qs</string>
     <string name="status_in_progress">In Progress</string>
     <string name="status_completed">Completed</string>
+    <string name="dashboard_empty_created">No challenges created</string>
+    <string name="dashboard_empty_taken">No challenge history</string>
+    <string name="more_options">more</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="invitation_code_label">Invitation code</string>
+    <string name="participants_count">%1$d participants</string>
 </resources>
