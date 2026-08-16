@@ -32,6 +32,7 @@ data class PaywallState(
     val failureReason: PaymentFailureReason = PaymentFailureReason.DECLINED,
     val preCheckoutBalance: Int? = null,
     val preCheckoutTier: String? = null,
+    val purchasedCoinCount: Int? = null,
     val usedFreeSessions: Int = 5,
     val maxFreeSessions: Int = 5,
     val resetDate: String = "1st of next month",
@@ -42,42 +43,44 @@ data class PaywallState(
             priceEgp = 0,
             originalPriceEgp = null,
             features = persistentListOf(
-                R.string.paywall_feature_5_free_sessions,
-                R.string.paywall_feature_basic_radar,
-                R.string.paywall_feature_limited_ai
+                R.string.paywall_feature_voice_mock_interview,
+                R.string.paywall_feature_performance_analytics,
+                R.string.paywall_feature_voice_scoring
             )
         ),
         SubscriptionPlan(
             id = "plus",
             nameRes = R.string.paywall_plan_plus,
-            priceEgp = 199,
+            priceEgp = 349,
             originalPriceEgp = null,
             isInitiallySelected = true,
             features = persistentListOf(
-                R.string.paywall_feature_detailed_radar,
-                R.string.paywall_feature_priority_ai,
-                R.string.paywall_feature_coaching_tips_library
+                R.string.paywall_feature_everything_in_free,
+                R.string.paywall_feature_ats_scan,
+                R.string.paywall_feature_resume_optimizer,
+                R.string.paywall_feature_technical_quizzes,
+                R.string.paywall_feature_80_monthly_coins
             )
         ),
         SubscriptionPlan(
             id = "pro",
             nameRes = R.string.paywall_plan_max,
-            priceEgp = 499,
+            priceEgp = 599,
             originalPriceEgp = null,
             features = persistentListOf(
-                R.string.paywall_feature_unlimited_sessions,
-                R.string.paywall_feature_advanced_radar,
-                R.string.paywall_feature_instant_ai,
-                R.string.paywall_feature_1on1_mentorship
+                R.string.paywall_feature_everything_in_plus,
+                R.string.paywall_feature_video_interview,
+                R.string.paywall_feature_160_monthly_coins
             )
         )
     ),
     val coinPacks: ImmutableList<CoinPack> = persistentListOf(),
     val unlockedFeatures: ImmutableList<Int> = persistentListOf(
-        R.string.paywall_feature_detailed_radar,
-        R.string.paywall_feature_priority_ai,
-        R.string.paywall_feature_coaching_tips_library,
-        R.string.paywall_feature_unlimited_sessions
+        R.string.paywall_feature_everything_in_free,
+        R.string.paywall_feature_ats_scan,
+        R.string.paywall_feature_resume_optimizer,
+        R.string.paywall_feature_technical_quizzes,
+        R.string.paywall_feature_80_monthly_coins
     )
 ) {
     val selectedPlan: SubscriptionPlan?
@@ -109,5 +112,5 @@ data class PaywallState(
         get() = selectedPlan?.nameRes ?: R.string.paywall_plan_plus
 
     val successfulCoinCount: Int
-        get() = selectedCoinPack?.coins ?: 500
+        get() = purchasedCoinCount ?: selectedCoinPack?.coins ?: 50
 }

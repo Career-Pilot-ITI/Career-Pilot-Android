@@ -29,4 +29,23 @@ class AtsJobMatchCardTest {
         composeRule.onNodeWithText("Paste a job link · See how your CV scores").assertExists()
         composeRule.runOnIdle { assertTrue(wasClicked) }
     }
+
+    @Test
+    fun cardShowsLockedPlusBadgeWhenLocked() {
+        var wasClicked = false
+
+        composeRule.setContent {
+            CareerPilotTheme {
+                AtsJobMatchCard(
+                    isLocked = true,
+                    onClick = { wasClicked = true },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("ATS Job Match").assertExists().performClick()
+        composeRule.onNodeWithText("PLUS").assertExists()
+        composeRule.onNodeWithText("Paste a job link · See how your CV scores").assertExists()
+        composeRule.runOnIdle { assertTrue(wasClicked) }
+    }
 }

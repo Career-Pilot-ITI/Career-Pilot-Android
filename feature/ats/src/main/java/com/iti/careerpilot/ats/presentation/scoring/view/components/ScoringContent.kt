@@ -2,6 +2,8 @@ package com.iti.careerpilot.ats.presentation.scoring.view.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -22,19 +25,23 @@ import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
 import com.iti.careerpilot.ats.presentation.components.RecommendationsCard
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillStatus
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
+import com.iti.core.model.FeatureKey
 
 @Composable
 fun ScoringContent(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -46,7 +53,7 @@ fun ScoringContent(
         val error by rememberUiStateValue(stateProvider) { it.error }
         AtsWorkspaceErrorContent(
             error = error,
-            onRetry = { onAction(ScoringAction.Retry) },
+            onRetry = { onIntent(ScoringIntent.Retry) },
             modifier = modifier,
         )
         return
@@ -156,27 +163,38 @@ fun ScoringContent(
         item {
             OptimizeCvActionItem(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
         }
         item {
-            CareerPilotButton(
-                text = stringResource(R.string.ats_generate_cover_letter),
-                onClick = { onAction(ScoringAction.GenerateCoverLetter) },
-                variant = ButtonVariant.OUTLINE,
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Email,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                    )
-                },
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CareerPilotButton(
+                    text = stringResource(R.string.ats_generate_cover_letter),
+                    onClick = { onIntent(ScoringIntent.GenerateCoverLetter) },
+                    variant = ButtonVariant.OUTLINE,
+                    modifier = Modifier.weight(1f),
+                    leadingContent = {
+                        Icon(
+                             imageVector = Icons.Outlined.Email,
+                             contentDescription = null,
+                             modifier = Modifier.size(20.dp),
+                        )
+                    },
+                )
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.CoverLetter),
+                    compact = true,
+                )
+            }
         }
         item {
             PracticeActionItem(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
         }
     }

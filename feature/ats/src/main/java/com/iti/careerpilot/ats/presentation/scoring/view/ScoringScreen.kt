@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,15 +25,20 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.background.CvOptimizationService
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoringBody
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
+import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.iti.common.snackbar.CareerPilotSnackbarController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoringRoot(
     workspaceId: Long,
@@ -50,11 +56,11 @@ fun ScoringRoot(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) {
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
     }
 
     LaunchedEffect(workspaceId) {
-        viewModel.onAction(ScoringAction.Initial(workspaceId))
+        viewModel.onIntent(ScoringIntent.Initial(workspaceId))
     }
 
     LaunchedEffect(lifecycleOwner, viewModel) {
@@ -81,9 +87,9 @@ fun ScoringRoot(
 
     ScoringScreen(
         stateProvider = stateProvider,
-        onAction = { action ->
+        onIntent = { intent ->
             if (
-                action == ScoringAction.OptimizeCv &&
+                intent == ScoringIntent.OptimizeCv &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(
                     context,
@@ -92,19 +98,46 @@ fun ScoringRoot(
             ) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
-                viewModel.onAction(action)
+                viewModel.onIntent(intent)
             }
         },
         onBack = onBack,
         onOpenJob = openJob,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val gateFeatureName by rememberUiStateValue(stateProvider) { it.gateFeatureName }
+    val showCoinTopUpSheet by rememberUiStateValue(stateProvider) { it.showCoinTopUpSheet }
+    val coinTopUpRequiredCost by rememberUiStateValue(stateProvider) { it.coinTopUpRequiredCost }
+    val coinBalance by rememberUiStateValue(stateProvider) { it.coinBalance }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
+            requiredPlan = gateRequiredPlan,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { viewModel.onIntent(ScoringIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(ScoringIntent.DismissGateSheet) },
+        )
+    }
+
+    if (showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = coinTopUpRequiredCost,
+            currentBalance = coinBalance,
+            onBuyCoins = { viewModel.onIntent(ScoringIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(ScoringIntent.DismissCoinTopUpSheet) },
+        )
+    }
 }
 
 @Composable
 fun ScoringScreen(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenJob: (String) -> Unit = {},
@@ -117,7 +150,7 @@ fun ScoringScreen(
 
         ScoringBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             onOpenJob = onOpenJob,
             modifier = Modifier.fillMaxSize(),
         )

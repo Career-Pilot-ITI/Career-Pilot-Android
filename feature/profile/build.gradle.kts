@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:access"))
+    implementation(project(":core:model"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:common"))
     implementation(project(":core:network"))

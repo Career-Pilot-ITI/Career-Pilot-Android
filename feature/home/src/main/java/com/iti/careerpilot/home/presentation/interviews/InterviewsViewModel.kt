@@ -25,38 +25,38 @@ class InterviewsViewModel @Inject constructor(
     private val _state = MutableStateFlow(InterviewsState())
     val state = _state.asStateFlow()
 
-    private val _events = Channel<InterviewsEvent>(Channel.BUFFERED)
+    private val _events = Channel<InterviewsEffect>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private var allTracks: List<InterviewTrack> = emptyList()
 
-    fun onAction(action: InterviewsAction) {
-        when (action) {
-            InterviewsAction.Initial -> load()
-            is InterviewsAction.QueryChanged -> {
-                _state.update { it.copy(query = action.query) }
+    fun onIntent(intent: InterviewsIntent) {
+        when (intent) {
+            InterviewsIntent.Initial -> load()
+            is InterviewsIntent.QueryChanged -> {
+                _state.update { it.copy(query = intent.query) }
                 applyFilter()
             }
 
-            is InterviewsAction.PracticeTrackClicked -> viewModelScope.launch {
+            is InterviewsIntent.PracticeTrackClicked -> viewModelScope.launch {
                 _events.send(
-                    InterviewsEvent.NavigateToReadyToPractice(
-                        trackId = action.trackId,
-                        trackName = action.trackName,
+                    InterviewsEffect.NavigateToReadyToPractice(
+                        trackId = intent.trackId,
+                        trackName = intent.trackName,
                     )
                 )
             }
 
-            is InterviewsAction.LessonTrackClicked -> viewModelScope.launch {
+            is InterviewsIntent.LessonTrackClicked -> viewModelScope.launch {
                 _events.send(
-                    InterviewsEvent.NavigateToQuiz(
-                        trackId = action.trackId,
-                        trackName = action.trackName,
+                    InterviewsEffect.NavigateToQuiz(
+                        trackId = intent.trackId,
+                        trackName = intent.trackName,
                     )
                 )
             }
 
-            InterviewsAction.Retry -> load()
+            InterviewsIntent.Retry -> load()
         }
     }
 

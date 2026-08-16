@@ -2,9 +2,14 @@ package com.iti.careerpilot.quiz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.PlanAccessMap
+import com.iti.careerpilot.core.access.domain.AccessRepository
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.careerpilot.quiz.domain.repository.QuizRepository
-import com.iti.careerpilot.quiz.presentation.action.QuizAction
-import com.iti.careerpilot.quiz.presentation.event.QuizEvent
+import com.iti.careerpilot.quiz.presentation.action.QuizIntent
+import com.iti.careerpilot.quiz.presentation.event.QuizEffect
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.careerpilot.quiz.presentation.state.RetryType
@@ -13,6 +18,8 @@ import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,64 +32,146 @@ import javax.inject.Inject
 @HiltViewModel
 class QuizViewModel @Inject constructor(
     private val quizRepo: QuizRepository,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
+    private val refreshAccess: RefreshAccessUseCase,
+    private val accessRepository: AccessRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(QuizState())
     val state = _state.asStateFlow()
 
-    private val _events = Channel<QuizEvent>()
+    private val _events = Channel<QuizEffect>()
     val events = _events.receiveAsFlow()
 
-    fun onAction(action: QuizAction) {
-        when (action) {
-            is QuizAction.Init -> {
-                _state.update { it.copy(trackName = action.trackName) }
+    init {
+        viewModelScope.launch {
+            checkFeatureAccess(FeatureKey.Quizzes).collect { access ->
+                _state.update {
+                    it.copy(
+                        quizAccess = access,
+                        gatePlanFeatures = if (access is FeatureAccess.Locked) {
+                            PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() }
+                        } else it.gatePlanFeatures,
+                        gateRequiredPlan = if (access is FeatureAccess.Locked) access.requiredPlan else it.gateRequiredPlan
+                    )
+                }
+                if (access is FeatureAccess.StaleCacheBlocked) {
+                    refreshAccess()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            accessRepository.accessState.collect { accessState ->
+                _state.update {
+                    it.copy(
+                        coinBalance = accessState.coinBalance,
+                        planDisplayName = accessState.plan.displayName(),
+                    )
+                }
+            }
+        }
+    }
+
+    fun onIntent(intent: QuizIntent) {
+        when (intent) {
+            is QuizIntent.Init -> {
+                _state.update { it.copy(trackName = intent.trackName) }
             }
 
-            is QuizAction.SenioritySelected -> {
-                _state.update { it.copy(seniority = action.level) }
-                generateTopics()
+            is QuizIntent.SenioritySelected -> {
+                _state.value.quizAccess.handle(
+                    onGranted = {
+                        _state.update { it.copy(seniority = intent.level) }
+                        generateTopics()
+                    },
+                    onLocked = { locked ->
+                        _state.update {
+                            it.copy(
+                                showGateSheet = true,
+                                gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                                gateRequiredPlan = locked.requiredPlan,
+                            )
+                        }
+                    },
+                    onCoinTopUpRequired = { coinReq ->
+                        _state.update {
+                            it.copy(
+                                showCoinTopUpSheet = true,
+                                coinTopUpRequiredCost = coinReq.coinCost,
+                            )
+                        }
+                    },
+                    onStale = {
+                        viewModelScope.launch { refreshAccess() }
+                    },
+                    onUnknown = {
+                        val cost = _state.value.quizCoinCost
+                        if (_state.value.coinBalance < cost) {
+                            _state.update {
+                                it.copy(
+                                    showCoinTopUpSheet = true,
+                                    coinTopUpRequiredCost = cost,
+                                    )
+                            }
+                        } else {
+                            _state.update { it.copy(seniority = intent.level) }
+                            generateTopics()
+                        }
+                    },
+                )
             }
 
-            is QuizAction.TopicSelected -> {
-                _state.update { it.copy(selectedTopic = action.topic) }
+            is QuizIntent.TopicSelected -> {
+                _state.update { it.copy(selectedTopic = intent.topic) }
                 generateNextLearningPoint()
             }
 
-            is QuizAction.AnswerSelected -> {
+            is QuizIntent.AnswerSelected -> {
                 _state.update {
-                    it.copy(quizAnswers = it.quizAnswers + (action.questionIndex to action.optionIndex))
+                    it.copy(quizAnswers = it.quizAnswers + (intent.questionIndex to intent.optionIndex))
                 }
             }
 
-            QuizAction.SubmitQuiz -> {
+            QuizIntent.SubmitQuiz -> {
                 calculateScore()
                 _state.update { it.copy(currentStep = QuizStep.QuizResult) }
             }
 
-            QuizAction.StartQuiz -> {
+            QuizIntent.StartQuiz -> {
                 generateNextQuiz()
             }
 
-            QuizAction.ContinueLearning -> {
+            QuizIntent.ContinueLearning -> {
                 generateNextLearningPoint()
             }
 
-            QuizAction.BackToTopics -> {
+            QuizIntent.BackToTopics -> {
                 _state.update { it.copy(currentStep = QuizStep.Topics, selectedTopic = null) }
             }
 
-            QuizAction.BackToSeniority -> {
+            QuizIntent.BackToSeniority -> {
                 _state.update { it.copy(currentStep = QuizStep.SelectSeniority, topics = emptyList()) }
             }
 
-            QuizAction.Retry -> {
+            QuizIntent.Retry -> {
                 when (_state.value.retryType) {
                     RetryType.GENERATE_TOPICS -> generateTopics()
                     RetryType.GENERATE_LEARNING_POINT -> generateNextLearningPoint()
                     RetryType.GENERATE_QUIZ -> generateNextQuiz()
                     null -> {}
                 }
+            }
+
+            QuizIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            QuizIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            QuizIntent.UpgradeFromGate -> {
+                _state.update { it.copy(showGateSheet = false) }
+                viewModelScope.launch { _events.send(QuizEffect.NavigateToPaywall(false)) }
+            }
+            QuizIntent.BuyCoinsClicked -> {
+                _state.update { it.copy(showCoinTopUpSheet = false) }
+                viewModelScope.launch { _events.send(QuizEffect.NavigateToPaywall(true)) }
             }
         }
     }

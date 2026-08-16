@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +22,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.settings.R
-import com.iti.careerpilot.settings.presentation.action.SettingsAction
+import com.iti.careerpilot.settings.presentation.action.SettingsIntent
+import com.iti.careerpilot.settings.presentation.componnents.AccountPlanSettingsCard
 import com.iti.careerpilot.settings.presentation.componnents.LanguageDialog
 import com.iti.careerpilot.settings.presentation.componnents.OpenDialogSettingsCard
 import com.iti.careerpilot.settings.presentation.componnents.ThemeDialog
+import com.iti.careerpilot.settings.presentation.event.SettingsEffect
 import com.iti.careerpilot.settings.presentation.state.SettingsState
 import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.careerpilot.settings.presentation.viewmodel.SettingsViewModel
@@ -33,14 +36,25 @@ import com.iti.careerpilot.settings.presentation.viewmodel.getTitleId
 @Composable
 fun SettingsRoot(
     onBack: () -> Unit,
+    openPaywall: (showGetCoins: Boolean, showMySubscription: Boolean) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is SettingsEffect.NavigateToPaywall -> {
+                    openPaywall(event.showGetCoins, event.showMySubscription)
+                }
+            }
+        }
+    }
+
     SettingsScreen(
         onBack = onBack,
         state = state,
-        onAction = viewModel::onAction
+        onIntent = viewModel::onIntent
     )
 }
 
@@ -48,7 +62,7 @@ fun SettingsRoot(
 fun SettingsScreen(
     onBack: () -> Unit,
     state: SettingsState,
-    onAction: (SettingsAction) -> Unit,
+    onIntent: (SettingsIntent) -> Unit,
 ) {
     val userSettings = LocalSettingsUser.current
     Scaffold(
@@ -82,8 +96,17 @@ fun SettingsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
+                AccountPlanSettingsCard(
+                    planDisplayName = state.planDisplayName,
+                    isMaxPlan = state.isMaxPlan,
+                    coinBalance = state.coinBalance,
+                    onManageSubscriptionClick = { onIntent(SettingsIntent.ManageSubscriptionClicked) },
+                    onCoinsClick = { onIntent(SettingsIntent.CoinsClicked) },
+                )
+            }
+            item {
                 OpenDialogSettingsCard(
-                    onAction = { onAction(SettingsAction.LanguageDialogToggle(true)) },
+                    onAction = { onIntent(SettingsIntent.LanguageDialogToggle(true)) },
                     iconId = R.drawable.ic_language,
                     titleId = R.string.language,
                     valueId = userSettings.language.getTitleId(),
@@ -91,7 +114,7 @@ fun SettingsScreen(
             }
             item {
                 OpenDialogSettingsCard(
-                    onAction = { onAction(SettingsAction.ThemeDialogToggle(true)) },
+                    onAction = { onIntent(SettingsIntent.ThemeDialogToggle(true)) },
                     iconId = R.drawable.ic_theme,
                     titleId = R.string.theme,
                     valueId = userSettings.theme.getTitleId(),
@@ -102,14 +125,14 @@ fun SettingsScreen(
 
     if (state.showLanguageDialog) {
         LanguageDialog(
-            onDismissRequest = { onAction(SettingsAction.LanguageDialogToggle(false)) },
+            onDismissRequest = { onIntent(SettingsIntent.LanguageDialogToggle(false)) },
             initial = userSettings.language
         )
     }
     if (state.showThemeDialog) {
         ThemeDialog(
-            onDismissRequest = { onAction(SettingsAction.ThemeDialogToggle(false)) },
-            setTheme = { onAction(SettingsAction.UpdateTheme(it)) },
+            onDismissRequest = { onIntent(SettingsIntent.ThemeDialogToggle(false)) },
+            setTheme = { onIntent(SettingsIntent.UpdateTheme(it)) },
             selectedTheme = userSettings.theme
         )
     }

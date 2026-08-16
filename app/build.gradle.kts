@@ -54,6 +54,8 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:access"))
+    implementation(project(":core:model"))
     implementation(project(":feature:payment"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:login"))

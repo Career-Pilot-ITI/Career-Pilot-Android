@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.CvOptimizationSection
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvIntent
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
@@ -27,7 +27,7 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 internal fun OptimizedCvContent(
     stateProvider: UiStateProvider<OptimizedCvUiState>,
-    onAction: (OptimizedCvAction) -> Unit,
+    onIntent: (OptimizedCvIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val content by rememberUiStateValue(stateProvider) {
@@ -53,7 +53,7 @@ internal fun OptimizedCvContent(
             item {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_retry),
-                    onClick = { onAction(OptimizedCvAction.Retry) },
+                    onClick = { onIntent(OptimizedCvIntent.Retry) },
                 )
             }
         }

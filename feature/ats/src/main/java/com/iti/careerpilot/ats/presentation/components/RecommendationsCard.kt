@@ -15,16 +15,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun RecommendationsCard(
     values: ImmutableList<String>,
     modifier: Modifier = Modifier,
+    coinCost: Int? = null,
 ) {
     CareerPilotCard(modifier = modifier.fillMaxWidth()) {
         Column {
+            if (coinCost != null && coinCost > 0) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.ats_recommendations),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    FeaturePricingBadge(coinCost = coinCost, compact = true)
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
             values.forEachIndexed { index, value ->
                 Row(
                     modifier = Modifier

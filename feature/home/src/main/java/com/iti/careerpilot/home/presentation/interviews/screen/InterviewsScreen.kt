@@ -31,8 +31,8 @@ import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.presentation.components.CareerPilotTopBar
-import com.iti.careerpilot.home.presentation.interviews.InterviewsAction
-import com.iti.careerpilot.home.presentation.interviews.InterviewsEvent
+import com.iti.careerpilot.home.presentation.interviews.InterviewsEffect
+import com.iti.careerpilot.home.presentation.interviews.InterviewsIntent
 import com.iti.careerpilot.home.presentation.interviews.InterviewsState
 import com.iti.careerpilot.home.presentation.interviews.InterviewsViewModel
 import com.iti.careerpilot.home.presentation.interviews.screen.components.SearchField
@@ -48,25 +48,25 @@ fun InterviewsRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
-        viewModel.onAction(InterviewsAction.Initial)
+        viewModel.onIntent(InterviewsIntent.Initial)
     }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is InterviewsEvent.NavigateToReadyToPractice ->
+            is InterviewsEffect.NavigateToReadyToPractice ->
                 openReadyToPractice(event.trackId, event.trackName)
-            is InterviewsEvent.NavigateToQuiz ->
+            is InterviewsEffect.NavigateToQuiz ->
                 openQuiz(event.trackId, event.trackName)
         }
     }
 
-    InterviewsScreen(state = state, onAction = viewModel::onAction, onBack = onBack)
+    InterviewsScreen(state = state, onIntent = viewModel::onIntent, onBack = onBack)
 }
 
 @Composable
 fun InterviewsScreen(
     state: InterviewsState,
-    onAction: (InterviewsAction) -> Unit,
+    onIntent: (InterviewsIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,7 +98,7 @@ fun InterviewsScreen(
             item {
                 SearchField(
                     query = state.query,
-                    onQueryChange = { onAction(InterviewsAction.QueryChanged(it)) },
+                    onQueryChange = { onIntent(InterviewsIntent.QueryChanged(it)) },
                 )
             }
 
@@ -119,7 +119,7 @@ fun InterviewsScreen(
                         text = stringResource(R.string.interviews_retry),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable { onAction(InterviewsAction.Retry) },
+                        modifier = Modifier.clickable { onIntent(InterviewsIntent.Retry) },
                     )
                 }
 
@@ -149,10 +149,10 @@ fun InterviewsScreen(
                             TrackRow(
                                 track = track,
                                 onPracticeClick = {
-                                    onAction(InterviewsAction.PracticeTrackClicked(track.id, track.name))
+                                    onIntent(InterviewsIntent.PracticeTrackClicked(track.id, track.name))
                                 },
                                 onLessonClick = {
-                                    onAction(InterviewsAction.LessonTrackClicked(track.id, track.name))
+                                    onIntent(InterviewsIntent.LessonTrackClicked(track.id, track.name))
                                 }
                             )
                         }

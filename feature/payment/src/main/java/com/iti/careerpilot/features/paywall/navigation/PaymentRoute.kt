@@ -17,4 +17,6 @@ sealed interface PaymentRoute : NavKey {
     data object PaymentSuccessful : PaymentRoute
     @Serializable
     data object PaymentFailed : PaymentRoute
+    @Serializable
+    data object MySubscription : PaymentRoute
 }

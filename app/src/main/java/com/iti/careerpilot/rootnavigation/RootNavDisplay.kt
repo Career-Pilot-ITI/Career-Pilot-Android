@@ -312,9 +312,12 @@ fun RootNavDisplay(
                         openEditProfile = { section ->
                             rootBackStack.navigateSingleTop(Route.EditProfile(section = section))
                         },
-                        openPaywall = { showGetCoins ->
+                        openPaywall = { showGetCoins, showMySubscription ->
                             rootBackStack.navigateSingleTop(
-                                Route.Paywall(showGetCoins = showGetCoins)
+                                Route.Paywall(
+                                    showGetCoins = showGetCoins,
+                                    showMySubscription = showMySubscription,
+                                )
                             )
                         },
                         openChallengeDetails = { challengeId ->
@@ -345,6 +348,9 @@ fun RootNavDisplay(
                             rootBackStack.navigateSingleTop(
                                 Route.EditProfile(section = ProfileEditSection.CAREER),
                             )
+                        },
+                        onPaywallRequested = {
+                            rootBackStack.navigateSingleTop(Route.Paywall())
                         },
                     )
                 }
@@ -468,6 +474,14 @@ fun RootNavDisplay(
                     SettingsRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Settings>()
+                        },
+                        openPaywall = { showGetCoins, showMySubscription ->
+                            rootBackStack.navigateSingleTop(
+                                Route.Paywall(
+                                    showGetCoins = showGetCoins,
+                                    showMySubscription = showMySubscription,
+                                )
+                            )
                         }
                     )
                 }
@@ -478,6 +492,9 @@ fun RootNavDisplay(
                         trackName = it.trackName,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Quiz>()
+                        },
+                        openPaywall = { showGetCoins ->
+                            rootBackStack.navigateSingleTop(Route.Paywall(showGetCoins = showGetCoins))
                         }
                     )
                 }
@@ -491,8 +508,13 @@ fun RootNavDisplay(
                     )
                 }
                 entry<Route.Paywall> {
+                    val startRoute = when {
+                        it.showMySubscription -> PaymentRoute.MySubscription
+                        it.showGetCoins -> PaymentRoute.GetCoins
+                        else -> PaymentRoute.ChoosePlan
+                    }
                     PaymentNavDisplay(
-                        startRoute = if (it.showGetCoins) PaymentRoute.GetCoins else PaymentRoute.ChoosePlan,
+                        startRoute = startRoute,
                         onNavigateBack = {
                             rootBackStack.popIfCurrentIs<Route.Paywall>()
                         }

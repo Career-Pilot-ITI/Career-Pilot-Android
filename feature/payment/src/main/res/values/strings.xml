@@ -9,7 +9,7 @@
     <string name="paywall_payment_history_empty">Payment history will appear after your first purchase.</string>
     <string name="paywall_plan_free">Free</string>
     <string name="paywall_plan_plus">Plus</string>
-    <string name="paywall_plan_pro">Pro</string>
+    <string name="paywall_plan_pro">Max</string>
     <string name="paywall_plan_max">Max</string>
     <string name="paywall_coin_pack">%1$d coins</string>
     <string name="paywall_price">EGP %1$d</string>
@@ -37,17 +37,17 @@
     <string name="paywall_current_plan_button">Current Plan</string>
     <string name="paywall_test_coins">Test Coins</string>
     <string name="paywall_price_mo">EGP %1$d/mo</string>
-    <string name="paywall_feature_5_free_sessions">5 free sessions / month</string>
-    <string name="paywall_feature_basic_radar">Basic radar chart</string>
-    <string name="paywall_feature_limited_ai">Limited AI feedback</string>
-    <string name="paywall_feature_12_sessions">12 sessions / month</string>
-    <string name="paywall_feature_detailed_radar">Detailed radar chart</string>
-    <string name="paywall_feature_priority_ai">Priority AI feedback</string>
-    <string name="paywall_feature_coaching_tips_library">Coaching tips library</string>
-    <string name="paywall_feature_unlimited_sessions">Unlimited sessions</string>
-    <string name="paywall_feature_advanced_radar">Advanced radar chart</string>
-    <string name="paywall_feature_instant_ai">Instant AI feedback</string>
-    <string name="paywall_feature_1on1_mentorship">1-on-1 Mentorship</string>
+    <string name="paywall_feature_voice_mock_interview">AI Voice Mock Interviews (10 coins / session)</string>
+    <string name="paywall_feature_performance_analytics">Performance Analytics &amp; Score Breakdown</string>
+    <string name="paywall_feature_voice_scoring">Voice Scoring &amp; AI Feedback</string>
+    <string name="paywall_feature_everything_in_free">Everything in Free plan</string>
+    <string name="paywall_feature_ats_scan">ATS Resume-to-Job Match Scan</string>
+    <string name="paywall_feature_resume_optimizer">AI Resume Section Optimizer &amp; Cover Letter</string>
+    <string name="paywall_feature_80_monthly_coins">80 Monthly Coins Included</string>
+    <string name="paywall_feature_everything_in_plus">Everything in Plus plan</string>
+    <string name="paywall_feature_video_interview">Video Body Language &amp; Posture AI</string>
+    <string name="paywall_feature_technical_quizzes">AI Technical Skill Quizzes &amp; Tests</string>
+    <string name="paywall_feature_160_monthly_coins">160 Monthly Coins Included</string>
     <string name="paywall_checkout_title">Checkout</string>
     <string name="paywall_checkout_subtitle">Review your new plan before proceeding.</string>
     <string name="paywall_upgrading_to">UPGRADING TO</string>
@@ -83,6 +83,10 @@
     <string name="paywall_successful_subtitle">Welcome to Plus. Your account has been upgraded.</string>
     <string name="paywall_successful_subtitle_plan">Welcome to %1$s! Your account has been upgraded successfully.</string>
     <string name="paywall_successful_subtitle_coins">Successfully added %1$d coins to your wallet!</string>
+    <string name="paywall_coins_successful_title">Coins Added Successfully!</string>
+    <string name="paywall_coins_successful_subtitle">+%1$d Coins credited to your wallet. Your new balance is %2$d coins.</string>
+    <string name="paywall_coins_successful_info">Your coins are ready to use! You can now start AI Mock Interviews, run ATS Resume Scans, and optimize your CV.</string>
+    <string name="paywall_coins_successful_wallet_balance">Wallet Balance</string>
     <string name="paywall_coins_benefit_added">Added %1$d coins to your wallet balance</string>
     <string name="paywall_coins_benefit_unlock">Use coins for AI interview feedback &amp; extra practice</string>
     <string name="paywall_coins_benefit_no_expiry">Coins never expire and stay in your account</string>
@@ -106,4 +110,25 @@
     <string name="paywall_plan_name_suffix">%1$s Plan</string>
     <string name="paywall_current_plan_badge">Current Plan</string>
     <string name="paywall_back">Back</string>
+
+    <!-- My Subscription Screen -->
+    <string name="paywall_my_subscription_title">My Subscription</string>
+    <string name="paywall_my_subscription_current_plan">Current Plan</string>
+    <string name="paywall_status_active">Active</string>
+    <string name="paywall_status_cancelled">Cancelled</string>
+    <string name="paywall_status_inactive">Inactive</string>
+    <string name="paywall_started_on">Started on %1$s</string>
+    <string name="paywall_renews_on">Renews on %1$s</string>
+    <string name="paywall_expires_on">Expires on %1$s</string>
+    <string name="paywall_pending_tier">Switching to %1$s at end of period</string>
+    <string name="paywall_included_features_title">Included in your plan</string>
+    <string name="paywall_change_plan_cta">Change Plan</string>
+    <string name="paywall_top_up_coins_cta">Top up Coins</string>
+    <string name="paywall_cancel_subscription_cta">Cancel Subscription</string>
+    <string name="paywall_cancel_dialog_title">Cancel Subscription?</string>
+    <string name="paywall_cancel_dialog_message">Are you sure you want to cancel your subscription? You will still retain access to your plan benefits until the end of the current billing cycle.</string>
+    <string name="paywall_cancel_dialog_confirm">Cancel Subscription</string>
+    <string name="paywall_cancel_dialog_dismiss">Keep Subscription</string>
+    <string name="paywall_subscription_load_error">Failed to load subscription details</string>
+    <string name="paywall_subscription_retry">Retry</string>
 </resources>

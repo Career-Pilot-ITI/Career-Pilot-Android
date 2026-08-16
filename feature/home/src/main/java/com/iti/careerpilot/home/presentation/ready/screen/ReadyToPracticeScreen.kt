@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,10 +49,13 @@ import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.home.presentation.components.CareerPilotTopBar
-import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeAction
-import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeEvent
+import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeEffect
+import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeIntent
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeState
 import com.iti.careerpilot.home.presentation.ready.ReadyToPracticeViewModel
 import com.iti.careerpilot.home.presentation.ready.screen.components.CameraRow
@@ -59,6 +63,7 @@ import com.iti.careerpilot.home.presentation.ready.screen.components.LandmarkFea
 import com.iti.careerpilot.home.presentation.ready.screen.components.MicrophoneRow
 import com.iti.careerpilot.home.presentation.ready.screen.components.TipsCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadyToPracticeRoot(
     trackId: Long,
@@ -73,7 +78,7 @@ fun ReadyToPracticeRoot(
     val context = LocalContext.current
 
     LaunchedEffect(trackId, trackName, workspaceId) {
-        viewModel.onAction(ReadyToPracticeAction.Initial(trackId, trackName, workspaceId))
+        viewModel.onIntent(ReadyToPracticeIntent.Initial(trackId, trackName, workspaceId))
     }
 
     LaunchedEffect(Unit) {
@@ -88,24 +93,24 @@ fun ReadyToPracticeRoot(
         ) == PackageManager.PERMISSION_GRANTED
 
         if (granted) {
-            viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+            viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
         }
         if (cameraGranted) {
-            viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
+            viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true))
         }
     }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is ReadyToPracticeEvent.NavigateToPractice -> openPractice(
+            is ReadyToPracticeEffect.NavigateToPractice -> openPractice(
                 event.trackId,
                 event.workspaceId,
                 event.isVideo,
                 event.enablePosture,
                 event.enableHands,
             )
-            ReadyToPracticeEvent.NavigateToPaywall -> openPaywall()
-            ReadyToPracticeEvent.NavigateBack -> onBack()
+            ReadyToPracticeEffect.NavigateToPaywall -> openPaywall()
+            ReadyToPracticeEffect.NavigateBack -> onBack()
         }
     }
 
@@ -116,10 +121,10 @@ fun ReadyToPracticeRoot(
             icon = Icons.Filled.Mic,
             cancel = stringResource(R.string.ready_permission_cancel),
             allow = stringResource(R.string.ready_permission_allow),
-            onDismiss = { viewModel.onAction(ReadyToPracticeAction.PermissionDialogDismissed) },
+            onDismiss = { viewModel.onIntent(ReadyToPracticeIntent.PermissionDialogDismissed) },
             onGranted = {
-                viewModel.onAction(
-                    ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true)
+                viewModel.onIntent(
+                    ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true)
                 )
             },
             neededPermissions = arrayOf(Manifest.permission.RECORD_AUDIO),
@@ -133,23 +138,42 @@ fun ReadyToPracticeRoot(
             icon = Icons.Filled.Videocam,
             cancel = stringResource(R.string.ready_permission_cancel),
             allow = stringResource(R.string.ready_permission_allow),
-            onDismiss = { viewModel.onAction(ReadyToPracticeAction.CameraPermissionDialogDismissed) },
+            onDismiss = { viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionDialogDismissed) },
             onGranted = {
-                viewModel.onAction(
-                    ReadyToPracticeAction.CameraPermissionChanged(isGranted = true)
+                viewModel.onIntent(
+                    ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true)
                 )
             },
             neededPermissions = arrayOf(Manifest.permission.CAMERA),
         )
     }
 
-    ReadyToPracticeScreen(state = state, onAction = viewModel::onAction)
+    if (state.showVideoGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = stringResource(R.string.video_session),
+            requiredPlan = state.videoGateRequiredPlan,
+            planFeatures = state.videoGatePlanFeatures,
+            onUpgradeClick = { viewModel.onIntent(ReadyToPracticeIntent.UpgradeFromVideoGate) },
+            onDismiss = { viewModel.onIntent(ReadyToPracticeIntent.DismissVideoGateSheet) },
+        )
+    }
+
+    if (state.showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = state.coinTopUpRequiredCost,
+            currentBalance = state.coinBalance,
+            onBuyCoins = { viewModel.onIntent(ReadyToPracticeIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(ReadyToPracticeIntent.DismissCoinTopUpSheet) },
+        )
+    }
+
+    ReadyToPracticeScreen(state = state, onIntent = viewModel::onIntent)
 }
 
 @Composable
 fun ReadyToPracticeScreen(
     state: ReadyToPracticeState,
-    onAction: (ReadyToPracticeAction) -> Unit,
+    onIntent: (ReadyToPracticeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -157,7 +181,7 @@ fun ReadyToPracticeScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CareerPilotTopBar(
-                onBack = { onAction(ReadyToPracticeAction.CancelClicked) },
+                onBack = { onIntent(ReadyToPracticeIntent.CancelClicked) },
             )
         },
     ) { innerPadding ->
@@ -214,7 +238,7 @@ fun ReadyToPracticeScreen(
                             color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(16.dp)
                         )
-                        .clickable { onAction(ReadyToPracticeAction.SelectAudioMode) }
+                        .clickable { onIntent(ReadyToPracticeIntent.SelectAudioMode) }
                         .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceL),
                     contentAlignment = Alignment.Center
                 ) {
@@ -234,6 +258,10 @@ fun ReadyToPracticeScreen(
                             fontWeight = if (isAudioSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isAudioSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                         )
+                        FeaturePricingBadge(
+                            coinCost = state.voiceCoinCost,
+                            compact = true,
+                        )
                     }
                 }
 
@@ -252,7 +280,7 @@ fun ReadyToPracticeScreen(
                             color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(16.dp)
                         )
-                        .clickable { onAction(ReadyToPracticeAction.SelectVideoMode) }
+                        .clickable { onIntent(ReadyToPracticeIntent.SelectVideoMode) }
                         .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceL),
                     contentAlignment = Alignment.Center
                 ) {
@@ -267,7 +295,7 @@ fun ReadyToPracticeScreen(
                                 tint = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                                 modifier = Modifier.size(26.dp)
                             )
-                            if (!state.isPaidPlan) {
+                            if (!state.isMaxPlan) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Lock,
@@ -284,7 +312,7 @@ fun ReadyToPracticeScreen(
                                 fontWeight = if (isVideoSelected) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isVideoSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                             )
-                            if (!state.isPaidPlan) {
+                            if (!state.isMaxPlan) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = stringResource(R.string.pro_badge),
@@ -298,6 +326,10 @@ fun ReadyToPracticeScreen(
                                 )
                             }
                         }
+                        FeaturePricingBadge(
+                            coinCost = state.videoCoinCost,
+                            compact = true,
+                        )
                     }
                 }
             }
@@ -306,8 +338,8 @@ fun ReadyToPracticeScreen(
                 LandmarkFeatureChips(
                     enablePosture = state.enablePostureTracking,
                     enableHands = state.enableHandTracking,
-                    onPostureToggle = { onAction(ReadyToPracticeAction.TogglePostureTracking(it)) },
-                    onHandsToggle = { onAction(ReadyToPracticeAction.ToggleHandTracking(it)) },
+                    onPostureToggle = { onIntent(ReadyToPracticeIntent.TogglePostureTracking(it)) },
+                    onHandsToggle = { onIntent(ReadyToPracticeIntent.ToggleHandTracking(it)) },
                 )
             }
 
@@ -315,21 +347,29 @@ fun ReadyToPracticeScreen(
 
             MicrophoneRow(
                 isGranted = state.isMicrophoneGranted,
-                onClick = { onAction(ReadyToPracticeAction.MicrophoneRowClicked) },
+                onClick = { onIntent(ReadyToPracticeIntent.MicrophoneRowClicked) },
             )
 
             if (state.isVideoMode) {
                 CameraRow(
                     isGranted = state.isCameraGranted,
-                    onClick = { onAction(ReadyToPracticeAction.CameraRowClicked) },
+                    onClick = { onIntent(ReadyToPracticeIntent.CameraRowClicked) },
                 )
             }
+
+            FeaturePricingBadge(
+                access = if (state.isVideoMode) state.videoInterviewAccess else state.audioInterviewAccess,
+                coinBalance = state.coinBalance,
+                planDisplayName = state.planDisplayName,
+                coinCost = if (state.isVideoMode) state.videoCoinCost else state.voiceCoinCost,
+                onUpgradeClick = { onIntent(ReadyToPracticeIntent.UpgradeFromVideoGate) },
+            )
 
             Spacer(modifier = Modifier.height(Dimens.SpaceM))
 
             CareerPilotButton(
                 text = stringResource(R.string.ready_begin),
-                onClick = { onAction(ReadyToPracticeAction.BeginInterviewClicked) },
+                onClick = { onIntent(ReadyToPracticeIntent.BeginInterviewClicked) },
                 enabled = state.canBegin,
             )
         }

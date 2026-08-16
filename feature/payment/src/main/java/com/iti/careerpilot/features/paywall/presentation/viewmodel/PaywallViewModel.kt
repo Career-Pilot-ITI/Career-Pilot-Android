@@ -23,6 +23,7 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.CheckoutSession
+import com.iti.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
@@ -144,9 +145,9 @@ class PaywallViewModel @Inject constructor(
                 is CareerPilotResult.Success -> {
                     val prices = result.data
                     val defaultPacks = listOf(
-                        CoinPack(id = "coins_100", coins = 100, priceEgp = 50),
-                        CoinPack(id = "coins_500", coins = 500, priceEgp = 200, badge = CoinPackBadge.MOST_POPULAR),
-                        CoinPack(id = "coins_1000", coins = 1000, priceEgp = 350, badge = CoinPackBadge.BEST_VALUE)
+                        CoinPack(id = "coins_50", coins = 50, priceEgp = 149),
+                        CoinPack(id = "coins_120", coins = 120, priceEgp = 299, badge = CoinPackBadge.MOST_POPULAR),
+                        CoinPack(id = "coins_300", coins = 300, priceEgp = 599, badge = CoinPackBadge.BEST_VALUE)
                     )
                     val packsList = if (prices.isNotEmpty()) {
                         prices.map { (coins, price) ->
@@ -155,8 +156,8 @@ class PaywallViewModel @Inject constructor(
                                 coins = coins,
                                 priceEgp = price.toInt(),
                                 badge = when (coins) {
-                                    500 -> CoinPackBadge.MOST_POPULAR
-                                    1000 -> CoinPackBadge.BEST_VALUE
+                                    120 -> CoinPackBadge.MOST_POPULAR
+                                    300 -> CoinPackBadge.BEST_VALUE
                                     else -> null
                                 }
                             )
@@ -166,7 +167,7 @@ class PaywallViewModel @Inject constructor(
                     }
                     val immutablePacks = packsList.toImmutableList()
                     mutableState.update { currentState ->
-                        val selectedId = currentState.selectedCoinPackId ?: "coins_500"
+                        val selectedId = currentState.selectedCoinPackId ?: "coins_120"
                         currentState.copy(
                             isLoadingCoinPacks = false,
                             coinPacks = immutablePacks,
@@ -218,7 +219,7 @@ class PaywallViewModel @Inject constructor(
             PaywallIntent.CheckoutRequested,
             PaywallIntent.ConfirmUpgradeRequested -> {
                 val selectedPlan = mutableState.value.selectedPlan
-                if (selectedPlan != null && selectedPlan.id.equals("free", ignoreCase = true)) {
+                if (selectedPlan != null && selectedPlan.plan == Plan.FREE) {
                     handleDowngradeRequested()
                 } else {
                     handleUpgradeRequested()
@@ -279,8 +280,8 @@ class PaywallViewModel @Inject constructor(
 
     private fun handleUpgradeRequested() {
         val selectedPlan = mutableState.value.selectedPlan
-        if (selectedPlan == null || selectedPlan.id.equals("free", ignoreCase = true) || (selectedPlan.priceEgp ?: 0) <= 0) {
-            if (selectedPlan?.id?.equals("free", ignoreCase = true) == true) {
+        if (selectedPlan == null || selectedPlan.plan == Plan.FREE || (selectedPlan.priceEgp ?: 0) <= 0) {
+            if (selectedPlan?.plan == Plan.FREE) {
                 handleDowngradeRequested()
             }
             return
@@ -326,7 +327,12 @@ class PaywallViewModel @Inject constructor(
         val packId = mutableState.value.selectedCoinPackId
         val pack = mutableState.value.coinPacks.find { it.id == packId }
         if (pack != null) {
-            mutableState.update { it.copy(checkoutItemType = CheckoutItemType.COIN_PACK) }
+            mutableState.update {
+                it.copy(
+                    checkoutItemType = CheckoutItemType.COIN_PACK,
+                    purchasedCoinCount = pack.coins
+                )
+            }
             executePaymentCheckout { topUpWalletUseCase(pack.coins, "EGP", "card") }
         }
     }
@@ -361,7 +367,16 @@ class PaywallViewModel @Inject constructor(
                 )
 
                 when (result) {
-                    PollResult.Success -> _effectChannel.send(PaywallEffect.NavigateToPaymentSuccessful)
+                    PollResult.Success -> {
+                        val latestProfile = userProfileRepo.readUserProfile()
+                        mutableState.update {
+                            it.copy(
+                                coinBalance = latestProfile.account.coinBalance,
+                                currentSubscriptionTier = latestProfile.account.subscriptionTier
+                            )
+                        }
+                        _effectChannel.send(PaywallEffect.NavigateToPaymentSuccessful)
+                    }
                     is PollResult.Failed -> {
                         mutableState.update { it.copy(failureReason = result.reason) }
                         _effectChannel.send(PaywallEffect.NavigateToPaymentFailed(result.reason))

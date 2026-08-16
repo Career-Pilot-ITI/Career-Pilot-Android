@@ -11,15 +11,23 @@ import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetAiJobUseCase
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvIntent
 import com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel.OptimizedCvViewModel
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.testing.FakeAccessRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.FeatureQuota
+import com.iti.core.model.Plan
+import kotlin.time.Clock
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -27,7 +35,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -38,13 +48,16 @@ class OptimizedCvViewModelTest {
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
+    // ----- existing happy-path tests -----
+
     @Test
     fun `completed job exposes section improvements`() = runTest(dispatcher) {
-        val viewModel = OptimizedCvViewModel(
-            getAiJob = GetAiJobUseCase(OptimizationRepository(COMPLETED_JOB)),
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertEquals("Experience", viewModel.state.value.sections.single().name)
@@ -53,15 +66,145 @@ class OptimizedCvViewModelTest {
 
     @Test
     fun `pending job exposes a retryable not-ready message`() = runTest(dispatcher) {
-        val viewModel = OptimizedCvViewModel(
-            getAiJob = GetAiJobUseCase(OptimizationRepository(PENDING_JOB)),
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(PENDING_JOB),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertNotNull(viewModel.state.value.error)
     }
+
+    // ----- gate path tests -----
+
+    @Test
+    fun `access Locked for free tier user shows gate sheet and stops loading`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
+        )
+
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertFalse(viewModel.state.value.isLoading)
+        assertEquals(0, viewModel.state.value.sections.size)
+    }
+
+    @Test
+    fun `access CoinTopUpRequired for plus tier user shows coin top-up sheet and marks hasInsufficientCoins`() = runTest(dispatcher) {
+        // CvAiAnalysis costs 15 coins; give plus user 2 coins (< 15) → CoinTopUpRequired
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 2, features = setOf(FeatureKey.CvAiAnalysis), plan = Plan.PLUS),
+        )
+
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertTrue(viewModel.state.value.hasInsufficientCoins)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
+        assertFalse(viewModel.state.value.isLoading)
+    }
+
+    @Test
+    fun `access StaleCacheBlocked calls refreshAccess and stops loading`() = runTest(dispatcher) {
+        // lastSyncedAt = null → StaleCacheBlocked
+        val accessRepo = FakeAccessRepository(initialState = AccessState.Free)
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = accessRepo,
+        )
+
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+
+        assertEquals(1, accessRepo.refreshCount)
+        assertFalse(viewModel.state.value.isLoading)
+        // No getAiJob call was made
+        assertEquals(0, viewModel.state.value.sections.size)
+    }
+
+    @Test
+    fun `access Granted proceeds to load AI job result`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
+        )
+
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(1, viewModel.state.value.sections.size)
+    }
+
+    @Test
+    fun `DismissCoinTopUpSheet clears coin top-up sheet flag`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 2, features = setOf(FeatureKey.CvAiAnalysis), plan = Plan.PLUS),
+        )
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+
+        viewModel.onIntent(OptimizedCvIntent.DismissCoinTopUpSheet)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+    }
+
+    @Test
+    fun `DismissGateSheet clears gate sheet flag`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            repository = OptimizationRepository(COMPLETED_JOB),
+            accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
+        )
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value.showGateSheet)
+
+        viewModel.onIntent(OptimizedCvIntent.DismissGateSheet)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.showGateSheet)
+    }
+
+    // ----- helpers -----
+
+    private fun createAccessRepository(
+        coins: Int,
+        features: Set<FeatureKey>,
+        plan: Plan = Plan.PLUS,
+        quotas: Map<FeatureKey, FeatureQuota> = emptyMap(),
+    ): FakeAccessRepository {
+        val accessState = AccessState(
+            plan = plan,
+            features = features,
+            quotas = quotas,
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = coins,
+        )
+        return FakeAccessRepository(initialState = accessState)
+    }
+
+    private fun createViewModel(
+        repository: OptimizationRepository,
+        accessRepo: FakeAccessRepository,
+    ) = OptimizedCvViewModel(
+        getAiJob = GetAiJobUseCase(repository),
+        checkFeatureAccess = CheckFeatureAccessUseCase(accessRepo),
+        refreshAccess = RefreshAccessUseCase(accessRepo),
+    )
 }
 
 private class OptimizationRepository(

@@ -25,6 +25,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTypography
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.features.paywall.presentation.view.components.CoinPurchaseSuccessCard
 import com.iti.careerpilot.features.paywall.presentation.view.components.ScreenTitle
 import com.iti.careerpilot.features.paywall.presentation.view.components.SuccessAnimation
 import com.iti.careerpilot.features.paywall.presentation.view.components.SuccessBenefitsCard
@@ -53,9 +54,18 @@ fun PaymentSuccessfulContent(
     onIntent: (PaywallIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val title = when (state.checkoutItemType) {
+        CheckoutItemType.COIN_PACK -> stringResource(R.string.paywall_coins_successful_title)
+        CheckoutItemType.SUBSCRIPTION -> stringResource(R.string.paywall_successful_title)
+    }
+
     val subtitle = when (state.checkoutItemType) {
         CheckoutItemType.COIN_PACK -> {
-            stringResource(R.string.paywall_successful_subtitle_coins, state.successfulCoinCount)
+            stringResource(
+                R.string.paywall_coins_successful_subtitle,
+                state.successfulCoinCount,
+                state.coinBalance
+            )
         }
         CheckoutItemType.SUBSCRIPTION -> {
             val planName = stringResource(id = state.successfulPlanNameRes)
@@ -89,7 +99,7 @@ fun PaymentSuccessfulContent(
         Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
 
         ScreenTitle(
-            title = stringResource(R.string.paywall_successful_title),
+            title = title,
             modifier = Modifier.padding(bottom = Dimens.SpaceS),
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -103,7 +113,14 @@ fun PaymentSuccessfulContent(
 
         Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
 
-        SuccessBenefitsCard(benefits = benefits)
+        if (state.checkoutItemType == CheckoutItemType.COIN_PACK) {
+            CoinPurchaseSuccessCard(
+                coinCount = state.successfulCoinCount,
+                totalBalance = state.coinBalance
+            )
+        } else {
+            SuccessBenefitsCard(benefits = benefits)
+        }
 
         Spacer(modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.height(Dimens.SpaceXXL))
@@ -124,6 +141,8 @@ private fun PaymentSuccessfulScreenPreview() {
     CareerPilotTheme {
         PaymentSuccessfulContent(
             state = PaywallState(
+                coinBalance = 700,
+                purchasedCoinCount = 500,
                 checkoutItemType = CheckoutItemType.COIN_PACK
             ),
             onIntent = {}

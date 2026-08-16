@@ -36,7 +36,7 @@ import com.iti.common.model.ProfileEditSection
 fun NestedNavDisplay(
     currentRootRoute: NavKey?,
     navigateBack: () -> Unit,
-    openPaywall: (showGetCoins: Boolean) -> Unit,
+    openPaywall: (showGetCoins: Boolean, showMySubscription: Boolean) -> Unit,
     logout: () -> Unit,
     openPracticeSession: (Long, Long?) -> Unit,
     openSessionDetails: (Long) -> Unit,
@@ -114,8 +114,8 @@ fun NestedNavDisplay(
                             openPracticeSession(trackId, sessionId)
                         },
                         openInterviews = openInterviews,
-                        openPlansPaywall = { openPaywall(false) },
-                        openCoinsPaywall = { openPaywall(true) },
+                        openPlansPaywall = { showMySubscription -> openPaywall(false, showMySubscription) },
+                        openCoinsPaywall = { openPaywall(true, false) },
                         openReports = {
                             nestedBackStack.apply {
                                 clear()
@@ -142,7 +142,8 @@ fun NestedNavDisplay(
                     ProfileRoot(
                         openSettings = openSettings,
                         logout = logout,
-                        openEditProfile = openEditProfile
+                        openEditProfile = openEditProfile,
+                        openSubscription = { openPaywall(false, true) }
                     )
                 }
             }

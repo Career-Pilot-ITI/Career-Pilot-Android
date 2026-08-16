@@ -171,7 +171,7 @@ fun GetCoinsContent(
 private fun GetCoinsScreenPreview() {
     CareerPilotTheme {
         GetCoinsContent(
-            state = PaywallState(selectedCoinPackId = "coins_500"),
+            state = PaywallState(selectedCoinPackId = "coins_120"),
             onIntent = {},
         )
     }

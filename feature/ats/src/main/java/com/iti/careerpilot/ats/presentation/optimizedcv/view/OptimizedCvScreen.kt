@@ -18,7 +18,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvIntent
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.components.OptimizedCvContent
 import com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel.OptimizedCvViewModel
@@ -36,12 +36,12 @@ fun OptimizedCvRoot(
     val stateProvider = rememberUiStateProvider(state)
 
     LaunchedEffect(jobId) {
-        viewModel.onAction(OptimizedCvAction.Initial(jobId))
+        viewModel.onIntent(OptimizedCvIntent.Initial(jobId))
     }
 
     OptimizedCvScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         onBack = onBack,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
@@ -51,7 +51,7 @@ fun OptimizedCvRoot(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun OptimizedCvScreen(
     stateProvider: UiStateProvider<OptimizedCvUiState>,
-    onAction: (OptimizedCvAction) -> Unit,
+    onIntent: (OptimizedCvIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -62,7 +62,7 @@ fun OptimizedCvScreen(
         )
         OptimizedCvBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -72,7 +72,7 @@ fun OptimizedCvScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun OptimizedCvBody(
     stateProvider: UiStateProvider<OptimizedCvUiState>,
-    onAction: (OptimizedCvAction) -> Unit,
+    onIntent: (OptimizedCvIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isLoading by rememberUiStateValue(stateProvider) { it.isLoading }
@@ -86,7 +86,7 @@ private fun OptimizedCvBody(
     } else {
         OptimizedCvContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = modifier,
         )
     }

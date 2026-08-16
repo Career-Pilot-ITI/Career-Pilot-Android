@@ -8,19 +8,27 @@ import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
+import com.iti.careerpilot.core.access.PlanAccessMap
+import com.iti.careerpilot.core.access.domain.AccessRepository
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
 import com.iti.common.util.UIText
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +40,9 @@ class ScoringViewModel @Inject constructor(
     private val observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val optimizeCv: OptimizeCvUseCase,
     private val savedStateHandle: SavedStateHandle,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase,
+    private val refreshAccess: RefreshAccessUseCase,
+    private val accessRepository: AccessRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScoringUiState())
     val state = _state.asStateFlow()
@@ -43,6 +54,51 @@ class ScoringViewModel @Inject constructor(
     private var activeOperation: Job? = null
     private var profileObservationJob: Job? = null
     private var optimizationOperation: Job? = null
+    private var accessObservationJob: Job? = null
+
+    init {
+        observeAccess()
+    }
+
+    private fun observeAccess() {
+        if (accessObservationJob != null) return
+        accessObservationJob = viewModelScope.launch {
+            launch {
+                checkFeatureAccess(FeatureKey.AtsFeatures).collect { access ->
+                    _state.update {
+                        it.copy(
+                            atsScoreAccess = access,
+                            gatePlanFeatures = if (access is FeatureAccess.Locked) {
+                                PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() }
+                            } else it.gatePlanFeatures,
+                            gateRequiredPlan = if (access is FeatureAccess.Locked) access.requiredPlan else it.gateRequiredPlan,
+                        )
+                    }
+                    if (access is FeatureAccess.StaleCacheBlocked) {
+                        refreshAccess()
+                    }
+                }
+            }
+            launch {
+                checkFeatureAccess(FeatureKey.CvAiAnalysis).collect { access ->
+                    _state.update { it.copy(cvOptimizeAccess = access) }
+                    if (access is FeatureAccess.StaleCacheBlocked) {
+                        refreshAccess()
+                    }
+                }
+            }
+            launch {
+                accessRepository.accessState.collect { accessState ->
+                    _state.update {
+                        it.copy(
+                            coinBalance = accessState.coinBalance,
+                            planDisplayName = accessState.plan.displayName(),
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     private fun observeProfile() {
         if (profileObservationJob != null) return
@@ -62,8 +118,47 @@ class ScoringViewModel @Inject constructor(
         if (this.workspaceId == workspaceId && _state.value.score != null) return
         this.workspaceId = workspaceId
         if (activeOperation?.isActive == true) return
+
         savedStateHandle[attemptKey(workspaceId)] = true
         activeOperation = viewModelScope.launch {
+            val access = checkFeatureAccess(FeatureKey.AtsFeatures).first()
+            var handled = false
+            access.handle(
+                onGranted = { /* proceed — handled below */ },
+                onLocked = { locked ->
+                    handled = true
+                    savedStateHandle[attemptKey(workspaceId)] = false
+                    _state.update {
+                        it.copy(
+                            showGateSheet = true,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
+                            gateFeatureName = FeatureKey.AtsFeatures.displayName(),
+                            isLoading = false,
+                        )
+                    }
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    handled = true
+                    savedStateHandle[attemptKey(workspaceId)] = false
+                    _state.update {
+                        it.copy(
+                            showCoinTopUpSheet = true,
+                            coinTopUpRequiredCost = coinReq.coinCost,
+                            hasInsufficientCoins = true,
+                            isLoading = false,
+                        )
+                    }
+                },
+                onStale = {
+                    handled = true
+                    savedStateHandle[attemptKey(workspaceId)] = false
+                    refreshAccess()
+                    _state.update { it.copy(isLoading = false) }
+                },
+            )
+            if (handled) return@launch
+
             _state.update {
                 it.copy(
                     isLoading = true,
@@ -108,22 +203,22 @@ class ScoringViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: ScoringAction) {
-        when (action) {
-            is ScoringAction.Initial -> {
+    fun onIntent(intent: ScoringIntent) {
+        when (intent) {
+            is ScoringIntent.Initial -> {
                 observeProfile()
-                loadScore(action.workspaceId)
+                loadScore(intent.workspaceId)
             }
-            ScoringAction.Retry -> workspaceId?.let {
+            ScoringIntent.Retry -> workspaceId?.let {
                 _state.update { state -> state.copy(score = null) }
                 loadScore(it)
             }
-            ScoringAction.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
-            ScoringAction.GenerateCoverLetter -> workspaceId?.let {
+            ScoringIntent.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
+            ScoringIntent.GenerateCoverLetter -> workspaceId?.let {
                 emit(ScoringEffect.OpenCoverLetter(it))
             }
-            ScoringAction.OptimizeCv -> startOptimization()
-            ScoringAction.StartPractice -> _state.value.trackId?.let { trackId ->
+            ScoringIntent.OptimizeCv -> startOptimization()
+            ScoringIntent.StartPractice -> _state.value.trackId?.let { trackId ->
                 workspaceId?.let { workspaceId ->
                     emit(
                         ScoringEffect.OpenPractice(
@@ -133,6 +228,16 @@ class ScoringViewModel @Inject constructor(
                         ),
                     )
                 }
+            }
+            ScoringIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            ScoringIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            ScoringIntent.UpgradeFromGate -> {
+                _state.update { it.copy(showGateSheet = false) }
+                emit(ScoringEffect.OpenCoinsPaywall)
+            }
+            ScoringIntent.BuyCoinsClicked -> {
+                _state.update { it.copy(showCoinTopUpSheet = false) }
+                emit(ScoringEffect.OpenCoinsPaywall)
             }
         }
     }
@@ -144,7 +249,43 @@ class ScoringViewModel @Inject constructor(
     private fun startOptimization() {
         val id = workspaceId ?: return
         if (optimizationOperation?.isActive == true) return
+
         optimizationOperation = viewModelScope.launch {
+            val access = checkFeatureAccess(FeatureKey.CvAiAnalysis).first()
+            var handled = false
+            access.handle(
+                onGranted = { /* proceed — handled below */ },
+                onLocked = { locked ->
+                    handled = true
+                    _state.update {
+                        it.copy(
+                            showGateSheet = true,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
+                            gateFeatureName = FeatureKey.CvAiAnalysis.displayName(),
+                            isStartingOptimization = false,
+                        )
+                    }
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    handled = true
+                    _state.update {
+                        it.copy(
+                            showCoinTopUpSheet = true,
+                            coinTopUpRequiredCost = coinReq.coinCost,
+                            hasInsufficientCoins = true,
+                            isStartingOptimization = false,
+                        )
+                    }
+                },
+                onStale = {
+                    handled = true
+                    refreshAccess()
+                    _state.update { it.copy(isStartingOptimization = false) }
+                },
+            )
+            if (handled) return@launch
+
             _state.update {
                 it.copy(
                     isStartingOptimization = true,

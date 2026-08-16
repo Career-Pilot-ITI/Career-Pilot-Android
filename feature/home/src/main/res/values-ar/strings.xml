@@ -11,8 +11,12 @@
     <string name="home_free_trial">نسخة تجريبية مجانية</string>
     <string name="home_upgrade">ترقية</string>
     <string name="home_plan_label">خطة %1$s</string>
-    <string name="home_plan_upgrade_subtitle">ترقية للحصول على مقابلات غير محدودة</string>
+    <string name="home_plan_upgrade_subtitle">الترقية لفتح ميزات ATS والاختبارات</string>
     <string name="home_plan_active_subtitle">أنت جاهز تماماً</string>
+    <string name="home_plan_upgrade_to_max">الترقية إلى ماكس</string>
+    <string name="home_plan_plus_subtitle">قم بالترقية إلى ماكس لمقابلات الفيديو والاختبارات</string>
+    <string name="home_plan_max_subtitle">أنت مشترك في الباقة الشاملة</string>
+    <string name="home_plan_manage">إدارة</string>
     <plurals name="home_free_sessions_remaining">
         <item quantity="zero">لا توجد جلسات مجانية متبقية</item>
         <item quantity="one">تبقى جلسة مجانية واحدة</item>
@@ -44,6 +48,7 @@
     <!-- ATS job match card -->
     <string name="home_ats_job_match">مطابقة الوظائف</string>
     <string name="home_ats_new">جديد</string>
+    <string name="home_ats_plus">بلس</string>
     <string name="home_ats_subtitle">ألصق رابط وظيفة · اكتشف مدى توافق سيرتك الذاتية</string>
 
     <!-- Available interviews -->
@@ -96,7 +101,7 @@
     <string name="start_lessons">ابدأ الدروس</string>
     <string name="audio_session">جلسة صوتية</string>
     <string name="video_session">جلسة فيديو</string>
-    <string name="pro_badge">احترافي</string>
+    <string name="pro_badge">ماكس</string>
 
     <string name="ready_feature_face">الوجه</string>
     <string name="ready_feature_posture">وضعية الجسم</string>
