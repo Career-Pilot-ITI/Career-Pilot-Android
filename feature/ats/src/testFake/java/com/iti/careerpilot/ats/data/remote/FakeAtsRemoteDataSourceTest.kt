@@ -2,10 +2,8 @@ package com.iti.careerpilot.ats.data.remote
 
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.PdfFile
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,22 +11,10 @@ class FakeAtsRemoteDataSourceTest {
     private val source = FakeAtsRemoteDataSource()
 
     @Test
-    fun `fake source completes the full ATS workflow`() = runTest {
-        val uploadProgress = mutableListOf<Int>()
-        val replacedCv = source.replaceCurrentCv(
-            file = PdfFile(
-                name = "resume.pdf",
-                mimeType = "application/pdf",
-                sizeBytes = 3,
-                bytes = byteArrayOf(1, 2, 3),
-            ),
-            onProgress = uploadProgress::add,
-        )
+    fun `fake source completes the ATS workflow`() = runTest {
         val imported = source.importJob("https://www.linkedin.com/jobs/view/123456789")
         val workspaceId = (imported as CareerPilotResult.Success).data.id
 
-        assertTrue(replacedCv is CareerPilotResult.Success)
-        assertEquals(listOf(35, 100), uploadProgress)
         val workspace = source.getWorkspace(workspaceId) as CareerPilotResult.Success
         assertEquals("Senior Frontend Engineer", workspace.data.job.title)
 
@@ -54,21 +40,5 @@ class FakeAtsRemoteDataSourceTest {
         val result = source.getWorkspace(Long.MAX_VALUE)
 
         assertEquals(NetworkError.NOT_FOUND, (result as CareerPilotResult.Error).error)
-    }
-
-    @Test
-    fun `fake source rejects an empty replacement CV`() = runTest {
-        val result = source.replaceCurrentCv(
-            file = PdfFile(
-                name = "empty.pdf",
-                mimeType = "application/pdf",
-                sizeBytes = 0,
-                bytes = byteArrayOf(),
-            ),
-            onProgress = {},
-        )
-
-        assertFalse(result is CareerPilotResult.Success)
-        assertEquals(NetworkError.BAD_REQUEST, (result as CareerPilotResult.Error).error)
     }
 }

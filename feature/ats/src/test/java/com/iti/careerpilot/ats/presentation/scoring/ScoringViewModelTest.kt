@@ -21,7 +21,6 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.datastore.models.CareerInfo
-import com.iti.core.model.PdfFile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
@@ -146,8 +145,6 @@ private class ScoringRepository : AtsRepository {
     var holdScore: CompletableDeferred<Unit>? = null
     var scoreResult: CareerPilotResult<AtsScore, NetworkError> = CareerPilotResult.Success(SCORE)
 
-    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
-        CareerPilotResult.Success(Unit)
     override suspend fun importJob(url: String) = CareerPilotResult.Success(WORKSPACE)
     override suspend fun getWorkspace(workspaceId: Long): CareerPilotResult<JobWorkspace, NetworkError> {
         workspaceCalls++
