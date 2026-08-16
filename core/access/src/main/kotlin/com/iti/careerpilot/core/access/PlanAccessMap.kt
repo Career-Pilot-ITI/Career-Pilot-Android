@@ -8,12 +8,15 @@ object PlanAccessMap {
     private val map: Map<Plan, Set<FeatureKey>> = mapOf(
         Plan.FREE to setOf(
             FeatureKey.MockInterviews,
+            FeatureKey.VoicePracticeMode,
         ),
         Plan.PLUS to setOf(
             FeatureKey.MockInterviews,
             FeatureKey.VoicePracticeMode,
             FeatureKey.AtsFeatures,
             FeatureKey.CvAiAnalysis,
+            FeatureKey.CoverLetter,
+            FeatureKey.JobParse,
             FeatureKey.Quizzes,
             FeatureKey.ExportPdfReport,
         ),
@@ -22,6 +25,8 @@ object PlanAccessMap {
             FeatureKey.VoicePracticeMode,
             FeatureKey.AtsFeatures,
             FeatureKey.CvAiAnalysis,
+            FeatureKey.CoverLetter,
+            FeatureKey.JobParse,
             FeatureKey.Quizzes,
             FeatureKey.ExportPdfReport,
             FeatureKey.AdvancedReports,

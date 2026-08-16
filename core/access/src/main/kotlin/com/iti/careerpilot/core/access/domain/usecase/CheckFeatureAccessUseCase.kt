@@ -21,11 +21,15 @@ class CheckFeatureAccessUseCase @Inject constructor(
             }
 
             val hasPlanAccess = state.hasAccess(feature)
+            if (!hasPlanAccess) {
+                return@map FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
+            }
+
             val quota = state.quotas[feature]
             val remaining = quota?.remaining
 
             // If plan grants access AND quota remaining > 0 → granted
-            if (hasPlanAccess && remaining != null && remaining > 0) {
+            if (remaining != null && remaining > 0) {
                 return@map FeatureAccess.Granted(quota = quota)
             }
 
@@ -47,10 +51,8 @@ class CheckFeatureAccessUseCase @Inject constructor(
                 }
                 // Quota exhausted with no coin fallback
                 remaining == 0 -> FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
-                // No coin option + plan has feature → unlimited (quota null or no cost)
-                hasPlanAccess -> FeatureAccess.Granted(quota = quota)
-                // No plan access + no coin option → truly locked
-                else -> FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
+                // Unlimited (quota null and no coin cost)
+                else -> FeatureAccess.Granted(quota = quota)
             }
         }
 }

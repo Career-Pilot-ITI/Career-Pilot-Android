@@ -26,6 +26,16 @@ class PlanAccessMapTest {
         assertEquals("QUIZZES", FeatureKey.Quizzes.key)
     }
 
+    @Test
+    fun `FeatureKey CoverLetter has key COVER_LETTER`() {
+        assertEquals("COVER_LETTER", FeatureKey.CoverLetter.key)
+    }
+
+    @Test
+    fun `FeatureKey JobParse has key JOB_PARSE`() {
+        assertEquals("JOB_PARSE", FeatureKey.JobParse.key)
+    }
+
     // ── displayName ──────────────────────────────────────────────────────────
 
     @Test
@@ -38,61 +48,95 @@ class PlanAccessMapTest {
         assertTrue(FeatureKey.AtsFeatures.displayName().isNotBlank())
     }
 
+    @Test
+    fun `displayName for CoverLetter is non-empty`() {
+        assertTrue(FeatureKey.CoverLetter.displayName().isNotBlank())
+    }
+
+    @Test
+    fun `displayName for JobParse is non-empty`() {
+        assertTrue(FeatureKey.JobParse.displayName().isNotBlank())
+    }
+
     // ── PlanAccessMap spec ───────────────────────────────────────────────────
 
     @Test
-    fun `FREE plan does NOT include AtsFeatures`() {
-        assertFalse(FeatureKey.AtsFeatures in PlanAccessMap.featuresFor(Plan.FREE))
+    fun `FREE plan includes MockInterviews and VoicePracticeMode`() {
+        val freeFeatures = PlanAccessMap.featuresFor(Plan.FREE)
+        assertTrue(FeatureKey.MockInterviews in freeFeatures)
+        assertTrue(FeatureKey.VoicePracticeMode in freeFeatures)
+        assertEquals(2, freeFeatures.size)
     }
 
     @Test
-    fun `FREE plan does NOT include VideoInterview`() {
-        assertFalse(FeatureKey.VideoInterview in PlanAccessMap.featuresFor(Plan.FREE))
+    fun `FREE plan does NOT include CV, ATS, Quiz, or MAX features`() {
+        val freeFeatures = PlanAccessMap.featuresFor(Plan.FREE)
+        assertFalse(FeatureKey.AtsFeatures in freeFeatures)
+        assertFalse(FeatureKey.CvAiAnalysis in freeFeatures)
+        assertFalse(FeatureKey.CoverLetter in freeFeatures)
+        assertFalse(FeatureKey.JobParse in freeFeatures)
+        assertFalse(FeatureKey.Quizzes in freeFeatures)
+        assertFalse(FeatureKey.ExportPdfReport in freeFeatures)
+        assertFalse(FeatureKey.AdvancedReports in freeFeatures)
+        assertFalse(FeatureKey.VideoInterview in freeFeatures)
     }
 
     @Test
-    fun `FREE plan includes MockInterviews`() {
-        assertTrue(FeatureKey.MockInterviews in PlanAccessMap.featuresFor(Plan.FREE))
+    fun `PLUS plan includes ATS, CV, CoverLetter, JobParse, Quizzes, ExportPdf, Mock, and Voice`() {
+        val plusFeatures = PlanAccessMap.featuresFor(Plan.PLUS)
+        assertTrue(FeatureKey.MockInterviews in plusFeatures)
+        assertTrue(FeatureKey.VoicePracticeMode in plusFeatures)
+        assertTrue(FeatureKey.AtsFeatures in plusFeatures)
+        assertTrue(FeatureKey.CvAiAnalysis in plusFeatures)
+        assertTrue(FeatureKey.CoverLetter in plusFeatures)
+        assertTrue(FeatureKey.JobParse in plusFeatures)
+        assertTrue(FeatureKey.Quizzes in plusFeatures)
+        assertTrue(FeatureKey.ExportPdfReport in plusFeatures)
     }
 
     @Test
-    fun `PLUS plan includes AtsFeatures`() {
-        assertTrue(FeatureKey.AtsFeatures in PlanAccessMap.featuresFor(Plan.PLUS))
+    fun `PLUS plan does NOT include MAX exclusive features`() {
+        val plusFeatures = PlanAccessMap.featuresFor(Plan.PLUS)
+        assertFalse(FeatureKey.VideoInterview in plusFeatures)
+        assertFalse(FeatureKey.AdvancedReports in plusFeatures)
     }
 
     @Test
-    fun `PLUS plan includes Quizzes`() {
-        assertTrue(FeatureKey.Quizzes in PlanAccessMap.featuresFor(Plan.PLUS))
+    fun `MAX plan includes all features including VideoInterview and AdvancedReports`() {
+        val maxFeatures = PlanAccessMap.featuresFor(Plan.MAX)
+        assertTrue(FeatureKey.MockInterviews in maxFeatures)
+        assertTrue(FeatureKey.VoicePracticeMode in maxFeatures)
+        assertTrue(FeatureKey.AtsFeatures in maxFeatures)
+        assertTrue(FeatureKey.CvAiAnalysis in maxFeatures)
+        assertTrue(FeatureKey.CoverLetter in maxFeatures)
+        assertTrue(FeatureKey.JobParse in maxFeatures)
+        assertTrue(FeatureKey.Quizzes in maxFeatures)
+        assertTrue(FeatureKey.ExportPdfReport in maxFeatures)
+        assertTrue(FeatureKey.AdvancedReports in maxFeatures)
+        assertTrue(FeatureKey.VideoInterview in maxFeatures)
+    }
+
+    // ── minimumPlanFor ───────────────────────────────────────────────────────
+
+    @Test
+    fun `minimumPlanFor FREE tier features is FREE`() {
+        assertEquals(Plan.FREE, PlanAccessMap.minimumPlanFor(FeatureKey.MockInterviews))
+        assertEquals(Plan.FREE, PlanAccessMap.minimumPlanFor(FeatureKey.VoicePracticeMode))
     }
 
     @Test
-    fun `PLUS plan does NOT include VideoInterview`() {
-        assertFalse(FeatureKey.VideoInterview in PlanAccessMap.featuresFor(Plan.PLUS))
-    }
-
-    @Test
-    fun `MAX plan includes VideoInterview`() {
-        assertTrue(FeatureKey.VideoInterview in PlanAccessMap.featuresFor(Plan.MAX))
-    }
-
-    @Test
-    fun `MAX plan includes AtsFeatures and Quizzes`() {
-        assertTrue(FeatureKey.AtsFeatures in PlanAccessMap.featuresFor(Plan.MAX))
-        assertTrue(FeatureKey.Quizzes in PlanAccessMap.featuresFor(Plan.MAX))
-    }
-
-    @Test
-    fun `minimumPlanFor VideoInterview is MAX`() {
-        assertEquals(Plan.MAX, PlanAccessMap.minimumPlanFor(FeatureKey.VideoInterview))
-    }
-
-    @Test
-    fun `minimumPlanFor Quizzes is PLUS`() {
-        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.Quizzes))
-    }
-
-    @Test
-    fun `minimumPlanFor AtsFeatures is PLUS`() {
+    fun `minimumPlanFor PLUS tier features is PLUS`() {
         assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.AtsFeatures))
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.CvAiAnalysis))
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.CoverLetter))
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.JobParse))
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.Quizzes))
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.ExportPdfReport))
+    }
+
+    @Test
+    fun `minimumPlanFor MAX tier features is MAX`() {
+        assertEquals(Plan.MAX, PlanAccessMap.minimumPlanFor(FeatureKey.AdvancedReports))
+        assertEquals(Plan.MAX, PlanAccessMap.minimumPlanFor(FeatureKey.VideoInterview))
     }
 }

@@ -166,8 +166,14 @@ class AccessRepositoryTest {
         assertEquals(Plan.PLUS, domain.plan)
         assertTrue(FeatureKey.AtsFeatures in domain.features)
         assertTrue(FeatureKey.CvAiAnalysis in domain.features)
-        assertFalse(FeatureKey.VideoInterview in domain.features)
+        assertTrue(FeatureKey.CoverLetter in domain.features)
+        assertTrue(FeatureKey.JobParse in domain.features)
         assertTrue(FeatureKey.Quizzes in domain.features)
+        assertTrue(FeatureKey.ExportPdfReport in domain.features)
+        assertTrue(FeatureKey.MockInterviews in domain.features)
+        assertTrue(FeatureKey.VoicePracticeMode in domain.features)
+        assertFalse(FeatureKey.VideoInterview in domain.features)
+        assertFalse(FeatureKey.AdvancedReports in domain.features)
     }
 
     @Test
