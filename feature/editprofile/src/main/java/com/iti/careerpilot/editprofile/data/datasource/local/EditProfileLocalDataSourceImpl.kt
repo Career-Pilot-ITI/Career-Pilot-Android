@@ -43,6 +43,19 @@ class EditProfileLocalDataSourceImpl @Inject constructor(
         return moveFileToInternalStorage(sourceFile, CV_DIR)
     }
 
+    override suspend fun saveCVBytes(bytes: ByteArray, fileName: String): String {
+        return withContext(Dispatchers.IO) {
+            val targetDir = File(context.filesDir, CV_DIR).apply {
+                if (!exists()) mkdirs()
+            }
+            targetDir.listFiles()?.forEach { it.delete() }
+            val safeFileName = File(fileName.ifBlank { "cv.pdf" }).name.ifBlank { "cv.pdf" }
+            val targetFile = File(targetDir, safeFileName)
+            targetFile.writeBytes(bytes)
+            targetFile.toUri().toString()
+        }
+    }
+
     suspend fun moveFileToInternalStorage(
         sourceFile: File,
         targetDir: String

@@ -39,6 +39,7 @@ data class EditProfileState(
     val isLoading: Boolean = false,
     val isUploadingAvatar: Boolean = false,
     val isUploadingCV: Boolean = false,
+    val isAnalyzingCV: Boolean = false,
     val avatarUploadProgress: Int = 0,
     val cvUploadProgress: Int = 0,
     val displayNameError: Boolean = false,

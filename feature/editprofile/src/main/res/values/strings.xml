@@ -64,6 +64,8 @@
     <string name="remove_cv">Remove CV</string>
     <string name="uploading">Uploading…</string>
     <string name="uploading_cv">Uploading CV… %1$d%%</string>
+    <string name="parsing_cv">Parsing CV…</string>
+    <string name="parsing_cv_subtitle">Analysing your CV. This may take a moment…</string>
     <string name="camera_permission_title">Camera Permission</string>
     <string name="camera_permission_text">Please allow the camera permission to continue</string>
     <string name="remove_x">remove</string>

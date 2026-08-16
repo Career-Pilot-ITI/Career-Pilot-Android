@@ -9,10 +9,7 @@ data class AtsEntryUiState(
     val cvFileName: String = "",
     val cvSizeBytes: Long = 0L,
     val hasSynchronizedCv: Boolean = false,
-    val isUploadingCv: Boolean = false,
-    val uploadProgress: Int = 0,
     val isImporting: Boolean = false,
 ) {
-    val isBusy: Boolean get() = isUploadingCv || isImporting
-    val canCompare: Boolean get() = isUrlValid && hasSynchronizedCv && !isBusy
+    val canCompare: Boolean get() = isUrlValid && hasSynchronizedCv && !isImporting
 }

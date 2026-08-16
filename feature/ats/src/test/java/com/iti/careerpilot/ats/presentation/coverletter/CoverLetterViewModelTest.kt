@@ -15,7 +15,6 @@ import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterVie
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
-import com.iti.core.model.PdfFile
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,8 +75,6 @@ private class CoverLetterRepository(
     override val userProfile = MutableStateFlow(UserProfile())
     var generateCalls = 0
 
-    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
-        CareerPilotResult.Success(Unit)
     override suspend fun importJob(url: String) = CareerPilotResult.Success(workspace())
     override suspend fun getWorkspace(workspaceId: Long) = CareerPilotResult.Success(workspace())
     override suspend fun scoreCv(workspaceId: Long): CareerPilotResult<AtsScore, NetworkError> =
