@@ -24,7 +24,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
@@ -33,7 +33,7 @@ import com.iti.careerpilot.core.designsystem.softShadow
 @Composable
 fun JobUrlTextField(
     stateProvider: UiStateProvider<AtsEntryUiState>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
     jobUrlDescription: String,
 ) {
     val jobUrl by rememberUiStateValue(stateProvider) { it.jobUrl }
@@ -41,7 +41,7 @@ fun JobUrlTextField(
 
     OutlinedTextField(
         value = jobUrl,
-        onValueChange = { onAction(AtsEntryAction.JobUrlChanged(it)) },
+        onValueChange = { onIntent(AtsEntryIntent.JobUrlChanged(it)) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp)

@@ -33,8 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.home.R
-import com.iti.careerpilot.home.presentation.home.HomeAction
-import com.iti.careerpilot.home.presentation.home.HomeEvent
+import com.iti.careerpilot.home.presentation.home.HomeEffect
+import com.iti.careerpilot.home.presentation.home.HomeIntent
 import com.iti.careerpilot.home.presentation.home.HomeState
 import com.iti.careerpilot.home.presentation.home.HomeViewModel
 import com.iti.careerpilot.home.presentation.home.screen.components.AtsJobMatchCard
@@ -55,7 +55,7 @@ fun HomeRoot(
     openSessionDetails: (Long) -> Unit,
     openPracticeSession: (trackId: Long, sessionId: Long) -> Unit,
     openInterviews: () -> Unit,
-    openPlansPaywall: () -> Unit,
+    openPlansPaywall: (showMySubscription: Boolean) -> Unit,
     openCoinsPaywall: () -> Unit,
     openReports: () -> Unit,
     openAts: () -> Unit,
@@ -64,8 +64,7 @@ fun HomeRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
-        viewModel.onAction(HomeAction.Initial)
-        viewModel.onScreenEntered()
+        viewModel.onIntent(HomeIntent.Initial)
     }
 
     var isInitialResume by remember { mutableStateOf(true) }
@@ -73,35 +72,35 @@ fun HomeRoot(
         if (isInitialResume) {
             isInitialResume = false
         } else {
-            viewModel.onAction(HomeAction.Refresh)
+            viewModel.onIntent(HomeIntent.Refresh)
         }
     }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is HomeEvent.NavigateToReadyToPractice ->
+            is HomeEffect.NavigateToReadyToPractice ->
                 openReadyToPractice(event.trackId, event.trackName)
 
-            is HomeEvent.NavigateToQuiz ->
+            is HomeEffect.NavigateToQuiz ->
                 openQuiz(event.trackId, event.trackName)
 
-            is HomeEvent.NavigateToSessionDetails ->
+            is HomeEffect.NavigateToSessionDetails ->
                 openSessionDetails(event.sessionId)
 
-            is HomeEvent.NavigateToPracticeSession ->
+            is HomeEffect.NavigateToPracticeSession ->
                 openPracticeSession(event.trackId, event.sessionId)
 
-            HomeEvent.NavigateToInterviews -> openInterviews()
-            HomeEvent.NavigateToPlansPaywall -> openPlansPaywall()
-            HomeEvent.NavigateToCoinsPaywall -> openCoinsPaywall()
-            HomeEvent.NavigateToReports -> openReports()
-            HomeEvent.NavigateToAts -> openAts()
+            HomeEffect.NavigateToInterviews -> openInterviews()
+            is HomeEffect.NavigateToPlansPaywall -> openPlansPaywall(event.showMySubscription)
+            HomeEffect.NavigateToCoinsPaywall -> openCoinsPaywall()
+            HomeEffect.NavigateToReports -> openReports()
+            HomeEffect.NavigateToAts -> openAts()
         }
     }
 
     HomeScreen(
         state = state,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
     )
 }
 
@@ -109,7 +108,7 @@ fun HomeRoot(
 @Composable
 fun HomeScreen(
     state: HomeState,
-    onAction: (HomeAction) -> Unit,
+    onIntent: (HomeIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -122,7 +121,7 @@ fun HomeScreen(
                 userName = state.userName,
                 coins = state.coins,
                 onCoinsClick = {
-                    onAction(HomeAction.CoinsClicked)
+                    onIntent(HomeIntent.CoinsClicked)
                 }
             )
         },
@@ -139,7 +138,7 @@ fun HomeScreen(
             PullToRefreshBox(
                 state = pullToRefreshState,
                 isRefreshing = state.isRefreshing,
-                onRefresh = { onAction(HomeAction.Refresh) },
+                onRefresh = { onIntent(HomeIntent.Refresh) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
@@ -164,8 +163,8 @@ fun HomeScreen(
                     item {
                         SubscriptionCard(
                             planLabel = state.planLabel,
-                            isSubscribed = state.isSubscribed,
-                            onUpgradeClick = { onAction(HomeAction.UpgradeClicked) },
+                            subscriptionTier = state.subscriptionTier,
+                            onCardClick = { onIntent(HomeIntent.UpgradeClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp
@@ -176,7 +175,7 @@ fun HomeScreen(
                     item {
                         LatestScoreCard(
                             summary = state.scoreSummary,
-                            onClick = { onAction(HomeAction.ScoreCardClicked) },
+                            onClick = { onIntent(HomeIntent.ScoreCardClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp
@@ -187,7 +186,7 @@ fun HomeScreen(
                         SectionHeader(
                             title = stringResource(R.string.home_available_interviews),
                             actionLabel = stringResource(R.string.home_see_all),
-                            onActionClick = { onAction(HomeAction.SeeAllInterviewsClicked) },
+                            onActionClick = { onIntent(HomeIntent.SeeAllInterviewsClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp
@@ -198,8 +197,8 @@ fun HomeScreen(
                     item {
                         PracticeInterviewCard(
                             trackName = state.practiceTrackName,
-                            onInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
-                            onLessonClick = { onAction(HomeAction.LessonClicked) },
+                            onInterviewClick = { onIntent(HomeIntent.PracticeInterviewClicked) },
+                            onLessonClick = { onIntent(HomeIntent.LessonClicked) },
                             modifier = Modifier
                                 .padding(
                                     horizontal = 20.dp
@@ -209,7 +208,8 @@ fun HomeScreen(
 
                     item {
                         AtsJobMatchCard(
-                            onClick = { onAction(HomeAction.AtsJobMatchClicked) },
+                            isLocked = !state.isSubscribed,
+                            onClick = { onIntent(HomeIntent.AtsJobMatchClicked) },
                             modifier = Modifier.padding(horizontal = 20.dp),
                         )
                     }
@@ -219,7 +219,7 @@ fun HomeScreen(
                             title = stringResource(R.string.home_recent_sessions),
                             actionLabel = stringResource(R.string.home_see_all)
                                 .takeIf { state.recentSessions.isNotEmpty() },
-                            onActionClick = { onAction(HomeAction.SeeAllSessionsClicked) }
+                            onActionClick = { onIntent(HomeIntent.SeeAllSessionsClicked) }
                                 .takeIf { state.recentSessions.isNotEmpty() },
                             modifier = Modifier
                                 .padding(
@@ -231,11 +231,11 @@ fun HomeScreen(
                     if (state.recentSessions.isEmpty()) {
                         item {
                             EmptySessionsCard(
-                                onStartInterviewClick = { onAction(HomeAction.PracticeInterviewClicked) },
+                                onStartInterviewClick = { onIntent(HomeIntent.PracticeInterviewClicked) },
                                 modifier = Modifier
-                                    .padding(
-                                        horizontal = 20.dp
-                                    )
+                                .padding(
+                                    horizontal = 20.dp
+                                )
                             )
                         }
                     } else {
@@ -245,8 +245,8 @@ fun HomeScreen(
                         ) { session ->
                             SessionRow(
                                 session = session,
-                                onClick = { onAction(HomeAction.SessionClicked(session.id)) },
-                                onResume = { onAction(HomeAction.ResumeSessionClicked(session.id)) },
+                                onClick = { onIntent(HomeIntent.SessionClicked(session.id)) },
+                                onResume = { onIntent(HomeIntent.ResumeSessionClicked(session.id)) },
                                 modifier = Modifier
                                     .padding(
                                         horizontal = 20.dp

@@ -7,8 +7,8 @@ plugins {
 android {
     namespace = "com.iti.careerpilot.core.designsystem"
 }
-
 dependencies {
+    implementation(project(":core:model"))
     implementation(libs.androidx.compose.googlefonts)
     api(libs.androidx.compose.material3)
     api(libs.androidx.material3.android)

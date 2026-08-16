@@ -6,4 +6,5 @@ sealed interface AtsEntryEffect {
     data object NavigateToEditProfile : AtsEntryEffect
     data class NavigateToJobDetails(val workspaceId: Long) : AtsEntryEffect
     data class ShowMessage(val message: UIText) : AtsEntryEffect
+    data object NavigateToPaywall : AtsEntryEffect
 }

@@ -20,6 +20,37 @@
     <string name="parsing_cv_subtitle">قد يستغرق هذا لحظة…</string>
 
     <string name="back">رجوع</string>
+
+    <string name="plan_upgrade_required_title">يلزم ترقية الخطة</string>
+    <string name="plan_upgrade_required_message">قم بالترقية إلى خطة %1$s لفتح هذه الميزة.</string>
+    <string name="upgrade_to_plan">الترقية إلى %1$s</string>
+    <string name="quota_reached_title">تم الوصول إلى الحصة الشهرية</string>
+    <string name="quota_reached_message">لقد استخدمت جميع الجلسات المجانية لهذا الشهر. يمكنك فتح جلسة إضافية مقابل %1$d عملة.</string>
+    <string name="spend_coins_action">إنفاق %1$d عملة (الرصيد: %2$d)</string>
+    <string name="get_more_coins_action">الحصول على المزيد من العملات (الرصيد: %1$d / المطلوب: %2$d)</string>
+    <string name="network_required_title">يلزم الاتصال بالشبكة</string>
+    <string name="network_required_message">يرجى الاتصال بالإنترنت للتحقق من وصول الاشتراك الخاص بك.</string>
+
+    <string name="pricing_badge_checking">جاري التحقق من الخطة والوصول…</string>
+    <string name="pricing_badge_requires_plan">تتطلب خطة %1$s</string>
+    <string name="pricing_badge_tap_to_upgrade">انقر للترقية وفتح هذه الميزة</string>
+    <string name="pricing_badge_coins_needed">يلزم %1$d عملة للمتابعة</string>
+    <string name="pricing_badge_balance_insufficient">رصيدك: %1$d عملة (غير كافٍ)</string>
+    <string name="pricing_badge_coins_per_use">%1$d عملة لكل استخدام</string>
+    <string name="pricing_badge_balance">رصيدك: %1$d عملة</string>
+    <string name="pricing_badge_quota_remaining">%1$d من %2$d استخدامات متبقية</string>
+    <string name="pricing_badge_included_in_plan">متضمنة في خطة %1$s</string>
+    <string name="pricing_badge_unlimited">استخدام غير محدود</string>
+
+    <string name="feature_gate_subtitle">%1$s متاح في خطة %2$s.</string>
+    <string name="not_now">ليس الآن</string>
+    <string name="not_enough_coins_title">لا توجد عملات كافية</string>
+    <string name="not_enough_coins_message">يتطلب هذا %1$d عملة، ولكن لديك حاليًا %2$d عملة.</string>
+    <string name="buy_coins">شراء عملات</string>
+    <string name="pricing_badge_coins">%1$d عملة</string>
+    <string name="coin_top_up_required">المطلوب</string>
+    <string name="coin_top_up_current_balance">الرصيد الحالي</string>
+    <string name="coin_top_up_description">ليس لديك رصيد كافٍ من العملات لاستخدام هذه الميزة. اشحن محفظتك للمتابعة.</string>
     <string name="cv_upload_tap_to_upload">اضغط لرفع سيرتك الذاتية</string>
     <string name="cv_upload_requirements">PDF · الحد الأقصى 10 ميجابايت</string>
     <string name="cv_upload_preparing">جارٍ تجهيز السيرة الذاتية…</string>

@@ -22,8 +22,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLetterContent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
@@ -32,9 +32,13 @@ import com.iti.careerpilot.ats.presentation.util.composeEmail
 import com.iti.careerpilot.ats.presentation.util.copyText
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoverLetterRoot(
     workspaceId: Long,
@@ -49,7 +53,7 @@ fun CoverLetterRoot(
     val clipboardLabel = stringResource(R.string.cover_letter)
 
     LaunchedEffect(workspaceId) {
-        viewModel.onAction(CoverLetterAction.Initial(workspaceId))
+        viewModel.onIntent(CoverLetterIntent.Initial(workspaceId))
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -77,17 +81,43 @@ fun CoverLetterRoot(
 
     CoverLetterScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         onBack = onBack,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val showCoinTopUpSheet by rememberUiStateValue(stateProvider) { it.showCoinTopUpSheet }
+    val coinTopUpRequiredCost by rememberUiStateValue(stateProvider) { it.coinTopUpRequiredCost }
+    val coinBalance by rememberUiStateValue(stateProvider) { it.coinBalance }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = stringResource(R.string.cover_letter),
+            requiredPlan = gateRequiredPlan,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { viewModel.onIntent(CoverLetterIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(CoverLetterIntent.DismissGateSheet) },
+        )
+    }
+
+    if (showCoinTopUpSheet) {
+        CoinTopUpBottomSheet(
+            coinCost = coinTopUpRequiredCost,
+            currentBalance = coinBalance,
+            onBuyCoins = { viewModel.onIntent(CoverLetterIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(CoverLetterIntent.DismissCoinTopUpSheet) },
+        )
+    }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun CoverLetterScreen(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,7 +128,7 @@ fun CoverLetterScreen(
         )
         CoverLetterBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -108,7 +138,7 @@ fun CoverLetterScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun CoverLetterBody(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isLoading by rememberUiStateValue(stateProvider) { it.isLoading }
@@ -122,7 +152,7 @@ private fun CoverLetterBody(
     } else {
         CoverLetterContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = modifier,
         )
     }

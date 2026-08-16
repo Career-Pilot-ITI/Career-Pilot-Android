@@ -7,17 +7,24 @@ import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsIntent
 import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewModel
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.testing.FakeAccessRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
+import kotlin.time.Clock
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -27,6 +34,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -40,9 +49,10 @@ class JobDetailsViewModelTest {
     @Test
     fun `job details loads workspace without scoring`() = runTest(dispatcher) {
         val repository = JobDetailsRepository()
-        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(repository))
+        val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(repository, accessRepo)
 
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(WORKSPACE, viewModel.state.value.workspace)
@@ -51,17 +61,88 @@ class JobDetailsViewModelTest {
     }
 
     @Test
-    fun `start scoring emits score route with workspace id`() = runTest(dispatcher) {
-        val viewModel = JobDetailsViewModel(GetWorkspaceUseCase(JobDetailsRepository()))
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+    fun `start scoring with sufficient coins emits score route with workspace id`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(JobDetailsAction.StartScoring)
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
         runCurrent()
 
         assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
     }
+
+    @Test
+    fun `start scoring with insufficient coins shows coin top up sheet and blocks navigation`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.AtsFeatures))
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+    }
+
+    @Test
+    fun `start scoring for free tier user shows gate sheet and blocks navigation`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+    }
+
+    @Test
+    fun `start scoring for free tier user even with coins shows gate sheet and blocks navigation`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
+        advanceUntilIdle()
+
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+    }
+
+    private fun createAccessRepository(
+        coins: Int,
+        features: Set<FeatureKey>,
+        plan: Plan = Plan.PLUS,
+    ): FakeAccessRepository {
+        val accessState = AccessState(
+            plan = plan,
+            features = features,
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = coins,
+        )
+        return FakeAccessRepository(initialState = accessState)
+    }
+
+    private fun createViewModel(
+        repository: JobDetailsRepository,
+        accessRepository: FakeAccessRepository,
+    ) = JobDetailsViewModel(
+        getWorkspace = GetWorkspaceUseCase(repository),
+        checkFeatureAccess = CheckFeatureAccessUseCase(accessRepository),
+        refreshAccess = RefreshAccessUseCase(accessRepository),
+        accessRepository = accessRepository,
+    )
 }
 
 private class JobDetailsRepository : AtsRepository {

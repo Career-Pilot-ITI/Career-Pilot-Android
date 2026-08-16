@@ -28,6 +28,7 @@
     <string name="cancel">Cancel</string>
     <string name="personal_info">Personal Info</string>
     <string name="career_info">Career Info</string>
+    <string name="subscription">Subscription</string>
     <string name="open_cv_with">Open CV with</string>
 
 </resources>

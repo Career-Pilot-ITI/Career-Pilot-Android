@@ -17,4 +17,12 @@
     <string name="select_theme">اختر المظهر</string>
     <string name="done">تم</string>
 
+    <!-- Plan & Coins -->
+    <string name="settings_current_plan">الخطة الحالية</string>
+    <string name="settings_plan_format">خطة %1$s</string>
+    <string name="settings_coins_count">%1$d عملة</string>
+    <string name="settings_manage_subscription">إدارة الاشتراك</string>
+    <string name="settings_upgrade_plan">ترقية الخطة</string>
+    <string name="settings_get_coins">شراء عملات</string>
+
 </resources>

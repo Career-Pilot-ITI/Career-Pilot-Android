@@ -3,6 +3,7 @@ package com.iti.careerpilot.login.presentation.otp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.login.domain.usecase.SendOtpUseCase
 import com.iti.careerpilot.login.domain.usecase.VerifyOtpUseCase
 import com.iti.common.util.countdownFlow
@@ -26,6 +27,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class OTPViewModel @Inject constructor(
     private val verifyOtp: VerifyOtpUseCase,
     private val sendOtp: SendOtpUseCase,
+    private val refreshAccessUseCase: RefreshAccessUseCase,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -70,7 +72,7 @@ class OTPViewModel @Inject constructor(
             verifyOtp(current.phoneNumber, current.code)
                 .onSuccess { session ->
                     viewModelScope.launch {
-
+                        refreshAccessUseCase()
                         resendTimerJob?.cancel()
                         _state.update { it.copy(isVerifyingOtp = false, isVerified = true) }
                         delay(SUCCESS_DISMISS_MILLIS.milliseconds)

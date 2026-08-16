@@ -84,7 +84,10 @@ sealed interface Route : NavKey {
     data class EditProfile(val section: ProfileEditSection = ProfileEditSection.ALL) : Route
 
     @Serializable
-    data class Paywall(val showGetCoins: Boolean = false) : Route
+    data class Paywall(
+        val showGetCoins: Boolean = false,
+        val showMySubscription: Boolean = false,
+    ) : Route
 
     @Serializable
     data object Onboarding: Route

@@ -10,11 +10,18 @@ import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GenerateCoverLetterUseCase
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.testing.FakeAccessRepository
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
+import com.iti.core.model.AccessState
+import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
+import kotlin.time.Clock
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +33,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -37,12 +46,13 @@ class CoverLetterViewModelTest {
     @After fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `opening cover letter generates immediately when workspace has no letter`() =
+    fun `opening cover letter generates immediately when workspace has no letter and coins sufficient`() =
         runTest(dispatcher) {
             val repository = CoverLetterRepository(coverLetterText = null)
-            val viewModel = createViewModel(repository)
+            val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CoverLetter))
+            val viewModel = createViewModel(repository, accessRepo)
 
-            viewModel.onAction(CoverLetterAction.Initial(1L))
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
             assertEquals(1, repository.generateCalls)
@@ -52,20 +62,90 @@ class CoverLetterViewModelTest {
     @Test
     fun `opening cover letter restores cached value without generating again`() = runTest(dispatcher) {
         val repository = CoverLetterRepository(coverLetterText = "Cached letter")
-        val viewModel = createViewModel(repository)
+        val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CoverLetter))
+        val viewModel = createViewModel(repository, accessRepo)
 
-        viewModel.onAction(CoverLetterAction.Initial(1L))
+        viewModel.onIntent(CoverLetterIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(0, repository.generateCalls)
         assertEquals("Cached letter", viewModel.state.value.editedValue)
     }
 
-    private fun createViewModel(repository: CoverLetterRepository) = CoverLetterViewModel(
+    @Test
+    fun `opening cover letter with insufficient coins displays coin top up sheet and blocks generation`() =
+        runTest(dispatcher) {
+            val repository = CoverLetterRepository(coverLetterText = null)
+            val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.CoverLetter))
+            val viewModel = createViewModel(repository, accessRepo)
+
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
+            advanceUntilIdle()
+
+            assertEquals(0, repository.generateCalls)
+            assertTrue(viewModel.state.value.showCoinTopUpSheet)
+            assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        }
+
+    @Test
+    fun `opening cover letter for free tier user shows gate sheet and blocks generation`() =
+        runTest(dispatcher) {
+            val repository = CoverLetterRepository(coverLetterText = null)
+            val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+            val viewModel = createViewModel(repository, accessRepo)
+
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
+            advanceUntilIdle()
+
+            assertEquals(0, repository.generateCalls)
+            assertTrue(viewModel.state.value.showGateSheet)
+            assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+            assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        }
+
+    @Test
+    fun `opening cover letter for free tier user even with coins shows gate sheet and blocks generation`() =
+        runTest(dispatcher) {
+            val repository = CoverLetterRepository(coverLetterText = null)
+            val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
+            val viewModel = createViewModel(repository, accessRepo)
+
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
+            advanceUntilIdle()
+
+            assertEquals(0, repository.generateCalls)
+            assertTrue(viewModel.state.value.showGateSheet)
+            assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+            assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        }
+
+    private fun createAccessRepository(
+        coins: Int,
+        features: Set<FeatureKey>,
+        plan: Plan = Plan.MAX,
+    ): FakeAccessRepository {
+        val accessState = AccessState(
+            plan = plan,
+            features = features,
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = coins,
+        )
+        return FakeAccessRepository(initialState = accessState)
+    }
+
+    private fun createViewModel(
+        repository: CoverLetterRepository,
+        accessRepository: FakeAccessRepository = createAccessRepository(10, setOf(FeatureKey.CoverLetter)),
+    ) = CoverLetterViewModel(
         getWorkspace = GetWorkspaceUseCase(repository),
         generateCoverLetter = GenerateCoverLetterUseCase(repository),
         observeCurrentProfile = ObserveCurrentProfileUseCase(repository),
         savedStateHandle = SavedStateHandle(),
+        checkFeatureAccess = CheckFeatureAccessUseCase(accessRepository),
+        refreshAccess = RefreshAccessUseCase(accessRepository),
+        accessRepository = accessRepository,
     )
 }
 

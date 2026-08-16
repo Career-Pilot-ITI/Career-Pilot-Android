@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,8 +32,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.entry.view.components.AtsScreenHeader
 import com.iti.careerpilot.ats.presentation.entry.view.components.FasterShareHintCard
@@ -45,29 +46,33 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.core.model.Plan
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AtsEntryRoot(
     initialSharedText: String?,
     onSharedTextConsumed: () -> Unit,
     onJobDetailsRequested: (Long) -> Unit,
     onEditProfileRequested: () -> Unit,
+    onPaywallRequested: () -> Unit = {},
     viewModel: AtsEntryViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
     val stateProvider = rememberUiStateProvider(state)
 
     LaunchedEffect(viewModel) {
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
     }
 
     LaunchedEffect(initialSharedText) {
         initialSharedText?.let {
-            viewModel.onAction(AtsEntryAction.SharedTextReceived(it))
+            viewModel.onIntent(AtsEntryIntent.SharedTextReceived(it))
             onSharedTextConsumed()
         }
     }
@@ -80,6 +85,7 @@ fun AtsEntryRoot(
                     AtsEntryEffect.NavigateToEditProfile -> onEditProfileRequested()
                     is AtsEntryEffect.NavigateToJobDetails -> onJobDetailsRequested(effect.workspaceId)
                     is AtsEntryEffect.ShowMessage -> CareerPilotSnackbarController.show(effect.message)
+                    AtsEntryEffect.NavigateToPaywall -> onPaywallRequested()
                 }
             }
         }
@@ -87,15 +93,16 @@ fun AtsEntryRoot(
 
     AtsEntryScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AtsEntryScreen(
     stateProvider: UiStateProvider<AtsEntryUiState>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val jobUrlDescription = stringResource(R.string.ats_job_posting_link)
@@ -144,7 +151,7 @@ fun AtsEntryScreen(
 
                 JobUrlTextField(
                     stateProvider = stateProvider,
-                    onAction = onAction,
+                    onIntent = onIntent,
                     jobUrlDescription = jobUrlDescription,
                 )
 
@@ -168,7 +175,7 @@ fun AtsEntryScreen(
 
                 CvUploadSection(
                     stateProvider = stateProvider,
-                    onAction = onAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -180,7 +187,22 @@ fun AtsEntryScreen(
         CompareButton(
             stateProvider = stateProvider,
             importMessages = importMessages,
-            onAction = onAction,
+            onIntent = onIntent,
+        )
+    }
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val gateFeatureName by rememberUiStateValue(stateProvider) { it.gateFeatureName }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
+            requiredPlan = gateRequiredPlan ?: Plan.PLUS,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { onIntent(AtsEntryIntent.UpgradeFromGate) },
+            onDismiss = { onIntent(AtsEntryIntent.DismissGateSheet) },
         )
     }
 }
@@ -188,7 +210,7 @@ fun AtsEntryScreen(
 @Composable
 private fun CvUploadSection(
     stateProvider: UiStateProvider<AtsEntryUiState>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
 ) {
     val fileName by rememberUiStateValue(stateProvider) { it.cvFileName }
     val fileSizeBytes by rememberUiStateValue(stateProvider) { it.cvSizeBytes }
@@ -225,7 +247,7 @@ private fun CvUploadSection(
                 )
                 CareerPilotButton(
                     text = stringResource(R.string.ats_open_edit_profile),
-                    onClick = { onAction(AtsEntryAction.EditProfileClicked) },
+                    onClick = { onIntent(AtsEntryIntent.EditProfileClicked) },
                 )
             }
         }
@@ -236,7 +258,7 @@ private fun CvUploadSection(
 private fun CompareButton(
     stateProvider: UiStateProvider<AtsEntryUiState>,
     importMessages: ImmutableList<String>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
 ) {
     val isImporting by rememberUiStateValue(stateProvider) { it.isImporting }
     val canCompare by rememberUiStateValue(stateProvider) { it.canCompare }
@@ -259,7 +281,7 @@ private fun CompareButton(
         } else {
             stringResource(R.string.ats_compare_now)
         },
-        onClick = { onAction(AtsEntryAction.CompareClicked) },
+        onClick = { onIntent(AtsEntryIntent.CompareClicked) },
         enabled = canCompare,
     )
 }

@@ -2,6 +2,7 @@ package com.iti.careerpilot.features.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.core.datastore.UserTokensRepo
 import com.iti.core.datastore.repo.UserProfileRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val userProfileRepo: UserProfileRepo,
-    private val userTokensRepo: UserTokensRepo
+    private val userTokensRepo: UserTokensRepo,
+    private val refreshAccessUseCase: RefreshAccessUseCase,
 ) : ViewModel() {
 
     private val _navigationEvent = Channel<SplashEvent>()
@@ -46,6 +48,8 @@ class SplashViewModel @Inject constructor(
     private suspend fun determineNextDestination(): SplashEvent {
         val tokens = userTokensRepo.readTokens()
         if (tokens.accessToken.isNullOrBlank()) return SplashEvent.NavigateToLogin
+
+        refreshAccessUseCase()
 
         val userProfile = userProfileRepo.readUserProfile()
         return if (userProfile.hasCompletedOnboarding) {

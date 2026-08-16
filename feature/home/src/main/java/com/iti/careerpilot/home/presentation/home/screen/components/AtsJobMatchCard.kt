@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +32,7 @@ import com.iti.careerpilot.home.R
 fun AtsJobMatchCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLocked: Boolean = false,
 ) {
     val colors = CareerPilotTheme.extendedColors
 
@@ -87,12 +89,31 @@ fun AtsJobMatchCard(
                         color = colors.onInfoContainer.copy(alpha = 0.14f),
                         contentColor = colors.info,
                     ) {
-                        Text(
-                            text = stringResource(R.string.home_ats_new),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
-                        )
+                        if (isLocked) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                                Text(
+                                    text = stringResource(R.string.home_ats_plus),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.home_ats_new),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                            )
+                        }
                     }
                 }
                 Text(

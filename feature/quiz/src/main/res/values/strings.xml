@@ -29,5 +29,6 @@
     <string name="quiz_loading_learning_point">Preparing your next lesson…</string>
     <string name="quiz_loading_quiz">Generating knowledge check…</string>
     <string name="empty_string" />
+    <string name="quiz_feature_name">Quizzes</string>
     <string name="error_unknown">Something went wrong, Please try again.</string>
 </resources>

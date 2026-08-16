@@ -20,6 +20,37 @@
     <string name="parsing_cv_subtitle">This may take a moment…</string>
 
     <string name="back">Back</string>
+
+    <string name="plan_upgrade_required_title">Plan Upgrade Required</string>
+    <string name="plan_upgrade_required_message">Upgrade to %1$s plan to unlock this feature.</string>
+    <string name="upgrade_to_plan">Upgrade to %1$s</string>
+    <string name="quota_reached_title">Monthly Quota Reached</string>
+    <string name="quota_reached_message">You used all free sessions for this month. Unlock an extra session for %1$d coins.</string>
+    <string name="spend_coins_action">Spend %1$d Coins (Balance: %2$d)</string>
+    <string name="get_more_coins_action">Get More Coins (Balance: %1$d / Need: %2$d)</string>
+    <string name="network_required_title">Network Connection Required</string>
+    <string name="network_required_message">Please connect to the internet to verify your subscription access.</string>
+
+    <string name="pricing_badge_checking">Checking plan &amp; access…</string>
+    <string name="pricing_badge_requires_plan">Requires %1$s plan</string>
+    <string name="pricing_badge_tap_to_upgrade">Tap to upgrade and unlock this feature</string>
+    <string name="pricing_badge_coins_needed">%1$d coins needed to continue</string>
+    <string name="pricing_badge_balance_insufficient">Your balance: %1$d coins (insufficient)</string>
+    <string name="pricing_badge_coins_per_use">%1$d coins per use</string>
+    <string name="pricing_badge_balance">Your balance: %1$d coins</string>
+    <string name="pricing_badge_quota_remaining">%1$d of %2$d uses remaining</string>
+    <string name="pricing_badge_included_in_plan">Included in %1$s plan</string>
+    <string name="pricing_badge_unlimited">No usage limits</string>
+
+    <string name="feature_gate_subtitle">%1$s is available on the %2$s plan.</string>
+    <string name="not_now">Not now</string>
+    <string name="not_enough_coins_title">Not enough coins</string>
+    <string name="not_enough_coins_message">This requires %1$d coins, but you currently have %2$d coins.</string>
+    <string name="buy_coins">Buy Coins</string>
+    <string name="pricing_badge_coins">%1$d Coins</string>
+    <string name="coin_top_up_required">Required</string>
+    <string name="coin_top_up_current_balance">Current Balance</string>
+    <string name="coin_top_up_description">You don\'t have enough coins to use this feature. Top up your wallet to continue.</string>
     <string name="cv_upload_tap_to_upload">Tap to upload your CV</string>
     <string name="cv_upload_requirements">PDF · Max 10 MB</string>
     <string name="cv_upload_preparing">Preparing your CV…</string>
