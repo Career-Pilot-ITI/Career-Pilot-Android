@@ -37,7 +37,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -91,17 +90,18 @@ import com.iti.core.model.SeniorityLevel
 import com.iti.core.model.getTitleRes
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun CreateChallengeScreenRoot(
+    challengeId: String? = null,
     onBack: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     viewModel: CreateChallengeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.onAction(CreateChallengeAction.Initial)
+    LaunchedEffect(challengeId) {
+        viewModel.onAction(CreateChallengeAction.Initial(challengeId))
     }
 
     ObserveEvent(viewModel.events) { event ->
@@ -114,7 +114,12 @@ fun CreateChallengeScreenRoot(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.create_challenge_title)) },
+                title = {
+                    Text(
+                        text = if (state.isEditMode) "Edit Challenge" else stringResource(R.string.create_challenge_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     BackIconButton(onBack = { viewModel.onAction(CreateChallengeAction.OnBackClicked) })
                 },
@@ -129,8 +134,12 @@ fun CreateChallengeScreenRoot(
         )
     }
 
+    if (state.isLoading) {
+        LoadingDialog(title = "Loading Challenge...")
+    }
+
     if (state.isSubmitting) {
-        LoadingDialog(title = stringResource(R.string.creating_challenge))
+        LoadingDialog(title = if (state.isEditMode) "Updating Challenge..." else stringResource(R.string.creating_challenge))
     }
 
     if (state.isSuccessDialogVisible && state.invitationCode != null) {
@@ -612,7 +621,7 @@ fun CreateChallengeScreenContent(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             CareerPilotButton(
-                text = stringResource(R.string.create_challenge_submit),
+                text = if (state.isEditMode) "Save Changes" else stringResource(R.string.create_challenge_submit),
                 onClick = { onAction(CreateChallengeAction.OnSubmit) },
                 enabled = !state.isSubmitting
             )

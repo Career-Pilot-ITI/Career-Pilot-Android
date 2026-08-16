@@ -323,7 +323,7 @@ fun RootNavDisplay(
                         },
                         openCreateChallenge = {
                             rootBackStack.navigateSingleTop(
-                                Route.CreateChallenge,
+                                Route.CreateChallenge(),
                             )
                         },
                         openChallengeDashboard = {
@@ -507,8 +507,9 @@ fun RootNavDisplay(
                     )
                 }
 
-                entry<Route.CreateChallenge> {
+                entry<Route.CreateChallenge> { route ->
                     CreateChallengeScreenRoot(
+                        challengeId = route.challengeId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.CreateChallenge>()
                         },
@@ -525,6 +526,14 @@ fun RootNavDisplay(
                     ChallengeDashboardScreenRoot(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
+                        },
+                        onEditChallenge = { challengeId ->
+                            rootBackStack.navigateSingleTop(Route.CreateChallenge(challengeId))
+                        },
+                        onViewChallenge = { challengeId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ChallengeDetails(challengeId)
+                            )
                         }
                     )
                 }

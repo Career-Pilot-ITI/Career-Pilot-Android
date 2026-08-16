@@ -89,7 +89,7 @@ sealed interface Route : NavKey {
     data object Interviews : Route
 
     @Serializable
-    data object CreateChallenge : Route
+    data class CreateChallenge(val challengeId: String? = null) : Route
 
     @Serializable
     data object ChallengeDashboard : Route

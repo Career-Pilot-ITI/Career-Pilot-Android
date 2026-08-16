@@ -11,5 +11,6 @@ interface CreateChallengeRemoteDataSource {
     suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError>
     suspend fun validateQuestions(questions: List<String>): CareerPilotResult<Boolean, FirebaseError>
     suspend fun saveChallenge(challenge: Challenge): CareerPilotResult<Unit, FirebaseError>
+    suspend fun getChallenge(challengeId: String): CareerPilotResult<Challenge, FirebaseError>
     fun generateChallengeId(visibility: ChallengeVisibility): String
 }

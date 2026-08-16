@@ -71,6 +71,17 @@ class CreateChallengeRemoteDataSourceImpl @Inject constructor(
             .await()
     }
 
+    override suspend fun getChallenge(challengeId: String): CareerPilotResult<Challenge, FirebaseError> = safeFirebaseCall {
+        // Check public
+        var doc = firestore.collection(FirestoreCollections.PUBLIC_CHALLENGES).document(challengeId).get().await()
+        if (!doc.exists()) {
+            // Check private
+            doc = firestore.collection(FirestoreCollections.PRIVATE_CHALLENGES).document(challengeId).get().await()
+        }
+        
+        doc.toObject(Challenge::class.java) ?: throw Exception("Challenge not found")
+    }
+
     override fun generateChallengeId(visibility: ChallengeVisibility): String {
         return firestore.collection(getCollectionName(visibility)).document().id.uppercase()
     }

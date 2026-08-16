@@ -17,10 +17,13 @@ data class CreateChallengeState(
     val analyzeHands: Boolean = false,
     val questions: ImmutableList<String> = persistentListOf("", "", "", "", "", "", "", "", "", ""),
 
+    val isLoading: Boolean = false,
     val isLoadingTracks: Boolean = false,
     val isSubmitting: Boolean = false,
     val error: String? = null,
     val invitationCode: String? = null,
     val isSuccessDialogVisible: Boolean = false,
-    val questionToDeleteIndex: Int? = null
+    val questionToDeleteIndex: Int? = null,
+    val isEditMode: Boolean = false,
+    val existingChallengeId: String? = null
 )

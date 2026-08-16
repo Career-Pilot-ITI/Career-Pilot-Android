@@ -7,7 +7,7 @@ import com.iti.core.model.Track
 
 
 sealed interface CreateChallengeAction {
-    data object Initial : CreateChallengeAction
+    data class Initial(val challengeId: String? = null) : CreateChallengeAction
     data class OnTrackSelected(val track: Track) : CreateChallengeAction
     data class OnVisibilityChanged(val visibility: ChallengeVisibility) : CreateChallengeAction
     data class OnSeniorityLevelChanged(val level: SeniorityLevel) : CreateChallengeAction

@@ -26,6 +26,10 @@ class CreateChallengeRepositoryImpl @Inject constructor(
         return remoteDataSource.saveChallenge(challenge)
     }
 
+    override suspend fun getChallenge(challengeId: String): CareerPilotResult<Challenge, FirebaseError> {
+        return remoteDataSource.getChallenge(challengeId)
+    }
+
     override fun generateChallengeId(visibility: ChallengeVisibility): String {
         return remoteDataSource.generateChallengeId(visibility)
     }
