@@ -18,6 +18,8 @@ class FeaturePricingMapTest {
         assertEquals(1, FeaturePricingMap.coinCost(FeatureKey.JobParse))
         assertEquals(0, FeaturePricingMap.coinCost(FeatureKey.ExportPdfReport))
         assertEquals(0, FeaturePricingMap.coinCost(FeatureKey.AdvancedReports))
+        assertEquals(0, FeaturePricingMap.coinCost(FeatureKey.CreateChallenge))
+        assertEquals(0, FeaturePricingMap.coinCost(FeatureKey.EnterChallenge))
     }
 
     @Test
@@ -29,7 +31,7 @@ class FeaturePricingMapTest {
     @Test
     fun `allPrices map contains correct mappings`() {
         val prices = FeaturePricingMap.allPrices()
-        assertEquals(10, prices.size)
+        assertEquals(12, prices.size)
         assertEquals(10, prices[FeatureKey.MockInterviews])
         assertEquals(10, prices[FeatureKey.VoicePracticeMode])
         assertEquals(0, prices[FeatureKey.VideoInterview])
@@ -40,5 +42,7 @@ class FeaturePricingMapTest {
         assertEquals(1, prices[FeatureKey.JobParse])
         assertEquals(0, prices[FeatureKey.ExportPdfReport])
         assertEquals(0, prices[FeatureKey.AdvancedReports])
+        assertEquals(0, prices[FeatureKey.CreateChallenge])
+        assertEquals(0, prices[FeatureKey.EnterChallenge])
     }
 }

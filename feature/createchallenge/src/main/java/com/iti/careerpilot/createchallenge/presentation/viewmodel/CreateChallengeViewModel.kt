@@ -11,18 +11,22 @@ import com.iti.careerpilot.createchallenge.domain.repository.CreateChallengeRepo
 import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAction
 import com.iti.careerpilot.createchallenge.presentation.event.CreateChallengeEvent
 import com.iti.careerpilot.createchallenge.presentation.state.CreateChallengeState
+import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
+import com.iti.core.model.FeatureAccess
+import com.iti.core.model.FeatureKey
 import com.iti.core.model.Track
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,7 +36,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateChallengeViewModel @Inject constructor(
     private val repository: CreateChallengeRepository,
-    private val userProfileRepo: UserProfileRepo
+    private val userProfileRepo: UserProfileRepo,
+    private val checkFeatureAccess: CheckFeatureAccessUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateChallengeState())
@@ -177,6 +182,14 @@ class CreateChallengeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val access = checkFeatureAccess(FeatureKey.CreateChallenge).first()
+            if (access !is FeatureAccess.Granted) {
+                CareerPilotSnackbarController.show(
+                    UIText.StringResource(R.string.create_challenge_error_max_plan_required)
+                )
+                return@launch
+            }
+
             _state.update { it.copy(isSubmitting = true, error = null) }
 
             repository.validateQuestions(nonEmptyQuestions)

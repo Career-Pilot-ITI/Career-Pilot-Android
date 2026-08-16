@@ -363,4 +363,72 @@ class CheckFeatureAccessUseCaseTest {
 
         assertEquals(FeatureAccess.StaleCacheBlocked, result)
     }
+
+    // ── Scenario 8: Challenge Features Access ───────────────────────────
+
+    @Test
+    fun `FREE plan user accessing EnterChallenge returns Granted`() = runTest {
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.FREE,
+            features = PlanAccessMap.featuresFor(Plan.FREE),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 0
+        )
+
+        val result = useCase(FeatureKey.EnterChallenge).first()
+
+        assertTrue(result is FeatureAccess.Granted)
+    }
+
+    @Test
+    fun `FREE plan user accessing CreateChallenge returns Locked MAX`() = runTest {
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.FREE,
+            features = PlanAccessMap.featuresFor(Plan.FREE),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 100
+        )
+
+        val result = useCase(FeatureKey.CreateChallenge).first()
+
+        assertTrue(result is FeatureAccess.Locked)
+        assertEquals(Plan.MAX, (result as FeatureAccess.Locked).requiredPlan)
+    }
+
+    @Test
+    fun `PLUS plan user accessing CreateChallenge returns Locked MAX`() = runTest {
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.PLUS,
+            features = PlanAccessMap.featuresFor(Plan.PLUS),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 100
+        )
+
+        val result = useCase(FeatureKey.CreateChallenge).first()
+
+        assertTrue(result is FeatureAccess.Locked)
+        assertEquals(Plan.MAX, (result as FeatureAccess.Locked).requiredPlan)
+    }
+
+    @Test
+    fun `MAX plan user accessing CreateChallenge returns Granted`() = runTest {
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.MAX,
+            features = PlanAccessMap.featuresFor(Plan.MAX),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 0
+        )
+
+        val result = useCase(FeatureKey.CreateChallenge).first()
+
+        assertTrue(result is FeatureAccess.Granted)
+    }
 }

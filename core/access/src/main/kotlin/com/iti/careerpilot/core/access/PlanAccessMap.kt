@@ -9,6 +9,7 @@ object PlanAccessMap {
         Plan.FREE to setOf(
             FeatureKey.MockInterviews,
             FeatureKey.VoicePracticeMode,
+            FeatureKey.EnterChallenge,
         ),
         Plan.PLUS to setOf(
             FeatureKey.MockInterviews,
@@ -19,6 +20,7 @@ object PlanAccessMap {
             FeatureKey.JobParse,
             FeatureKey.Quizzes,
             FeatureKey.ExportPdfReport,
+            FeatureKey.EnterChallenge,
         ),
         Plan.MAX to setOf(
             FeatureKey.MockInterviews,
@@ -31,6 +33,8 @@ object PlanAccessMap {
             FeatureKey.ExportPdfReport,
             FeatureKey.AdvancedReports,
             FeatureKey.VideoInterview,
+            FeatureKey.EnterChallenge,
+            FeatureKey.CreateChallenge,
         ),
     )
 

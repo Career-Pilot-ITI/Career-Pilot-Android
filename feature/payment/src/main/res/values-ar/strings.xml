@@ -14,7 +14,7 @@
     <string name="paywall_coin_pack">%1$d عملة</string>
     <string name="paywall_price">%1$d جنيه مصري</string>
     <string name="paywall_monthly_price">%1$d جنيه مصري شهرياً</string>
-    <string name="paywall_free_plan_description">خطتك المجانية الحالية</string>
+    <string name="paywall_free_plan_description">الخطة المجانية: مقابلات صوتية والمشاركة في التحديات</string>
     <string name="paywall_badge_most_popular">الأكثر شيوعاً</string>
     <string name="paywall_badge_best_value">أفضل قيمة</string>
     <string name="paywall_selected">تم الاختيار</string>
@@ -40,12 +40,14 @@
     <string name="paywall_feature_voice_mock_interview">مقابلات تجريبية صوتية بالذكاء الاصطناعي (10 عملات / جلسة)</string>
     <string name="paywall_feature_performance_analytics">تحليلات الأداء وتفصيل الدرجات</string>
     <string name="paywall_feature_voice_scoring">تقييم الصوت وملاحظات الذكاء الاصطناعي</string>
+    <string name="paywall_feature_enter_challenges">المشاركة في التحديات العامة والخاصة</string>
     <string name="paywall_feature_everything_in_free">كل مميزات الخطة المجانية</string>
     <string name="paywall_feature_ats_scan">فحص ومطابقة السيرة الذاتية لأنظمة ATS</string>
     <string name="paywall_feature_resume_optimizer">تحسين أقسام السيرة الذاتية وخطاب التقديم</string>
     <string name="paywall_feature_80_monthly_coins">80 عملة شهرية متضمنة</string>
     <string name="paywall_feature_everything_in_plus">كل مميزات خطة بلس</string>
     <string name="paywall_feature_video_interview">تحليل لغة الجسد والوضعية في الفيديو</string>
+    <string name="paywall_feature_create_challenges">إنشاء واستضافة تحديات المقابلات المخصصة</string>
     <string name="paywall_feature_technical_quizzes">اختبارات المهارات التقنية ومسارات التعلم</string>
     <string name="paywall_feature_160_monthly_coins">160 عملة شهرية متضمنة</string>
     <string name="paywall_checkout_title">إتمام الشراء</string>

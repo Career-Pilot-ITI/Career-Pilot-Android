@@ -45,7 +45,8 @@ data class PaywallState(
             features = persistentListOf(
                 R.string.paywall_feature_voice_mock_interview,
                 R.string.paywall_feature_performance_analytics,
-                R.string.paywall_feature_voice_scoring
+                R.string.paywall_feature_voice_scoring,
+                R.string.paywall_feature_enter_challenges
             )
         ),
         SubscriptionPlan(
@@ -70,6 +71,7 @@ data class PaywallState(
             features = persistentListOf(
                 R.string.paywall_feature_everything_in_plus,
                 R.string.paywall_feature_video_interview,
+                R.string.paywall_feature_create_challenges,
                 R.string.paywall_feature_160_monthly_coins
             )
         )

@@ -15,4 +15,5 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:ai"))
     implementation(project(":core:challengefirestore"))
+    implementation(project(":core:access"))
 }
