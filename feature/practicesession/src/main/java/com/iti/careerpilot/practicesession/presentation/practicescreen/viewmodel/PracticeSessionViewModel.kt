@@ -9,6 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
+import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSource
+import com.iti.careerpilot.challengefirestore.ChallengeQuestionResult
+import com.iti.careerpilot.challengefirestore.ChallengeSession
 import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
@@ -29,11 +32,13 @@ import com.iti.careerpilot.practicesession.presentation.practicescreen.state.Vol
 import com.iti.careerpilot.whisper.domain.WhisperEngine
 import com.iti.common.dispatcher.CareerPilotDispatchers.Default
 import com.iti.common.dispatcher.Dispatcher
+import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.error.TranscriptionError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.models.isPaidSubscriber
 import com.iti.core.datastore.repo.UserProfileRepo
@@ -55,7 +60,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
@@ -76,6 +80,7 @@ const val WAVE_BAR_COUNT = 32
 class PracticeSessionViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sessionRepo: SessionRepo,
+    private val firestoreDataSource: ChallengeFirestoreDataSource,
     private val voiceRecorder: VoiceRecorder,
     private val audioPlayer: AudioPlayer,
     private val whisperEngine: WhisperEngine,
@@ -90,6 +95,8 @@ class PracticeSessionViewModel @Inject constructor(
     private companion object {
         const val TAG = "PracticeSessionVM"
         const val KEY_ACTIVE_SESSION_ID = "practice_active_session_id"
+        const val KEY_FIRESTORE_SESSION_ID = "practice_firestore_session_id"
+        const val KEY_CHALLENGE_ID = "practice_challenge_id"
         const val KEY_SESSION_STARTED_AT_MS = "practice_session_started_at_ms"
         const val KEY_IS_VIDEO_SESSION = "practice_is_video_session"
         const val KEY_ENABLE_POSTURE = "enable_posture_tracking"
@@ -251,6 +258,7 @@ class PracticeSessionViewModel @Inject constructor(
             is CreateNewPracticeSession -> createNewSession(
                 action.trackId,
                 action.workspaceId,
+                action.challengeId,
                 action.isVideoSession,
                 action.enablePostureTracking,
                 action.enableHandTracking
@@ -258,6 +266,7 @@ class PracticeSessionViewModel @Inject constructor(
 
             is RestartPracticeSession -> restartOldSession(
                 action.sessionId,
+                action.firestoreSessionId,
                 action.isVideoSession,
                 action.enablePostureTracking,
                 action.enableHandTracking
@@ -395,6 +404,7 @@ class PracticeSessionViewModel @Inject constructor(
 
     private fun restartOldSession(
         sessionId: Long,
+        firestoreSessionId: String? = null,
         isVideoSession: Boolean = false,
         enablePostureTracking: Boolean = false,
         enableHandTracking: Boolean = false
@@ -412,15 +422,24 @@ class PracticeSessionViewModel @Inject constructor(
                 enableHandTracking = effectiveHands
             )
         }
-        if (_state.value.currentSession != null || _state.value.isLoadingSession) return
+        if (_state.value.currentSession != null || _state.value.firestoreSession != null || _state.value.isLoadingSession) return
+
+        if (firestoreSessionId != null) {
+            loadFirestoreSession {
+                firestoreDataSource.getSession(firestoreSessionId)
+            }
+            return
+        }
+
         loadSession {
             sessionRepo.restartOldSession(sessionId)
         }
     }
 
     private fun createNewSession(
-        trackId: Long,
+        trackId: Long = 0,
         workspaceId: Long? = null,
+        challengeId: String? = null,
         isVideoSession: Boolean = false,
         enablePostureTracking: Boolean = false,
         enableHandTracking: Boolean = false
@@ -435,14 +454,40 @@ class PracticeSessionViewModel @Inject constructor(
             it.copy(
                 isVideoSessionSelected = effectiveIsVideo,
                 enablePostureTracking = effectivePosture,
-                enableHandTracking = effectiveHands
+                enableHandTracking = effectiveHands,
+                challengeId = challengeId
             )
         }
-        if (_state.value.currentSession != null || _state.value.isLoadingSession) return
+        if (_state.value.currentSession != null || _state.value.firestoreSession != null || _state.value.isLoadingSession) return
 
         val restoredSessionId = savedStateHandle.get<Long>(KEY_ACTIVE_SESSION_ID)
+        val restoredFirestoreSessionId = savedStateHandle.get<String>(KEY_FIRESTORE_SESSION_ID)
+
+        if (restoredFirestoreSessionId != null) {
+            restartOldSession(0L, restoredFirestoreSessionId, effectiveIsVideo, effectivePosture, effectiveHands)
+            return
+        }
+
         if (restoredSessionId != null && restoredSessionId > 0L) {
-            restartOldSession(restoredSessionId, effectiveIsVideo, effectivePosture, effectiveHands)
+            restartOldSession(restoredSessionId, null, effectiveIsVideo, effectivePosture, effectiveHands)
+            return
+        }
+
+        if (challengeId != null) {
+            loadFirestoreSession {
+                when (val challengeResult = firestoreDataSource.getChallenge(challengeId)) {
+                    is CareerPilotResult.Success -> {
+                        val profile = userProfileRepo.userProfile.value
+                        firestoreDataSource.createSession(
+                            challenge = challengeResult.data,
+                            participantId = profile.id,
+                            participantEmail = profile.account.email,
+                            participantName = profile.personal.displayName
+                        )
+                    }
+                    is CareerPilotResult.Error -> challengeResult
+                }
+            }
             return
         }
 
@@ -472,8 +517,59 @@ class PracticeSessionViewModel @Inject constructor(
                     handleSessionLoadSuccess(session)
                 }
                 .onError {
-                    handleSessionLoadError(it)
+                    handleSessionLoadError(it.toUIText())
                 }
+        }
+    }
+
+    private fun loadFirestoreSession(
+        request: suspend () -> CareerPilotResult<ChallengeSession, FirebaseError>
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingSession = true) }
+            request()
+                .onSuccess { session ->
+                    handleFirestoreSessionLoadSuccess(session)
+                }
+                .onError { error ->
+                    handleSessionLoadError(error.toUIText())
+                }
+        }
+    }
+
+    private fun handleFirestoreSessionLoadSuccess(session: ChallengeSession) {
+        savedStateHandle[KEY_FIRESTORE_SESSION_ID] = session.sessionId
+        savedStateHandle[KEY_CHALLENGE_ID] = session.challengeId
+        
+        if (sessionStartedAtMs == null) {
+            sessionStartedAtMs = resolveSessionStartMs(session.startedAt)
+        }
+        startSessionTimer()
+
+        _state.update {
+            it.copy(
+                isLoadingSession = false,
+                firestoreSession = session,
+                firestoreSessionId = session.sessionId,
+                challengeId = session.challengeId,
+                recordedAudioPath = null,
+                transcription = null,
+                isEmptyAnswer = false,
+                uploadProgress = 0,
+                recordingDuration = Duration.ZERO,
+                amplitudes = emptyList(),
+                volumeBars = createInitialVolumeBars(),
+                showQuestionCard = true
+            )
+        }
+        refreshSessionTimer()
+        if (_state.value.autoReadQuestion) {
+            readQuestion()
+        }
+        if (_state.value.isVideoSessionSelected) {
+            checkBodyLanguageAccess()
+        } else {
+            _state.update { it.copy(bodyLanguageEnabled = false) }
         }
     }
 
@@ -524,13 +620,14 @@ class PracticeSessionViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleSessionLoadError(error: NetworkError) {
+    private suspend fun handleSessionLoadError(errorText: UIText) {
         _state.update { it.copy(isLoadingSession = false) }
-        _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
+        _event.send(PracticeSessionEvent.ShowError(errorText))
     }
 
     private fun readQuestion() {
-        val question = _state.value.currentSession?.currentQuestion?.questionText
+        val question = _state.value.firestoreSession?.currentQuestion?.questionText
+            ?: _state.value.currentSession?.currentQuestion?.questionText
         if (!question.isNullOrBlank()) {
             _state.update { it.copy(showQuestionCard = true) }
             if (_state.value.isRecording) {
@@ -543,8 +640,11 @@ class PracticeSessionViewModel @Inject constructor(
 
     private fun submitAnswer() {
         val audioPath = _state.value.recordedAudioPath ?: return
-        val session = _state.value.currentSession ?: return
-        val sessionId = session.sessionId
+        val session = _state.value.currentSession
+        val firestoreSession = _state.value.firestoreSession
+        
+        if (session == null && firestoreSession == null) return
+
         val isEmptyAnswer = RecordingAnswerClassifier.isLikelyEmpty(
             durationMs = _state.value.recordingDuration.inWholeMilliseconds,
             rawAmplitudes = _state.value.amplitudes,
@@ -585,7 +685,11 @@ class PracticeSessionViewModel @Inject constructor(
                     _state.update { it.copy(transcription = safeTranscript) }
                     uploadResult
                         .onSuccess { audioAttachment ->
-                            uploadAnswer(sessionId, audioAttachment.url, safeTranscript)
+                            if (firestoreSession != null) {
+                                uploadFirestoreAnswer(firestoreSession.sessionId, audioAttachment.url, safeTranscript)
+                            } else if (session != null) {
+                                uploadAnswer(session.sessionId, audioAttachment.url, safeTranscript)
+                            }
                         }
                         .onError { error ->
                             _state.update {
@@ -608,6 +712,107 @@ class PracticeSessionViewModel @Inject constructor(
                     }
                     _event.send(PracticeSessionEvent.ShowError(TranscriptionError.UNKNOWN.toUIText()))
                 }
+        }
+    }
+
+    private suspend fun uploadFirestoreAnswer(
+        sessionId: String,
+        audioUrl: String,
+        transcript: String
+    ) {
+        _state.update {
+            it.copy(
+                isUploadingAndTranscribingAudio = false,
+                isSendingAnswer = true,
+                isLoadingSession = false,
+            )
+        }
+        
+        val currentQuestion = _state.value.firestoreSession?.currentQuestion ?: return
+
+        val result = firestoreDataSource.submitAnswer(
+            sessionId = sessionId,
+            questionResult = ChallengeQuestionResult(
+                questionId = currentQuestion.id,
+                questionText = currentQuestion.questionText,
+                questionOrder = currentQuestion.questionOrder,
+                userTranscript = transcript,
+                answerAudioUrl = audioUrl,
+                durationMs = _state.value.recordingDuration.inWholeMilliseconds,
+                speechRateWpm = 0.0,
+                createdAt = currentQuestion.createdAt,
+                completedAt = Instant.now().toString()
+            )
+        )
+
+        result.onSuccess { updatedSession ->
+            handleFirestoreAnswerSubmissionSuccess(updatedSession)
+        }.onError {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                )
+            }
+            _event.send(PracticeSessionEvent.ShowError(NetworkError.UNKNOWN.toUIText()))
+        }
+    }
+
+    private suspend fun handleFirestoreAnswerSubmissionSuccess(
+        session: ChallengeSession
+    ) {
+        val isCompleted = session.status.contains("COMPLETED", ignoreCase = true)
+
+        if (isCompleted) {
+            // Finalize body language if running
+            if (bodyLanguageAnalyzer.isRunning) {
+                val metrics = bodyLanguageAnalyzer.finalizeSession()
+                sessionCache.putMetrics(session.sessionId, metrics)
+                bodyLanguageAnalyzer.stop()
+            }
+
+            timerJob?.cancel()
+            savedStateHandle.remove<String>(KEY_FIRESTORE_SESSION_ID)
+            sessionStartedAtMs = null
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                    recordedAudioPath = null
+                )
+            }
+            _event.send(PracticeSessionEvent.NavigateToFirestoreResult(session.sessionId))
+            return
+        }
+
+        val nextQuestion = session.currentQuestion
+        if (nextQuestion != null) {
+            _state.update {
+                it.copy(
+                    isSendingAnswer = false,
+                    isUploadingAndTranscribingAudio = false,
+                    isLoadingSession = false,
+                    firestoreSession = session,
+                    recordedAudioPath = null,
+                    transcription = null,
+                    isEmptyAnswer = false,
+                    uploadProgress = 0,
+                    recordingDuration = Duration.ZERO,
+                    amplitudes = emptyList(),
+                    volumeBars = createInitialVolumeBars()
+                )
+            }
+            if (_state.value.autoReadQuestion) {
+                readQuestion()
+            } else {
+                _state.update {
+                    it.copy(
+                        showQuestionCard = true
+                    )
+                }
+            }
         }
     }
 

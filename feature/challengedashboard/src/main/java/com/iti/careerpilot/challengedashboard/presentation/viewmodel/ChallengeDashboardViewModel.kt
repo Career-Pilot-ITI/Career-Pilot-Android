@@ -68,7 +68,7 @@ class ChallengeDashboardViewModel @Inject constructor(
         when (action) {
             ChallengeDashboardAction.Initial -> initialize()
             ChallengeDashboardAction.Refresh -> loadData()
-            is ChallengeDashboardAction.OnTabSelected -> _state.update { it.copy(selectedTab = action.index) }
+            is ChallengeDashboardAction.OnTabSelected -> _state.update { it.copy(selectedTab = action.tab) }
             is ChallengeDashboardAction.OnDeleteChallenge -> deleteChallenge(
                 action.challengeId,
                 action.visibility

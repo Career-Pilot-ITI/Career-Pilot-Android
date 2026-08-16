@@ -1,5 +1,6 @@
 package com.iti.careerpilot.challengedashboard.presentation.state
 
+import com.iti.careerpilot.challengedashboard.R
 import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.careerpilot.challengefirestore.ChallengeSession
 import kotlinx.collections.immutable.ImmutableList
@@ -9,7 +10,12 @@ data class ChallengeDashboardState(
     val isLoading: Boolean = false,
     val createdChallenges: ImmutableList<Challenge> = persistentListOf(),
     val takenChallenges: ImmutableList<ChallengeSession> = persistentListOf(),
-    val selectedTab: Int = 0, // 0: My Challenges, 1: Taken Challenges
+    val selectedTab: DashboardTab = DashboardTab.MY_CHALLENGES,
     val participantSessions: ImmutableList<ChallengeSession>? = null, // Sessions for a specific created challenge
-    val selectedChallengeId: String? = null
+    val selectedChallengeId: String? = null,
 )
+
+enum class DashboardTab(val titleRes: Int) {
+    MY_CHALLENGES(R.string.dashboard_tab_my_challenges),
+    HISTORY(R.string.dashboard_tab_history)
+}

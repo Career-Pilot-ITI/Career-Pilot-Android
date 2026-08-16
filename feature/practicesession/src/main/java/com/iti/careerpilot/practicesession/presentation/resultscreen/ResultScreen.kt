@@ -87,11 +87,14 @@ import com.iti.careerpilot.practicesession.presentation.resultscreen.components.
 @Composable
 fun ResultRoot(
     sessionId: Long? = null,
+    firestoreSessionId: String? = null,
     onBack: () -> Unit,
     viewModel: ResultViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(sessionId) {
-        if (sessionId != null && sessionId > 0L) {
+    LaunchedEffect(sessionId, firestoreSessionId) {
+        if (firestoreSessionId != null) {
+            viewModel.initialise(firestoreSessionId)
+        } else if (sessionId != null && sessionId > 0L) {
             viewModel.initialise(sessionId)
         }
     }

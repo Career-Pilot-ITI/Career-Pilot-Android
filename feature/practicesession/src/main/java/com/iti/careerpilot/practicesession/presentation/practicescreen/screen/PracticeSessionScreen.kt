@@ -87,6 +87,7 @@ fun PracticeSessionRoot(
     enableHandTracking: Boolean = false,
     onBack: () -> Unit,
     onNavigateToResult: (Long) -> Unit,
+    onNavigateToFirestoreResult: (String) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
@@ -94,6 +95,7 @@ fun PracticeSessionRoot(
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
+            is PracticeSessionEvent.NavigateToFirestoreResult -> onNavigateToFirestoreResult(newEvent.sessionId)
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
             }
@@ -108,7 +110,16 @@ fun PracticeSessionRoot(
     }
 
     LaunchedEffect(trackId, sessionId, workspaceId, challengeId) {
-        if (sessionId != null && sessionId != 0L) {
+        if (challengeId != null) {
+            viewModel.onAction(
+                PracticeSessionAction.CreateNewPracticeSession(
+                    challengeId = challengeId,
+                    isVideoSession = isVideoSession,
+                    enablePostureTracking = enablePostureTracking,
+                    enableHandTracking = enableHandTracking
+                )
+            )
+        } else if (sessionId != null && sessionId != 0L) {
             viewModel.onAction(
                 PracticeSessionAction.RestartPracticeSession(
                     sessionId = sessionId,

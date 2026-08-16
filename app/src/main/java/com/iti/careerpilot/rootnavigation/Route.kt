@@ -65,7 +65,10 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data class PracticeResult(val sessionId: Long) : Route
+    data class PracticeResult(
+        val sessionId: Long? = null,
+        val firestoreSessionId: String? = null,
+    ) : Route
 
     @Serializable
     data class QuestionBreakdown(val sessionId: Long) : Route

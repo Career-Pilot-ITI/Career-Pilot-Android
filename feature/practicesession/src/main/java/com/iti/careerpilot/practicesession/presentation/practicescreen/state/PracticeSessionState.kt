@@ -1,6 +1,7 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.state
 
 import androidx.compose.runtime.Immutable
+import com.iti.careerpilot.challengefirestore.ChallengeSession
 import com.iti.careerpilot.practicesession.domain.audio.models.AudioPlaybackState
 import com.iti.careerpilot.practicesession.domain.models.Session
 import kotlin.time.Duration
@@ -9,8 +10,11 @@ import kotlin.time.Duration
 data class PracticeSessionState(
     val isLoadingSession: Boolean = false,
     val sessionId: Long = 0L,
+    val firestoreSessionId: String? = null,
+    val challengeId: String? = null,
     val showPermissionDialog: Boolean = false,
     val currentSession: Session? = null,
+    val firestoreSession: ChallengeSession? = null,
     val isRecording: Boolean = false,
     val isReadingQuestion: Boolean = false,
     val recordedAudioPath: String? = null,

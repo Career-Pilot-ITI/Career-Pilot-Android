@@ -48,9 +48,11 @@ import com.iti.careerpilot.challengedashboard.R
 import com.iti.careerpilot.challengedashboard.presentation.action.ChallengeDashboardAction
 import com.iti.careerpilot.challengedashboard.presentation.event.ChallengeDashboardEvent
 import com.iti.careerpilot.challengedashboard.presentation.state.ChallengeDashboardState
+import com.iti.careerpilot.challengedashboard.presentation.state.DashboardTab
 import com.iti.careerpilot.challengedashboard.presentation.viewmodel.ChallengeDashboardViewModel
 import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.careerpilot.challengefirestore.ChallengeSession
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
 import com.iti.careerpilot.challengefirestore.getTitleRes
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
@@ -133,7 +135,7 @@ fun ChallengeDashboardScreenContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
-            if (state.selectedTab == 0) {
+            if (state.selectedTab == DashboardTab.MY_CHALLENGES) {
                 items(state.createdChallenges) { challenge ->
                     CreatedChallengeItem(
                         challenge = challenge,
@@ -155,7 +157,7 @@ fun ChallengeDashboardScreenContent(
 }
 
 @Composable
-fun DashboardTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
+fun DashboardTabs(selectedTab: DashboardTab, onTabSelected: (DashboardTab) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,9 +166,8 @@ fun DashboardTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val tabs = listOf("My Challenges", "History")
-        tabs.forEachIndexed { index, title ->
-            val isSelected = selectedTab == index
+        DashboardTab.entries.forEach { tab ->
+            val isSelected = selectedTab == tab
             val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, label = "tabBg")
             val contentColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, label = "tabText")
 
@@ -176,10 +177,15 @@ fun DashboardTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
                     .fillMaxHeight()
                     .clip(MaterialTheme.shapes.large)
                     .background(bgColor)
-                    .clickable { onTabSelected(index) },
+                    .clickable { onTabSelected(tab) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = contentColor)
+                Text(
+                    text = stringResource(tab.titleRes),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
+                )
             }
         }
     }
@@ -195,17 +201,43 @@ fun CreatedChallengeItem(
     CareerPilotCard {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(challenge.trackName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(challenge.trackName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(challenge.seniorityLevel.getTitleRes()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        Text(stringResource(R.string.questions_count, challenge.questions.size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                        Text(stringResource(challenge.type.getTitleRes()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    }
+                }
                 Row {
                     IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.secondary) }
                     IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error) }
+                }
+            }
+
+            if (challenge.visibility == ChallengeVisibility.PRIVATE && challenge.invitationCode.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.challenge_code_label, challenge.invitationCode),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(challenge.visibility.getTitleRes()), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.outline)
                 Button(onClick = onViewReports, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)) {
-                    Text("View Reports", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.view_reports), style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
@@ -222,9 +254,23 @@ fun TakenChallengeItem(session: ChallengeSession, onClick: () -> Unit) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(session.challengeTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    Text(
+                        text = stringResource(R.string.questions_progress, session.answeredCount, session.maxQuestions),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    Text(
+                        text = if (session.status == "COMPLETED") stringResource(R.string.status_completed) else stringResource(R.string.status_in_progress),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (session.status == "COMPLETED") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
-            session.score?.let {
+            session.overallScore?.let {
                 Text("$it%", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
@@ -241,9 +287,9 @@ fun ParticipantReportsDialog(
     Dialog(onDismissRequest = onDismiss) {
         CareerPilotCard {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Participant Reports", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.participant_reports_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 if (sessions.isEmpty()) {
-                    Text("No participants yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                    Text(stringResource(R.string.no_participants_message), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
                 } else {
                     LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
                         items(sessions) { session ->
@@ -256,16 +302,26 @@ fun ParticipantReportsDialog(
                             ) {
                                 Column {
                                     Text(session.participantName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                                    Text(session.participantEmail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(session.participantEmail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                        Text(stringResource(R.string.questions_progress, session.answeredCount, session.maxQuestions), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                        Text(
+                                            text = if (session.status == "COMPLETED") stringResource(R.string.status_completed) else stringResource(R.string.status_in_progress),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (session.status == "COMPLETED") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
                                 }
-                                session.score?.let { Text("$it%", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
+                                session.overallScore?.let { Text("$it%", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) }
                             }
                             HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                         }
                     }
                 }
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text("Close")
+                    Text(stringResource(R.string.close))
                 }
             }
         }

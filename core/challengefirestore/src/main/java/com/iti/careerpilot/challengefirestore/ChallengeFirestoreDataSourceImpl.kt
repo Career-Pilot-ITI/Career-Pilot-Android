@@ -10,9 +10,12 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.onError
+import com.iti.common.result.onSuccess
 import com.iti.common.util.safeFirebaseCall
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
+import java.time.Instant
 import javax.inject.Inject
 
 class ChallengeFirestoreDataSourceImpl @Inject constructor(
@@ -144,6 +147,162 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
         return firestore.collection(getCollectionName(visibility)).document().id.uppercase()
     }
 
+    override suspend fun createSession(
+        challenge: Challenge,
+        participantId: Long,
+        participantEmail: String,
+        participantName: String
+    ): CareerPilotResult<ChallengeSession, FirebaseError> = safeFirebaseCall {
+        val sessionId = firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS).document().id
+        val firstQuestion = challenge.questions.firstOrNull()
+        val now = Instant.now().toString()
+
+        val session = ChallengeSession(
+            sessionId = sessionId,
+            challengeId = challenge.id,
+            challengeTitle = challenge.trackName,
+            participantId = participantId,
+            participantEmail = participantEmail,
+            participantName = participantName,
+            trackName = challenge.trackName,
+            status = "IN_PROGRESS",
+            targetDurationMinutes = challenge.questions.size * 2, // 2 mins per question
+            maxQuestions = challenge.questions.size,
+            answeredCount = 0,
+            startedAt = now,
+            updatedAt = now,
+            timestamp = System.currentTimeMillis(),
+            currentQuestion = firstQuestion?.let {
+                ChallengeCurrentQuestion(
+                    id = it.id,
+                    questionText = it.text,
+                    questionOrder = 1,
+                    createdAt = now
+                )
+            }
+        )
+
+        firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS)
+            .document(sessionId)
+            .set(session)
+            .await()
+
+        session
+    }
+
+    override suspend fun submitAnswer(
+        sessionId: String,
+        questionResult: ChallengeQuestionResult
+    ): CareerPilotResult<ChallengeSession, FirebaseError> = safeFirebaseCall {
+        val docRef = firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS).document(sessionId)
+        val session = docRef.get().await().toObject<ChallengeSession>()
+            ?: throw Exception("Session not found")
+
+        // 1. Score the answer using Gemini
+        val scoringPrompt = """
+            Score the following technical interview answer:
+            Question: ${questionResult.questionText}
+            Answer: ${questionResult.userTranscript}
+            
+            Provide scores (0-100) for:
+            - Content Relevance
+            - Clarity
+            - Confidence
+            - Pacing (assume speechRateWpm: ${questionResult.speechRateWpm})
+            - Filler Words
+            
+            The Answer can be a little of from bad transcription so keep that in mind and figure out what the user is trying to say
+            Also provide a short coaching tip.
+            
+            Return ONLY a JSON object:
+            {
+              "contentRelevance": number,
+              "clarity": number,
+              "confidence": number,
+              "pacing": number,
+              "fillerWords": number,
+              "overallScore": number,
+              "coachingTip": "string"
+            }
+        """.trimIndent()
+
+        val response = model.generateContent(scoringPrompt)
+        val text = response.text ?: throw Exception("Empty AI response")
+        val score = json.decodeFromString<ChallengeScore>(cleanJson(text)).copy(
+            createdAt = Instant.now().toString()
+        )
+
+        // 2. Update question result with score
+        val updatedQuestionResult = questionResult.copy(score = score)
+        val updatedResults = session.results + updatedQuestionResult
+        val nextOrder = session.answeredCount + 1
+        
+        // Find next question from original challenge
+        val challenge = when (val challengeResult = getChallenge(session.challengeId)) {
+            is CareerPilotResult.Success -> challengeResult.data
+            is CareerPilotResult.Error -> throw Exception("Challenge not found")
+        }
+        val nextQuestion = challenge.questions.getOrNull(session.answeredCount + 1)
+
+        val isCompleted = nextQuestion == null
+        val now = Instant.now().toString()
+
+        // 3. Calculate overall scores if completed
+        var finalSession = session.copy(
+            results = updatedResults,
+            answeredCount = session.answeredCount + 1,
+            updatedAt = now,
+            status = if (isCompleted) "COMPLETED" else "IN_PROGRESS",
+            currentQuestion = nextQuestion?.let {
+                ChallengeCurrentQuestion(
+                    id = it.id,
+                    questionText = it.text,
+                    questionOrder = nextOrder,
+                    createdAt = now
+                )
+            }
+        )
+
+        if (isCompleted) {
+            val avgClarity = updatedResults.map { it.score?.clarity ?: 0 }.average().toInt()
+            val avgConfidence = updatedResults.map { it.score?.confidence ?: 0 }.average().toInt()
+            val avgPacing = updatedResults.map { it.score?.pacing ?: 0 }.average().toInt()
+            val avgFiller = updatedResults.map { it.score?.fillerWords ?: 0 }.average().toInt()
+            val avgRelevance = updatedResults.map { it.score?.contentRelevance ?: 0 }.average().toInt()
+            val avgOverall = updatedResults.map { it.score?.overallScore ?: 0 }.average().toInt()
+
+            finalSession = finalSession.copy(
+                clarityScore = avgClarity,
+                confidenceScore = avgConfidence,
+                pacingScore = avgPacing,
+                fillerWordsScore = avgFiller,
+                contentRelevanceScore = avgRelevance,
+                overallScore = avgOverall,
+                coachingTips = updatedResults.mapNotNull { it.score?.coachingTip }.filter { it.isNotBlank() }
+            )
+        }
+
+        docRef.set(finalSession).await()
+        finalSession
+    }
+
+    override suspend fun getSession(sessionId: String): CareerPilotResult<ChallengeSession, FirebaseError> =
+        safeFirebaseCall {
+            firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS)
+                .document(sessionId)
+                .get()
+                .await()
+                .toObject<ChallengeSession>() ?: throw Exception("Session not found")
+        }
+
+    override suspend fun updateSession(session: ChallengeSession): CareerPilotResult<Unit, FirebaseError> =
+        safeFirebaseCall {
+            firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS)
+                .document(session.sessionId)
+                .set(session)
+                .await()
+        }
+
     private fun getCollectionName(visibility: ChallengeVisibility): String {
         return if (visibility == ChallengeVisibility.PUBLIC) {
             FirestoreCollections.PUBLIC_CHALLENGES
@@ -168,7 +327,7 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
     )
 
     companion object {
-        private const val MODEL_NAME = "gemini-3.1-flash-lite"
+        private const val MODEL_NAME = "gemini-3.5-flash-lite"
         private const val SYSTEM_INSTRUCTION = """
             You are a technical interview expert. Your task is to validate a list of interview questions.
             A valid technical question should be related to programming, software engineering, system design, data science, or other IT fields.

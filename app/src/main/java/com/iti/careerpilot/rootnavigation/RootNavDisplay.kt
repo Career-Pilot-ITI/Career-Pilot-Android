@@ -411,6 +411,14 @@ fun RootNavDisplay(
                                 Route.PracticeResult(sessionId)
                             )
                         },
+                        onNavigateToFirestoreResult = { firestoreSessionId ->
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeResult(
+                                    firestoreSessionId = firestoreSessionId
+                                )
+                            )
+                        },
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                         }
@@ -420,6 +428,7 @@ fun RootNavDisplay(
                 entry<Route.PracticeResult> {
                     ResultRoot(
                         sessionId = it.sessionId,
+                        firestoreSessionId = it.firestoreSessionId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }

@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="challenge_dashboard_title">التحكم في التحديات</string>
+    <string name="dashboard_tab_my_challenges">تحدياتي</string>
+    <string name="dashboard_tab_history">السجل</string>
+    <string name="view_reports">عرض التقارير</string>
+    <string name="challenge_code_label">الكود: %1$s</string>
+    <string name="questions_count">%1$d أسئلة</string>
+    <string name="participant_reports_title">تقارير المشاركين</string>
+    <string name="no_participants_message">لا يوجد مشاركون بعد.</string>
+    <string name="close">إغلاق</string>
+    <string name="questions_progress">%1$d/%2$d أسئلة</string>
+    <string name="status_in_progress">قيد التنفيذ</string>
+    <string name="status_completed">مكتمل</string>
 </resources>

@@ -14,4 +14,19 @@ interface ChallengeFirestoreDataSource {
     suspend fun getChallengeSessions(challengeId: String): CareerPilotResult<List<ChallengeSession>, FirebaseError>
     suspend fun validateQuestions(questions: List<String>): CareerPilotResult<Boolean, FirebaseError>
     fun generateChallengeId(visibility: ChallengeVisibility): String
+
+    suspend fun createSession(
+        challenge: Challenge,
+        participantId: Long,
+        participantEmail: String,
+        participantName: String
+    ): CareerPilotResult<ChallengeSession, FirebaseError>
+
+    suspend fun submitAnswer(
+        sessionId: String,
+        questionResult: ChallengeQuestionResult
+    ): CareerPilotResult<ChallengeSession, FirebaseError>
+
+    suspend fun getSession(sessionId: String): CareerPilotResult<ChallengeSession, FirebaseError>
+    suspend fun updateSession(session: ChallengeSession): CareerPilotResult<Unit, FirebaseError>
 }
