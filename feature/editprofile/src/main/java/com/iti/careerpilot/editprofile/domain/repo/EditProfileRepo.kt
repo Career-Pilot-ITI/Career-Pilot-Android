@@ -22,10 +22,13 @@ interface EditProfileRepo {
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError>
 
-    suspend fun uploadCV(
+    suspend fun uploadAndAnalyzeCV(
         uri: Uri,
-        onProgress: (Int) -> Unit
+        onUploadProgress: (Int) -> Unit,
+        onAnalysisStarted: () -> Unit,
     ): CareerPilotResult<FileUploadResponse, NetworkError>
+
+    suspend fun ensureCvAvailableLocally()
 
     suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError>
 }

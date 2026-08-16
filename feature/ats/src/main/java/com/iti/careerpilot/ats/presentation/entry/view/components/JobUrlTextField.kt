@@ -37,7 +37,6 @@ fun JobUrlTextField(
     jobUrlDescription: String,
 ) {
     val jobUrl by rememberUiStateValue(stateProvider) { it.jobUrl }
-    val isBusy by rememberUiStateValue(stateProvider) { it.isBusy }
     val isUrlValid by rememberUiStateValue(stateProvider) { it.isUrlValid }
 
     OutlinedTextField(
@@ -58,7 +57,6 @@ fun JobUrlTextField(
             )
         },
         singleLine = true,
-        enabled = !isBusy,
         isError = jobUrl.isNotBlank() && !isUrlValid,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         prefix = {

@@ -80,36 +80,26 @@ import kotlin.time.Duration.Companion.milliseconds
 fun PracticeSessionRoot(
     trackId: Long,
     sessionId: Long? = null,
+    firestoreSessionId: String? = null,
     workspaceId: Long? = null,
+    challengeId: String? = null,
     isVideoSession: Boolean = false,
     enablePostureTracking: Boolean = false,
     enableHandTracking: Boolean = false,
     onBack: () -> Unit,
     onNavigateToResult: (Long) -> Unit,
+    onNavigateToFirestoreResult: (String) -> Unit,
     viewModel: PracticeSessionViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<UIText?>(null) }
-    val view = LocalView.current
-
-    DisposableEffect(view) {
-        val window = (view.context as? Activity)?.window
-        if (window != null) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            val insetsController = WindowInsetsControllerCompat(window, view)
-            insetsController.isAppearanceLightNavigationBars = false
-        }
-        onDispose {
-            val window = (view.context as? Activity)?.window
-            if (window != null) {
-                WindowCompat.setDecorFitsSystemWindows(window, true)
-            }
-        }
-    }
 
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
+            is PracticeSessionEvent.NavigateToFirestoreResult -> onNavigateToFirestoreResult(
+                newEvent.sessionId
+            )
+
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
             }
@@ -123,8 +113,26 @@ fun PracticeSessionRoot(
         }
     }
 
-    LaunchedEffect(trackId, sessionId, workspaceId) {
-        if (sessionId != null && sessionId != 0L) {
+    LaunchedEffect(trackId, sessionId, firestoreSessionId, workspaceId, challengeId) {
+        if (firestoreSessionId != null) {
+            viewModel.onAction(
+                PracticeSessionAction.RestartPracticeSession(
+                    firestoreSessionId = firestoreSessionId,
+                    isVideoSession = isVideoSession,
+                    enablePostureTracking = enablePostureTracking,
+                    enableHandTracking = enableHandTracking
+                )
+            )
+        } else if (challengeId != null) {
+            viewModel.onAction(
+                PracticeSessionAction.CreateNewPracticeSession(
+                    challengeId = challengeId,
+                    isVideoSession = isVideoSession,
+                    enablePostureTracking = enablePostureTracking,
+                    enableHandTracking = enableHandTracking
+                )
+            )
+        } else if (sessionId != null && sessionId != 0L) {
             viewModel.onAction(
                 PracticeSessionAction.RestartPracticeSession(
                     sessionId = sessionId,
@@ -177,7 +185,13 @@ fun PracticeSessionRoot(
             showCameraPreviewToggle = state.isBodyLanguageAnalyzing,
             isCameraPreviewVisible = state.isCameraPreviewVisible,
             onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
-            onCameraPreviewToggle = { viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(it)) },
+            onCameraPreviewToggle = {
+                viewModel.onAction(
+                    PracticeSessionAction.ToggleCameraPreview(
+                        it
+                    )
+                )
+            },
             onDismiss = {
                 viewModel.onAction(
                     PracticeSessionAction.ShowOrHideSettingsBottomSheet(
@@ -199,6 +213,22 @@ fun PracticeSessionRoot(
             onConfirm = { onBack() },
             cancel = stringResource(R.string.cancel),
             confirm = stringResource(R.string.leave)
+        )
+    }
+
+    if (state.showRestartWarning) {
+        ConfirmationDialog(
+            title = stringResource(R.string.restart_challenge_title),
+            text = stringResource(R.string.restart_challenge_message),
+            icon = ImageVector.vectorResource(R.drawable.ic_delete),
+            onDismiss = {
+                onBack()
+            },
+            onConfirm = {
+                viewModel.onAction(PracticeSessionAction.ConfirmRestartChallenge)
+            },
+            cancel = stringResource(R.string.cancel),
+            confirm = stringResource(R.string.restart)
         )
     }
 
@@ -360,8 +390,9 @@ fun PracticeSessionScreen(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     QuestionCard(
-                        questionOrder = state.currentSession?.currentQuestion?.questionOrder,
-                        questionText = state.currentSession?.currentQuestion?.questionText,
+                        questionOrder = state.displayQuestionOrder,
+                        maxQuestions = state.displayMaxQuestions,
+                        questionText = state.displayQuestionText,
                         isReadingQuestion = state.isReadingQuestion,
                         onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
                         onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) },
@@ -377,7 +408,7 @@ fun PracticeSessionScreen(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Row (
+                    Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()

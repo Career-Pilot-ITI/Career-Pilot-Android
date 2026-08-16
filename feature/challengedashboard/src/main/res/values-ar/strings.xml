@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="challenge_dashboard_title">التحكم في التحديات</string>
+    <string name="dashboard_tab_my_challenges">تحدياتي</string>
+    <string name="dashboard_tab_history">السجل</string>
+    <string name="view_reports">عرض التقارير</string>
+    <string name="challenge_code_label">الكود: %1$s</string>
+    <string name="questions_count">%1$d أسئلة</string>
+    <string name="participant_reports_title">تقارير المشاركين</string>
+    <string name="no_participants_message">لا يوجد مشاركون بعد.</string>
+    <string name="close">إغلاق</string>
+    <string name="questions_progress">%1$d/%2$d أسئلة</string>
+    <string name="status_in_progress">قيد التنفيذ</string>
+    <string name="status_completed">مكتمل</string>
+    <string name="dashboard_empty_created">لم يتم إنشاء أي تحديات بعد</string>
+    <string name="dashboard_empty_taken">لا يوجد سجل للتحديات المأخوذة</string>
+    <string name="more_options">خيارات إضافية</string>
+    <string name="edit">تعديل</string>
+    <string name="delete">حذف</string>
+    <string name="invitation_code_label">كود الدعوة</string>
+    <string name="participants_count">%1$d مشارك</string>
+    <string name="delete_challenge_confirmation">هل أنت متأكد من رغبتك في حذف هذا التحدي؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="cancel">إلغاء</string>
+</resources>

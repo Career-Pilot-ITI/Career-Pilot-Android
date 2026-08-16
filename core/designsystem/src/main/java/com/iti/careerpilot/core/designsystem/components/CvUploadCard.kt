@@ -55,6 +55,7 @@ fun CvUploadCard(
     stage: CvUploadCardStage,
     uploadProgress: Int,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -69,7 +70,8 @@ fun CvUploadCard(
                 cornerRadius = 20.dp,
             )
             .clickable(
-                enabled = stage != CvUploadCardStage.PREPARING &&
+                enabled = enabled &&
+                    stage != CvUploadCardStage.PREPARING &&
                     stage != CvUploadCardStage.UPLOADING &&
                     stage != CvUploadCardStage.PARSING,
                 onClick = onClick,

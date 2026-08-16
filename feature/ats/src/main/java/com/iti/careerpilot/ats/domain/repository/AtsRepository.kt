@@ -7,16 +7,10 @@ import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
-import com.iti.core.model.PdfFile
 import kotlinx.coroutines.flow.StateFlow
 
 interface AtsRepository {
     val userProfile: StateFlow<UserProfile>
-
-    suspend fun replaceCurrentCv(
-        file: PdfFile,
-        onProgress: (Int) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError>
 
     suspend fun importJob(url: String): CareerPilotResult<JobWorkspace, NetworkError>
 

@@ -19,4 +19,9 @@ interface EditProfileLocalDataSource {
     suspend fun moveCVToInternalStorage(
         sourceFile: File
     ): String
+
+    suspend fun saveCVBytes(
+        bytes: ByteArray,
+        fileName: String,
+    ): String
 }

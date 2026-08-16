@@ -8,4 +8,5 @@ dependencies {
     implementation(project(":core:interviews"))
     implementation(project(":core:network"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:challengefirestore"))
 }
