@@ -175,7 +175,7 @@ class QuizViewModelTest {
     }
 
     @Test
-    fun `FREE user with Locked access selecting seniority shows gate sheet with dynamic features and does not generate topics`() = runTest {
+    fun `FREE user with insufficient coins selecting seniority shows coin top up sheet and does not generate topics`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
@@ -190,17 +190,45 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.quizAccess is FeatureAccess.Locked)
+        assertTrue(viewModel.state.value.quizAccess is FeatureAccess.CoinTopUpRequired)
 
         viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showGateSheet)
-        assertEquals(Plan.MAX, viewModel.state.value.gateRequiredPlan)
-        val expectedFeatures = PlanAccessMap.featuresFor(Plan.MAX).map { it.displayName() }
-        assertEquals(expectedFeatures, viewModel.state.value.gatePlanFeatures)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
         assertEquals(0, fakeQuizRepo.generateTopicsCallCount)
         assertEquals(QuizStep.SelectSeniority, viewModel.state.value.currentStep)
+    }
+
+    @Test
+    fun `FREE user with sufficient coins selecting seniority is granted via coin fallback and generates topics`() = runTest {
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.FREE,
+                features = PlanAccessMap.featuresFor(Plan.FREE),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 15,
+            )
+        )
+        val fakeQuizRepo = FakeQuizRepo().apply {
+            topicsResult = CareerPilotResult.Success(dummyTopics)
+        }
+        val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.quizAccess is FeatureAccess.Granted)
+
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals("Senior", viewModel.state.value.seniority)
+        assertEquals(1, fakeQuizRepo.generateTopicsCallCount)
+        assertEquals(dummyTopics, viewModel.state.value.topics)
+        assertEquals(QuizStep.Topics, viewModel.state.value.currentStep)
     }
 
     @Test
@@ -334,24 +362,11 @@ class QuizViewModelTest {
 
     @Test
     fun `DismissGateSheet hides gate sheet`() = runTest {
-        val fakeRepo = FakeAccessRepository(
-            AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = emptyMap(),
-                expiresAt = null,
-                lastSyncedAt = Clock.System.now(),
-                coinBalance = 0,
-            )
-        )
-        val viewModel = createViewModel(accessRepository = fakeRepo)
+        val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
-
-        viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
-        testScheduler.advanceUntilIdle()
-        assertTrue(viewModel.state.value.showGateSheet)
 
         viewModel.onIntent(QuizIntent.DismissGateSheet)
+        testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showGateSheet)
     }
 
@@ -386,22 +401,8 @@ class QuizViewModelTest {
 
     @Test
     fun `UpgradeFromGate closes gate sheet and emits NavigateToPaywall with showGetCoins false`() = runTest {
-        val fakeRepo = FakeAccessRepository(
-            AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = emptyMap(),
-                expiresAt = null,
-                lastSyncedAt = Clock.System.now(),
-                coinBalance = 0,
-            )
-        )
-        val viewModel = createViewModel(accessRepository = fakeRepo)
+        val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
-
-        viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
-        testScheduler.advanceUntilIdle()
-        assertTrue(viewModel.state.value.showGateSheet)
 
         val events = mutableListOf<QuizEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {

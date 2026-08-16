@@ -167,7 +167,7 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `SelectVideoMode when VideoInterview is Locked opens video gate sheet with dynamic features`() = runTest {
+    fun `SelectVideoMode when user has insufficient coins opens coin top up sheet`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
@@ -181,15 +181,38 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Locked)
+        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.CoinTopUpRequired)
 
         viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showVideoGateSheet)
-        assertEquals(Plan.MAX, viewModel.state.value.videoGateRequiredPlan)
-        val expectedFeatures = PlanAccessMap.featuresFor(Plan.MAX).map { it.displayName() }
-        assertEquals(expectedFeatures, viewModel.state.value.videoGatePlanFeatures)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
         assertFalse(viewModel.state.value.isVideoMode)
+    }
+
+    @Test
+    fun `SelectVideoMode on FREE plan with sufficient coins is granted via coin fallback`() = runTest {
+        val fakeRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.FREE,
+                features = PlanAccessMap.featuresFor(Plan.FREE),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 20,
+            )
+        )
+        val viewModel = createViewModel(accessRepository = fakeRepo)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Granted)
+
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.isVideoMode)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
     @Test
@@ -216,6 +239,7 @@ class ReadyToPracticeViewModelTest {
         assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.CoinTopUpRequired)
 
         viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertEquals(40, viewModel.state.value.coinTopUpRequiredCost)
@@ -246,23 +270,11 @@ class ReadyToPracticeViewModelTest {
 
     @Test
     fun `DismissVideoGateSheet hides sheet`() = runTest {
-        val fakeRepo = FakeAccessRepository(
-            AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = emptyMap(),
-                expiresAt = null,
-                lastSyncedAt = Clock.System.now(),
-                coinBalance = 0,
-            )
-        )
-        val viewModel = createViewModel(accessRepository = fakeRepo)
+        val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
-        assertTrue(viewModel.state.value.showVideoGateSheet)
-
         viewModel.onIntent(ReadyToPracticeIntent.DismissVideoGateSheet)
+        testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showVideoGateSheet)
     }
 
@@ -288,29 +300,18 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
         viewModel.onIntent(ReadyToPracticeIntent.DismissCoinTopUpSheet)
+        testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
     @Test
     fun `UpgradeFromVideoGate closes sheet and emits NavigateToPaywall`() = runTest {
-        val fakeRepo = FakeAccessRepository(
-            AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = emptyMap(),
-                expiresAt = null,
-                lastSyncedAt = Clock.System.now(),
-                coinBalance = 0,
-            )
-        )
-        val viewModel = createViewModel(accessRepository = fakeRepo)
+        val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
-
-        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
-        assertTrue(viewModel.state.value.showVideoGateSheet)
 
         val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -528,7 +529,7 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `BeginInterviewClicked in audio mode when Locked emits NavigateToPaywall`() = runTest {
+    fun `BeginInterviewClicked in audio mode with insufficient coins opens coin top up sheet`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
@@ -554,7 +555,9 @@ class ReadyToPracticeViewModelTest {
         viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(events.any { it is ReadyToPracticeEffect.NavigateToPaywall })
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertTrue(events.isEmpty())
         job.cancel()
     }
 
