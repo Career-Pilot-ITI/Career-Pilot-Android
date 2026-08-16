@@ -8,8 +8,8 @@ import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.careerpilot.quiz.domain.repository.QuizRepository
-import com.iti.careerpilot.quiz.presentation.action.QuizAction
-import com.iti.careerpilot.quiz.presentation.event.QuizEvent
+import com.iti.careerpilot.quiz.presentation.action.QuizIntent
+import com.iti.careerpilot.quiz.presentation.event.QuizEffect
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.careerpilot.quiz.presentation.state.RetryType
@@ -40,7 +40,7 @@ class QuizViewModel @Inject constructor(
     private val _state = MutableStateFlow(QuizState())
     val state = _state.asStateFlow()
 
-    private val _events = Channel<QuizEvent>()
+    private val _events = Channel<QuizEffect>()
     val events = _events.receiveAsFlow()
 
     init {
@@ -73,16 +73,16 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: QuizAction) {
-        when (action) {
-            is QuizAction.Init -> {
-                _state.update { it.copy(trackName = action.trackName) }
+    fun onIntent(intent: QuizIntent) {
+        when (intent) {
+            is QuizIntent.Init -> {
+                _state.update { it.copy(trackName = intent.trackName) }
             }
 
-            is QuizAction.SenioritySelected -> {
+            is QuizIntent.SenioritySelected -> {
                 _state.value.quizAccess.handle(
                     onGranted = {
-                        _state.update { it.copy(seniority = action.level) }
+                        _state.update { it.copy(seniority = intent.level) }
                         generateTopics()
                     },
                     onLocked = { locked ->
@@ -112,49 +112,49 @@ class QuizViewModel @Inject constructor(
                                 it.copy(
                                     showCoinTopUpSheet = true,
                                     coinTopUpRequiredCost = cost,
-                                )
+                                    )
                             }
                         } else {
-                            _state.update { it.copy(seniority = action.level) }
+                            _state.update { it.copy(seniority = intent.level) }
                             generateTopics()
                         }
                     },
                 )
             }
 
-            is QuizAction.TopicSelected -> {
-                _state.update { it.copy(selectedTopic = action.topic) }
+            is QuizIntent.TopicSelected -> {
+                _state.update { it.copy(selectedTopic = intent.topic) }
                 generateNextLearningPoint()
             }
 
-            is QuizAction.AnswerSelected -> {
+            is QuizIntent.AnswerSelected -> {
                 _state.update {
-                    it.copy(quizAnswers = it.quizAnswers + (action.questionIndex to action.optionIndex))
+                    it.copy(quizAnswers = it.quizAnswers + (intent.questionIndex to intent.optionIndex))
                 }
             }
 
-            QuizAction.SubmitQuiz -> {
+            QuizIntent.SubmitQuiz -> {
                 calculateScore()
                 _state.update { it.copy(currentStep = QuizStep.QuizResult) }
             }
 
-            QuizAction.StartQuiz -> {
+            QuizIntent.StartQuiz -> {
                 generateNextQuiz()
             }
 
-            QuizAction.ContinueLearning -> {
+            QuizIntent.ContinueLearning -> {
                 generateNextLearningPoint()
             }
 
-            QuizAction.BackToTopics -> {
+            QuizIntent.BackToTopics -> {
                 _state.update { it.copy(currentStep = QuizStep.Topics, selectedTopic = null) }
             }
 
-            QuizAction.BackToSeniority -> {
+            QuizIntent.BackToSeniority -> {
                 _state.update { it.copy(currentStep = QuizStep.SelectSeniority, topics = emptyList()) }
             }
 
-            QuizAction.Retry -> {
+            QuizIntent.Retry -> {
                 when (_state.value.retryType) {
                     RetryType.GENERATE_TOPICS -> generateTopics()
                     RetryType.GENERATE_LEARNING_POINT -> generateNextLearningPoint()
@@ -163,15 +163,15 @@ class QuizViewModel @Inject constructor(
                 }
             }
 
-            QuizAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            QuizAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
-            QuizAction.UpgradeFromGate -> {
+            QuizIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            QuizIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            QuizIntent.UpgradeFromGate -> {
                 _state.update { it.copy(showGateSheet = false) }
-                viewModelScope.launch { _events.send(QuizEvent.NavigateToPaywall(false)) }
+                viewModelScope.launch { _events.send(QuizEffect.NavigateToPaywall(false)) }
             }
-            QuizAction.BuyCoinsClicked -> {
+            QuizIntent.BuyCoinsClicked -> {
                 _state.update { it.copy(showCoinTopUpSheet = false) }
-                viewModelScope.launch { _events.send(QuizEvent.NavigateToPaywall(true)) }
+                viewModelScope.launch { _events.send(QuizEffect.NavigateToPaywall(true)) }
             }
         }
     }

@@ -187,15 +187,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.UpgradeClicked)
+        viewModel.onIntent(HomeIntent.UpgradeClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToPlansPaywall>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToPlansPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPlansPaywall event", event != null)
         assertFalse(event!!.showMySubscription)
         job.cancel()
@@ -216,15 +216,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.UpgradeClicked)
+        viewModel.onIntent(HomeIntent.UpgradeClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToPlansPaywall>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToPlansPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPlansPaywall event", event != null)
         assertFalse(event!!.showMySubscription)
         job.cancel()
@@ -245,15 +245,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.UpgradeClicked)
+        viewModel.onIntent(HomeIntent.UpgradeClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToPlansPaywall>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToPlansPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPlansPaywall event", event != null)
         assertTrue(event!!.showMySubscription)
         job.cancel()
@@ -264,15 +264,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.CoinsClicked)
+        viewModel.onIntent(HomeIntent.CoinsClicked)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(events.any { it is HomeEvent.NavigateToCoinsPaywall })
+        assertTrue(events.any { it is HomeEffect.NavigateToCoinsPaywall })
         job.cancel()
     }
 
@@ -287,15 +287,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.PracticeInterviewClicked)
+        viewModel.onIntent(HomeIntent.PracticeInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToReadyToPractice>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToReadyToPractice>().firstOrNull()
         assertTrue("Expected NavigateToReadyToPractice event", event != null)
         assertEquals(5L, event!!.trackId)
         assertEquals("Kotlin Multiplatform", event.trackName)
@@ -312,15 +312,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(userProfileRepo = userProfileRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.LessonClicked)
+        viewModel.onIntent(HomeIntent.LessonClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToQuiz>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToQuiz>().firstOrNull()
         assertTrue("Expected NavigateToQuiz event", event != null)
         assertEquals(7L, event!!.trackId)
         assertEquals("Backend Go", event.trackName)
@@ -332,16 +332,16 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.ScoreCardClicked)
-        viewModel.onAction(HomeAction.SeeAllSessionsClicked)
+        viewModel.onIntent(HomeIntent.ScoreCardClicked)
+        viewModel.onIntent(HomeIntent.SeeAllSessionsClicked)
         testScheduler.advanceUntilIdle()
 
-        assertEquals(2, events.count { it is HomeEvent.NavigateToReports })
+        assertEquals(2, events.count { it is HomeEffect.NavigateToReports })
         job.cancel()
     }
 
@@ -350,15 +350,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.SeeAllInterviewsClicked)
+        viewModel.onIntent(HomeIntent.SeeAllInterviewsClicked)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(events.any { it is HomeEvent.NavigateToInterviews })
+        assertTrue(events.any { it is HomeEffect.NavigateToInterviews })
         job.cancel()
     }
 
@@ -367,15 +367,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.InterviewTrackClicked(trackId = 12L, trackName = "AI Engineer"))
+        viewModel.onIntent(HomeIntent.InterviewTrackClicked(trackId = 12L, trackName = "AI Engineer"))
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToReadyToPractice>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToReadyToPractice>().firstOrNull()
         assertTrue("Expected NavigateToReadyToPractice", event != null)
         assertEquals(12L, event!!.trackId)
         assertEquals("AI Engineer", event.trackName)
@@ -387,15 +387,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.SessionClicked(sessionId = 42L))
+        viewModel.onIntent(HomeIntent.SessionClicked(sessionId = 42L))
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToSessionDetails>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToSessionDetails>().firstOrNull()
         assertTrue("Expected NavigateToSessionDetails", event != null)
         assertEquals(42L, event!!.sessionId)
         job.cancel()
@@ -418,15 +418,15 @@ class HomeViewModelTest {
         val viewModel = createViewModel(interviewRepository = repo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<HomeEvent>()
+        val events = mutableListOf<HomeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(HomeAction.ResumeSessionClicked(sessionId = 42L))
+        viewModel.onIntent(HomeIntent.ResumeSessionClicked(sessionId = 42L))
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<HomeEvent.NavigateToPracticeSession>().firstOrNull()
+        val event = events.filterIsInstance<HomeEffect.NavigateToPracticeSession>().firstOrNull()
         assertTrue("Expected NavigateToPracticeSession", event != null)
         assertEquals(99L, event!!.trackId)
         assertEquals(42L, event.sessionId)

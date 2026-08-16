@@ -1,8 +1,8 @@
 package com.iti.careerpilot.settings.presentation.viewmodel
 
 import com.iti.careerpilot.core.access.testing.FakeAccessRepository
-import com.iti.careerpilot.settings.presentation.action.SettingsAction
-import com.iti.careerpilot.settings.presentation.event.SettingsEvent
+import com.iti.careerpilot.settings.presentation.action.SettingsIntent
+import com.iti.careerpilot.settings.presentation.event.SettingsEffect
 import com.iti.core.datastore.settings.domain.UserSettingsRepo
 import com.iti.core.datastore.settings.domain.models.ThemeSetting
 import com.iti.core.datastore.settings.domain.models.UserSettings
@@ -181,15 +181,15 @@ class SettingsViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<SettingsEvent>()
+        val events = mutableListOf<SettingsEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(SettingsAction.ManageSubscriptionClicked)
+        viewModel.onIntent(SettingsIntent.ManageSubscriptionClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<SettingsEvent.NavigateToPaywall>().firstOrNull()
+        val event = events.filterIsInstance<SettingsEffect.NavigateToPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPaywall event", event != null)
         assertFalse(event!!.showGetCoins)
         assertFalse(event.showMySubscription)
@@ -211,15 +211,15 @@ class SettingsViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<SettingsEvent>()
+        val events = mutableListOf<SettingsEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(SettingsAction.ManageSubscriptionClicked)
+        viewModel.onIntent(SettingsIntent.ManageSubscriptionClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<SettingsEvent.NavigateToPaywall>().firstOrNull()
+        val event = events.filterIsInstance<SettingsEffect.NavigateToPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPaywall event", event != null)
         assertFalse(event!!.showGetCoins)
         assertFalse(event.showMySubscription)
@@ -241,15 +241,15 @@ class SettingsViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeAccessRepo)
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<SettingsEvent>()
+        val events = mutableListOf<SettingsEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(SettingsAction.ManageSubscriptionClicked)
+        viewModel.onIntent(SettingsIntent.ManageSubscriptionClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<SettingsEvent.NavigateToPaywall>().firstOrNull()
+        val event = events.filterIsInstance<SettingsEffect.NavigateToPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPaywall event", event != null)
         assertFalse(event!!.showGetCoins)
         assertTrue(event.showMySubscription)
@@ -261,15 +261,15 @@ class SettingsViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<SettingsEvent>()
+        val events = mutableListOf<SettingsEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(SettingsAction.CoinsClicked)
+        viewModel.onIntent(SettingsIntent.CoinsClicked)
         testScheduler.advanceUntilIdle()
 
-        val event = events.filterIsInstance<SettingsEvent.NavigateToPaywall>().firstOrNull()
+        val event = events.filterIsInstance<SettingsEffect.NavigateToPaywall>().firstOrNull()
         assertTrue("Expected NavigateToPaywall event", event != null)
         assertTrue(event!!.showGetCoins)
         assertFalse(event.showMySubscription)
@@ -283,11 +283,11 @@ class SettingsViewModelTest {
 
         assertFalse(viewModel.state.value.showLanguageDialog)
 
-        viewModel.onAction(SettingsAction.LanguageDialogToggle(open = true))
+        viewModel.onIntent(SettingsIntent.LanguageDialogToggle(open = true))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showLanguageDialog)
 
-        viewModel.onAction(SettingsAction.LanguageDialogToggle(open = false))
+        viewModel.onIntent(SettingsIntent.LanguageDialogToggle(open = false))
         testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showLanguageDialog)
     }
@@ -299,11 +299,11 @@ class SettingsViewModelTest {
 
         assertFalse(viewModel.state.value.showThemeDialog)
 
-        viewModel.onAction(SettingsAction.ThemeDialogToggle(open = true))
+        viewModel.onIntent(SettingsIntent.ThemeDialogToggle(open = true))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showThemeDialog)
 
-        viewModel.onAction(SettingsAction.ThemeDialogToggle(open = false))
+        viewModel.onIntent(SettingsIntent.ThemeDialogToggle(open = false))
         testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showThemeDialog)
     }
@@ -314,7 +314,7 @@ class SettingsViewModelTest {
         val viewModel = createViewModel(userSettingsRepo = fakeUserSettingsRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(SettingsAction.UpdateTheme(ThemeSetting.DARK))
+        viewModel.onIntent(SettingsIntent.UpdateTheme(ThemeSetting.DARK))
         testScheduler.advanceUntilIdle()
 
         assertEquals(ThemeSetting.DARK, fakeUserSettingsRepo.currentSettings().theme)

@@ -38,7 +38,7 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeState())
     val state = _state.asStateFlow()
 
-    private val _events = Channel<HomeEvent>(Channel.BUFFERED)
+    private val _events = Channel<HomeEffect>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private var hasInitialized = false
@@ -56,62 +56,62 @@ class HomeViewModel @Inject constructor(
         load(isRefresh = false)
     }
 
-    fun onAction(action: HomeAction) {
-        when (action) {
-            HomeAction.Initial -> initialize()
-            HomeAction.Refresh -> load(isRefresh = true)
+    fun onIntent(intent: HomeIntent) {
+        when (intent) {
+            HomeIntent.Initial -> initialize()
+            HomeIntent.Refresh -> load(isRefresh = true)
 
-            HomeAction.PracticeInterviewClicked -> {
+            HomeIntent.PracticeInterviewClicked -> {
                 val current = _state.value
                 val trackId = current.practiceTrackId ?: 1L
                 sendEvent(
-                    HomeEvent.NavigateToReadyToPractice(
+                    HomeEffect.NavigateToReadyToPractice(
                         trackId = trackId,
                         trackName = current.practiceTrackName.ifBlank { "Android Developer" },
                     )
                 )
             }
 
-            HomeAction.LessonClicked -> {
+            HomeIntent.LessonClicked -> {
                 val current = _state.value
                 val trackId = current.practiceTrackId ?: 1L
                 sendEvent(
-                    HomeEvent.NavigateToQuiz(
+                    HomeEffect.NavigateToQuiz(
                         trackId = trackId,
                         trackName = current.practiceTrackName.ifBlank { "Android Developer" },
                     )
                 )
             }
 
-            HomeAction.UpgradeClicked -> {
+            HomeIntent.UpgradeClicked -> {
                 val currentTier = _state.value.subscriptionTier.uppercase()
                 val isMax = currentTier in setOf("PRO", "MAX")
-                sendEvent(HomeEvent.NavigateToPlansPaywall(showMySubscription = isMax))
+                sendEvent(HomeEffect.NavigateToPlansPaywall(showMySubscription = isMax))
             }
 
-            HomeAction.CoinsClicked -> sendEvent(HomeEvent.NavigateToCoinsPaywall)
-            HomeAction.ScoreCardClicked -> sendEvent(HomeEvent.NavigateToReports)
-            HomeAction.AtsJobMatchClicked -> sendEvent(HomeEvent.NavigateToAts)
-            HomeAction.SeeAllSessionsClicked -> sendEvent(HomeEvent.NavigateToReports)
-            HomeAction.SeeAllInterviewsClicked -> sendEvent(HomeEvent.NavigateToInterviews)
+            HomeIntent.CoinsClicked -> sendEvent(HomeEffect.NavigateToCoinsPaywall)
+            HomeIntent.ScoreCardClicked -> sendEvent(HomeEffect.NavigateToReports)
+            HomeIntent.AtsJobMatchClicked -> sendEvent(HomeEffect.NavigateToAts)
+            HomeIntent.SeeAllSessionsClicked -> sendEvent(HomeEffect.NavigateToReports)
+            HomeIntent.SeeAllInterviewsClicked -> sendEvent(HomeEffect.NavigateToInterviews)
 
-            is HomeAction.InterviewTrackClicked -> sendEvent(
-                HomeEvent.NavigateToReadyToPractice(
-                    trackId = action.trackId,
-                    trackName = action.trackName,
+            is HomeIntent.InterviewTrackClicked -> sendEvent(
+                HomeEffect.NavigateToReadyToPractice(
+                    trackId = intent.trackId,
+                    trackName = intent.trackName,
                 )
             )
 
-            is HomeAction.SessionClicked ->
-                sendEvent(HomeEvent.NavigateToSessionDetails(action.sessionId))
+            is HomeIntent.SessionClicked ->
+                sendEvent(HomeEffect.NavigateToSessionDetails(intent.sessionId))
 
-            is HomeAction.ResumeSessionClicked -> {
+            is HomeIntent.ResumeSessionClicked -> {
                 val session = _state.value.recentSessions
-                    .firstOrNull { it.id == action.sessionId }
+                    .firstOrNull { it.id == intent.sessionId }
                 sendEvent(
-                    HomeEvent.NavigateToPracticeSession(
+                    HomeEffect.NavigateToPracticeSession(
                         trackId = session?.trackId ?: 0L,
-                        sessionId = action.sessionId,
+                        sessionId = intent.sessionId,
                     )
                 )
             }
@@ -198,7 +198,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun sendEvent(event: HomeEvent) {
+    private fun sendEvent(event: HomeEffect) {
         viewModelScope.launch { _events.send(event) }
     }
 

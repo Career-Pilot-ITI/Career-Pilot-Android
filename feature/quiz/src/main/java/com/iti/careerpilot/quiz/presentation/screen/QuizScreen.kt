@@ -35,8 +35,8 @@ import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.quiz.R
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
-import com.iti.careerpilot.quiz.presentation.action.QuizAction
-import com.iti.careerpilot.quiz.presentation.event.QuizEvent
+import com.iti.careerpilot.quiz.presentation.action.QuizIntent
+import com.iti.careerpilot.quiz.presentation.event.QuizEffect
 import com.iti.careerpilot.quiz.presentation.screen.components.ErrorContent
 import com.iti.careerpilot.quiz.presentation.screen.components.LearningPointContent
 import com.iti.careerpilot.quiz.presentation.screen.components.QuizContent
@@ -59,19 +59,19 @@ fun QuizRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(trackName) {
-        viewModel.onAction(QuizAction.Init(trackName))
+        viewModel.onIntent(QuizIntent.Init(trackName))
     }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            QuizEvent.QuizCompleted -> onBack()
-            is QuizEvent.NavigateToPaywall -> openPaywall(event.showGetCoins)
+            QuizEffect.QuizCompleted -> onBack()
+            is QuizEffect.NavigateToPaywall -> openPaywall(event.showGetCoins)
         }
     }
 
     QuizScreen(
         state = state,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         onBack = onBack,
     )
 
@@ -80,8 +80,8 @@ fun QuizRoot(
             featureName = stringResource(R.string.quiz_feature_name),
             requiredPlan = state.gateRequiredPlan,
             planFeatures = state.gatePlanFeatures,
-            onUpgradeClick = { viewModel.onAction(QuizAction.UpgradeFromGate) },
-            onDismiss = { viewModel.onAction(QuizAction.DismissGateSheet) },
+            onUpgradeClick = { viewModel.onIntent(QuizIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(QuizIntent.DismissGateSheet) },
         )
     }
 
@@ -89,8 +89,8 @@ fun QuizRoot(
         CoinTopUpBottomSheet(
             coinCost = state.coinTopUpRequiredCost,
             currentBalance = state.coinBalance,
-            onBuyCoins = { viewModel.onAction(QuizAction.BuyCoinsClicked) },
-            onDismiss = { viewModel.onAction(QuizAction.DismissCoinTopUpSheet) },
+            onBuyCoins = { viewModel.onIntent(QuizIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(QuizIntent.DismissCoinTopUpSheet) },
         )
     }
 }
@@ -98,13 +98,13 @@ fun QuizRoot(
 @Composable
 fun QuizScreen(
     state: QuizState,
-    onAction: (QuizAction) -> Unit,
+    onIntent: (QuizIntent) -> Unit,
     onBack: () -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            QuizTopBar(state = state, onBack = onBack, onAction = onAction)
+            QuizTopBar(state = state, onBack = onBack, onIntent = onIntent)
         }
     ) { innerPadding ->
         Box(
@@ -114,7 +114,7 @@ fun QuizScreen(
         ) {
             QuizStepContent(
                 state = state,
-                onAction = onAction,
+                onIntent = onIntent,
                 modifier = Modifier.fillMaxSize()
             )
 
@@ -131,7 +131,7 @@ fun QuizScreen(
 private fun QuizTopBar(
     state: QuizState,
     onBack: () -> Unit,
-    onAction: (QuizAction) -> Unit
+    onIntent: (QuizIntent) -> Unit
 ) {
     val isAtTopics = state.currentStep == QuizStep.Topics
     val isAtSeniority = state.currentStep == QuizStep.SelectSeniority
@@ -152,8 +152,8 @@ private fun QuizTopBar(
                 onBack = {
                     when (state.currentStep) {
                         QuizStep.SelectSeniority -> onBack()
-                        QuizStep.Topics -> onAction(QuizAction.BackToSeniority)
-                        else -> onAction(QuizAction.BackToTopics)
+                        QuizStep.Topics -> onIntent(QuizIntent.BackToSeniority)
+                        else -> onIntent(QuizIntent.BackToTopics)
                     }
                 }
             )
@@ -168,7 +168,7 @@ private fun QuizTopBar(
 @Composable
 private fun QuizStepContent(
     state: QuizState,
-    onAction: (QuizAction) -> Unit,
+    onIntent: (QuizIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     AnimatedContent(
@@ -188,7 +188,7 @@ private fun QuizStepContent(
             QuizStep.SelectSeniority -> {
                 SelectSeniorityContent(
                     state = state,
-                    onAction = onAction,
+                    onIntent = onIntent,
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -196,7 +196,7 @@ private fun QuizStepContent(
             QuizStep.Topics -> {
                 TopicsList(
                     topics = state.topics,
-                    onTopicSelected = { onAction(QuizAction.TopicSelected(it)) },
+                    onTopicSelected = { onIntent(QuizIntent.TopicSelected(it)) },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -205,7 +205,7 @@ private fun QuizStepContent(
                 state.currentLearningPoint?.let { learningPoint ->
                     LearningPointContent(
                         learningPoint = learningPoint,
-                        onNext = { onAction(QuizAction.StartQuiz) },
+                        onNext = { onIntent(QuizIntent.StartQuiz) },
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -216,8 +216,8 @@ private fun QuizStepContent(
                     QuizContent(
                         quiz = quiz,
                         answers = state.quizAnswers,
-                        onAnswerSelected = { q, o -> onAction(QuizAction.AnswerSelected(q, o)) },
-                        onSubmit = { onAction(QuizAction.SubmitQuiz) },
+                        onAnswerSelected = { q, o -> onIntent(QuizIntent.AnswerSelected(q, o)) },
+                        onSubmit = { onIntent(QuizIntent.SubmitQuiz) },
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -229,8 +229,8 @@ private fun QuizStepContent(
                         quiz = quiz,
                         answers = state.quizAnswers,
                         score = state.quizScore,
-                        onContinue = { onAction(QuizAction.ContinueLearning) },
-                        onBackToTopics = { onAction(QuizAction.BackToTopics) },
+                        onContinue = { onIntent(QuizIntent.ContinueLearning) },
+                        onBackToTopics = { onIntent(QuizIntent.BackToTopics) },
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -239,7 +239,7 @@ private fun QuizStepContent(
             QuizStep.Error -> {
                 ErrorContent(
                     error = state.error,
-                    onRetry = { onAction(QuizAction.Retry) },
+                    onRetry = { onIntent(QuizIntent.Retry) },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(20.dp)

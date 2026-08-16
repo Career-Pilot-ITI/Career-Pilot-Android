@@ -32,7 +32,7 @@ class ReadyToPracticeViewModel @Inject constructor(
     private val _state = MutableStateFlow(ReadyToPracticeState())
     val state = _state.asStateFlow()
 
-    private val _events = Channel<ReadyToPracticeEvent>(Channel.BUFFERED)
+    private val _events = Channel<ReadyToPracticeEffect>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private val trackId: Long?
@@ -102,28 +102,28 @@ class ReadyToPracticeViewModel @Inject constructor(
         _state.update { it.copy(trackName = trackName) }
     }
 
-    fun onAction(action: ReadyToPracticeAction) {
-        when (action) {
-            is ReadyToPracticeAction.Initial -> initialize(
-                action.trackId,
-                action.trackName,
-                action.workspaceId,
+    fun onIntent(intent: ReadyToPracticeIntent) {
+        when (intent) {
+            is ReadyToPracticeIntent.Initial -> initialize(
+                intent.trackId,
+                intent.trackName,
+                intent.workspaceId,
             )
-            is ReadyToPracticeAction.MicrophonePermissionChanged -> _state.update {
+            is ReadyToPracticeIntent.MicrophonePermissionChanged -> _state.update {
                 it.copy(
-                    isMicrophoneGranted = action.isGranted,
+                    isMicrophoneGranted = intent.isGranted,
                     isPermissionDialogVisible = false,
                 )
             }
 
-            is ReadyToPracticeAction.CameraPermissionChanged -> _state.update {
+            is ReadyToPracticeIntent.CameraPermissionChanged -> _state.update {
                 it.copy(
-                    isCameraGranted = action.isGranted,
+                    isCameraGranted = intent.isGranted,
                     showCameraPermissionDialog = false,
                 )
             }
 
-            ReadyToPracticeAction.SelectAudioMode -> _state.update {
+            ReadyToPracticeIntent.SelectAudioMode -> _state.update {
                 it.copy(
                     isVideoMode = false,
                     enablePostureTracking = false,
@@ -131,15 +131,15 @@ class ReadyToPracticeViewModel @Inject constructor(
                 )
             }
 
-            is ReadyToPracticeAction.TogglePostureTracking -> _state.update {
-                it.copy(enablePostureTracking = action.enabled)
+            is ReadyToPracticeIntent.TogglePostureTracking -> _state.update {
+                it.copy(enablePostureTracking = intent.enabled)
             }
 
-            is ReadyToPracticeAction.ToggleHandTracking -> _state.update {
-                it.copy(enableHandTracking = action.enabled)
+            is ReadyToPracticeIntent.ToggleHandTracking -> _state.update {
+                it.copy(enableHandTracking = intent.enabled)
             }
 
-            ReadyToPracticeAction.SelectVideoMode -> {
+            ReadyToPracticeIntent.SelectVideoMode -> {
                 _state.value.videoInterviewAccess.handle(
                     onGranted = {
                         _state.update {
@@ -190,39 +190,39 @@ class ReadyToPracticeViewModel @Inject constructor(
                 )
             }
 
-            ReadyToPracticeAction.MicrophoneRowClicked -> _state.update {
+            ReadyToPracticeIntent.MicrophoneRowClicked -> _state.update {
                 if (it.isMicrophoneGranted) it else it.copy(isPermissionDialogVisible = true)
             }
 
-            ReadyToPracticeAction.PermissionDialogDismissed -> _state.update {
+            ReadyToPracticeIntent.PermissionDialogDismissed -> _state.update {
                 it.copy(isPermissionDialogVisible = false)
             }
 
-            ReadyToPracticeAction.CameraRowClicked -> _state.update {
+            ReadyToPracticeIntent.CameraRowClicked -> _state.update {
                 if (it.isCameraGranted) it else it.copy(showCameraPermissionDialog = true)
             }
 
-            ReadyToPracticeAction.CameraPermissionDialogDismissed -> _state.update {
+            ReadyToPracticeIntent.CameraPermissionDialogDismissed -> _state.update {
                 it.copy(showCameraPermissionDialog = false)
             }
 
-            ReadyToPracticeAction.BeginInterviewClicked,
-            ReadyToPracticeAction.StartPracticeClicked -> beginInterview()
+            ReadyToPracticeIntent.BeginInterviewClicked,
+            ReadyToPracticeIntent.StartPracticeClicked -> beginInterview()
 
-            ReadyToPracticeAction.CancelClicked -> sendEvent(ReadyToPracticeEvent.NavigateBack)
+            ReadyToPracticeIntent.CancelClicked -> sendEvent(ReadyToPracticeEffect.NavigateBack)
 
-            ReadyToPracticeAction.DismissVideoGateSheet -> _state.update { it.copy(showVideoGateSheet = false) }
+            ReadyToPracticeIntent.DismissVideoGateSheet -> _state.update { it.copy(showVideoGateSheet = false) }
 
-            ReadyToPracticeAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            ReadyToPracticeIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
 
-            ReadyToPracticeAction.UpgradeFromVideoGate -> {
+            ReadyToPracticeIntent.UpgradeFromVideoGate -> {
                 _state.update { it.copy(showVideoGateSheet = false) }
-                sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                sendEvent(ReadyToPracticeEffect.NavigateToPaywall)
             }
 
-            ReadyToPracticeAction.BuyCoinsClicked -> {
+            ReadyToPracticeIntent.BuyCoinsClicked -> {
                 _state.update { it.copy(showCoinTopUpSheet = false) }
-                sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                sendEvent(ReadyToPracticeEffect.NavigateToPaywall)
             }
         }
     }
@@ -241,7 +241,7 @@ class ReadyToPracticeViewModel @Inject constructor(
                 if (s.isVideoMode) {
                     _state.update { it.copy(showVideoGateSheet = true) }
                 } else {
-                    sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
+                    sendEvent(ReadyToPracticeEffect.NavigateToPaywall)
                 }
             },
             onCoinTopUpRequired = { coinReq ->
@@ -273,7 +273,7 @@ class ReadyToPracticeViewModel @Inject constructor(
         if (handled) return
 
         sendEvent(
-            ReadyToPracticeEvent.NavigateToPractice(
+            ReadyToPracticeEffect.NavigateToPractice(
                 trackId = id,
                 workspaceId = workspaceId,
                 isVideo = s.isVideoMode,
@@ -283,7 +283,7 @@ class ReadyToPracticeViewModel @Inject constructor(
         )
     }
 
-    private fun sendEvent(event: ReadyToPracticeEvent) {
+    private fun sendEvent(event: ReadyToPracticeEffect) {
         viewModelScope.launch { _events.send(event) }
     }
 

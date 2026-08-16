@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.settings.R
-import com.iti.careerpilot.settings.presentation.action.SettingsAction
-import com.iti.careerpilot.settings.presentation.event.SettingsEvent
+import com.iti.careerpilot.settings.presentation.action.SettingsIntent
+import com.iti.careerpilot.settings.presentation.event.SettingsEffect
 import com.iti.careerpilot.settings.presentation.state.SettingsState
 import com.iti.core.datastore.settings.domain.UserSettingsRepo
 import com.iti.core.datastore.settings.domain.models.LanguageSetting
@@ -37,7 +37,7 @@ class SettingsViewModel @Inject constructor(
     private val _state: MutableStateFlow<SettingsState> = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
-    private val _events = Channel<SettingsEvent>(Channel.BUFFERED)
+    private val _events = Channel<SettingsEffect>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     init {
@@ -58,30 +58,30 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: SettingsAction) {
-        when (action) {
-            is SettingsAction.UpdateTheme -> {
+    fun onIntent(intent: SettingsIntent) {
+        when (intent) {
+            is SettingsIntent.UpdateTheme -> {
                 updateSettings {
-                    it.copy(theme = action.theme)
+                    it.copy(theme = intent.theme)
                 }
             }
 
-            is SettingsAction.LanguageDialogToggle -> {
+            is SettingsIntent.LanguageDialogToggle -> {
                 _state.update {
-                    it.copy(showLanguageDialog = action.open)
+                    it.copy(showLanguageDialog = intent.open)
                 }
             }
 
-            is SettingsAction.ThemeDialogToggle -> {
+            is SettingsIntent.ThemeDialogToggle -> {
                 _state.update {
-                    it.copy(showThemeDialog = action.open)
+                    it.copy(showThemeDialog = intent.open)
                 }
             }
 
-            SettingsAction.ManageSubscriptionClicked -> {
+            SettingsIntent.ManageSubscriptionClicked -> {
                 viewModelScope.launch {
                     _events.send(
-                        SettingsEvent.NavigateToPaywall(
+                        SettingsEffect.NavigateToPaywall(
                             showGetCoins = false,
                             showMySubscription = _state.value.isMaxPlan,
                         )
@@ -89,10 +89,10 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
-            SettingsAction.CoinsClicked -> {
+            SettingsIntent.CoinsClicked -> {
                 viewModelScope.launch {
                     _events.send(
-                        SettingsEvent.NavigateToPaywall(
+                        SettingsEffect.NavigateToPaywall(
                             showGetCoins = true,
                             showMySubscription = false,
                         )

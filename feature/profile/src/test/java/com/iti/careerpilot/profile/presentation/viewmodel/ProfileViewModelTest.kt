@@ -2,8 +2,8 @@ package com.iti.careerpilot.profile.presentation.viewmodel
 
 import com.iti.careerpilot.core.network.auth.SessionManager
 import com.iti.careerpilot.profile.domain.repo.ProfileRepo
-import com.iti.careerpilot.profile.presentation.action.ProfileAction
-import com.iti.careerpilot.profile.presentation.event.ProfileEvent
+import com.iti.careerpilot.profile.presentation.action.ProfileIntent
+import com.iti.careerpilot.profile.presentation.event.ProfileEffect
 import com.iti.common.error.NetworkError
 import com.iti.common.model.ProfileEditSection
 import com.iti.common.result.CareerPilotResult
@@ -96,7 +96,7 @@ class ProfileViewModelTest {
     @Test
     fun `init downloads missing files and refreshes profile when profile id is 0`() = runTest {
         val viewModel = createViewModel()
-        viewModel.onAction(ProfileAction.Initial)
+        viewModel.onIntent(ProfileIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, profileRepo.downloadMissingFilesCallCount)
@@ -108,7 +108,7 @@ class ProfileViewModelTest {
         profileRepo._userProfile.value = UserProfile(id = 42L)
 
         val viewModel = createViewModel()
-        viewModel.onAction(ProfileAction.Initial)
+        viewModel.onIntent(ProfileIntent.Initial)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, profileRepo.downloadMissingFilesCallCount)
@@ -120,15 +120,15 @@ class ProfileViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val emittedEvents = mutableListOf<ProfileEvent>()
+        val emittedEvents = mutableListOf<ProfileEffect>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(emittedEvents)
         }
 
-        viewModel.onAction(ProfileAction.OnSubscriptionClick)
+        viewModel.onIntent(ProfileIntent.OnSubscriptionClick)
         testScheduler.advanceUntilIdle()
 
-        assertEquals(listOf(ProfileEvent.NavigateToSubscription), emittedEvents)
+        assertEquals(listOf(ProfileEffect.NavigateToSubscription), emittedEvents)
         job.cancel()
     }
 
@@ -137,15 +137,15 @@ class ProfileViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val emittedEvents = mutableListOf<ProfileEvent>()
+        val emittedEvents = mutableListOf<ProfileEffect>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(emittedEvents)
         }
 
-        viewModel.onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.CAREER))
+        viewModel.onIntent(ProfileIntent.OnEditProfileClick(ProfileEditSection.CAREER))
         testScheduler.advanceUntilIdle()
 
-        assertEquals(listOf(ProfileEvent.NavigateToEditProfile(ProfileEditSection.CAREER)), emittedEvents)
+        assertEquals(listOf(ProfileEffect.NavigateToEditProfile(ProfileEditSection.CAREER)), emittedEvents)
         job.cancel()
     }
 
@@ -154,15 +154,15 @@ class ProfileViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val emittedEvents = mutableListOf<ProfileEvent>()
+        val emittedEvents = mutableListOf<ProfileEffect>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(emittedEvents)
         }
 
-        viewModel.onAction(ProfileAction.OnSettingsClick)
+        viewModel.onIntent(ProfileIntent.OnSettingsClick)
         testScheduler.advanceUntilIdle()
 
-        assertEquals(listOf(ProfileEvent.NavigateToSettings), emittedEvents)
+        assertEquals(listOf(ProfileEffect.NavigateToSettings), emittedEvents)
         job.cancel()
     }
 
@@ -176,11 +176,11 @@ class ProfileViewModelTest {
 
         assertFalse(viewModel.state.value.showLogoutDialog)
 
-        viewModel.onAction(ProfileAction.OnLogoutClick)
+        viewModel.onIntent(ProfileIntent.OnLogoutClick)
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showLogoutDialog)
 
-        viewModel.onAction(ProfileAction.OnLogoutDismiss)
+        viewModel.onIntent(ProfileIntent.OnLogoutDismiss)
         testScheduler.advanceUntilIdle()
         assertFalse(viewModel.state.value.showLogoutDialog)
 
@@ -193,23 +193,23 @@ class ProfileViewModelTest {
         val stateJob = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.state.collect {}
         }
-        val emittedEvents = mutableListOf<ProfileEvent>()
+        val emittedEvents = mutableListOf<ProfileEffect>()
         val eventJob = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(emittedEvents)
         }
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ProfileAction.OnLogoutClick)
+        viewModel.onIntent(ProfileIntent.OnLogoutClick)
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showLogoutDialog)
 
-        viewModel.onAction(ProfileAction.OnLogoutConfirm)
+        viewModel.onIntent(ProfileIntent.OnLogoutConfirm)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showLogoutDialog)
         assertEquals(1, sessionManager.clearSessionCallCount)
         assertEquals(1, profileRepo.clearUserProfileCallCount)
-        assertEquals(listOf(ProfileEvent.NavigateToLogout), emittedEvents)
+        assertEquals(listOf(ProfileEffect.NavigateToLogout), emittedEvents)
 
         stateJob.cancel()
         eventJob.cancel()
@@ -220,16 +220,16 @@ class ProfileViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val emittedEvents = mutableListOf<ProfileEvent>()
+        val emittedEvents = mutableListOf<ProfileEffect>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(emittedEvents)
         }
 
         val testUrl = "https://example.com/cv.pdf"
-        viewModel.onAction(ProfileAction.OnCVClick(testUrl))
+        viewModel.onIntent(ProfileIntent.OnCVClick(testUrl))
         testScheduler.advanceUntilIdle()
 
-        assertEquals(listOf(ProfileEvent.OpenCV(testUrl)), emittedEvents)
+        assertEquals(listOf(ProfileEffect.OpenCV(testUrl)), emittedEvents)
         job.cancel()
     }
 }

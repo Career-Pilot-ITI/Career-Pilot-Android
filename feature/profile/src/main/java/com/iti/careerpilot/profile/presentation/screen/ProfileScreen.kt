@@ -32,8 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.profile.R
-import com.iti.careerpilot.profile.presentation.action.ProfileAction
-import com.iti.careerpilot.profile.presentation.event.ProfileEvent
+import com.iti.careerpilot.profile.presentation.action.ProfileIntent
+import com.iti.careerpilot.profile.presentation.event.ProfileEffect
 import com.iti.careerpilot.profile.presentation.screen.components.CVCard
 import com.iti.careerpilot.profile.presentation.screen.components.InfoCard
 import com.iti.careerpilot.profile.presentation.screen.components.LogoutDialog
@@ -62,16 +62,16 @@ fun ProfileRoot(
     val chooserTitle = stringResource(R.string.open_cv_with)
 
     LaunchedEffect(viewModel) {
-        viewModel.onAction(ProfileAction.Initial)
+        viewModel.onIntent(ProfileIntent.Initial)
     }
 
     ObserveEvent(viewModel.events) { event ->
         when (event) {
-            is ProfileEvent.NavigateToEditProfile -> openEditProfile(event.section)
-            ProfileEvent.NavigateToSettings -> openSettings()
-            ProfileEvent.NavigateToSubscription -> openSubscription()
-            ProfileEvent.NavigateToLogout -> logout()
-            is ProfileEvent.OpenCV -> {
+            is ProfileEffect.NavigateToEditProfile -> openEditProfile(event.section)
+            ProfileEffect.NavigateToSettings -> openSettings()
+            ProfileEffect.NavigateToSubscription -> openSubscription()
+            ProfileEffect.NavigateToLogout -> logout()
+            is ProfileEffect.OpenCV -> {
                 if (event.url.isNotBlank()) {
                     val uri = if (event.url.startsWith("file://")) {
                         val file = File(event.url.toUri().path!!)
@@ -97,14 +97,14 @@ fun ProfileRoot(
 
     ProfileScreen(
         state = state,
-        onAction = viewModel::onAction
+        onIntent = viewModel::onIntent
     )
 }
 
 @Composable
 fun ProfileScreen(
     state: ProfileState,
-    onAction: (ProfileAction) -> Unit,
+    onIntent: (ProfileIntent) -> Unit,
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -148,20 +148,20 @@ fun ProfileScreen(
                     fileSize = if (state.profile.cv.cvSizeBytes > 0) "${state.profile.cv.cvSizeBytes / 1024} KB" else "",
                     onClick = {
                         val cvUri = state.profile.cv.cvLocalUri.ifBlank { state.profile.cv.cvUrl }
-                        onAction(ProfileAction.OnCVClick(cvUri))
+                        onIntent(ProfileIntent.OnCVClick(cvUri))
                     }
                 )
             }
             item {
                 MenuSection(
-                    onOpenSettings = { onAction(ProfileAction.OnSettingsClick) },
-                    onOpenSubscription = { onAction(ProfileAction.OnSubscriptionClick) },
-                    onLogOut = { onAction(ProfileAction.OnLogoutClick) },
+                    onOpenSettings = { onIntent(ProfileIntent.OnSettingsClick) },
+                    onOpenSubscription = { onIntent(ProfileIntent.OnSubscriptionClick) },
+                    onLogOut = { onIntent(ProfileIntent.OnLogoutClick) },
                     onEditPersonalInfoClick = {
-                        onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.PERSONAL))
+                        onIntent(ProfileIntent.OnEditProfileClick(ProfileEditSection.PERSONAL))
                     },
                     onEditCareerClick = {
-                        onAction(ProfileAction.OnEditProfileClick(ProfileEditSection.CAREER))
+                        onIntent(ProfileIntent.OnEditProfileClick(ProfileEditSection.CAREER))
                     },
                 )
             }
@@ -170,8 +170,8 @@ fun ProfileScreen(
 
     if (state.showLogoutDialog) {
         LogoutDialog(
-            onConfirm = { onAction(ProfileAction.OnLogoutConfirm) },
-            onDismiss = { onAction(ProfileAction.OnLogoutDismiss) }
+            onConfirm = { onIntent(ProfileIntent.OnLogoutConfirm) },
+            onDismiss = { onIntent(ProfileIntent.OnLogoutDismiss) }
         )
     }
 }
@@ -201,7 +201,7 @@ private fun ProfileScreenPreview() {
                     )
                 )
             ),
-            onAction = {}
+            onIntent = {}
         )
     }
 }

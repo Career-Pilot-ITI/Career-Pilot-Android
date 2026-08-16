@@ -25,7 +25,7 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 import com.iti.careerpilot.quiz.R
-import com.iti.careerpilot.quiz.presentation.action.QuizAction
+import com.iti.careerpilot.quiz.presentation.action.QuizIntent
 import com.iti.careerpilot.quiz.presentation.state.QuizState
 
 enum class SeniorityLevel(val apiKey: String, @StringRes val labelRes: Int) {
@@ -40,7 +40,7 @@ enum class SeniorityLevel(val apiKey: String, @StringRes val labelRes: Int) {
 @Composable
 fun SelectSeniorityContent(
     state: QuizState,
-    onAction: (QuizAction) -> Unit,
+    onIntent: (QuizIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -82,7 +82,7 @@ fun SelectSeniorityContent(
                 access = state.quizAccess,
                 coinBalance = state.coinBalance,
                 planDisplayName = state.planDisplayName,
-                onUpgradeClick = { onAction(QuizAction.UpgradeFromGate) },
+                onUpgradeClick = { onIntent(QuizIntent.UpgradeFromGate) },
             )
         }
 
@@ -92,7 +92,7 @@ fun SelectSeniorityContent(
         ) { level ->
             SeniorityItem(
                 label = stringResource(level.labelRes),
-                onClick = { onAction(QuizAction.SenioritySelected(level.apiKey)) }
+                onClick = { onIntent(QuizIntent.SenioritySelected(level.apiKey)) }
             )
         }
     }

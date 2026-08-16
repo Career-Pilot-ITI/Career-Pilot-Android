@@ -11,8 +11,8 @@ import com.iti.careerpilot.quiz.domain.model.LearningQuiz
 import com.iti.careerpilot.quiz.domain.model.QuizQuestion
 import com.iti.careerpilot.quiz.domain.model.StudyTopic
 import com.iti.careerpilot.quiz.domain.repository.QuizRepository
-import com.iti.careerpilot.quiz.presentation.action.QuizAction
-import com.iti.careerpilot.quiz.presentation.event.QuizEvent
+import com.iti.careerpilot.quiz.presentation.action.QuizIntent
+import com.iti.careerpilot.quiz.presentation.event.QuizEffect
 import com.iti.careerpilot.quiz.presentation.state.QuizStep
 import com.iti.careerpilot.quiz.presentation.state.RetryType
 import com.iti.common.error.FirebaseError
@@ -151,7 +151,7 @@ class QuizViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
         assertEquals("Android Engineer", viewModel.state.value.trackName)
     }
 
@@ -192,7 +192,7 @@ class QuizViewModelTest {
 
         assertTrue(viewModel.state.value.quizAccess is FeatureAccess.Locked)
 
-        viewModel.onAction(QuizAction.SenioritySelected("Junior"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showGateSheet)
@@ -227,7 +227,7 @@ class QuizViewModelTest {
 
         assertTrue(viewModel.state.value.quizAccess is FeatureAccess.CoinTopUpRequired)
 
-        viewModel.onAction(QuizAction.SenioritySelected("Mid-level"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Mid-level"))
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -254,7 +254,7 @@ class QuizViewModelTest {
         val refreshAfterInit = fakeRepo.refreshCount
         assertTrue(refreshAfterInit > 0)
 
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertTrue(fakeRepo.refreshCount > refreshAfterInit)
@@ -279,8 +279,8 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.Init("Android Engineer"))
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertEquals("Senior", viewModel.state.value.seniority)
@@ -299,8 +299,8 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.Init("Android Engineer"))
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertEquals(QuizStep.Error, viewModel.state.value.currentStep)
@@ -316,15 +316,15 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.Init("Android Engineer"))
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, fakeQuizRepo.generateTopicsCallCount)
 
         // Change response to success and retry
         fakeQuizRepo.topicsResult = CareerPilotResult.Success(dummyTopics)
-        viewModel.onAction(QuizAction.Retry)
+        viewModel.onIntent(QuizIntent.Retry)
         testScheduler.advanceUntilIdle()
 
         assertEquals(2, fakeQuizRepo.generateTopicsCallCount)
@@ -347,11 +347,11 @@ class QuizViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.SenioritySelected("Junior"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showGateSheet)
 
-        viewModel.onAction(QuizAction.DismissGateSheet)
+        viewModel.onIntent(QuizIntent.DismissGateSheet)
         assertFalse(viewModel.state.value.showGateSheet)
     }
 
@@ -376,11 +376,11 @@ class QuizViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.SenioritySelected("Mid-level"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Mid-level"))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        viewModel.onAction(QuizAction.DismissCoinTopUpSheet)
+        viewModel.onIntent(QuizIntent.DismissCoinTopUpSheet)
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
@@ -399,20 +399,20 @@ class QuizViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.SenioritySelected("Junior"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Junior"))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showGateSheet)
 
-        val events = mutableListOf<QuizEvent>()
+        val events = mutableListOf<QuizEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(QuizAction.UpgradeFromGate)
+        viewModel.onIntent(QuizIntent.UpgradeFromGate)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showGateSheet)
-        val paywallEvent = events.filterIsInstance<QuizEvent.NavigateToPaywall>().firstOrNull()
+        val paywallEvent = events.filterIsInstance<QuizEffect.NavigateToPaywall>().firstOrNull()
         assertNotNull("Expected NavigateToPaywall event", paywallEvent)
         assertFalse(paywallEvent!!.showGetCoins)
         job.cancel()
@@ -439,20 +439,20 @@ class QuizViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.SenioritySelected("Mid-level"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Mid-level"))
         testScheduler.advanceUntilIdle()
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        val events = mutableListOf<QuizEvent>()
+        val events = mutableListOf<QuizEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(QuizAction.BuyCoinsClicked)
+        viewModel.onIntent(QuizIntent.BuyCoinsClicked)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
-        val paywallEvent = events.filterIsInstance<QuizEvent.NavigateToPaywall>().firstOrNull()
+        val paywallEvent = events.filterIsInstance<QuizEffect.NavigateToPaywall>().firstOrNull()
         assertNotNull("Expected NavigateToPaywall event", paywallEvent)
         assertTrue(paywallEvent!!.showGetCoins)
         job.cancel()
@@ -473,7 +473,7 @@ class QuizViewModelTest {
         testScheduler.advanceUntilIdle()
 
         val topic = dummyTopics.first()
-        viewModel.onAction(QuizAction.TopicSelected(topic))
+        viewModel.onIntent(QuizIntent.TopicSelected(topic))
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, fakeQuizRepo.generateLearningPointCallCount)
@@ -498,10 +498,10 @@ class QuizViewModelTest {
         testScheduler.advanceUntilIdle()
 
         val topic = dummyTopics.first()
-        viewModel.onAction(QuizAction.TopicSelected(topic))
+        viewModel.onIntent(QuizIntent.TopicSelected(topic))
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.StartQuiz)
+        viewModel.onIntent(QuizIntent.StartQuiz)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, fakeQuizRepo.generateQuizCallCount)
@@ -525,18 +525,18 @@ class QuizViewModelTest {
         testScheduler.advanceUntilIdle()
 
         val topic = dummyTopics.first()
-        viewModel.onAction(QuizAction.TopicSelected(topic))
+        viewModel.onIntent(QuizIntent.TopicSelected(topic))
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.StartQuiz)
+        viewModel.onIntent(QuizIntent.StartQuiz)
         testScheduler.advanceUntilIdle()
 
         // Question 1 correct answer is index 1 -> select 1 (correct)
-        viewModel.onAction(QuizAction.AnswerSelected(questionIndex = 0, optionIndex = 1))
+        viewModel.onIntent(QuizIntent.AnswerSelected(questionIndex = 0, optionIndex = 1))
         // Question 2 correct answer is index 0 -> select 1 (wrong)
-        viewModel.onAction(QuizAction.AnswerSelected(questionIndex = 1, optionIndex = 1))
+        viewModel.onIntent(QuizIntent.AnswerSelected(questionIndex = 1, optionIndex = 1))
 
-        viewModel.onAction(QuizAction.SubmitQuiz)
+        viewModel.onIntent(QuizIntent.SubmitQuiz)
         testScheduler.advanceUntilIdle()
 
         assertEquals(1, viewModel.state.value.quizScore)
@@ -548,8 +548,8 @@ class QuizViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.TopicSelected(dummyTopics.first()))
-        viewModel.onAction(QuizAction.BackToTopics)
+        viewModel.onIntent(QuizIntent.TopicSelected(dummyTopics.first()))
+        viewModel.onIntent(QuizIntent.BackToTopics)
 
         assertEquals(QuizStep.Topics, viewModel.state.value.currentStep)
         assertNull(viewModel.state.value.selectedTopic)
@@ -560,7 +560,7 @@ class QuizViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.BackToSeniority)
+        viewModel.onIntent(QuizIntent.BackToSeniority)
 
         assertEquals(QuizStep.SelectSeniority, viewModel.state.value.currentStep)
         assertTrue(viewModel.state.value.topics.isEmpty())
@@ -597,7 +597,7 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -630,8 +630,8 @@ class QuizViewModelTest {
         val viewModel = createViewModel(quizRepo = fakeQuizRepo, accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(QuizAction.Init("Android Engineer"))
-        viewModel.onAction(QuizAction.SenioritySelected("Senior"))
+        viewModel.onIntent(QuizIntent.Init("Android Engineer"))
+        viewModel.onIntent(QuizIntent.SenioritySelected("Senior"))
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showCoinTopUpSheet)

@@ -160,7 +160,7 @@ class ReadyToPracticeViewModelTest {
 
         assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Granted)
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
 
         assertTrue(viewModel.state.value.isVideoMode)
         assertTrue(viewModel.state.value.showCameraPermissionDialog)
@@ -183,7 +183,7 @@ class ReadyToPracticeViewModelTest {
 
         assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Locked)
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
 
         assertTrue(viewModel.state.value.showVideoGateSheet)
         assertEquals(Plan.MAX, viewModel.state.value.videoGateRequiredPlan)
@@ -215,7 +215,7 @@ class ReadyToPracticeViewModelTest {
 
         assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.CoinTopUpRequired)
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertEquals(40, viewModel.state.value.coinTopUpRequiredCost)
@@ -238,7 +238,7 @@ class ReadyToPracticeViewModelTest {
 
         val initialRefreshCount = fakeRepo.refreshCount
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         testScheduler.advanceUntilIdle()
 
         assertTrue(fakeRepo.refreshCount > initialRefreshCount)
@@ -259,10 +259,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         assertTrue(viewModel.state.value.showVideoGateSheet)
 
-        viewModel.onAction(ReadyToPracticeAction.DismissVideoGateSheet)
+        viewModel.onIntent(ReadyToPracticeIntent.DismissVideoGateSheet)
         assertFalse(viewModel.state.value.showVideoGateSheet)
     }
 
@@ -287,10 +287,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        viewModel.onAction(ReadyToPracticeAction.DismissCoinTopUpSheet)
+        viewModel.onIntent(ReadyToPracticeIntent.DismissCoinTopUpSheet)
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
@@ -309,19 +309,19 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         assertTrue(viewModel.state.value.showVideoGateSheet)
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.UpgradeFromVideoGate)
+        viewModel.onIntent(ReadyToPracticeIntent.UpgradeFromVideoGate)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showVideoGateSheet)
-        assertTrue(events.any { it is ReadyToPracticeEvent.NavigateToPaywall })
+        assertTrue(events.any { it is ReadyToPracticeEffect.NavigateToPaywall })
         job.cancel()
     }
 
@@ -346,19 +346,19 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BuyCoinsClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BuyCoinsClicked)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
-        assertTrue(events.any { it is ReadyToPracticeEvent.NavigateToPaywall })
+        assertTrue(events.any { it is ReadyToPracticeEffect.NavigateToPaywall })
         job.cancel()
     }
 
@@ -367,10 +367,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.TogglePostureTracking(true))
         assertTrue(viewModel.state.value.enablePostureTracking)
 
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(false))
+        viewModel.onIntent(ReadyToPracticeIntent.TogglePostureTracking(false))
         assertFalse(viewModel.state.value.enablePostureTracking)
     }
 
@@ -379,10 +379,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.ToggleHandTracking(true))
         assertTrue(viewModel.state.value.enableHandTracking)
 
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(false))
+        viewModel.onIntent(ReadyToPracticeIntent.ToggleHandTracking(false))
         assertFalse(viewModel.state.value.enableHandTracking)
     }
 
@@ -391,15 +391,15 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(true))
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.TogglePostureTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.ToggleHandTracking(true))
 
         assertTrue(viewModel.state.value.isVideoMode)
         assertTrue(viewModel.state.value.enablePostureTracking)
         assertTrue(viewModel.state.value.enableHandTracking)
 
-        viewModel.onAction(ReadyToPracticeAction.SelectAudioMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectAudioMode)
         assertFalse(viewModel.state.value.isVideoMode)
         assertFalse(viewModel.state.value.enablePostureTracking)
         assertFalse(viewModel.state.value.enableHandTracking)
@@ -410,7 +410,7 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
         assertTrue(viewModel.state.value.isMicrophoneGranted)
         assertFalse(viewModel.state.value.isPermissionDialogVisible)
@@ -421,7 +421,7 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.MicrophoneRowClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophoneRowClicked)
 
         assertTrue(viewModel.state.value.isPermissionDialogVisible)
     }
@@ -431,10 +431,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.MicrophoneRowClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophoneRowClicked)
         assertTrue(viewModel.state.value.isPermissionDialogVisible)
 
-        viewModel.onAction(ReadyToPracticeAction.PermissionDialogDismissed)
+        viewModel.onIntent(ReadyToPracticeIntent.PermissionDialogDismissed)
         assertFalse(viewModel.state.value.isPermissionDialogVisible)
     }
 
@@ -443,7 +443,7 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true))
 
         assertTrue(viewModel.state.value.isCameraGranted)
         assertFalse(viewModel.state.value.showCameraPermissionDialog)
@@ -454,7 +454,7 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.CameraRowClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.CameraRowClicked)
 
         assertTrue(viewModel.state.value.showCameraPermissionDialog)
     }
@@ -464,10 +464,10 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.CameraRowClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.CameraRowClicked)
         assertTrue(viewModel.state.value.showCameraPermissionDialog)
 
-        viewModel.onAction(ReadyToPracticeAction.CameraPermissionDialogDismissed)
+        viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionDialogDismissed)
         assertFalse(viewModel.state.value.showCameraPermissionDialog)
     }
 
@@ -478,17 +478,17 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 101L, trackName = "Backend")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
+        val practiceEvent = events.filterIsInstance<ReadyToPracticeEffect.NavigateToPractice>().firstOrNull()
         assertTrue("Expected NavigateToPractice event", practiceEvent != null)
         assertEquals(101L, practiceEvent!!.trackId)
         assertFalse(practiceEvent.isVideo)
@@ -504,21 +504,21 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 102L, trackName = "Android")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
-        viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
-        viewModel.onAction(ReadyToPracticeAction.TogglePostureTracking(true))
-        viewModel.onAction(ReadyToPracticeAction.ToggleHandTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.TogglePostureTracking(true))
+        viewModel.onIntent(ReadyToPracticeIntent.ToggleHandTracking(true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
+        val practiceEvent = events.filterIsInstance<ReadyToPracticeEffect.NavigateToPractice>().firstOrNull()
         assertTrue("Expected NavigateToPractice event", practiceEvent != null)
         assertEquals(102L, practiceEvent!!.trackId)
         assertTrue(practiceEvent.isVideo)
@@ -544,17 +544,17 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 103L, trackName = "iOS")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(events.any { it is ReadyToPracticeEvent.NavigateToPaywall })
+        assertTrue(events.any { it is ReadyToPracticeEffect.NavigateToPaywall })
         job.cancel()
     }
 
@@ -581,14 +581,14 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 104L, trackName = "Flutter")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -620,23 +620,23 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 105L, trackName = "Kotlin")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
-        viewModel.onAction(ReadyToPracticeAction.CameraPermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true))
         // Manually trigger video mode in state if possible or select video mode
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode) // sets showVideoGateSheet
-        viewModel.onAction(ReadyToPracticeAction.DismissVideoGateSheet)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode) // sets showVideoGateSheet
+        viewModel.onIntent(ReadyToPracticeIntent.DismissVideoGateSheet)
 
         // Now test beginInterview when audio is granted but video is locked
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
         // Audio mode is active since SelectVideoMode was locked, so beginInterview in audio mode (MockInterviews is in FREE) proceeds
-        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
+        val practiceEvent = events.filterIsInstance<ReadyToPracticeEffect.NavigateToPractice>().firstOrNull()
         assertTrue("Expected NavigateToPractice event", practiceEvent != null)
         assertFalse(practiceEvent!!.isVideo)
         job.cancel()
@@ -659,11 +659,11 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 106L, trackName = "Security")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
         val initialRefreshCount = fakeRepo.refreshCount
 
-        viewModel.onAction(ReadyToPracticeAction.BeginInterviewClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
         assertTrue(fakeRepo.refreshCount > initialRefreshCount)
@@ -674,15 +674,15 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.CancelClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.CancelClicked)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(events.any { it is ReadyToPracticeEvent.NavigateBack })
+        assertTrue(events.any { it is ReadyToPracticeEffect.NavigateBack })
         job.cancel()
     }
 
@@ -720,14 +720,14 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 201L, trackName = "Kotlin Dev")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.StartPracticeClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.StartPracticeClicked)
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -753,18 +753,18 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         viewModel.initialise(trackId = 202L, trackName = "Kotlin Dev")
-        viewModel.onAction(ReadyToPracticeAction.MicrophonePermissionChanged(isGranted = true))
+        viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
 
-        val events = mutableListOf<ReadyToPracticeEvent>()
+        val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
         }
 
-        viewModel.onAction(ReadyToPracticeAction.StartPracticeClicked)
+        viewModel.onIntent(ReadyToPracticeIntent.StartPracticeClicked)
         testScheduler.advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
-        val practiceEvent = events.filterIsInstance<ReadyToPracticeEvent.NavigateToPractice>().firstOrNull()
+        val practiceEvent = events.filterIsInstance<ReadyToPracticeEffect.NavigateToPractice>().firstOrNull()
         assertTrue("Expected NavigateToPractice event", practiceEvent != null)
         assertEquals(202L, practiceEvent!!.trackId)
         job.cancel()
@@ -791,7 +791,7 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        viewModel.onAction(ReadyToPracticeAction.SelectVideoMode)
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)

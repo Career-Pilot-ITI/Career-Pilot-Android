@@ -3,8 +3,8 @@ package com.iti.careerpilot.profile.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.profile.domain.repo.ProfileRepo
-import com.iti.careerpilot.profile.presentation.action.ProfileAction
-import com.iti.careerpilot.profile.presentation.event.ProfileEvent
+import com.iti.careerpilot.profile.presentation.action.ProfileIntent
+import com.iti.careerpilot.profile.presentation.event.ProfileEffect
 import com.iti.careerpilot.profile.presentation.state.ProfileState
 import com.iti.careerpilot.core.network.auth.SessionManager
 import com.iti.common.dispatcher.CareerPilotDispatchers
@@ -45,7 +45,7 @@ class ProfileViewModel @Inject constructor(
             initialValue = ProfileState()
         )
 
-    private val _events = Channel<ProfileEvent>(Channel.BUFFERED)
+    private val _events = Channel<ProfileEffect>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private var initializationJob: Job? = null
@@ -60,25 +60,25 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: ProfileAction) {
-        when (action) {
-            ProfileAction.Initial -> initialize()
-            is ProfileAction.OnEditProfileClick -> sendEvent(ProfileEvent.NavigateToEditProfile(action.section))
-            ProfileAction.OnSettingsClick -> sendEvent(ProfileEvent.NavigateToSettings)
-            ProfileAction.OnSubscriptionClick -> sendEvent(ProfileEvent.NavigateToSubscription)
+    fun onIntent(intent: ProfileIntent) {
+        when (intent) {
+            ProfileIntent.Initial -> initialize()
+            is ProfileIntent.OnEditProfileClick -> sendEvent(ProfileEffect.NavigateToEditProfile(intent.section))
+            ProfileIntent.OnSettingsClick -> sendEvent(ProfileEffect.NavigateToSettings)
+            ProfileIntent.OnSubscriptionClick -> sendEvent(ProfileEffect.NavigateToSubscription)
 
-            ProfileAction.OnLogoutClick -> _state.update { it.copy(showLogoutDialog = true) }
-            ProfileAction.OnLogoutDismiss -> _state.update { it.copy(showLogoutDialog = false) }
-            ProfileAction.OnLogoutConfirm -> {
+            ProfileIntent.OnLogoutClick -> _state.update { it.copy(showLogoutDialog = true) }
+            ProfileIntent.OnLogoutDismiss -> _state.update { it.copy(showLogoutDialog = false) }
+            ProfileIntent.OnLogoutConfirm -> {
                 _state.update { it.copy(showLogoutDialog = false) }
                 viewModelScope.launch {
                     sessionManager.clearSession()
                     profileRepo.clearUserProfile()
-                    sendEvent(ProfileEvent.NavigateToLogout)
+                    sendEvent(ProfileEffect.NavigateToLogout)
                 }
             }
 
-            is ProfileAction.OnCVClick -> sendEvent(ProfileEvent.OpenCV(action.cvLocalUriOrUrl))
+            is ProfileIntent.OnCVClick -> sendEvent(ProfileEffect.OpenCV(intent.cvLocalUriOrUrl))
         }
     }
 
@@ -91,7 +91,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun sendEvent(event: ProfileEvent) {
+    private fun sendEvent(event: ProfileEffect) {
         viewModelScope.launch(dispatcherDefault) { _events.send(event) }
     }
 }
