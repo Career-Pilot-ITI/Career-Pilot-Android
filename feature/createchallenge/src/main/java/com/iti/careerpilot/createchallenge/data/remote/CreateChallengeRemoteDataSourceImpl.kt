@@ -8,7 +8,9 @@ import com.iti.careerpilot.core.network.util.safeCall
 import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
+import com.iti.common.result.map
 import com.iti.core.model.Track
+import com.iti.core.model.TrackDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import javax.inject.Inject
@@ -18,8 +20,18 @@ class CreateChallengeRemoteDataSourceImpl @Inject constructor(
     private val firestoreDataSource: ChallengeFirestoreDataSource
 ) : CreateChallengeRemoteDataSource {
 
-    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> = safeCall {
+    override suspend fun getTracks(): CareerPilotResult<List<Track>, NetworkError> = safeCall<List<TrackDto>> {
         client.get(Endpoints.GET_TRACKS)
+    }.map { trackList ->
+        trackList.mapNotNull { dto ->
+            dto.id?.let { id ->
+                dto.name?.let { name ->
+                    Track(
+                        id, name
+                    )
+                }
+            }
+        }
     }
 
     override suspend fun validateQuestions(questions: List<String>): CareerPilotResult<Boolean, FirebaseError> =
