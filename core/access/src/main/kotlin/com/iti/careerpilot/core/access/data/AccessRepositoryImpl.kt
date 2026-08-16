@@ -9,6 +9,7 @@ import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.AccessState
 import com.iti.core.model.FeatureKey
+import com.iti.core.model.Plan
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,11 +48,7 @@ class AccessRepositoryImpl @Inject constructor(
         }.onFailure {
             val cachedProfile = userProfileRepo.userProfile.value
             if (cachedProfile.account.subscriptionTier.isNotEmpty() || cachedProfile.account.coinBalance > 0) {
-                val cachedPlan = when (cachedProfile.account.subscriptionTier.uppercase().trim()) {
-                    "PLUS" -> com.iti.core.model.Plan.PLUS
-                    "PRO", "MAX" -> com.iti.core.model.Plan.MAX
-                    else -> com.iti.core.model.Plan.FREE
-                }
+                val cachedPlan = Plan.fromString(cachedProfile.account.subscriptionTier)
                 val fallbackState = AccessState(
                     plan = cachedPlan,
                     features = com.iti.careerpilot.core.access.PlanAccessMap.featuresFor(cachedPlan),

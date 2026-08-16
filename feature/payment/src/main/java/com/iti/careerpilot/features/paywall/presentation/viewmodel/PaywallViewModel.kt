@@ -23,6 +23,7 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.model.CheckoutSession
+import com.iti.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
@@ -218,7 +219,7 @@ class PaywallViewModel @Inject constructor(
             PaywallIntent.CheckoutRequested,
             PaywallIntent.ConfirmUpgradeRequested -> {
                 val selectedPlan = mutableState.value.selectedPlan
-                if (selectedPlan != null && selectedPlan.id.equals("free", ignoreCase = true)) {
+                if (selectedPlan != null && selectedPlan.plan == Plan.FREE) {
                     handleDowngradeRequested()
                 } else {
                     handleUpgradeRequested()
@@ -279,8 +280,8 @@ class PaywallViewModel @Inject constructor(
 
     private fun handleUpgradeRequested() {
         val selectedPlan = mutableState.value.selectedPlan
-        if (selectedPlan == null || selectedPlan.id.equals("free", ignoreCase = true) || (selectedPlan.priceEgp ?: 0) <= 0) {
-            if (selectedPlan?.id?.equals("free", ignoreCase = true) == true) {
+        if (selectedPlan == null || selectedPlan.plan == Plan.FREE || (selectedPlan.priceEgp ?: 0) <= 0) {
+            if (selectedPlan?.plan == Plan.FREE) {
                 handleDowngradeRequested()
             }
             return

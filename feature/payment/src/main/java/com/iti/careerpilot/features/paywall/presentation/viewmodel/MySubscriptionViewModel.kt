@@ -52,11 +52,7 @@ class MySubscriptionViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             getCurrentSubscriptionUseCase()
                 .onSuccess { info ->
-                    val plan = when (info.tier.uppercase().trim()) {
-                        "PLUS" -> Plan.PLUS
-                        "PRO", "MAX" -> Plan.MAX
-                        else -> Plan.FREE
-                    }
+                    val plan = Plan.fromString(info.tier)
                     val features = PlanAccessMap.featuresFor(plan).map { it.displayName() }
                     _state.update {
                         it.copy(

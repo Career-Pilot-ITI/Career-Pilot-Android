@@ -10,4 +10,12 @@ enum class Plan {
         PLUS -> "Plus"
         MAX  -> "Max"
     }
+
+    companion object {
+        fun fromString(raw: String): Plan = when (raw.uppercase().trim()) {
+            "PLUS"       -> PLUS
+            "PRO", "MAX" -> MAX
+            else         -> FREE
+        }
+    }
 }

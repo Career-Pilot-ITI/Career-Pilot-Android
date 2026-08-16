@@ -3,6 +3,7 @@ package com.iti.careerpilot.features.paywall.domain.model
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import com.iti.careerpilot.payment.R
+import com.iti.core.model.Plan
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -36,6 +37,9 @@ data class SubscriptionPlan(
     val isInitiallySelected: Boolean = false,
     val features: ImmutableList<Int> = persistentListOf(),
 ) {
+    val plan: Plan
+        get() = Plan.fromString(id)
+
     val tierLevel: Int
         get() = SubscriptionTier.getTierLevel(id)
 

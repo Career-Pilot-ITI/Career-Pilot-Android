@@ -43,12 +43,7 @@ data class SubscriptionStatusDto(
         syncTime: Instant = Clock.System.now(),
         coinBalanceFallback: Int = 0
     ): AccessState {
-        val parsedPlan = when (effectivePlanString.uppercase().trim()) {
-            "FREE" -> Plan.FREE
-            "PLUS" -> Plan.PLUS
-            "PRO", "MAX" -> Plan.MAX // backend sends "PRO"; app calls it "MAX"
-            else -> Plan.FREE
-        }
+        val parsedPlan = Plan.fromString(effectivePlanString)
         val domainFeatures = features.map { FeatureKey.from(it) }.toSet()
         val domainQuotas = quotas.associate { q ->
             val key = FeatureKey.from(q.feature)
