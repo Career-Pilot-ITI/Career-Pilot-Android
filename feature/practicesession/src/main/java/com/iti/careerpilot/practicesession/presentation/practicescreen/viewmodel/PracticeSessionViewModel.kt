@@ -107,6 +107,8 @@ class PracticeSessionViewModel @Inject constructor(
 
     private var hasLoadedInitialData = false
     private var autoStopTriggered = false
+    private var pendingRestartAction: RestartPracticeSession? = null
+    private var pendingCreateAction: CreateNewPracticeSession? = null
 
     private var sessionStartedAtMs: Long?
         get() = savedStateHandle[KEY_SESSION_STARTED_AT_MS]
@@ -273,6 +275,43 @@ class PracticeSessionViewModel @Inject constructor(
                 action.enableHandTracking
             )
 
+            is ShowOrHideRestartWarning -> {
+                _state.update { it.copy(showRestartWarning = action.show) }
+                if (!action.show) {
+                    pendingRestartAction = null
+                    pendingCreateAction = null
+                }
+            }
+
+            ConfirmRestartChallenge -> {
+                _state.update { it.copy(showRestartWarning = false) }
+                val restart = pendingRestartAction
+                val create = pendingCreateAction
+                pendingRestartAction = null
+                pendingCreateAction = null
+
+                if (restart != null) {
+                    restartOldSession(
+                        restart.sessionId,
+                        restart.firestoreSessionId,
+                        restart.isVideoSession,
+                        restart.enablePostureTracking,
+                        restart.enableHandTracking,
+                        forceRestart = true
+                    )
+                } else if (create != null) {
+                    createNewSession(
+                        create.trackId,
+                        create.workspaceId,
+                        create.challengeId,
+                        create.isVideoSession,
+                        create.enablePostureTracking,
+                        create.enableHandTracking,
+                        forceCreate = true
+                    )
+                }
+            }
+
             is ShowOrHidePermissionDialog -> togglePermissionDialog(action.show)
 
             is ShowOrHideDiscardConfirmDialog -> toggleDiscardConfirmDialog(action.show)
@@ -408,7 +447,8 @@ class PracticeSessionViewModel @Inject constructor(
         firestoreSessionId: String? = null,
         isVideoSession: Boolean = false,
         enablePostureTracking: Boolean = false,
-        enableHandTracking: Boolean = false
+        enableHandTracking: Boolean = false,
+        forceRestart: Boolean = false
     ) {
         val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
         val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
@@ -424,6 +464,18 @@ class PracticeSessionViewModel @Inject constructor(
             )
         }
         if (_state.value.currentSession != null || _state.value.firestoreSession != null || _state.value.isLoadingSession) return
+
+        if (firestoreSessionId != null && !forceRestart) {
+            pendingRestartAction = RestartPracticeSession(
+                sessionId,
+                firestoreSessionId,
+                effectiveIsVideo,
+                effectivePosture,
+                effectiveHands
+            )
+            _state.update { it.copy(showRestartWarning = true) }
+            return
+        }
 
         if (firestoreSessionId != null) {
             loadFirestoreSession {
@@ -443,7 +495,8 @@ class PracticeSessionViewModel @Inject constructor(
         challengeId: String? = null,
         isVideoSession: Boolean = false,
         enablePostureTracking: Boolean = false,
-        enableHandTracking: Boolean = false
+        enableHandTracking: Boolean = false,
+        forceCreate: Boolean = false
     ) {
         val effectiveIsVideo = savedStateHandle.get<Boolean>(KEY_IS_VIDEO_SESSION) ?: isVideoSession
         val effectivePosture = savedStateHandle.get<Boolean>(KEY_ENABLE_POSTURE) ?: enablePostureTracking
@@ -474,21 +527,31 @@ class PracticeSessionViewModel @Inject constructor(
             return
         }
 
-        if (challengeId != null) {
-            loadFirestoreSession {
-                when (val challengeResult = firestoreDataSource.getChallenge(challengeId)) {
-                    is CareerPilotResult.Success -> {
-                        val profile = userProfileRepo.userProfile.value
-                        firestoreDataSource.createSession(
-                            challenge = challengeResult.data,
-                            participantId = profile.id,
-                            participantEmail = profile.account.email,
-                            participantName = profile.personal.displayName
-                        )
-                    }
-                    is CareerPilotResult.Error -> challengeResult
+        if (challengeId != null && !forceCreate) {
+            viewModelScope.launch {
+                _state.update { it.copy(isLoadingSession = true) }
+                val profile = userProfileRepo.userProfile.value
+                val takenResult = firestoreDataSource.getTakenChallenges(profile.id)
+                
+                var hasTakenBefore = false
+                if (takenResult is CareerPilotResult.Success) {
+                    hasTakenBefore = takenResult.data.any { it.challengeId == challengeId }
+                }
+
+                if (hasTakenBefore) {
+                    pendingCreateAction = CreateNewPracticeSession(
+                        trackId, workspaceId, challengeId, effectiveIsVideo, effectivePosture, effectiveHands
+                    )
+                    _state.update { it.copy(showRestartWarning = true, isLoadingSession = false) }
+                } else {
+                    performCreateFirestoreSession(challengeId)
                 }
             }
+            return
+        }
+
+        if (challengeId != null) {
+            performCreateFirestoreSession(challengeId)
             return
         }
 
@@ -501,6 +564,24 @@ class PracticeSessionViewModel @Inject constructor(
                     workspaceId = workspaceId,
                 )
             )
+        }
+    }
+
+    private fun performCreateFirestoreSession(challengeId: String) {
+        loadFirestoreSession {
+            when (val challengeResult = firestoreDataSource.getChallenge(challengeId)) {
+                is CareerPilotResult.Success -> {
+                    val profile = userProfileRepo.userProfile.value
+                    firestoreDataSource.createSession(
+                        challenge = challengeResult.data,
+                        participantId = profile.id,
+                        participantEmail = profile.account.email,
+                        participantName = profile.personal.displayName
+                    )
+                }
+
+                is CareerPilotResult.Error -> challengeResult
+            }
         }
     }
 

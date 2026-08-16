@@ -35,6 +35,12 @@ sealed interface PracticeSessionAction {
         val show: Boolean
     ) : PracticeSessionAction
 
+    data class ShowOrHideRestartWarning(
+        val show: Boolean
+    ) : PracticeSessionAction
+
+    data object ConfirmRestartChallenge : PracticeSessionAction
+
     data class ToggleAutoReadQuestion(
         val enabled: Boolean
     ) : PracticeSessionAction

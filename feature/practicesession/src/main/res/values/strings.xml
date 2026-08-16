@@ -77,6 +77,11 @@
     <string name="retry">Retry</string>
     <string name="more_details">More details</string>
 
+    <!-- Restart challenge confirmation -->
+    <string name="restart_challenge_title">Restart Challenge?</string>
+    <string name="restart_challenge_message">This challenge was taken before. Restarting it will delete the previous result and progress.</string>
+    <string name="restart">Restart</string>
+
     <!-- Body language / camera -->
     <string name="camera_permission">Camera Permission</string>
     <string name="please_allow_camera_permission_for_body_language">Allow camera access to enable body language analysis during your practice session.</string>

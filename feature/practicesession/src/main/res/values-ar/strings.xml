@@ -79,6 +79,11 @@
     <string name="retry">إعادة المحاولة</string>
     <string name="more_details">المزيد من التفاصيل</string>
 
+    <!-- Restart challenge confirmation -->
+    <string name="restart_challenge_title">إعادة بدء التحدي؟</string>
+    <string name="restart_challenge_message">تم خوض هذا التحدي من قبل. إعادة بدئه سيؤدي إلى حذف النتيجة والتقدم السابقين.</string>
+    <string name="restart">إعادة بدء</string>
+
     <!-- Body language / camera -->
     <string name="camera_permission">إذن الكاميرا</string>
     <string name="please_allow_camera_permission_for_body_language">اسمح بالوصول إلى الكاميرا لتفعيل تحليل لغة الجسد أثناء جلسة التدريب.</string>

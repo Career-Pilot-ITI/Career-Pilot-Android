@@ -96,7 +96,10 @@ fun PracticeSessionRoot(
     ObserveEvent(viewModel.event) { newEvent ->
         when (newEvent) {
             is PracticeSessionEvent.NavigateToResult -> onNavigateToResult(newEvent.sessionId)
-            is PracticeSessionEvent.NavigateToFirestoreResult -> onNavigateToFirestoreResult(newEvent.sessionId)
+            is PracticeSessionEvent.NavigateToFirestoreResult -> onNavigateToFirestoreResult(
+                newEvent.sessionId
+            )
+
             is PracticeSessionEvent.ShowError -> {
                 errorMessage = newEvent.message
             }
@@ -182,7 +185,13 @@ fun PracticeSessionRoot(
             showCameraPreviewToggle = state.isBodyLanguageAnalyzing,
             isCameraPreviewVisible = state.isCameraPreviewVisible,
             onAutoReadToggle = { viewModel.onAction(PracticeSessionAction.ToggleAutoReadQuestion(it)) },
-            onCameraPreviewToggle = { viewModel.onAction(PracticeSessionAction.ToggleCameraPreview(it)) },
+            onCameraPreviewToggle = {
+                viewModel.onAction(
+                    PracticeSessionAction.ToggleCameraPreview(
+                        it
+                    )
+                )
+            },
             onDismiss = {
                 viewModel.onAction(
                     PracticeSessionAction.ShowOrHideSettingsBottomSheet(
@@ -204,6 +213,22 @@ fun PracticeSessionRoot(
             onConfirm = { onBack() },
             cancel = stringResource(R.string.cancel),
             confirm = stringResource(R.string.leave)
+        )
+    }
+
+    if (state.showRestartWarning) {
+        ConfirmationDialog(
+            title = stringResource(R.string.restart_challenge_title),
+            text = stringResource(R.string.restart_challenge_message),
+            icon = ImageVector.vectorResource(R.drawable.ic_delete),
+            onDismiss = {
+                onBack()
+            },
+            onConfirm = {
+                viewModel.onAction(PracticeSessionAction.ConfirmRestartChallenge)
+            },
+            cancel = stringResource(R.string.cancel),
+            confirm = stringResource(R.string.restart)
         )
     }
 
@@ -383,7 +408,7 @@ fun PracticeSessionScreen(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Row (
+                    Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -546,6 +546,7 @@ fun RootNavDisplay(
                             )
                         },
                         onContinueSession = { sessionId ->
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
                             rootBackStack.navigateSingleTop(
                                 Route.PracticeSession(
                                     firestoreSessionId = sessionId

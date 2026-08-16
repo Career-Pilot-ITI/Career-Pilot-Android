@@ -37,6 +37,7 @@ data class PracticeSessionState(
     val showDiscardConfirm: Boolean = false,
     val showLeaveConfirm: Boolean = false,
     val showSettingsBottomSheet: Boolean = false,
+    val showRestartWarning: Boolean = false,
     val autoReadQuestion: Boolean = true,
 
     // Body language
