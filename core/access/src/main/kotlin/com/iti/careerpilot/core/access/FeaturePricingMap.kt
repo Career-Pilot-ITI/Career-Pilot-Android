@@ -16,6 +16,8 @@ import com.iti.core.model.FeatureKey
  * - Job Parse: 1 Coin
  * - Export PDF Report: 0 Coins
  * - Advanced Reports: 0 Coins
+ * - Create Challenge: 0 Coins
+ * - Enter Challenge: 0 Coins
  */
 object FeaturePricingMap {
 
@@ -30,6 +32,8 @@ object FeaturePricingMap {
         FeatureKey.JobParse to 1,
         FeatureKey.ExportPdfReport to 0,
         FeatureKey.AdvancedReports to 0,
+        FeatureKey.CreateChallenge to 0,
+        FeatureKey.EnterChallenge to 0,
     )
 
     /**

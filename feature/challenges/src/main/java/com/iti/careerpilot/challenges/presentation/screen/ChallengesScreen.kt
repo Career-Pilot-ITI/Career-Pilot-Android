@@ -1,4 +1,7 @@
-@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(
+    androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class
+)
 
 package com.iti.careerpilot.challenges.presentation.screen
 
@@ -56,6 +59,9 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +85,7 @@ import com.iti.careerpilot.challenges.presentation.viewmodel.ChallengesViewModel
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 
 
@@ -87,9 +94,11 @@ fun ChallengesScreenRoot(
     openCreateChallenge: () -> Unit,
     openChallengeDashboard: () -> Unit,
     openChallengeDetails: (String) -> Unit,
+    openPlansPaywall: () -> Unit = {},
     viewModel: ChallengesViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var featureGateData by remember { mutableStateOf<ChallengesEvent.ShowFeatureGate?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.onAction(ChallengesAction.Initial)
@@ -100,6 +109,10 @@ fun ChallengesScreenRoot(
             ChallengesEvent.NavigateToCreateChallenge -> openCreateChallenge()
             ChallengesEvent.NavigateToChallengeDashboard -> openChallengeDashboard()
             is ChallengesEvent.NavigateToChallengeDetails -> openChallengeDetails(event.challengeId)
+            is ChallengesEvent.ShowFeatureGate -> {
+                featureGateData = event
+            }
+            ChallengesEvent.NavigateToPlansPaywall -> openPlansPaywall()
         }
     }
 
@@ -107,6 +120,21 @@ fun ChallengesScreenRoot(
         state = state,
         onAction = viewModel::onAction
     )
+
+    featureGateData?.let { gateData ->
+        FeatureGateBottomSheet(
+            featureName = gateData.featureName,
+            requiredPlan = gateData.requiredPlan,
+            planFeatures = gateData.planFeatures,
+            onUpgradeClick = {
+                featureGateData = null
+                openPlansPaywall()
+            },
+            onDismiss = {
+                featureGateData = null
+            }
+        )
+    }
 
     if (state.isPrivateCodeDialogOpen) {
         PrivateCodeDialog(

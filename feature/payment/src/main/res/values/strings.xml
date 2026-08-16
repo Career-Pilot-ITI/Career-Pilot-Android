@@ -14,7 +14,7 @@
     <string name="paywall_coin_pack">%1$d coins</string>
     <string name="paywall_price">EGP %1$d</string>
     <string name="paywall_monthly_price">EGP %1$d monthly</string>
-    <string name="paywall_free_plan_description">Your current free plan</string>
+    <string name="paywall_free_plan_description">Free tier: Mock interviews &amp; challenge participation</string>
     <string name="paywall_badge_most_popular">Most popular</string>
     <string name="paywall_badge_best_value">Best value</string>
     <string name="paywall_selected">Selected</string>
@@ -40,12 +40,14 @@
     <string name="paywall_feature_voice_mock_interview">AI Voice Mock Interviews (10 coins / session)</string>
     <string name="paywall_feature_performance_analytics">Performance Analytics &amp; Score Breakdown</string>
     <string name="paywall_feature_voice_scoring">Voice Scoring &amp; AI Feedback</string>
+    <string name="paywall_feature_enter_challenges">Participate in Public &amp; Private Challenges</string>
     <string name="paywall_feature_everything_in_free">Everything in Free plan</string>
     <string name="paywall_feature_ats_scan">ATS Resume-to-Job Match Scan</string>
     <string name="paywall_feature_resume_optimizer">AI Resume Section Optimizer &amp; Cover Letter</string>
     <string name="paywall_feature_80_monthly_coins">80 Monthly Coins Included</string>
     <string name="paywall_feature_everything_in_plus">Everything in Plus plan</string>
     <string name="paywall_feature_video_interview">Video Body Language &amp; Posture AI</string>
+    <string name="paywall_feature_create_challenges">Create &amp; Host Custom Challenges</string>
     <string name="paywall_feature_technical_quizzes">AI Technical Skill Quizzes &amp; Tests</string>
     <string name="paywall_feature_160_monthly_coins">160 Monthly Coins Included</string>
     <string name="paywall_checkout_title">Checkout</string>

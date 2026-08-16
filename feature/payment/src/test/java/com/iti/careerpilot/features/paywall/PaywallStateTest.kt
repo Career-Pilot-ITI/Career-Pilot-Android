@@ -215,11 +215,20 @@ class PaywallStateTest {
         val freePlan = state.subscriptionPlans.first { it.id == "free" }
         val proPlan = state.subscriptionPlans.first { it.id == "pro" }
 
+        assertTrue(
+            "Free plan should include participate in challenges",
+            freePlan.features.contains(com.iti.careerpilot.payment.R.string.paywall_feature_enter_challenges)
+        )
+        assertTrue(
+            "Pro/Max plan should include create challenges",
+            proPlan.features.contains(com.iti.careerpilot.payment.R.string.paywall_feature_create_challenges)
+        )
         assertEquals(
             listOf(
                 com.iti.careerpilot.payment.R.string.paywall_feature_voice_mock_interview,
                 com.iti.careerpilot.payment.R.string.paywall_feature_performance_analytics,
-                com.iti.careerpilot.payment.R.string.paywall_feature_voice_scoring
+                com.iti.careerpilot.payment.R.string.paywall_feature_voice_scoring,
+                com.iti.careerpilot.payment.R.string.paywall_feature_enter_challenges
             ),
             freePlan.features
         )
@@ -227,6 +236,7 @@ class PaywallStateTest {
             listOf(
                 com.iti.careerpilot.payment.R.string.paywall_feature_everything_in_plus,
                 com.iti.careerpilot.payment.R.string.paywall_feature_video_interview,
+                com.iti.careerpilot.payment.R.string.paywall_feature_create_challenges,
                 com.iti.careerpilot.payment.R.string.paywall_feature_160_monthly_coins
             ),
             proPlan.features
