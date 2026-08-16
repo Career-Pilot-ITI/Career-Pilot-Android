@@ -5,5 +5,4 @@ data class CreateSessionRequest(
     val questionCount: Int,
     val durationMinutes: Int,
     val workspaceId: Long? = null,
-    val challengeId: String? = null
 )

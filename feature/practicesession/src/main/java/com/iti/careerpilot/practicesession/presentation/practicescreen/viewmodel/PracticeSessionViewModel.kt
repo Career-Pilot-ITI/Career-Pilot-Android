@@ -251,7 +251,6 @@ class PracticeSessionViewModel @Inject constructor(
             is CreateNewPracticeSession -> createNewSession(
                 action.trackId,
                 action.workspaceId,
-                action.challengeId,
                 action.isVideoSession,
                 action.enablePostureTracking,
                 action.enableHandTracking
@@ -422,7 +421,6 @@ class PracticeSessionViewModel @Inject constructor(
     private fun createNewSession(
         trackId: Long,
         workspaceId: Long? = null,
-        challengeId: String? = null,
         isVideoSession: Boolean = false,
         enablePostureTracking: Boolean = false,
         enableHandTracking: Boolean = false
@@ -455,7 +453,6 @@ class PracticeSessionViewModel @Inject constructor(
                     questionCount = QUESTION_COUNT,
                     durationMinutes = SESSION_DURATION,
                     workspaceId = workspaceId,
-                    challengeId = challengeId
                 )
             )
         }

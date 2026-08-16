@@ -122,7 +122,6 @@ fun PracticeSessionRoot(
                 PracticeSessionAction.CreateNewPracticeSession(
                     trackId = trackId,
                     workspaceId = workspaceId,
-                    challengeId = challengeId,
                     isVideoSession = isVideoSession,
                     enablePostureTracking = enablePostureTracking,
                     enableHandTracking = enableHandTracking
