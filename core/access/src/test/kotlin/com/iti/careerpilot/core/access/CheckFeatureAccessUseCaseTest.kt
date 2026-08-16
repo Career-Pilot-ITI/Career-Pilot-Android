@@ -271,4 +271,114 @@ class CheckFeatureAccessUseCaseTest {
 
         assertEquals(FeatureAccess.StaleCacheBlocked, result)
     }
+
+    // ── Scenario 8: Coin fallback for plan-gated features & quota-exhausted features ──
+
+    @Test
+    fun `feature not in plan with sufficient coins returns Granted via coin fallback`() = runTest {
+        // FREE plan does not include Quizzes, but user has 10 coins (Quizzes cost = 10)
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.FREE,
+            features = PlanAccessMap.featuresFor(Plan.FREE),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 10
+        )
+
+        val result = useCase(FeatureKey.Quizzes).first()
+
+        assertTrue(result is FeatureAccess.Granted)
+        assertEquals(null, (result as FeatureAccess.Granted).quota)
+    }
+
+    @Test
+    fun `feature not in plan with insufficient coins returns CoinTopUpRequired`() = runTest {
+        // FREE plan does not include Quizzes, user has 5 coins (Quizzes cost = 10)
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.FREE,
+            features = PlanAccessMap.featuresFor(Plan.FREE),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 5
+        )
+
+        val result = useCase(FeatureKey.Quizzes).first()
+
+        assertTrue(result is FeatureAccess.CoinTopUpRequired)
+        val topUp = result as FeatureAccess.CoinTopUpRequired
+        assertEquals(FeatureKey.Quizzes, topUp.feature)
+        assertEquals(10, topUp.coinCost)
+        assertEquals(5, topUp.currentCoins)
+    }
+
+    @Test
+    fun `feature not in plan with zero coin cost returns Locked even with coins`() = runTest {
+        // AdvancedReports has coinCost = 0 and is not in FREE plan -> truly locked
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.FREE,
+            features = PlanAccessMap.featuresFor(Plan.FREE),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 50
+        )
+
+        val result = useCase(FeatureKey.AdvancedReports).first()
+
+        assertTrue(result is FeatureAccess.Locked)
+        assertEquals(Plan.MAX, (result as FeatureAccess.Locked).requiredPlan)
+    }
+
+    @Test
+    fun `quota exhausted feature with exact coins returns Granted via coin fallback`() = runTest {
+        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 5, coinBalance = 5
+        val quota = FeatureQuota(
+            feature = FeatureKey.MockInterviews,
+            remaining = 0,
+            max = 10,
+            coinCost = null
+        )
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.PLUS,
+            features = PlanAccessMap.featuresFor(Plan.PLUS),
+            quotas = mapOf(FeatureKey.MockInterviews to quota),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 5
+        )
+
+        val result = useCase(FeatureKey.MockInterviews).first()
+
+        assertTrue(result is FeatureAccess.Granted)
+        assertEquals(quota, (result as FeatureAccess.Granted).quota)
+    }
+
+    @Test
+    fun `quota exhausted feature with insufficient coins returns CoinTopUpRequired via coin fallback`() = runTest {
+        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 5, coinBalance = 2
+        val quota = FeatureQuota(
+            feature = FeatureKey.MockInterviews,
+            remaining = 0,
+            max = 10,
+            coinCost = null
+        )
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.PLUS,
+            features = PlanAccessMap.featuresFor(Plan.PLUS),
+            quotas = mapOf(FeatureKey.MockInterviews to quota),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 2
+        )
+
+        val result = useCase(FeatureKey.MockInterviews).first()
+
+        assertTrue(result is FeatureAccess.CoinTopUpRequired)
+        val topUp = result as FeatureAccess.CoinTopUpRequired
+        assertEquals(FeatureKey.MockInterviews, topUp.feature)
+        assertEquals(5, topUp.coinCost)
+        assertEquals(2, topUp.currentCoins)
+    }
 }

@@ -20,33 +20,37 @@ class CheckFeatureAccessUseCase @Inject constructor(
                 return@map FeatureAccess.StaleCacheBlocked
             }
 
-            if (!state.hasAccess(feature)) {
-                return@map FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
-            }
-
+            val hasPlanAccess = state.hasAccess(feature)
             val quota = state.quotas[feature]
             val remaining = quota?.remaining
-            if (remaining != null && remaining > 0) {
+
+            // If plan grants access AND quota remaining > 0 → granted
+            if (hasPlanAccess && remaining != null && remaining > 0) {
                 return@map FeatureAccess.Granted(quota = quota)
             }
 
-            val cost = (quota?.coinCost?.takeIf { it > 0 })
-                ?: FeaturePricingMap.coinCost(feature)
+            // Compute coin cost (from quota override or pricing map)
+            val cost = (quota?.coinCost?.takeIf { it > 0 }) ?: FeaturePricingMap.coinCost(feature)
 
-            if (cost > 0) {
-                if (state.coinBalance < cost) {
-                    FeatureAccess.CoinTopUpRequired(
-                        feature = feature,
-                        coinCost = cost,
-                        currentCoins = state.coinBalance
-                    )
-                } else {
-                    FeatureAccess.Granted(quota = quota)
+            return@map when {
+                // Coin path available
+                cost > 0 -> {
+                    if (state.coinBalance >= cost) {
+                        FeatureAccess.Granted(quota = quota) // afford with coins
+                    } else {
+                        FeatureAccess.CoinTopUpRequired(
+                            feature = feature,
+                            coinCost = cost,
+                            currentCoins = state.coinBalance
+                        )
+                    }
                 }
-            } else if (remaining == 0) {
-                FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
-            } else {
-                FeatureAccess.Granted(quota = quota)
+                // Quota exhausted with no coin fallback
+                remaining == 0 -> FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
+                // No coin option + plan has feature → unlimited (quota null or no cost)
+                hasPlanAccess -> FeatureAccess.Granted(quota = quota)
+                // No plan access + no coin option → truly locked
+                else -> FeatureAccess.Locked(PlanAccessMap.minimumPlanFor(feature))
             }
         }
 }
