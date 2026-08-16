@@ -23,18 +23,30 @@ data class CachedSessionResult(
 @Singleton
 class InMemorySessionCache @Inject constructor() {
 
-    private val cache = ConcurrentHashMap<Long, CachedSessionResult>()
+    private val cache = ConcurrentHashMap<String, CachedSessionResult>()
 
-    fun getEvaluation(sessionId: Long): Pair<BodyLanguageEvaluation, FallbackReason?>? {
+    fun getEvaluation(sessionId: Long): Pair<BodyLanguageEvaluation, FallbackReason?>? =
+        getEvaluation(sessionId.toString())
+
+    fun getEvaluation(sessionId: String): Pair<BodyLanguageEvaluation, FallbackReason?>? {
         val entry = cache[sessionId] ?: return null
         val eval = entry.evaluation ?: return null
         return Pair(eval, entry.fallbackReason)
     }
 
-    fun getMetrics(sessionId: Long): BodyLanguageMetrics? = cache[sessionId]?.metrics
+    fun getMetrics(sessionId: Long): BodyLanguageMetrics? = getMetrics(sessionId.toString())
+    
+    fun getMetrics(sessionId: String): BodyLanguageMetrics? = cache[sessionId]?.metrics
 
     fun put(
         sessionId: Long,
+        evaluation: BodyLanguageEvaluation,
+        fallbackReason: FallbackReason? = null,
+        metrics: BodyLanguageMetrics? = null,
+    ) = put(sessionId.toString(), evaluation, fallbackReason, metrics)
+
+    fun put(
+        sessionId: String,
         evaluation: BodyLanguageEvaluation,
         fallbackReason: FallbackReason? = null,
         metrics: BodyLanguageMetrics? = null,
@@ -47,7 +59,9 @@ class InMemorySessionCache @Inject constructor() {
         )
     }
 
-    fun putMetrics(sessionId: Long, metrics: BodyLanguageMetrics) {
+    fun putMetrics(sessionId: Long, metrics: BodyLanguageMetrics) = putMetrics(sessionId.toString(), metrics)
+
+    fun putMetrics(sessionId: String, metrics: BodyLanguageMetrics) {
         val existing = cache[sessionId]
         if (existing != null) {
             cache[sessionId] = existing.copy(metrics = metrics)
@@ -60,7 +74,9 @@ class InMemorySessionCache @Inject constructor() {
         }
     }
 
-    fun clear(sessionId: Long) {
+    fun clear(sessionId: Long) = clear(sessionId.toString())
+
+    fun clear(sessionId: String) {
         cache.remove(sessionId)
     }
 

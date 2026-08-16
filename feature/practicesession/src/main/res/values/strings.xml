@@ -36,6 +36,7 @@
     <string name="scroll_for_more">Scroll for more</string>
     <string name="loading_question">Loading question…</string>
     <string name="question_number">Question %1$s</string>
+    <string name="question_x_of_y">Question %1$d of %2$d</string>
     <string name="session_settings">Session Settings</string>
     <string name="auto_read_question">Auto read question</string>
     <string name="automatically_speak_the_question_when_it_s_shown">Automatically speak the question when it\'s shown</string>
@@ -54,12 +55,14 @@
     <string name="coaching_tips">Coaching Tips</string>
     <string name="excellent_performance">Excellent Performance!</string>
     <string name="good_performance">Good Performance!</string>
+    <string name="needs_improvement">Needs Improvement</string>
     <string name="keep_practicing">Keep Practicing!</string>
     <string name="score_out_of_100">%1$d/100</string>
     <string name="view_details">View Details</string>
     <string name="performance_breakdown">Performance Breakdown</string>
     <string name="question_details">Question Details</string>
     <string name="your_transcript">Your Transcript</string>
+    <string name="transcript">Transcript</string>
     <string name="analysis">Analysis</string>
     <string name="no_results_found">No results, yet</string>
     <string name="error_creating_results">An error occurred while creating your results. Please try again.</string>
@@ -75,6 +78,11 @@
     <string name="submitting_answer_message">Your answer is ready. We’re saving it now and getting the next question ready for you.</string>
     <string name="retry">Retry</string>
     <string name="more_details">More details</string>
+
+    <!-- Restart challenge confirmation -->
+    <string name="restart_challenge_title">Restart Challenge?</string>
+    <string name="restart_challenge_message">This challenge was taken before. Restarting it will delete the previous result and progress.</string>
+    <string name="restart">Restart</string>
 
     <!-- Body language / camera -->
     <string name="camera_permission">Camera Permission</string>

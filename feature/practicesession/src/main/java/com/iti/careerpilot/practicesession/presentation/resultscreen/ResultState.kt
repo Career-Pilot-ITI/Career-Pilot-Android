@@ -21,6 +21,7 @@ sealed interface BodyLanguageUiState {
 data class ResultState(
     val isLoading: Boolean = false,
     val sessionId: Long? = null,
+    val firestoreSessionId: String? = null,
     val sessionResult: SessionResult? = null,
     val bodyLanguageMetrics: BodyLanguageMetrics? = null,
     val bodyLanguageUiState: BodyLanguageUiState = BodyLanguageUiState.Idle,

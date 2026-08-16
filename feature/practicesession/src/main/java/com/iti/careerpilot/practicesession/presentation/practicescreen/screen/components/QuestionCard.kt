@@ -15,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +37,7 @@ import com.iti.careerpilot.practicesession.R
 @Composable
 fun QuestionCard(
     questionOrder: Int?,
+    maxQuestions: Int?,
     questionText: String?,
     isReadingQuestion: Boolean,
     onPlayClick: () -> Unit,
@@ -44,6 +46,10 @@ fun QuestionCard(
 ) {
     val scrollState = rememberScrollState()
     val scrollbarColor = MaterialTheme.colorScheme.primary
+
+    LaunchedEffect(questionOrder) {
+        scrollState.scrollTo(0)
+    }
 
     CareerPilotCard(
         modifier = modifier,
@@ -61,8 +67,13 @@ fun QuestionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val questionLabel = if (questionOrder != null && maxQuestions != null) {
+                    stringResource(R.string.question_x_of_y, questionOrder, maxQuestions)
+                } else {
+                    stringResource(R.string.question_number, questionOrder ?: "")
+                }
                 Text(
-                    text = stringResource(R.string.question_number, questionOrder ?: ""),
+                    text = questionLabel,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )

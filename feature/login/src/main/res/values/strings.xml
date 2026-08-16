@@ -5,7 +5,7 @@
     <string name="login_heading">Your AI Interview Coach Awaits</string>
     <string name="login_subheading">Practice realistic interviews, get instant feedback, and land your dream role.</string>
     <string name="phone_number_label">Phone Number</string>
-    <string name="phone_placeholder">01X XXXX XXXX</string>
+    <string name="phone_placeholder" translatable="false">01X XXXX XXXX</string>
     <string name="btn_continue">Continue</string>
     <string name="btn_retry_in_seconds">Try again in %1$ds</string>
 

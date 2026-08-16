@@ -4,7 +4,6 @@ import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -28,14 +27,18 @@ fun CareerPilotBottomNavBar(
     AnimatedNavigationBar(
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp)
             .selectableGroup(),
         selectedIndex = selectedIndex,
 
         ballColor = MaterialTheme.colorScheme.primary,
         barColor = MaterialTheme.colorScheme.surface,
 
-        cornerRadius = shapeCornerRadius(28.dp),
+        cornerRadius = shapeCornerRadius(
+            topLeft = 32.dp,
+            topRight = 32.dp,
+            bottomLeft = 0.dp,
+            bottomRight = 0.dp
+        ),
 
         ballAnimation = Parabolic(
             animationSpec = tween(

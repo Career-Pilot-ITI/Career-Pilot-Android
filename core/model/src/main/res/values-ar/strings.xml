@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ChallengeVisibility -->
+    <string name="challenge_visibility_public">عام</string>
+    <string name="challenge_visibility_private">خاص</string>
+
+    <!-- SeniorityLevel -->
+    <string name="seniority_intern">متدرب</string>
+    <string name="seniority_junior">مبتدئ</string>
+    <string name="seniority_mid_level">متوسط</string>
+    <string name="seniority_senior">خبير</string>
+    <string name="seniority_lead">قائد فريق</string>
+
+    <!-- ChallengeType -->
+    <string name="challenge_type_audio">صوت فقط</string>
+    <string name="challenge_type_video_audio">فيديو وصوت</string>
+</resources>

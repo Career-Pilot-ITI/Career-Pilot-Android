@@ -133,6 +133,7 @@ fun BottomNavBarItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
+            Spacer(Modifier.height(2.dp))
             Icon(
                 painter = painterResource(id = icon),
                 contentDescription = label,
@@ -155,7 +156,7 @@ fun BottomNavBarItem(
                 Text(
                     modifier = Modifier.visible(isSelected),
                     text = label,
-                    style = MaterialTheme.typography.labelSmall.copy(
+                    style = MaterialTheme.typography.labelMedium.copy(
                         color = labelColor
                     )
                 )
