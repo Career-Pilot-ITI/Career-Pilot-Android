@@ -246,7 +246,7 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
         // 2. Update question result with score
         val updatedQuestionResult = questionResult.copy(score = score)
         val updatedResults = session.results + updatedQuestionResult
-        val nextOrder = session.answeredCount + 1
+        val nextOrder = updatedResults.size + 1
         
         // Find next question from original challenge
         val challenge = when (val challengeResult = getChallenge(session.challengeId)) {
