@@ -7,4 +7,6 @@ sealed interface AtsEntryAction {
     data object SelectCvClicked : AtsEntryAction
     data class PdfSelected(val uri: String) : AtsEntryAction
     data object CompareClicked : AtsEntryAction
+    data object DismissGateSheet : AtsEntryAction
+    data object DismissCoinTopUpSheet : AtsEntryAction
 }
