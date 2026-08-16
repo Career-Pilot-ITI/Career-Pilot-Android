@@ -70,4 +70,8 @@ dependencies {
     implementation(project(":feature:quiz"))
     implementation(project(":feature:reports"))
     implementation(project(":feature:ats"))
+    implementation(project(":feature:challenges"))
+    implementation(project(":feature:createchallenge"))
+    implementation(project(":feature:challengedashboard"))
+    implementation(project(":feature:challengedetails"))
 }

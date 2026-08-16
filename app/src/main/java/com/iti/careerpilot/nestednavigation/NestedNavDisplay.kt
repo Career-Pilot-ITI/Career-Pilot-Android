@@ -4,13 +4,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -18,6 +24,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.iti.careerpilot.challenges.presentation.screen.ChallengesScreenRoot
 import com.iti.careerpilot.home.presentation.home.screen.HomeRoot
 import com.iti.careerpilot.profile.presentation.screen.ProfileRoot
 import com.iti.careerpilot.reports.presentation.screen.history.view.SessionHistoryRoot
@@ -39,6 +46,9 @@ fun NestedNavDisplay(
     openQuiz: (trackId: Long, trackName: String) -> Unit,
     openInterviews: () -> Unit,
     openAts: () -> Unit,
+    openCreateChallenge: () -> Unit,
+    openChallengeDashboard: () -> Unit,
+    openChallengeDetails: (String) -> Unit,
 ) {
 
     val nestedBackStack = rememberNavBackStack(Route.NestedNav.Home)
@@ -46,14 +56,16 @@ fun NestedNavDisplay(
     Scaffold( // do not change window insets here
         containerColor = Color.Transparent,
         bottomBar = {
-            if (nestedBackStack.lastOrNull().isBottomDestination()) {
-                CareerPilotBottomNavBar(
+            CareerPilotBottomNavBar(
                 selectedIndex = nestedBackStack.selectedBottomNavBarIndex(),
                 modifier = Modifier
             ) {
                 BottomBarDestination.entries.forEach { destination ->
                     BottomNavBarItem(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .fillMaxWidth()
+                            .height(80.dp),
                         onClick = {
                             nestedBackStack.apply {
                                 clear()
@@ -68,7 +80,6 @@ fun NestedNavDisplay(
                         label = stringResource(destination.title),
                     )
                 }
-            }
             }
         }
     ) { innerPadding ->
@@ -115,6 +126,13 @@ fun NestedNavDisplay(
                         openAts = openAts,
                     )
                 }
+                entry<Route.NestedNav.Challenges> {
+                    ChallengesScreenRoot(
+                        openCreateChallenge = openCreateChallenge,
+                        openChallengeDashboard = openChallengeDashboard,
+                        openChallengeDetails = openChallengeDetails
+                    )
+                }
                 entry<Route.NestedNav.SessionHistory> {
                     SessionHistoryRoot(
                         openSessionDetails = openSessionDetails,
@@ -134,8 +152,9 @@ fun NestedNavDisplay(
 }
 
 private fun NavKey?.isBottomDestination() = this == Route.NestedNav.Home ||
-    this == Route.NestedNav.SessionHistory ||
-    this == Route.NestedNav.Profile
+        this == Route.NestedNav.Challenges ||
+        this == Route.NestedNav.SessionHistory ||
+        this == Route.NestedNav.Profile
 
 private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
     return this.lastOrNull()?.let {
@@ -144,12 +163,16 @@ private fun NavBackStack<NavKey>.selectedBottomNavBarIndex(): Int {
                 0
             }
 
-            Route.NestedNav.SessionHistory -> {
+            Route.NestedNav.Challenges -> {
                 1
             }
 
-            else -> {
+            Route.NestedNav.SessionHistory -> {
                 2
+            }
+
+            else -> {
+                3
             }
         }
     } ?: 0

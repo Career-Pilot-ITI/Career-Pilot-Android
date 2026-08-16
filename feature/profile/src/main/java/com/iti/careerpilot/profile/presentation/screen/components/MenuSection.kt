@@ -2,7 +2,6 @@ package com.iti.careerpilot.profile.presentation.screen.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -11,7 +10,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.iti.careerpilot.core.designsystem.CareerPilotPalette
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.profile.R
 

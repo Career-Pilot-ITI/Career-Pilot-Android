@@ -17,5 +17,6 @@ dependencies {
     implementation(project(":core:bodylanguage"))
     implementation(project(":core:ai"))
     implementation(project(":core:model"))
+    implementation(project(":core:challengefirestore"))
     implementation(libs.bundles.camerax)
 }

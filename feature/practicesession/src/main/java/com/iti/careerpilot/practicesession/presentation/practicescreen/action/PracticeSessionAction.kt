@@ -3,15 +3,17 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.action
 sealed interface PracticeSessionAction {
 
     data class CreateNewPracticeSession(
-        val trackId: Long,
+        val trackId: Long = 0,
         val workspaceId: Long? = null,
+        val challengeId: String? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,
     ) : PracticeSessionAction
 
     data class RestartPracticeSession(
-        val sessionId: Long,
+        val sessionId: Long = 0,
+        val firestoreSessionId: String? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,
@@ -32,6 +34,12 @@ sealed interface PracticeSessionAction {
     data class ShowOrHideLeaveConfirmDialog(
         val show: Boolean
     ) : PracticeSessionAction
+
+    data class ShowOrHideRestartWarning(
+        val show: Boolean
+    ) : PracticeSessionAction
+
+    data object ConfirmRestartChallenge : PracticeSessionAction
 
     data class ToggleAutoReadQuestion(
         val enabled: Boolean

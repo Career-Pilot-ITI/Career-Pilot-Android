@@ -22,6 +22,9 @@ sealed interface Route : NavKey {
         data object Home : Route
 
         @Serializable
+        data object Challenges : Route
+
+        @Serializable
         data object SessionHistory : Route
 
         @Serializable
@@ -52,16 +55,21 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class PracticeSession(
-        val trackId: Long,
+        val trackId: Long = 0,
         val sessionId: Long? = null,
+        val firestoreSessionId: String? = null,
         val workspaceId: Long? = null,
+        val challengeId: String? = null,
         val isVideoSession: Boolean = false,
         val enablePostureTracking: Boolean = false,
         val enableHandTracking: Boolean = false,
     ) : Route
 
     @Serializable
-    data class PracticeResult(val sessionId: Long) : Route
+    data class PracticeResult(
+        val sessionId: Long? = null,
+        val firestoreSessionId: String? = null,
+    ) : Route
 
     @Serializable
     data class QuestionBreakdown(val sessionId: Long) : Route
@@ -86,6 +94,15 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Interviews : Route
+
+    @Serializable
+    data class CreateChallenge(val challengeId: String? = null) : Route
+
+    @Serializable
+    data object ChallengeDashboard : Route
+
+    @Serializable
+    data class ChallengeDetails(val challengeId: String) : Route
 
     @Serializable
     data class ReadyToPractice(

@@ -12,16 +12,12 @@ import com.google.firebase.ai.type.SerializationException
 import com.google.firebase.ai.type.ServerException
 import kotlinx.coroutines.CancellationException
 
-suspend fun <T> safeFirebaseCall(
+suspend inline fun <reified T> safeFirebaseCall(
     call: suspend () -> T
 ): CareerPilotResult<T, FirebaseError> {
     return try {
         val response = call()
-        if (response != null) {
-            CareerPilotResult.Success(response)
-        } else {
-            CareerPilotResult.Error(FirebaseError.BAD_RESPONSE)
-        }
+        CareerPilotResult.Success(response)
     } catch (e: PromptBlockedException) {
         Log.e("SafeFirebaseCall", "Prompt blocked", e)
         CareerPilotResult.Error(FirebaseError.PROMPT_BLOCKED)

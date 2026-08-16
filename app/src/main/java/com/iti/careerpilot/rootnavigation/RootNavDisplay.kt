@@ -26,7 +26,10 @@ import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryRoot
 import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsRoot
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvRoot
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringRoot
+import com.iti.careerpilot.challengedashboard.presentation.screen.ChallengeDashboardScreenRoot
+import com.iti.careerpilot.challengedetails.presentation.screen.ChallengeDetailsScreenRoot
 import com.iti.careerpilot.core.designsystem.components.CareerPilotAppScaffold
+import com.iti.careerpilot.createchallenge.presentation.screen.CreateChallengeScreenRoot
 import com.iti.careerpilot.editprofile.presentation.screen.EditProfileRoot
 import com.iti.careerpilot.features.paywall.navigation.PaymentNavDisplay
 import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
@@ -317,6 +320,21 @@ fun RootNavDisplay(
                                 )
                             )
                         },
+                        openChallengeDetails = { challengeId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ChallengeDetails(challengeId)
+                            )
+                        },
+                        openCreateChallenge = {
+                            rootBackStack.navigateSingleTop(
+                                Route.CreateChallenge(),
+                            )
+                        },
+                        openChallengeDashboard = {
+                            rootBackStack.navigateSingleTop(
+                                Route.ChallengeDashboard,
+                            )
+                        }
                     )
                 }
                 entry<Route.Ats> {
@@ -394,7 +412,9 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = route.trackId,
                         sessionId = route.sessionId,
+                        firestoreSessionId = route.firestoreSessionId,
                         workspaceId = route.workspaceId,
+                        challengeId = route.challengeId,
                         isVideoSession = route.isVideoSession,
                         enablePostureTracking = route.enablePostureTracking,
                         enableHandTracking = route.enableHandTracking,
@@ -402,6 +422,14 @@ fun RootNavDisplay(
                             rootBackStack.popIfCurrentIs<Route.PracticeSession>()
                             rootBackStack.navigateSingleTop(
                                 Route.PracticeResult(sessionId)
+                            )
+                        },
+                        onNavigateToFirestoreResult = { firestoreSessionId ->
+                            rootBackStack.popIfCurrentIs<Route.PracticeSession>()
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeResult(
+                                    firestoreSessionId = firestoreSessionId
+                                )
                             )
                         },
                         onBack = {
@@ -413,6 +441,7 @@ fun RootNavDisplay(
                 entry<Route.PracticeResult> {
                     ResultRoot(
                         sessionId = it.sessionId,
+                        firestoreSessionId = it.firestoreSessionId,
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.PracticeResult>()
                         }
@@ -513,6 +542,68 @@ fun RootNavDisplay(
                         onBack = {
                             rootBackStack.popIfCurrentIs<Route.Interviews>()
                         },
+                    )
+                }
+
+                entry<Route.CreateChallenge> { route ->
+                    CreateChallengeScreenRoot(
+                        challengeId = route.challengeId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.CreateChallenge>()
+                        },
+                        onNavigateToDashboard = {
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.CreateChallenge>()
+                                navigateSingleTop(Route.ChallengeDashboard)
+                            }
+                        }
+                    )
+                }
+
+                entry<Route.ChallengeDashboard> {
+                    ChallengeDashboardScreenRoot(
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
+                        },
+                        onEditChallenge = { challengeId ->
+                            rootBackStack.navigateSingleTop(Route.CreateChallenge(challengeId))
+                        },
+                        onViewResult = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeResult(firestoreSessionId = sessionId)
+                            )
+                        },
+                        onContinueSession = { sessionId ->
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDashboard>()
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeSession(
+                                    firestoreSessionId = sessionId
+                                )
+                            )
+                        }
+                    )
+                }
+
+                entry<Route.ChallengeDetails> { route ->
+                    ChallengeDetailsScreenRoot(
+                        challengeId = route.challengeId,
+                        onBack = {
+                            rootBackStack.popIfCurrentIs<Route.ChallengeDetails>()
+                        },
+                        onNavigateToPractice = { trackId, challengeId, isVideo, posture, hands ->
+                            rootBackStack.apply {
+                                popIfCurrentIs<Route.ChallengeDetails>()
+                                navigateSingleTop(
+                                    Route.PracticeSession(
+                                        trackId = trackId,
+                                        challengeId = challengeId,
+                                        isVideoSession = isVideo,
+                                        enablePostureTracking = posture,
+                                        enableHandTracking = hands
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
 

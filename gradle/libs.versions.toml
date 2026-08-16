@@ -156,6 +156,7 @@ firebase-ai = { module = "com.google.firebase:firebase-ai" }
 firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity" }
 firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

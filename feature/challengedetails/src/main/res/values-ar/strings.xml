@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="challenge_details_title">تفاصيل التحدي</string>
+    <string name="challenge_details_mic_permission_title">إذن الميكروفون</string>
+    <string name="challenge_details_mic_permission_text">يتطلب هذا التحدي الوصول إلى الميكروفون لتسجيل الصوت.</string>
+    <string name="challenge_details_camera_permission_title">إذن الكاميرا</string>
+    <string name="challenge_details_camera_permission_text">يتطلب هذا التحدي الوصول إلى الكاميرا لتسجيل الفيديو.</string>
+    <string name="challenge_details_allow">السماح</string>
+    <string name="challenge_details_cancel">إلغاء</string>
+    <string name="challenge_details_by">تحدي بواسطة %1$s</string>
+    <string name="challenge_details_seniority">المستوى: %1$s</string>
+    <string name="challenge_details_configuration">الإعدادات</string>
+    <string name="challenge_details_type">النوع</string>
+    <string name="challenge_details_questions_count">%1$d أسئلة</string>
+    <string name="challenge_details_questions_label">الأسئلة</string>
+    <string name="challenge_details_estimated_time">الوقت المقدر</string>
+    <string name="challenge_details_minutes">%1$d دقائق</string>
+    <string name="challenge_details_video_analysis">تحليل الفيديو</string>
+    <string name="challenge_details_face_analysis">تحليل الووجه</string>
+    <string name="challenge_details_posture_analysis">تحليل وضعية الجسم</string>
+    <string name="challenge_details_hands_analysis">تحليل إيماءات اليد</string>
+    <string name="challenge_details_enabled">مفعل</string>
+    <string name="challenge_details_disabled">معطل</string>
+    <string name="challenge_details_mic_access">الوصول إلى الميكروفون</string>
+    <string name="challenge_details_camera_access">الوصول إلى الكاميرا</string>
+    <string name="challenge_details_tap_to_grant">اضغط للمنح</string>
+    <string name="challenge_details_begin">ابدأ التحدي</string>
+    <string name="challenge_details_prep_tips">نصائح للتحضير</string>
+    <string name="challenge_details_tip_quiet">تأكد من أنك في بيئة هادئة.</string>
+    <string name="challenge_details_tip_internet">تحقق من اتصالك بالإنترنت.</string>
+    <string name="challenge_details_tip_focus">ابق مركزا وأجب بوضوح.</string>
+    <string name="challenge_details_tip_lighting">لجلسات الفيديو، تأكد من وجود إضاءة جيدة.</string>
+</resources>

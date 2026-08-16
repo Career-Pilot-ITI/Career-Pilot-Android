@@ -26,6 +26,11 @@ class EvaluateBodyLanguageUseCase @Inject constructor(
     suspend operator fun invoke(
         sessionId: Long,
         metrics: BodyLanguageMetrics,
+    ): Pair<BodyLanguageEvaluation, FallbackReason?> = invoke(sessionId.toString(), metrics)
+
+    suspend operator fun invoke(
+        sessionId: String,
+        metrics: BodyLanguageMetrics,
     ): Pair<BodyLanguageEvaluation, FallbackReason?> {
         val cached = cache.getEvaluation(sessionId)
         if (cached != null) {

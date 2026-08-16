@@ -5,7 +5,6 @@
     <string name="login_heading">مدرب الذكاء الاصطناعي للمقابلات في انتظارك</string>
     <string name="login_subheading">تدرب على مقابلات واقعية، واحصل على تقييم فوري، واحصل على وظيفة أحلامك.</string>
     <string name="phone_number_label">رقم الهاتف</string>
-    <string name="phone_placeholder">٠١x xxxx xxxx</string>
     <string name="btn_continue">متابعة</string>
     <string name="btn_retry_in_seconds">حاول مرة أخرى خلال %1$d ثانية</string>
 
