@@ -2,9 +2,11 @@ package com.iti.careerpilot.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
+import com.iti.careerpilot.home.R
+import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
-import com.iti.careerpilot.home.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
 import com.iti.careerpilot.home.domain.usecase.GetTracksUseCase
@@ -12,6 +14,7 @@ import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
@@ -63,22 +66,22 @@ class HomeViewModel @Inject constructor(
 
             HomeIntent.PracticeInterviewClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: 1L
+                val trackId = current.practiceTrackId ?: return promptForTrack()
                 sendEvent(
                     HomeEffect.NavigateToReadyToPractice(
                         trackId = trackId,
-                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
+                        trackName = current.practiceTrackName,
                     )
                 )
             }
 
             HomeIntent.LessonClicked -> {
                 val current = _state.value
-                val trackId = current.practiceTrackId ?: 1L
+                val trackId = current.practiceTrackId ?: return promptForTrack()
                 sendEvent(
                     HomeEffect.NavigateToQuiz(
                         trackId = trackId,
-                        trackName = current.practiceTrackName.ifBlank { "Android Developer" },
+                        trackName = current.practiceTrackName,
                     )
                 )
             }
@@ -206,6 +209,14 @@ class HomeViewModel @Inject constructor(
 
     private fun sendEvent(event: HomeEffect) {
         viewModelScope.launch { _events.send(event) }
+    }
+
+    private fun promptForTrack() {
+        viewModelScope.launch {
+            CareerPilotSnackbarController.show(
+                UIText.StringResource(R.string.home_no_track_selected),
+            )
+        }
     }
 
     private companion object {

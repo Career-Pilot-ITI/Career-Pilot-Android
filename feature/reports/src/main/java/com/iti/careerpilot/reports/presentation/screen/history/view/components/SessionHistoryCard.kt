@@ -1,5 +1,6 @@
 package com.iti.careerpilot.reports.presentation.screen.history.view.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,12 +22,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import com.iti.careerpilot.core.designsystem.CareerPilotShapes
 import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
+import com.iti.careerpilot.core.designsystem.components.rememberSessionTimestamp
 import com.iti.careerpilot.reports.R
-import com.iti.careerpilot.reports.presentation.screen.components.localizedSessionDate
 import com.iti.careerpilot.reports.presentation.screen.history.uimodels.SessionSummaryUiModel
+
+@Composable
+private fun ContinueChip() {
+    Text(
+        text = stringResource(R.string.reports_session_continue),
+        modifier = Modifier
+            .clip(CareerPilotShapes.small)
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
+            .padding(horizontal = Dimens.SpaceM, vertical = Dimens.SpaceS),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.secondary,
+        maxLines = 1,
+    )
+}
 
 @Composable
 fun SessionHistoryCard(
@@ -34,7 +50,7 @@ fun SessionHistoryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val date = localizedSessionDate(session.completedAt)
+    val date = rememberSessionTimestamp(session.occurredAt)
     val minutes = pluralStringResource(
         R.plurals.reports_minutes,
         session.durationMinutes,
@@ -47,18 +63,26 @@ fun SessionHistoryCard(
     )
     val dateAndDuration = stringResource(R.string.reports_summary_separator, date, minutes)
     val supportingText = stringResource(R.string.reports_summary_separator, dateAndDuration, questions)
-    val description = stringResource(
-        R.string.reports_open_session,
-        session.category,
-        session.score,
-    )
+    val description = if (session.score == null) {
+        stringResource(R.string.reports_resume_session, session.category)
+    } else {
+        stringResource(R.string.reports_open_session, session.category, session.score)
+    }
+
+    val isInteractive = session.isCompleted || session.isResumable
 
     CareerPilotCard(
         modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = description }
             .clip(CareerPilotShapes.medium)
-            .clickable(role = Role.Button, onClick = onClick),
+            .then(
+                if (isInteractive) {
+                    Modifier.clickable(role = Role.Button, onClick = onClick)
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         Row(
             modifier = Modifier
@@ -73,6 +97,7 @@ fun SessionHistoryCard(
                     text = session.category,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     text = supportingText,
@@ -80,14 +105,19 @@ fun SessionHistoryCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.56f),
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
-                contentDescription = null,
-                modifier = Modifier.size(Dimens.IconSizeM),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f),
-            )
+            if (session.isResumable) {
+                ContinueChip()
+            } else {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowForwardIos,
+                    contentDescription = null,
+                    modifier = Modifier.size(Dimens.IconSizeM),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f),
+                )
+            }
         }
     }
 }

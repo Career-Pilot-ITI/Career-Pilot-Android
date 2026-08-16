@@ -23,8 +23,8 @@
     </plurals>
     <string name="home_free_sessions_used">%1$d of %2$d free sessions used</string>
 
-    <!-- Overall score card -->
-    <string name="home_overall_score">OVERALL SCORE</string>
+    <!-- Latest score card -->
+    <string name="home_latest_score">LATEST SCORE</string>
     <string name="home_score_excellent">Excellent Work</string>
     <string name="home_score_good">Good Progress</string>
     <string name="home_score_keep_going">Keep Going</string>
@@ -39,6 +39,7 @@
 
     <!-- Practice interview card -->
     <string name="home_practice_interview">Practice Interview</string>
+    <string name="home_no_track_selected">Choose a career track in your profile to start an interview.</string>
     <string name="home_start_practice">Start practice interview</string>
 
     <!-- ATS job match card -->
@@ -58,8 +59,6 @@
     <string name="home_recent_sessions_empty_body">Practise with an AI interviewer and get instant feedback on your answers.</string>
     <string name="home_recent_sessions_empty_action">Start your first interview</string>
     <string name="home_session_meta">%1$s · %2$d min</string>
-    <string name="home_session_today">Today, %1$s</string>
-    <string name="home_session_yesterday">Yesterday, %1$s</string>
     <string name="home_session_unscored">—</string>
     <string name="home_session_continue">Continue</string>
 

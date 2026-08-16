@@ -54,12 +54,33 @@ class SessionHistoryViewModel @Inject constructor(
     private val eventChannel = Channel<SessionHistoryEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
+    private var hasEnteredScreen = false
+
+    fun onScreenEntered(): Boolean {
+        val isReturningToScreen = hasEnteredScreen
+        hasEnteredScreen = true
+        return isReturningToScreen
+    }
+
     fun onAction(action: SessionHistoryAction) {
         when (action) {
             is SessionHistoryAction.SessionClicked -> {
                 if (action.sessionId > 0L) {
                     viewModelScope.launch {
                         eventChannel.send(SessionHistoryEvent.NavigateToSessionDetails(action.sessionId))
+                    }
+                }
+            }
+
+            is SessionHistoryAction.ResumeSessionClicked -> {
+                if (action.sessionId > 0L) {
+                    viewModelScope.launch {
+                        eventChannel.send(
+                            SessionHistoryEvent.NavigateToPracticeSession(
+                                trackId = action.trackId ?: 0L,
+                                sessionId = action.sessionId,
+                            ),
+                        )
                     }
                 }
             }

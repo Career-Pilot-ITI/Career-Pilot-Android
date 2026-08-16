@@ -1,6 +1,6 @@
 package com.iti.careerpilot.home.presentation.home
 
-import com.iti.careerpilot.home.domain.model.InterviewSession
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.model.ScoreSummary
 import com.iti.common.util.UIText

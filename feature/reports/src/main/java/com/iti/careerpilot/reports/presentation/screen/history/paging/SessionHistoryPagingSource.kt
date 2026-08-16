@@ -2,7 +2,7 @@ package com.iti.careerpilot.reports.presentation.screen.history.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 import com.iti.careerpilot.reports.domain.usecase.GetSessionHistoryUseCase
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
@@ -10,11 +10,11 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class SessionHistoryPagingSource(
     private val getSessionHistory: GetSessionHistoryUseCase,
-) : PagingSource<Int, InterviewSessionSummary>() {
+) : PagingSource<Int, InterviewSession>() {
 
     override suspend fun load(
         params: LoadParams<Int>,
-    ): LoadResult<Int, InterviewSessionSummary> {
+    ): LoadResult<Int, InterviewSession> {
         val pageNumber = params.key ?: INITIAL_PAGE
         return try {
             when (
@@ -42,7 +42,7 @@ class SessionHistoryPagingSource(
     }
 
     override fun getRefreshKey(
-        state: PagingState<Int, InterviewSessionSummary>,
+        state: PagingState<Int, InterviewSession>,
     ): Int? {
         val anchorPosition = state.anchorPosition ?: return null
         val anchorPage = state.closestPageToPosition(anchorPosition) ?: return null

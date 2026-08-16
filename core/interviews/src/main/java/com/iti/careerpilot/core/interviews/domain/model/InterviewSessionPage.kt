@@ -1,7 +1,7 @@
-package com.iti.careerpilot.reports.domain.model
+package com.iti.careerpilot.core.interviews.domain.model
 
-data class SessionHistoryPage(
-    val sessions: List<InterviewSessionSummary>,
+data class InterviewSessionPage(
+    val sessions: List<InterviewSession>,
     val pageNumber: Int,
     val totalPages: Int,
     val totalElements: Long,

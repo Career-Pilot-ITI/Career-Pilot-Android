@@ -1,80 +1,22 @@
 package com.iti.careerpilot.reports.data.datasource.remote
 
+import com.iti.careerpilot.core.interviews.data.remote.FakeInterviewSessions
+import com.iti.careerpilot.core.interviews.data.remote.dto.InterviewSessionDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionsPageDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.PageableDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.QuestionScoreDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.SortDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.fakeDelay
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 class FakeReportsRemoteDataSource @Inject constructor() : ReportsRemoteDataSource {
-    override suspend fun getSessions(
-        page: Int,
-        size: Int,
-    ): CareerPilotResult<InterviewSessionsPageDto, NetworkError> {
-        fakeDelay()
-        if (page < 0 || size <= 0) {
-            return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        }
-
-        val totalElements = fakeSessions.size
-        val totalPages = if (totalElements == 0) {
-            0
-        } else {
-            (totalElements + size - 1) / size
-        }
-        val offset = page.toLong() * size
-        val fromIndex = minOf(offset, totalElements.toLong()).toInt()
-        val toIndex = minOf(offset + size, totalElements.toLong()).toInt()
-        val content = fakeSessions.subList(fromIndex, toIndex)
-        val sort = SortDto(
-            unsorted = true,
-            sorted = false,
-            empty = true,
-        )
-        return CareerPilotResult.Success(
-            InterviewSessionsPageDto(
-                totalElements = totalElements.toLong(),
-                totalPages = totalPages,
-                pageable = PageableDto(
-                    unpaged = false,
-                    paged = true,
-                    pageNumber = page,
-                    pageSize = size,
-                    offset = offset,
-                    sort = sort,
-                ),
-                last = totalPages == 0 || page >= totalPages - 1,
-                first = page == 0,
-                numberOfElements = content.size,
-                size = size,
-                content = content,
-                number = page,
-                sort = sort,
-                empty = content.isEmpty(),
-            ),
-        )
-    }
-
-    override suspend fun getSession(
-        sessionId: Long,
-    ): CareerPilotResult<InterviewSessionDto, NetworkError> {
-        fakeDelay()
-        return fakeSessions.find { it.id == sessionId }.toResult()
-    }
 
     override suspend fun getFeedback(
         sessionId: Long,
     ): CareerPilotResult<FeedbackReportDto, NetworkError> {
         fakeDelay()
-        val session = fakeSessions.find { it.id == sessionId }
+        val session = FakeInterviewSessions.findById(sessionId)
             ?: return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
         return CareerPilotResult.Success(session.toFeedback())
     }
@@ -83,22 +25,18 @@ class FakeReportsRemoteDataSource @Inject constructor() : ReportsRemoteDataSourc
         sessionId: Long,
     ): CareerPilotResult<List<SessionQuestionDto>, NetworkError> {
         fakeDelay()
-        val session = fakeSessions.find { it.id == sessionId }
+        val session = FakeInterviewSessions.findById(sessionId)
             ?: return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
         return CareerPilotResult.Success(session.toQuestions())
     }
 }
 
-private fun InterviewSessionDto?.toResult():
-    CareerPilotResult<InterviewSessionDto, NetworkError> = this?.let {
-    CareerPilotResult.Success(it)
-} ?: CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-
 private fun InterviewSessionDto.toFeedback(): FeedbackReportDto {
+    val sessionId = id ?: 0L
     val score = overallScore ?: 0
     return FeedbackReportDto(
-        id = id + FEEDBACK_ID_OFFSET,
-        sessionId = id,
+        id = sessionId + FEEDBACK_ID_OFFSET,
+        sessionId = sessionId,
         overallScore = score,
         clarityScore = (score + 2).coerceAtMost(MAX_SCORE),
         confidenceScore = (score - 3).coerceAtLeast(MIN_SCORE),
@@ -111,7 +49,7 @@ private fun InterviewSessionDto.toFeedback(): FeedbackReportDto {
             "Support each answer with one measurable example from your experience.",
         ),
         generatedAt = completedAt,
-        createdAt = completedAt ?: "Today",
+        createdAt = completedAt ?: startedAt ?: createdAt.orEmpty(),
     )
 }
 
@@ -156,10 +94,11 @@ private fun InterviewSessionDto.createQuestion(
     coachingTip: String,
     durationMs: Long,
 ): SessionQuestionDto {
-    val questionId = id * QUESTION_ID_MULTIPLIER + order
+    val sessionId = id ?: 0L
+    val questionId = sessionId * QUESTION_ID_MULTIPLIER + order
     return SessionQuestionDto(
         id = questionId,
-        sessionId = id,
+        sessionId = sessionId,
         questionText = question,
         questionOrder = order,
         userTranscript = transcript,
@@ -167,7 +106,7 @@ private fun InterviewSessionDto.createQuestion(
         speechRateWpm = 128.0 + order,
         avgPauseMs = 510.0 + order * 20,
         silenceRatio = 0.12 + order * 0.01,
-        createdAt = startedAt ?: createdAt,
+        createdAt = startedAt ?: createdAt.orEmpty(),
         completedAt = completedAt,
         score = QuestionScoreDto(
             id = questionId + SCORE_ID_OFFSET,
@@ -179,81 +118,13 @@ private fun InterviewSessionDto.createQuestion(
             fillerWords = (score - 5).coerceAtLeast(MIN_SCORE),
             overallScore = score,
             coachingTip = coachingTip,
-            createdAt = completedAt ?: "Today",
+            createdAt = completedAt ?: startedAt ?: createdAt.orEmpty(),
         ),
-    )
-}
-
-private val FAKE_TRACKS = listOf(
-    "Android Development",
-    "Backend Development",
-    "UI/UX Design",
-)
-
-private val fakeSessions = listOf(
-    InterviewSessionDto(
-        id = 101L,
-        trackId = 1L,
-        trackName = "Android Development",
-        status = "COMPLETED",
-        overallScore = 87,
-        durationSeconds = 1_140,
-        targetDurationMinutes = 20,
-        maxQuestions = 3,
-        startedAt = "2026-07-20T09:00:00Z",
-        completedAt = "2026-07-20T09:19:00Z",
-        createdAt = "2026-07-20T09:00:00Z",
-    ),
-    InterviewSessionDto(
-        id = 102L,
-        trackId = 2L,
-        trackName = "Backend Development",
-        status = "COMPLETED",
-        overallScore = 76,
-        durationSeconds = 1_020,
-        targetDurationMinutes = 20,
-        maxQuestions = 3,
-        startedAt = "2026-07-17T14:30:00Z",
-        completedAt = "2026-07-17T14:47:00Z",
-        createdAt = "2026-07-17T14:30:00Z",
-    ),
-    InterviewSessionDto(
-        id = 103L,
-        trackId = 3L,
-        trackName = "UI/UX Design",
-        status = "COMPLETED",
-        overallScore = 64,
-        durationSeconds = 900,
-        targetDurationMinutes = 20,
-        maxQuestions = 3,
-        startedAt = "2026-07-12T11:10:00Z",
-        completedAt = "2026-07-12T11:25:00Z",
-        createdAt = "2026-07-12T11:10:00Z",
-    ),
-) + List(ADDITIONAL_FAKE_SESSION_COUNT) { index ->
-    val timestamp = Instant.parse("2026-07-10T10:00:00Z")
-        .minus(index.toLong(), ChronoUnit.DAYS)
-        .toString()
-    val score = MAX_SCORE - ((index + 4) * 3 % SCORE_VARIATION)
-    InterviewSessionDto(
-        id = 104L + index,
-        trackId = (index % FAKE_TRACKS.size + 1).toLong(),
-        trackName = FAKE_TRACKS[index % FAKE_TRACKS.size],
-        status = "COMPLETED",
-        overallScore = score,
-        durationSeconds = 900 + index * 30,
-        targetDurationMinutes = 20,
-        maxQuestions = 3,
-        startedAt = timestamp,
-        completedAt = timestamp,
-        createdAt = timestamp,
     )
 }
 
 private const val MIN_SCORE = 0
 private const val MAX_SCORE = 100
-private const val ADDITIONAL_FAKE_SESSION_COUNT = 30
-private const val SCORE_VARIATION = 40
 private const val FEEDBACK_ID_OFFSET = 1_000L
 private const val QUESTION_ID_MULTIPLIER = 10L
 private const val SCORE_ID_OFFSET = 10_000L

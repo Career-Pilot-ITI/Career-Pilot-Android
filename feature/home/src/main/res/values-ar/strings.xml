@@ -18,24 +18,24 @@
     <string name="home_plan_max_subtitle">أنت مشترك في الباقة الشاملة</string>
     <string name="home_plan_manage">إدارة</string>
     <plurals name="home_free_sessions_remaining">
-        <item quantity="zero">لا توجد جلسات مجانية متبقية</item>
-        <item quantity="one">تبقى جلسة مجانية واحدة</item>
-        <item quantity="two">تبقى جلستان مجانيتان</item>
-        <item quantity="few">تبقى %1$d جلسات مجانية</item>
-        <item quantity="many">تبقى %1$d جلسة مجانية</item>
-        <item quantity="other">تبقى %1$d جلسة مجانية</item>
+        <item quantity="zero">لا توجد مقابلات مجانية متبقية</item>
+        <item quantity="one">تبقى مقابلة مجانية واحدة</item>
+        <item quantity="two">تبقى مقابلتان مجانيتان</item>
+        <item quantity="few">تبقى %1$d مقابلات مجانية</item>
+        <item quantity="many">تبقى %1$d مقابلة مجانية</item>
+        <item quantity="other">تبقى %1$d مقابلة مجانية</item>
     </plurals>
-    <string name="home_free_sessions_used">تم استخدام %1$d من %2$d جلسة مجانية</string>
+    <string name="home_free_sessions_used">تم استخدام %1$d من %2$d مقابلة مجانية</string>
 
-    <!-- Overall score card -->
-    <string name="home_overall_score">الدرجة الإجمالية</string>
+    <!-- Latest score card -->
+    <string name="home_latest_score">درجة آخر مقابلة</string>
     <string name="home_score_excellent">عمل ممتاز</string>
     <string name="home_score_good">تقدم جيد</string>
     <string name="home_score_keep_going">واصل التقدم</string>
     <string name="home_score_needs_work">بحاجة إلى تحسين</string>
-    <string name="home_score_delta_up">+%1$d عن الجلسة السابقة</string>
-    <string name="home_score_delta_down">%1$d عن الجلسة السابقة</string>
-    <string name="home_score_no_previous">أول جلسة مسجلة</string>
+    <string name="home_score_delta_up">+%1$d عن المقابلة السابقة</string>
+    <string name="home_score_delta_down">%1$d عن المقابلة السابقة</string>
+    <string name="home_score_no_previous">أول مقابلة مسجلة</string>
     <string name="home_score_none">لا توجد نتيجة بعد</string>
     <string name="home_score_none_hint">قم بإجراء مقابلة لعرض نتيجتك</string>
     <string name="home_score_empty_value">—</string>
@@ -43,6 +43,7 @@
 
     <!-- Practice interview card -->
     <string name="home_practice_interview">التدريب على المقابلة</string>
+    <string name="home_no_track_selected">اختر مساراً مهنياً من ملفك الشخصي لبدء المقابلة.</string>
     <string name="home_start_practice">ابدأ التدريب على المقابلة</string>
 
     <!-- ATS job match card -->
@@ -56,14 +57,12 @@
     <string name="home_available_interviews_subtitle">اختر مساراً وابدأ التدريب</string>
 
     <!-- Recent sessions -->
-    <string name="home_recent_sessions">أحدث الجلسات</string>
+    <string name="home_recent_sessions">أحدث المقابلات</string>
     <string name="home_see_all">عرض الكل</string>
     <string name="home_recent_sessions_empty_title">لا توجد مقابلات بعد</string>
     <string name="home_recent_sessions_empty_body">تدرب مع مُحاور ذكي واحصل على تغذية راجعة فورية لإجاباتك.</string>
     <string name="home_recent_sessions_empty_action">ابدأ مقابلتك الأولى</string>
     <string name="home_session_meta">%1$s · %2$d دقيقة</string>
-    <string name="home_session_today">اليوم، %1$s</string>
-    <string name="home_session_yesterday">أمس، %1$s</string>
     <string name="home_session_unscored">—</string>
     <string name="home_session_continue">متابعة</string>
 

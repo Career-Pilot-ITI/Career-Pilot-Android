@@ -183,7 +183,8 @@ class OnboardingRepositoryImpl @Inject constructor(
                     skills = if (newProfile.career.skills.isNotEmpty()) (current.career.skills + newProfile.career.skills).distinct() else current.career.skills,
                     targetCompanies = if (newProfile.career.targetCompanies.isNotEmpty()) newProfile.career.targetCompanies else current.career.targetCompanies,
                     educationLevel = newProfile.career.educationLevel.ifBlank { current.career.educationLevel },
-                    trackName = newProfile.career.trackName.ifBlank { current.career.trackName }
+                    trackName = newProfile.career.trackName.ifBlank { current.career.trackName },
+                    trackId = newProfile.career.trackId ?: current.career.trackId
                 ),
                 avatar = current.avatar.copy(
                     avatarUrl = newProfile.avatar.avatarUrl.ifBlank { current.avatar.avatarUrl }

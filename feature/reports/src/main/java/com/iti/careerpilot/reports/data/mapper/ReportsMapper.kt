@@ -1,59 +1,22 @@
 package com.iti.careerpilot.reports.data.mapper
 
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 import com.iti.careerpilot.reports.data.datasource.remote.dto.FeedbackReportDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionDto
-import com.iti.careerpilot.reports.data.datasource.remote.dto.InterviewSessionsPageDto
 import com.iti.careerpilot.reports.data.datasource.remote.dto.SessionQuestionDto
 import com.iti.careerpilot.reports.domain.model.CoachingImpact
 import com.iti.careerpilot.reports.domain.model.CoachingSuggestion
-import com.iti.careerpilot.reports.domain.model.InterviewSessionSummary
 import com.iti.careerpilot.reports.domain.model.PerformanceMetrics
 import com.iti.careerpilot.reports.domain.model.PerformanceTier
 import com.iti.careerpilot.reports.domain.model.QuestionBreakdown
 import com.iti.careerpilot.reports.domain.model.QuestionReport
 import com.iti.careerpilot.reports.domain.model.ReportDetails
-import com.iti.careerpilot.reports.domain.model.SessionHistoryPage
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import kotlinx.serialization.SerializationException
 
-internal fun InterviewSessionDto.toHistoryDomainOrNull(): InterviewSessionSummary? {
-    val score = overallScore ?: return null
-    validateScore(score)
-    val durationMinutes = ((durationSeconds ?: 0).coerceAtLeast(0) + 59) / 60
-    return InterviewSessionSummary(
-        id = id,
-        score = score,
-        category = trackName.orEmpty(),
-        completedAt = parseBackendTimestamp(completedAt ?: createdAt),
-        durationMinutes = durationMinutes,
-        questionCount = maxQuestions?.coerceAtLeast(0) ?: 0,
-    )
-}
-
-internal fun InterviewSessionsPageDto.toHistoryDomain(): SessionHistoryPage {
-    if (
-        number < 0 ||
-        size <= 0 ||
-        totalPages < 0 ||
-        totalElements < 0L ||
-        numberOfElements < 0
-    ) {
-        throw SerializationException("Invalid session history page metadata")
-    }
-    return SessionHistoryPage(
-        sessions = content.mapNotNull(InterviewSessionDto::toHistoryDomainOrNull),
-        pageNumber = number,
-        totalPages = totalPages,
-        totalElements = totalElements,
-        isFirst = first,
-        isLast = last,
-    )
-}
-
 internal fun FeedbackReportDto.toDomain(
-    session: InterviewSessionDto,
+    session: InterviewSession,
 ): ReportDetails {
     validateScore(overallScore)
     val metricValues = listOf(
@@ -67,9 +30,8 @@ internal fun FeedbackReportDto.toDomain(
     val nonBlankTips = coachingTips.filter(String::isNotBlank)
     return ReportDetails(
         sessionId = sessionId,
-        completedAt = parseBackendTimestamp(
-            session.completedAt ?: generatedAt ?: createdAt,
-        ),
+        completedAt = session.occurredAt
+            ?: parseBackendTimestamp(generatedAt ?: createdAt),
         overallScore = overallScore,
         performanceTier = overallScore.toPerformanceTier(),
         topPercent = null,
@@ -142,14 +104,15 @@ private fun Int.toPerformanceTier(): PerformanceTier = when {
     else -> PerformanceTier.NEEDS_IMPROVEMENT
 }
 
-private fun parseBackendTimestamp(value: String): Instant = try {
-    Instant.parse(value)
-} catch (_: Exception) {
-    try {
-        LocalDateTime.parse(value).atZone(ZoneId.systemDefault()).toInstant()
-    } catch (exception: Exception) {
-        throw SerializationException("Invalid report timestamp", exception)
-    }
+private fun parseBackendTimestamp(value: String): Instant =
+    parseBackendTimestampOrNull(value)
+        ?: throw SerializationException("Invalid report timestamp")
+
+private fun parseBackendTimestampOrNull(value: String?): Instant? {
+    if (value.isNullOrBlank()) return null
+    return runCatching { Instant.parse(value) }
+        .recoverCatching { LocalDateTime.parse(value).toInstant(ZoneOffset.UTC) }
+        .getOrNull()
 }
 
 private fun validateScore(value: Int) {

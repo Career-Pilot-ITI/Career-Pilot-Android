@@ -3,8 +3,6 @@
     <string name="reports_session_history">Session History</string>
     <string name="reports_average_score">Avg score %1$d</string>
     <string name="reports_summary_separator">%1$s · %2$s</string>
-    <string name="reports_today">Today</string>
-    <string name="reports_yesterday">Yesterday</string>
     <string name="reports_overall_score">Overall Score</string>
     <string name="reports_performance_strong">Strong Performance</string>
     <string name="reports_performance_good">Good Performance</string>
@@ -41,6 +39,9 @@
     <string name="reports_retry">Retry</string>
     <string name="reports_back">Back</string>
     <string name="reports_open_session">Open report for %1$s with score %2$d</string>
+    <string name="reports_resume_session">Resume %1$s session</string>
+    <string name="reports_session_continue">Continue</string>
+    <string name="reports_session_unscored">—</string>
     <string name="reports_score_out_of_100" tools:ignore="PluralsCandidate">%1$d out of 100</string>
     <string name="reports_radar_summary">Clarity %1$d, Confidence %2$d, Pacing %3$d, Filler Words %4$d, Content %5$d</string>
     <string name="reports_question_selected" tools:ignore="PluralsCandidate">Question %1$d selected</string>

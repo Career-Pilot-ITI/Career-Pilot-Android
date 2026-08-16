@@ -136,6 +136,9 @@ fun NestedNavDisplay(
                 entry<Route.NestedNav.SessionHistory> {
                     SessionHistoryRoot(
                         openSessionDetails = openSessionDetails,
+                        openPracticeSession = { trackId, sessionId ->
+                            openPracticeSession(trackId, sessionId)
+                        },
                     )
                 }
                 entry<Route.NestedNav.Profile> {
