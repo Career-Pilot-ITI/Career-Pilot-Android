@@ -6,6 +6,7 @@ import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.model.Challenge
+import com.iti.core.model.ChallengeVisibility
 import com.iti.core.model.Track
 import javax.inject.Inject
 
@@ -23,5 +24,9 @@ class CreateChallengeRepositoryImpl @Inject constructor(
 
     override suspend fun createChallenge(challenge: Challenge): CareerPilotResult<Unit, FirebaseError> {
         return remoteDataSource.saveChallenge(challenge)
+    }
+
+    override fun generateChallengeId(visibility: ChallengeVisibility): String {
+        return remoteDataSource.generateChallengeId(visibility)
     }
 }

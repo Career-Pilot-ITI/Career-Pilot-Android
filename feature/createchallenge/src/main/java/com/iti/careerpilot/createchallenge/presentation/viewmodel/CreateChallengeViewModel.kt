@@ -148,7 +148,7 @@ class CreateChallengeViewModel @Inject constructor(
             repository.validateQuestions(nonEmptyQuestions)
                 .onSuccess {
                     val userProfile = userProfileRepo.readUserProfile()
-                    val challengeId = UUID.randomUUID().toString().substring(0, 8).uppercase()
+                    val challengeId = repository.generateChallengeId(current.visibility)
                     val challenge = Challenge(
                         id = challengeId,
                         creatorId = userProfile.account.email,

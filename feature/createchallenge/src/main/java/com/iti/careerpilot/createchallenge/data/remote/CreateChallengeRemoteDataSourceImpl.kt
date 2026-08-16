@@ -63,16 +63,24 @@ class CreateChallengeRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun saveChallenge(challenge: Challenge): CareerPilotResult<Unit, FirebaseError> = safeFirebaseCall {
-        val collectionName = if (challenge.visibility == ChallengeVisibility.PUBLIC) {
-            FirestoreCollections.PUBLIC_CHALLENGES
-        } else {
-            FirestoreCollections.PRIVATE_CHALLENGES
-        }
+        val collectionName = getCollectionName(challenge.visibility)
 
         firestore.collection(collectionName)
             .document(challenge.id)
             .set(challenge)
             .await()
+    }
+
+    override fun generateChallengeId(visibility: ChallengeVisibility): String {
+        return firestore.collection(getCollectionName(visibility)).document().id.uppercase()
+    }
+
+    private fun getCollectionName(visibility: ChallengeVisibility): String {
+        return if (visibility == ChallengeVisibility.PUBLIC) {
+            FirestoreCollections.PUBLIC_CHALLENGES
+        } else {
+            FirestoreCollections.PRIVATE_CHALLENGES
+        }
     }
 
     private fun cleanJson(jsonString: String): String {
