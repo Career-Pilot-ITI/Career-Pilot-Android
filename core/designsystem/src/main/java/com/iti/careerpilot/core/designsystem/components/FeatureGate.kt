@@ -36,7 +36,6 @@ import com.iti.careerpilot.core.designsystem.Dimens
 import com.iti.careerpilot.core.designsystem.R
 import com.iti.core.model.FeatureAccess
 import com.iti.core.model.Plan
-import java.util.Locale
 
 /**
  * Animated gate that shows [content] when access is [FeatureAccess.Granted],
@@ -113,8 +112,7 @@ fun LockedFeatureCard(
     modifier: Modifier = Modifier,
 ) {
     val pulseAlpha = rememberPulsingGlowAlpha()
-    val planName = requiredPlan.name.lowercase()
-        .replaceFirstChar { it.titlecase(Locale.getDefault()) }
+    val planName = requiredPlan.displayName()
 
     CareerPilotCard(modifier = modifier.alpha(pulseAlpha)) {
         Column(
