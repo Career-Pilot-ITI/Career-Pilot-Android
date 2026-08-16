@@ -46,6 +46,7 @@ import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
 import com.iti.careerpilot.reports.presentation.screen.breakdown.view.QuestionBreakdownRoot
 import com.iti.careerpilot.reports.presentation.screen.details.view.ReportDetailsRoot
 import com.iti.careerpilot.settings.presentation.screen.SettingsRoot
+import com.iti.common.model.ProfileEditSection
 import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.snackbar.model.CareerPilotSnackbarType
 import com.iti.onboarding.navigation.OnboardingPagerScreen
@@ -339,6 +340,11 @@ fun RootNavDisplay(
                         onSharedTextConsumed = onSharedTextConsumed,
                         onJobDetailsRequested = { workspaceId ->
                             rootBackStack.navigateSingleTop(Route.AtsJobDetails(workspaceId))
+                        },
+                        onEditProfileRequested = {
+                            rootBackStack.navigateSingleTop(
+                                Route.EditProfile(section = ProfileEditSection.CAREER),
+                            )
                         },
                     )
                 }

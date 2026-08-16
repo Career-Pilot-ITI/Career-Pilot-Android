@@ -13,6 +13,19 @@ import java.io.File
 import javax.inject.Inject
 
 class FakeEditProfileRemoteDataSource @Inject constructor() : EditProfileRemoteDataSource {
+    override suspend fun getProfile(): CareerPilotResult<UserProfileDto, NetworkError> {
+        fakeDelay()
+        if (shouldFail()) return CareerPilotResult.Error(NetworkError.FAKE_SERVER_ERROR)
+        return CareerPilotResult.Success(
+            UserProfileDto(
+                id = 1L,
+                displayName = "Career Pilot User",
+                cvUrl = "https://fake.url/cv.pdf",
+                onboardingCompleted = true,
+            )
+        )
+    }
+
     override suspend fun updateProfile(request: UpdateProfileRequestDto): CareerPilotResult<UserProfileDto, NetworkError> {
         fakeDelay()
         if (shouldFail()) return CareerPilotResult.Error(NetworkError.FAKE_SERVER_ERROR)
@@ -57,6 +70,25 @@ class FakeEditProfileRemoteDataSource @Inject constructor() : EditProfileRemoteD
                 createdAt = "2023-10-01T00:00:00Z"
             )
         )
+    }
+
+    override suspend fun analyzeCV(file: File): CareerPilotResult<UserProfileDto, NetworkError> {
+        fakeDelay()
+        if (shouldFail()) return CareerPilotResult.Error(NetworkError.FAKE_SERVER_ERROR)
+        return CareerPilotResult.Success(
+            UserProfileDto(
+                id = 1L,
+                targetRole = "Software Engineer",
+                skills = listOf(),
+                cvUrl = "https://fake.url/cv.pdf",
+                onboardingCompleted = true,
+            )
+        )
+    }
+
+    override suspend fun downloadBytes(url: String): ByteArray? {
+        fakeDelay()
+        return if (shouldFail()) null else byteArrayOf(0x25, 0x50, 0x44, 0x46)
     }
 
     override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> {

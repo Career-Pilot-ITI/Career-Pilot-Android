@@ -1,6 +1,5 @@
 package com.iti.careerpilot.ats.presentation.entry
 
-import android.net.Uri
 import com.iti.careerpilot.ats.domain.model.AtsScore
 import com.iti.careerpilot.ats.domain.model.AiJob
 import com.iti.careerpilot.ats.domain.model.CoverLetter
@@ -9,22 +8,20 @@ import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.ImportJobUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
-import com.iti.careerpilot.ats.domain.usecase.ReplaceCurrentCvUseCase
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
 import com.iti.careerpilot.ats.presentation.entry.viewmodel.AtsEntryViewModel
 import com.iti.common.error.NetworkError
-import com.iti.common.error.StorageError
-import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.UserProfile
-import com.iti.core.model.PdfFile
-import com.iti.core.model.PdfFileMetadata
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -113,11 +110,20 @@ class AtsEntryViewModelTest {
         advanceUntilIdle()
     }
 
+    @Test
+    fun `missing CV edit action navigates to edit profile`() = runTest(dispatcher) {
+        val viewModel = createViewModel(FakeAtsRepository())
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(AtsEntryAction.EditProfileClicked)
+        runCurrent()
+
+        assertEquals(AtsEntryEffect.NavigateToEditProfile, effect.await())
+    }
+
     private fun createViewModel(repository: FakeAtsRepository) = AtsEntryViewModel(
         observeCurrentProfile = ObserveCurrentProfileUseCase(repository),
-        replaceCurrentCv = ReplaceCurrentCvUseCase(repository),
         importJob = ImportJobUseCase(repository),
-        pdfOperations = FakePdfOperations,
     )
 }
 
@@ -125,21 +131,6 @@ private class FakeAtsRepository : AtsRepository {
     override val userProfile = MutableStateFlow(UserProfile())
     var importCount = 0
     var holdImport: CompletableDeferred<Unit>? = null
-
-    override suspend fun replaceCurrentCv(
-        file: PdfFile,
-        onProgress: (Int) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError> {
-        onProgress(100)
-        userProfile.value = userProfile.value.copy(
-            cv = CvInfo(
-                cvUrl = "https://cdn.example.com/${file.name}",
-                cvFileName = file.name,
-                cvSizeBytes = file.sizeBytes,
-            ),
-        )
-        return CareerPilotResult.Success(Unit)
-    }
 
     override suspend fun importJob(url: String): CareerPilotResult<JobWorkspace, NetworkError> {
         importCount++
@@ -192,14 +183,4 @@ private class FakeAtsRepository : AtsRepository {
             updatedAt = null,
         )
     }
-}
-
-private object FakePdfOperations : PdfOperations {
-    override suspend fun readPdf(uri: String) = CareerPilotResult.Success(
-        PdfFile("resume.pdf", "application/pdf", 3, byteArrayOf(1, 2, 3)),
-    )
-    override suspend fun getPdfMetaData(uri: Uri): CareerPilotResult<PdfFileMetadata, StorageError> =
-        CareerPilotResult.Error(StorageError.UNKNOWN)
-    override suspend fun storePdfInternally(file: PdfFile): CareerPilotResult<String, StorageError> =
-        CareerPilotResult.Success("file:///cv/${file.name}")
 }

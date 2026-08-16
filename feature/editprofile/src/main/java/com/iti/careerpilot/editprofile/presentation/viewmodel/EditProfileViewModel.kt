@@ -56,44 +56,46 @@ class EditProfileViewModel @Inject constructor(
     private fun initialize() {
         if (hasInitialized) return
         hasInitialized = true
-        loadProfile()
+        _state.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            editProfileRepo.ensureCvAvailableLocally()
+            loadProfile()
+        }
         loadTracks()
     }
 
-    private fun loadProfile() {
-        viewModelScope.launch {
-            val profile = editProfileRepo.userProfile.value
-            original = profile
-            val birthMillis = calculateMillis(profile.personal.dateOfBirth)
-            _state.update {
-                it.copy(
-                    displayName = profile.personal.displayName,
-                    username = profile.account.username,
-                    email = profile.account.email,
-                    gender = profile.personal.gender,
-                    dateOfBirth = profile.personal.dateOfBirth,
-                    dateOfBirthMillis = birthMillis,
-                    dateOfBirthDisplay = formatLocalizedDate(birthMillis),
-                    targetRole = profile.career.targetRole,
-                    industry = profile.career.industry,
-                    experienceLevel = profile.career.experienceLevel,
-                    trackName = profile.career.trackName,
-                    trackId = profile.career.trackId,
-                    currentJobTitle = profile.career.currentJobTitle,
-                    yearsOfExperience = profile.career.yearsOfExperience.toString(),
-                    skills = profile.career.skills,
-                    targetCompanies = profile.career.targetCompanies,
-                    educationLevel = profile.career.educationLevel,
-                    timezone = profile.account.timezone,
-                    avatarUrl = profile.avatar.avatarUrl,
-                    avatarLocalUri = profile.avatar.avatarLocalUri,
-                    cvUrl = profile.cv.cvUrl,
-                    cvLocalUri = profile.cv.cvLocalUri,
-                    cvFileName = profile.cv.cvFileName,
-                    cvFileSize = if (profile.cv.cvSizeBytes > 0) "${profile.cv.cvSizeBytes / 1024} KB" else "",
-                    isLoading = false
-                )
-            }
+    private suspend fun loadProfile() {
+        val profile = editProfileRepo.userProfile.value
+        original = profile
+        val birthMillis = calculateMillis(profile.personal.dateOfBirth)
+        _state.update {
+            it.copy(
+                displayName = profile.personal.displayName,
+                username = profile.account.username,
+                email = profile.account.email,
+                gender = profile.personal.gender,
+                dateOfBirth = profile.personal.dateOfBirth,
+                dateOfBirthMillis = birthMillis,
+                dateOfBirthDisplay = formatLocalizedDate(birthMillis),
+                targetRole = profile.career.targetRole,
+                industry = profile.career.industry,
+                experienceLevel = profile.career.experienceLevel,
+                trackName = profile.career.trackName,
+                trackId = profile.career.trackId,
+                currentJobTitle = profile.career.currentJobTitle,
+                yearsOfExperience = profile.career.yearsOfExperience.toString(),
+                skills = profile.career.skills,
+                targetCompanies = profile.career.targetCompanies,
+                educationLevel = profile.career.educationLevel,
+                timezone = profile.account.timezone,
+                avatarUrl = profile.avatar.avatarUrl,
+                avatarLocalUri = profile.avatar.avatarLocalUri,
+                cvUrl = profile.cv.cvUrl,
+                cvLocalUri = profile.cv.cvLocalUri,
+                cvFileName = profile.cv.cvFileName,
+                cvFileSize = if (profile.cv.cvSizeBytes > 0) "${profile.cv.cvSizeBytes / 1024} KB" else "",
+                isLoading = false
+            )
         }
     }
 
@@ -242,26 +244,54 @@ class EditProfileViewModel @Inject constructor(
         uri?.let { newUri ->
             performFileUpload(
                 uri = newUri,
-                uploadCall = { u, p -> editProfileRepo.uploadCV(u, p) },
+                uploadCall = { u, p ->
+                    editProfileRepo.uploadAndAnalyzeCV(
+                        uri = u,
+                        onUploadProgress = p,
+                        onAnalysisStarted = {
+                            _state.update {
+                                it.copy(
+                                    isAnalyzingCV = true,
+                                    cvUploadProgress = 100,
+                                )
+                            }
+                        },
+                    )
+                },
                 onStart = {
                     _state.update { s ->
-                        s.copy(isUploadingCV = true, cvUploadProgress = 0)
+                        s.copy(
+                            isUploadingCV = true,
+                            isAnalyzingCV = false,
+                            cvUploadProgress = 0,
+                        )
                     }
                 },
                 onProgress = { p -> _state.update { it.copy(cvUploadProgress = p) } },
                 onSuccess = { resp ->
+                    val savedCv = editProfileRepo.userProfile.value.cv
                     _state.update {
                         it.copy(
-                            cvUrl = resp.url,
-                            cvLocalUri = uri.toString(),
+                            cvUrl = savedCv.cvUrl.ifBlank { resp.url },
+                            cvLocalUri = savedCv.cvLocalUri,
                             cvFileId = resp.id,
-                            cvFileName = resp.originalName,
-                            cvFileSize = if (resp.sizeBytes > 0) "${resp.sizeBytes / (1024f * 1024f)} MB" else ""
+                            cvFileName = savedCv.cvFileName.ifBlank { resp.originalName },
+                            cvFileSize = if (savedCv.cvSizeBytes > 0) {
+                                "${savedCv.cvSizeBytes / (1024f * 1024f)} MB"
+                            } else {
+                                ""
+                            }
                         )
                     }
                 },
                 onFinish = {
-                    _state.update { it.copy(isUploadingCV = false, cvUploadProgress = 0) }
+                    _state.update {
+                        it.copy(
+                            isUploadingCV = false,
+                            isAnalyzingCV = false,
+                            cvUploadProgress = 0,
+                        )
+                    }
                 }
             )
         }

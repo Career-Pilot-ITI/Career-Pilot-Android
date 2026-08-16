@@ -13,7 +13,6 @@ import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewM
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
-import com.iti.core.model.PdfFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -70,8 +69,6 @@ private class JobDetailsRepository : AtsRepository {
     var workspaceCalls = 0
     var scoreCalls = 0
 
-    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
-        CareerPilotResult.Success(Unit)
     override suspend fun importJob(url: String) = CareerPilotResult.Success(WORKSPACE)
     override suspend fun getWorkspace(workspaceId: Long): CareerPilotResult<JobWorkspace, NetworkError> {
         workspaceCalls++

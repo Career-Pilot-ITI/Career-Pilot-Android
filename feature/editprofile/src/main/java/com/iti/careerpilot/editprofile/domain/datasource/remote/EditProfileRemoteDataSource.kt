@@ -11,6 +11,8 @@ import java.io.File
 
 interface EditProfileRemoteDataSource {
 
+    suspend fun getProfile(): CareerPilotResult<UserProfileDto, NetworkError>
+
     suspend fun updateProfile(
         request: UpdateProfileRequestDto
     ): CareerPilotResult<UserProfileDto, NetworkError>
@@ -24,6 +26,12 @@ interface EditProfileRemoteDataSource {
         file: File,
         onProgress: (Int) -> Unit
     ): CareerPilotResult<FileUploadResponse, NetworkError>
+
+    suspend fun analyzeCV(
+        file: File,
+    ): CareerPilotResult<UserProfileDto, NetworkError>
+
+    suspend fun downloadBytes(url: String): ByteArray?
 
     suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError>
 }

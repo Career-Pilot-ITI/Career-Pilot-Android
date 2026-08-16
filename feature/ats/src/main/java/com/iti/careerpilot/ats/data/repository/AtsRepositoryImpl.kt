@@ -8,13 +8,10 @@ import com.iti.careerpilot.ats.domain.model.CoverLetter
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.common.error.NetworkError
-import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.datastore.models.CvInfo
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.datastore.repo.UserProfileRepo
 import com.iti.core.datastore.sync.UserProfileSync
-import com.iti.core.model.PdfFile
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.coroutines.cancellation.CancellationException
@@ -23,35 +20,8 @@ class AtsRepositoryImpl @Inject constructor(
     private val remoteDataSource: AtsRemoteDataSource,
     private val profileRepo: UserProfileRepo,
     private val profileSync: UserProfileSync,
-    private val pdfOperations: PdfOperations,
 ) : AtsRepository {
     override val userProfile: StateFlow<UserProfile> = profileRepo.userProfile
-
-    override suspend fun replaceCurrentCv(
-        file: PdfFile,
-        onProgress: (Int) -> Unit,
-    ): CareerPilotResult<Unit, NetworkError> = when (
-        val result = remoteDataSource.replaceCurrentCv(file, onProgress)
-    ) {
-        is CareerPilotResult.Error -> result
-        is CareerPilotResult.Success -> {
-            val storedUri = when (val stored = pdfOperations.storePdfInternally(file)) {
-                is CareerPilotResult.Success -> stored.data
-                is CareerPilotResult.Error -> ""
-            }
-            profileRepo.updateUserProfile { profile ->
-                profile.copy(
-                    cv = CvInfo(
-                        cvUrl = result.data,
-                        cvLocalUri = storedUri,
-                        cvFileName = file.name,
-                        cvSizeBytes = file.sizeBytes,
-                    ),
-                )
-            }
-            CareerPilotResult.Success(Unit)
-        }
-    }
 
     override suspend fun importJob(url: String) = mapResult(remoteDataSource.importJob(url)) { it.toDomain() }
 

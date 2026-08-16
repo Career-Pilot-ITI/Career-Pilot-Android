@@ -12,21 +12,9 @@ import com.iti.careerpilot.ats.data.dto.JobWorkspaceDto
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.fakeDelay
-import com.iti.core.model.PdfFile
 import javax.inject.Inject
 
 class FakeAtsRemoteDataSource @Inject constructor() : AtsRemoteDataSource {
-    override suspend fun replaceCurrentCv(
-        file: PdfFile,
-        onProgress: (Int) -> Unit,
-    ): CareerPilotResult<String, NetworkError> {
-        if (file.bytes.isEmpty()) return CareerPilotResult.Error(NetworkError.BAD_REQUEST)
-        onProgress(35)
-        fakeAtsDelay()
-        onProgress(100)
-        return CareerPilotResult.Success("https://cdn.careerpilot.test/cv/${file.name}")
-    }
-
     override suspend fun importJob(url: String): CareerPilotResult<JobWorkspaceDto, NetworkError> {
         fakeAtsDelay()
         return if (url.startsWith("https://")) CareerPilotResult.Success(WORKSPACE)
