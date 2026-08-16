@@ -36,6 +36,7 @@
     <string name="scroll_for_more">Scroll for more</string>
     <string name="loading_question">Loading question…</string>
     <string name="question_number">Question %1$s</string>
+    <string name="question_x_of_y">Question %1$d of %2$d</string>
     <string name="session_settings">Session Settings</string>
     <string name="auto_read_question">Auto read question</string>
     <string name="automatically_speak_the_question_when_it_s_shown">Automatically speak the question when it\'s shown</string>

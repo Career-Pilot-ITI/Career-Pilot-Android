@@ -37,6 +37,7 @@
     <string name="scroll_for_more">مرر للمزيد</string>
     <string name="loading_question">جارٍ تحميل السؤال…</string>
     <string name="question_number">السؤال %1$s</string>
+    <string name="question_x_of_y">السؤال %1$d من %2$d</string>
 
     <string name="session_settings">إعدادات الجلسة</string>
     <string name="auto_read_question">قراءة السؤال تلقائيًا</string>

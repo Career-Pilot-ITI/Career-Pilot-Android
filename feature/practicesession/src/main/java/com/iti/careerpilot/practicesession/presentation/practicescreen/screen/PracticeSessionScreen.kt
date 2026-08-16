@@ -366,6 +366,7 @@ fun PracticeSessionScreen(
                 ) {
                     QuestionCard(
                         questionOrder = state.displayQuestionOrder,
+                        maxQuestions = state.displayMaxQuestions,
                         questionText = state.displayQuestionText,
                         isReadingQuestion = state.isReadingQuestion,
                         onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },

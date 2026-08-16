@@ -53,4 +53,7 @@ data class PracticeSessionState(
 
     val displayQuestionOrder: Int?
         get() = firestoreSession?.currentQuestion?.questionOrder ?: currentSession?.currentQuestion?.questionOrder
+
+    val displayMaxQuestions: Int?
+        get() = firestoreSession?.maxQuestions ?: currentSession?.maxQuestions
 }
