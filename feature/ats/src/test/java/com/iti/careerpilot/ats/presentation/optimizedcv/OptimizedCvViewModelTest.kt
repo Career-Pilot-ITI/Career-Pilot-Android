@@ -79,21 +79,8 @@ class OptimizedCvViewModelTest {
 
     // ----- gate path tests -----
 
-    /**
-     * Locked state is produced when the feature has no coin fallback (quota.remaining=0 with
-     * no coin cost override, and the pricing map cost resolves to 0).
-     * For CvAiAnalysis, we force it by setting a quota with remaining=0 AND explicitly setting
-     * the plan to not include the feature — so neither plan access nor coin path is available.
-     *
-     * Note: Because CvAiAnalysis has coin cost 15 in FeaturePricingMap, the coin path is always
-     * preferred over locking. To produce Locked we use no-plan access + quota exhausted with
-     * coinCost=0 override and then check CoinTopUpRequired since cost falls back to pricing map.
-     * The truly reachable "gated" states for coin-priced features are CoinTopUpRequired and
-     * StaleCacheBlocked. We test gate-sheet via CoinTopUpRequired with 0 coins.
-     */
     @Test
-    fun `access CoinTopUpRequired with zero coins shows coin top-up sheet and stops loading`() = runTest(dispatcher) {
-        // CvAiAnalysis costs 15 coins; user has 0 → CoinTopUpRequired
+    fun `access Locked for free tier user shows gate sheet and stops loading`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
             accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
@@ -102,19 +89,19 @@ class OptimizedCvViewModelTest {
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertTrue(viewModel.state.value.hasInsufficientCoins)
-        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
         assertFalse(viewModel.state.value.isLoading)
         assertEquals(0, viewModel.state.value.sections.size)
     }
 
     @Test
-    fun `access CoinTopUpRequired shows coin top-up sheet and marks hasInsufficientCoins`() = runTest(dispatcher) {
-        // CvAiAnalysis costs 15 coins; give user 2 coins (< 15) → CoinTopUpRequired
+    fun `access CoinTopUpRequired for plus tier user shows coin top-up sheet and marks hasInsufficientCoins`() = runTest(dispatcher) {
+        // CvAiAnalysis costs 15 coins; give plus user 2 coins (< 15) → CoinTopUpRequired
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
-            accessRepo = createAccessRepository(coins = 2, features = emptySet(), plan = Plan.FREE),
+            accessRepo = createAccessRepository(coins = 2, features = setOf(FeatureKey.CvAiAnalysis), plan = Plan.PLUS),
         )
 
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
@@ -163,7 +150,7 @@ class OptimizedCvViewModelTest {
     fun `DismissCoinTopUpSheet clears coin top-up sheet flag`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
-            accessRepo = createAccessRepository(coins = 2, features = emptySet(), plan = Plan.FREE),
+            accessRepo = createAccessRepository(coins = 2, features = setOf(FeatureKey.CvAiAnalysis), plan = Plan.PLUS),
         )
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
@@ -177,34 +164,17 @@ class OptimizedCvViewModelTest {
 
     @Test
     fun `DismissGateSheet clears gate sheet flag`() = runTest(dispatcher) {
-        // Force Locked by using a quota with remaining=0 and coinCost explicitly 0 so pricing map
-        // takes effect (5 coins) — but actually set coins=0 so we get CoinTopUpRequired.
-        // To truly get Locked: use FeatureKey with no coin cost. For coverage of DismissGateSheet,
-        // we manually set the state via an action after observing showGateSheet would be set.
-        // The gate sheet flag is independently dismissable regardless of how it was set.
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
-            accessRepo = createAccessRepository(
-                coins = 20,
-                features = setOf(FeatureKey.CvAiAnalysis),
-                // Provide a quota with remaining=0 and coinCost=0 to force Locked path
-                quotas = mapOf(
-                    FeatureKey.CvAiAnalysis to FeatureQuota(
-                        feature = FeatureKey.CvAiAnalysis,
-                        remaining = 0,
-                        max = 10,
-                        coinCost = 0,
-                    ),
-                ),
-            ),
+            accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
         )
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
+        assertTrue(viewModel.state.value.showGateSheet)
 
-        // With remaining=0 and coinCost=0 (no coin override), pricing map = 15, so cost=15 > 0.
-        // coinBalance(20) >= cost(15) → Granted. This path doesn't gate.
-        // So this test verifies dismiss clears state even if already false (no-op dismiss is safe).
         viewModel.onIntent(OptimizedCvIntent.DismissGateSheet)
+        advanceUntilIdle()
+
         assertFalse(viewModel.state.value.showGateSheet)
     }
 

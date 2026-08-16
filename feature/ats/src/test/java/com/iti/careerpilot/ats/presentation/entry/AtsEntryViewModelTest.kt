@@ -137,18 +137,35 @@ class AtsEntryViewModelTest {
 
     // ----- gate path tests -----
 
-    /**
-     * JobParse costs 1 coin. With 0 coins and no plan access (FREE plan without JobParse feature),
-     * the access result is CoinTopUpRequired — never Locked — since cost > 0 always takes coin path.
-     * showCoinTopUpSheet is set and import is blocked.
-     */
     @Test
-    fun `compare when CoinTopUpRequired shows coin top-up sheet and blocks import`() = runTest(dispatcher) {
+    fun `compare when Locked for free tier shows gate sheet and blocks import`() = runTest(dispatcher) {
         val repository = FakeAtsRepository().apply {
             userProfile.value = UserProfile(cv = CvInfo(cvUrl = "https://cdn.example.com/cv.pdf"))
         }
-        // JobParse costs 1 coin; user has 0 → CoinTopUpRequired
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(repository, accessRepo)
+        viewModel.onIntent(AtsEntryIntent.Initial)
+        runCurrent()
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        )
+
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
+        advanceUntilIdle()
+
+        assertEquals(0, repository.importCount)
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertFalse(viewModel.state.value.isImporting)
+    }
+
+    @Test
+    fun `compare when CoinTopUpRequired for plus tier shows coin top-up sheet and blocks import`() = runTest(dispatcher) {
+        val repository = FakeAtsRepository().apply {
+            userProfile.value = UserProfile(cv = CvInfo(cvUrl = "https://cdn.example.com/cv.pdf"))
+        }
+        val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.JobParse), plan = Plan.PLUS)
         val viewModel = createViewModel(repository, accessRepo)
         viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
@@ -213,7 +230,7 @@ class AtsEntryViewModelTest {
         val repository = FakeAtsRepository().apply {
             userProfile.value = UserProfile(cv = CvInfo(cvUrl = "https://cdn.example.com/cv.pdf"))
         }
-        val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.JobParse), plan = Plan.PLUS)
         val viewModel = createViewModel(repository, accessRepo)
         viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
@@ -230,9 +247,20 @@ class AtsEntryViewModelTest {
 
     @Test
     fun `DismissGateSheet clears gate sheet flag`() = runTest(dispatcher) {
-        val viewModel = createViewModel(FakeAtsRepository())
+        val repository = FakeAtsRepository().apply {
+            userProfile.value = UserProfile(cv = CvInfo(cvUrl = "https://cdn.example.com/cv.pdf"))
+        }
+        val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(repository, accessRepo)
+        viewModel.onIntent(AtsEntryIntent.Initial)
+        runCurrent()
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        )
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value.showGateSheet)
 
-        // DismissGateSheet is safe to call even when showGateSheet is already false
         viewModel.onIntent(AtsEntryIntent.DismissGateSheet)
         assertFalse(viewModel.state.value.showGateSheet)
     }

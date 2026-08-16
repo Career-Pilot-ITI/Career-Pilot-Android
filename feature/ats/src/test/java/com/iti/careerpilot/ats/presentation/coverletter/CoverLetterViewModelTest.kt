@@ -88,7 +88,7 @@ class CoverLetterViewModelTest {
         }
 
     @Test
-    fun `opening cover letter with insufficient coins shows coin top up sheet`() =
+    fun `opening cover letter for free tier user shows gate sheet and blocks generation`() =
         runTest(dispatcher) {
             val repository = CoverLetterRepository(coverLetterText = null)
             val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
@@ -98,14 +98,13 @@ class CoverLetterViewModelTest {
             advanceUntilIdle()
 
             assertEquals(0, repository.generateCalls)
-            assertTrue(viewModel.state.value.showCoinTopUpSheet)
-            assertTrue(viewModel.state.value.hasInsufficientCoins)
-            assertFalse(viewModel.state.value.showGateSheet)
-            assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+            assertTrue(viewModel.state.value.showGateSheet)
+            assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+            assertFalse(viewModel.state.value.showCoinTopUpSheet)
         }
 
     @Test
-    fun `opening cover letter with sufficient coins via coin fallback is granted`() =
+    fun `opening cover letter for free tier user even with coins shows gate sheet and blocks generation`() =
         runTest(dispatcher) {
             val repository = CoverLetterRepository(coverLetterText = null)
             val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
@@ -114,10 +113,10 @@ class CoverLetterViewModelTest {
             viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
-            assertEquals(1, repository.generateCalls)
-            assertFalse(viewModel.state.value.showGateSheet)
+            assertEquals(0, repository.generateCalls)
+            assertTrue(viewModel.state.value.showGateSheet)
+            assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
             assertFalse(viewModel.state.value.showCoinTopUpSheet)
-            assertEquals("Generated letter", viewModel.state.value.editedValue)
         }
 
     private fun createAccessRepository(

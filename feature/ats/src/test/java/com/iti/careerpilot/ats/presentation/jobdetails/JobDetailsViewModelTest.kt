@@ -89,7 +89,7 @@ class JobDetailsViewModelTest {
     }
 
     @Test
-    fun `start scoring with insufficient coins shows coin top-up sheet`() = runTest(dispatcher) {
+    fun `start scoring for free tier user shows gate sheet and blocks navigation`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
         viewModel.onIntent(JobDetailsIntent.Initial(1L))
@@ -98,25 +98,24 @@ class JobDetailsViewModelTest {
         viewModel.onIntent(JobDetailsIntent.StartScoring)
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertFalse(viewModel.state.value.showGateSheet)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
     @Test
-    fun `start scoring with sufficient coins via coin fallback is granted`() = runTest(dispatcher) {
+    fun `start scoring for free tier user even with coins shows gate sheet and blocks navigation`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
         viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
-        val effect = async { viewModel.effects.first() }
 
         viewModel.onIntent(JobDetailsIntent.StartScoring)
-        runCurrent()
+        advanceUntilIdle()
 
-        assertFalse(viewModel.state.value.showGateSheet)
+        assertTrue(viewModel.state.value.showGateSheet)
+        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
     }
 
     private fun createAccessRepository(

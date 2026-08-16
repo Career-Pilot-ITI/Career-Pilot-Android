@@ -27,7 +27,7 @@ data class CoverLetterUiState(
     val coinBalance: Int = 0,
     val planDisplayName: String = "Free",
     val showGateSheet: Boolean = false,
-    val gateRequiredPlan: Plan = Plan.MAX,
+    val gateRequiredPlan: Plan = Plan.PLUS,
     val gatePlanFeatures: List<String> = emptyList(),
     val showCoinTopUpSheet: Boolean = false,
     val coinTopUpRequiredCost: Int = 0,
