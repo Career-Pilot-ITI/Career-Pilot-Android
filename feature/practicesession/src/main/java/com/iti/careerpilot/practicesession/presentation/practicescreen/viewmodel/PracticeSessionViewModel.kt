@@ -3,6 +3,7 @@ package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmode
 import android.os.SystemClock
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -673,7 +674,6 @@ class PracticeSessionViewModel @Inject constructor(
                 async { transcribeAudio(audioPath) }
             }
 
-            val uploadResult = uploadDeferred.await()
             val transcriptionResult = transcribeDeferred?.await()
                 ?: Result.success(RecordingAnswerClassifier.NO_ANSWER_TRANSCRIPT)
 
@@ -683,24 +683,30 @@ class PracticeSessionViewModel @Inject constructor(
                         RecordingAnswerClassifier.NO_ANSWER_TRANSCRIPT
                     }
                     _state.update { it.copy(transcription = safeTranscript) }
-                    uploadResult
-                        .onSuccess { audioAttachment ->
-                            if (firestoreSession != null) {
-                                uploadFirestoreAnswer(firestoreSession.sessionId, audioAttachment.url, safeTranscript)
-                            } else if (session != null) {
+
+                    if (firestoreSession != null) {
+                        val audioFile = File(audioPath)
+                        val audioBytes = runCatching { audioFile.readBytes() }.getOrNull()
+                        val extension = audioFile.extension
+                        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                        uploadFirestoreAnswer(firestoreSession.sessionId, audioBytes, mimeType, safeTranscript)
+                    } else if (session != null) {
+                        val uploadResult = uploadDeferred.await()
+                        uploadResult
+                            .onSuccess { audioAttachment ->
                                 uploadAnswer(session.sessionId, audioAttachment.url, safeTranscript)
                             }
-                        }
-                        .onError { error ->
-                            _state.update {
-                                it.copy(
-                                    isUploadingAndTranscribingAudio = false,
-                                    isSendingAnswer = false,
-                                    isLoadingSession = false,
-                                )
+                            .onError { error ->
+                                _state.update {
+                                    it.copy(
+                                        isUploadingAndTranscribingAudio = false,
+                                        isSendingAnswer = false,
+                                        isLoadingSession = false,
+                                    )
+                                }
+                                _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
                             }
-                            _event.send(PracticeSessionEvent.ShowError(error.toUIText()))
-                        }
+                    }
                 }
                 .onFailure { _ ->
                     _state.update {
@@ -717,7 +723,8 @@ class PracticeSessionViewModel @Inject constructor(
 
     private suspend fun uploadFirestoreAnswer(
         sessionId: String,
-        audioUrl: String,
+        audioBytes: ByteArray?,
+        mimeType: String?,
         transcript: String
     ) {
         _state.update {
@@ -737,12 +744,14 @@ class PracticeSessionViewModel @Inject constructor(
                 questionText = currentQuestion.questionText,
                 questionOrder = currentQuestion.questionOrder,
                 userTranscript = transcript,
-                answerAudioUrl = audioUrl,
+                answerAudioUrl = "", // We do not save the audio file
                 durationMs = _state.value.recordingDuration.inWholeMilliseconds,
                 speechRateWpm = 0.0,
                 createdAt = currentQuestion.createdAt,
                 completedAt = Instant.now().toString()
-            )
+            ),
+            audioBytes = audioBytes,
+            mimeType = mimeType
         )
 
         result.onSuccess { updatedSession ->

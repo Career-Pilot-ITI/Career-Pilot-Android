@@ -192,28 +192,28 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
 
     override suspend fun submitAnswer(
         sessionId: String,
-        questionResult: ChallengeQuestionResult
+        questionResult: ChallengeQuestionResult,
+        audioBytes: ByteArray?,
+        mimeType: String?
     ): CareerPilotResult<ChallengeSession, FirebaseError> = safeFirebaseCall {
         val docRef = firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS).document(sessionId)
         val session = docRef.get().await().toObject<ChallengeSession>()
             ?: throw Exception("Session not found")
 
-        // 1. Score the answer using Gemini
+        // 1. Score the answer using Gemini (Multimodal)
         val scoringPrompt = """
-            Score the following technical interview answer:
+            Score the following technical interview answer. 
+            Analyze both the provided transcript and the audio recording for:
+            - Content Relevance (alignment with the question)
+            - Clarity (articulation and technical accuracy)
+            - Confidence (tone and flow)
+            - Pacing (speech rate and pauses)
+            - Filler Words (frequency of 'uh', 'um', etc.)
+            
             Question: ${questionResult.questionText}
-            Answer: ${questionResult.userTranscript}
+            Transcript: ${questionResult.userTranscript}
             
-            Provide scores (0-100) for:
-            - Content Relevance
-            - Clarity
-            - Confidence
-            - Pacing (assume speechRateWpm: ${questionResult.speechRateWpm})
-            - Filler Words
-            
-            The Answer can be a little of from bad transcription so keep that in mind and figure out what the user is trying to say
-            Also provide a short coaching tip.
-            
+            Provide scores (0-100) and a short coaching tip.
             Return ONLY a JSON object:
             {
               "contentRelevance": number,
@@ -226,7 +226,19 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
             }
         """.trimIndent()
 
-        val response = model.generateContent(scoringPrompt)
+        val response = if (audioBytes != null) {
+            model.generateContent(
+                listOf(
+                    content {
+                        inlineData(audioBytes, mimeType ?: "audio/wav")
+                        text(scoringPrompt)
+                    }
+                )
+            )
+        } else {
+            model.generateContent(scoringPrompt)
+        }
+
         val text = response.text ?: throw Exception("Empty AI response")
         val score = json.decodeFromString<ChallengeScore>(cleanJson(text)).copy(
             createdAt = Instant.now().toString()

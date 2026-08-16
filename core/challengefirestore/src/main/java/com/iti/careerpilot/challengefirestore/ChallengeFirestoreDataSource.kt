@@ -24,7 +24,9 @@ interface ChallengeFirestoreDataSource {
 
     suspend fun submitAnswer(
         sessionId: String,
-        questionResult: ChallengeQuestionResult
+        questionResult: ChallengeQuestionResult,
+        audioBytes: ByteArray? = null,
+        mimeType: String? = null
     ): CareerPilotResult<ChallengeSession, FirebaseError>
 
     suspend fun getSession(sessionId: String): CareerPilotResult<ChallengeSession, FirebaseError>
