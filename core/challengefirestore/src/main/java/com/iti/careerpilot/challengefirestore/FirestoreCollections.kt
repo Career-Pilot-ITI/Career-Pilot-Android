@@ -1,4 +1,4 @@
-package com.iti.core.model
+package com.iti.careerpilot.challengefirestore
 
 object FirestoreCollections {
     const val PUBLIC_CHALLENGES = "public_challenges"

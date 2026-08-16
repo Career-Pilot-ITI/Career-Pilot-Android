@@ -6,10 +6,9 @@ import com.iti.careerpilot.challengedetails.domain.repository.ChallengeDetailsRe
 import com.iti.careerpilot.challengedetails.presentation.action.ChallengeDetailsAction
 import com.iti.careerpilot.challengedetails.presentation.event.ChallengeDetailsEvent
 import com.iti.careerpilot.challengedetails.presentation.state.ChallengeDetailsState
+import com.iti.careerpilot.challengefirestore.ChallengeType
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
-import com.iti.common.snackbar.CareerPilotSnackbarController
-import com.iti.common.util.toUIText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,24 +32,20 @@ class ChallengeDetailsViewModel @Inject constructor(
     fun onAction(action: ChallengeDetailsAction) {
         when (action) {
             is ChallengeDetailsAction.Initial -> fetchChallenge(action.challengeId)
-            ChallengeDetailsAction.MicrophoneRowClicked -> _state.update { it.copy(isPermissionDialogVisible = true) }
-            ChallengeDetailsAction.CameraRowClicked -> _state.update { it.copy(showCameraPermissionDialog = true) }
-            ChallengeDetailsAction.PermissionDialogDismissed -> _state.update { it.copy(isPermissionDialogVisible = false) }
-            ChallengeDetailsAction.CameraPermissionDialogDismissed -> _state.update { it.copy(showCameraPermissionDialog = false) }
-            is ChallengeDetailsAction.MicrophonePermissionChanged -> _state.update { it.copy(isMicrophoneGranted = action.isGranted) }
-            is ChallengeDetailsAction.CameraPermissionChanged -> _state.update { it.copy(isCameraGranted = action.isGranted) }
-            ChallengeDetailsAction.BeginChallengeClicked -> {
-                _state.value.challenge?.let { challenge ->
-                    viewModelScope.launch {
-                        _events.send(ChallengeDetailsEvent.NavigateToPractice(challenge))
-                    }
-                }
-            }
             ChallengeDetailsAction.OnBackClicked -> {
-                viewModelScope.launch {
-                    _events.send(ChallengeDetailsEvent.NavigateBack)
-                }
+                viewModelScope.launch { _events.send(ChallengeDetailsEvent.NavigateBack) }
             }
+            ChallengeDetailsAction.BeginChallengeClicked -> handleBegin()
+            is ChallengeDetailsAction.MicrophonePermissionChanged -> {
+                _state.update { it.copy(isMicrophoneGranted = action.isGranted) }
+            }
+            is ChallengeDetailsAction.CameraPermissionChanged -> {
+                _state.update { it.copy(isCameraGranted = action.isGranted) }
+            }
+            ChallengeDetailsAction.PermissionDialogDismissed -> _state.update { it.copy(showMicPermissionDialog = false) }
+            ChallengeDetailsAction.CameraPermissionDialogDismissed -> _state.update { it.copy(showCameraPermissionDialog = false) }
+            ChallengeDetailsAction.MicrophoneRowClicked -> _state.update { it.copy(showMicPermissionDialog = true, showCameraPermissionDialog = false) }
+            ChallengeDetailsAction.CameraRowClicked -> _state.update { it.copy(showMicPermissionDialog = true, showCameraPermissionDialog = true) }
         }
     }
 
@@ -62,9 +57,26 @@ class ChallengeDetailsViewModel @Inject constructor(
                     _state.update { it.copy(challenge = challenge, isLoading = false) }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false) }
-                    CareerPilotSnackbarController.show(error.toUIText())
+                    _state.update { it.copy(isLoading = false, error = error.toString()) }
                 }
+        }
+    }
+
+    private fun handleBegin() {
+        val challenge = _state.value.challenge ?: return
+        
+        if (!_state.value.isMicrophoneGranted) {
+            _state.update { it.copy(showMicPermissionDialog = true) }
+            return
+        }
+        
+        if (challenge.type == ChallengeType.VIDEO_AND_AUDIO && !_state.value.isCameraGranted) {
+            _state.update { it.copy(showCameraPermissionDialog = true) }
+            return
+        }
+
+        viewModelScope.launch {
+            _events.send(ChallengeDetailsEvent.NavigateToPractice(challenge))
         }
     }
 }

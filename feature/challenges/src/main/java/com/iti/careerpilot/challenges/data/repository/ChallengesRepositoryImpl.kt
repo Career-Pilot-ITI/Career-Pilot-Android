@@ -1,10 +1,10 @@
 package com.iti.careerpilot.challenges.data.repository
 
+import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.careerpilot.challenges.data.remote.ChallengesRemoteDataSource
 import com.iti.careerpilot.challenges.domain.repository.ChallengesRepository
 import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.Challenge
 import javax.inject.Inject
 
 class ChallengesRepositoryImpl @Inject constructor(

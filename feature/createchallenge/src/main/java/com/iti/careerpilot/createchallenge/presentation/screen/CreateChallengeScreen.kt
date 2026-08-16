@@ -72,6 +72,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.challengefirestore.ChallengeType
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
+import com.iti.careerpilot.challengefirestore.SeniorityLevel
+import com.iti.careerpilot.challengefirestore.getTitleRes
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
@@ -84,10 +88,6 @@ import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAc
 import com.iti.careerpilot.createchallenge.presentation.event.CreateChallengeEvent
 import com.iti.careerpilot.createchallenge.presentation.state.CreateChallengeState
 import com.iti.careerpilot.createchallenge.presentation.viewmodel.CreateChallengeViewModel
-import com.iti.core.model.ChallengeType
-import com.iti.core.model.ChallengeVisibility
-import com.iti.core.model.SeniorityLevel
-import com.iti.core.model.getTitleRes
 import kotlinx.coroutines.launch
 
 
@@ -114,12 +114,10 @@ fun CreateChallengeScreenRoot(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = if (state.isEditMode) "Edit Challenge" else stringResource(R.string.create_challenge_title),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+                title = { Text(
+                    text = if (state.isEditMode) stringResource(R.string.edit_challenge) else stringResource(R.string.create_challenge_title),
+                    fontWeight = FontWeight.Bold
+                ) },
                 navigationIcon = {
                     BackIconButton(onBack = { viewModel.onAction(CreateChallengeAction.OnBackClicked) })
                 },
@@ -135,11 +133,11 @@ fun CreateChallengeScreenRoot(
     }
 
     if (state.isLoading) {
-        LoadingDialog(title = "Loading Challenge...")
+        LoadingDialog(title = stringResource(R.string.loading_challenge))
     }
 
     if (state.isSubmitting) {
-        LoadingDialog(title = if (state.isEditMode) "Updating Challenge..." else stringResource(R.string.creating_challenge))
+        LoadingDialog(title = if (state.isEditMode) stringResource(R.string.updating_challenge) else stringResource(R.string.creating_challenge))
     }
 
     if (state.isSuccessDialogVisible && state.invitationCode != null) {
@@ -621,7 +619,7 @@ fun CreateChallengeScreenContent(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             CareerPilotButton(
-                text = if (state.isEditMode) "Save Changes" else stringResource(R.string.create_challenge_submit),
+                text = if (state.isEditMode) stringResource(R.string.save_changes) else stringResource(R.string.create_challenge_submit),
                 onClick = { onAction(CreateChallengeAction.OnSubmit) },
                 enabled = !state.isSubmitting
             )

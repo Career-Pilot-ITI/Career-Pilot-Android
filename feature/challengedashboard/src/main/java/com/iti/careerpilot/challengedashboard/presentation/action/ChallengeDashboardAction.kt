@@ -1,6 +1,7 @@
 package com.iti.careerpilot.challengedashboard.presentation.action
 
-import com.iti.core.model.ChallengeVisibility
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
+
 
 sealed interface ChallengeDashboardAction {
     data object Initial : ChallengeDashboardAction

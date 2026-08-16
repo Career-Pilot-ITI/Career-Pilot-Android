@@ -1,5 +1,6 @@
-package com.iti.core.model
+package com.iti.careerpilot.challengefirestore
 
+import com.iti.core.model.R
 import kotlinx.serialization.Serializable
 
 @Serializable

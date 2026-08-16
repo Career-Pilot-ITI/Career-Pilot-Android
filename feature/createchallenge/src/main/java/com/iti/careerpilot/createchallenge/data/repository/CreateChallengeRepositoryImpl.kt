@@ -1,12 +1,12 @@
 package com.iti.careerpilot.createchallenge.data.repository
 
+import com.iti.careerpilot.challengefirestore.Challenge
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
 import com.iti.careerpilot.createchallenge.data.remote.CreateChallengeRemoteDataSource
 import com.iti.careerpilot.createchallenge.domain.repository.CreateChallengeRepository
 import com.iti.common.error.FirebaseError
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.Challenge
-import com.iti.core.model.ChallengeVisibility
 import com.iti.core.model.Track
 import javax.inject.Inject
 
@@ -28,6 +28,10 @@ class CreateChallengeRepositoryImpl @Inject constructor(
 
     override suspend fun getChallenge(challengeId: String): CareerPilotResult<Challenge, FirebaseError> {
         return remoteDataSource.getChallenge(challengeId)
+    }
+
+    override suspend fun deleteChallenge(challengeId: String, visibility: ChallengeVisibility): CareerPilotResult<Unit, FirebaseError> {
+        return remoteDataSource.deleteChallenge(challengeId, visibility)
     }
 
     override fun generateChallengeId(visibility: ChallengeVisibility): String {

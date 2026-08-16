@@ -63,6 +63,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iti.careerpilot.challengefirestore.Challenge
+import com.iti.careerpilot.challengefirestore.SeniorityLevel
+import com.iti.careerpilot.challengefirestore.getTitleRes
 import com.iti.careerpilot.challenges.R
 import com.iti.careerpilot.challenges.presentation.action.ChallengesAction
 import com.iti.careerpilot.challenges.presentation.event.ChallengesEvent
@@ -72,9 +75,7 @@ import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
-import com.iti.core.model.Challenge
-import com.iti.core.model.SeniorityLevel
-import com.iti.core.model.getTitleRes
+
 
 
 @Composable

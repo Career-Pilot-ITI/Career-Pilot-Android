@@ -2,6 +2,10 @@ package com.iti.careerpilot.createchallenge.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.iti.careerpilot.challengefirestore.Challenge
+import com.iti.careerpilot.challengefirestore.ChallengeQuestion
+import com.iti.careerpilot.challengefirestore.ChallengeType
+import com.iti.careerpilot.challengefirestore.VideoAnalysisConfig
 import com.iti.careerpilot.createchallenge.R
 import com.iti.careerpilot.createchallenge.domain.repository.CreateChallengeRepository
 import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAction
@@ -13,11 +17,7 @@ import com.iti.common.snackbar.CareerPilotSnackbarController
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.datastore.repo.UserProfileRepo
-import com.iti.core.model.Challenge
-import com.iti.core.model.ChallengeQuestion
-import com.iti.core.model.ChallengeType
 import com.iti.core.model.Track
-import com.iti.core.model.VideoAnalysisConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.Channel
@@ -58,24 +58,14 @@ class CreateChallengeViewModel @Inject constructor(
             repository.getTracks()
                 .onSuccess { tracks ->
                     val tracksList = if (tracks.isEmpty()) getFakeTracks() else tracks
-                    _state.update {
-                        it.copy(
-                            tracks = tracksList.toImmutableList(),
-                            isLoadingTracks = false
-                        )
-                    }
+                    _state.update { it.copy(tracks = tracksList.toImmutableList(), isLoadingTracks = false) }
                     if (_state.value.selectedTrack == null) {
                         _state.update { it.copy(selectedTrack = tracksList.firstOrNull()) }
                     }
                 }
                 .onError { error ->
                     val fakeTracks = getFakeTracks()
-                    _state.update {
-                        it.copy(
-                            tracks = fakeTracks.toImmutableList(),
-                            isLoadingTracks = false
-                        )
-                    }
+                    _state.update { it.copy(tracks = fakeTracks.toImmutableList(), isLoadingTracks = false) }
                     if (_state.value.selectedTrack == null) {
                         _state.update { it.copy(selectedTrack = fakeTracks.firstOrNull()) }
                     }
@@ -86,13 +76,7 @@ class CreateChallengeViewModel @Inject constructor(
 
     private fun fetchExistingChallenge(challengeId: String) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isLoading = true,
-                    isEditMode = true,
-                    existingChallengeId = challengeId
-                )
-            }
+            _state.update { it.copy(isLoading = true, isEditMode = true, existingChallengeId = challengeId) }
             repository.getChallenge(challengeId)
                 .onSuccess { challenge ->
                     _state.update {
@@ -128,12 +112,7 @@ class CreateChallengeViewModel @Inject constructor(
             is CreateChallengeAction.Initial -> initialize(action.challengeId)
             is CreateChallengeAction.OnTrackSelected -> _state.update { it.copy(selectedTrack = action.track) }
             is CreateChallengeAction.OnVisibilityChanged -> _state.update { it.copy(visibility = action.visibility) }
-            is CreateChallengeAction.OnSeniorityLevelChanged -> _state.update {
-                it.copy(
-                    seniorityLevel = action.level
-                )
-            }
-
+            is CreateChallengeAction.OnSeniorityLevelChanged -> _state.update { it.copy(seniorityLevel = action.level) }
             is CreateChallengeAction.OnChallengeTypeChanged -> _state.update { it.copy(challengeType = action.type) }
             is CreateChallengeAction.OnPostureToggle -> _state.update { it.copy(analyzePosture = action.enabled) }
             is CreateChallengeAction.OnHandsToggle -> _state.update { it.copy(analyzeHands = action.enabled) }
@@ -142,11 +121,9 @@ class CreateChallengeViewModel @Inject constructor(
                 newQuestions[action.index] = action.text
                 _state.update { it.copy(questions = newQuestions.toImmutableList()) }
             }
-
             CreateChallengeAction.OnAddQuestion -> {
                 _state.update { it.copy(questions = (it.questions + "").toImmutableList()) }
             }
-
             is CreateChallengeAction.OnRemoveQuestion -> {
                 val questionText = _state.value.questions.getOrNull(action.index)
                 if (questionText.isNullOrBlank()) {
@@ -155,25 +132,17 @@ class CreateChallengeViewModel @Inject constructor(
                     _state.update { it.copy(questionToDeleteIndex = action.index) }
                 }
             }
-
             CreateChallengeAction.OnConfirmDeleteQuestion -> {
                 _state.value.questionToDeleteIndex?.let { removeQuestion(it) }
                 _state.update { it.copy(questionToDeleteIndex = null) }
             }
-
-            CreateChallengeAction.OnDismissDeleteConfirmation -> _state.update {
-                it.copy(
-                    questionToDeleteIndex = null
-                )
-            }
-
+            CreateChallengeAction.OnDismissDeleteConfirmation -> _state.update { it.copy(questionToDeleteIndex = null) }
             CreateChallengeAction.OnSubmit -> submitChallenge()
             CreateChallengeAction.OnDismissError -> _state.update { it.copy(error = null) }
             CreateChallengeAction.OnDismissSuccess -> {
                 _state.update { it.copy(isSuccessDialogVisible = false, invitationCode = null) }
                 viewModelScope.launch { _events.send(CreateChallengeEvent.NavigateToDashboard) }
             }
-
             CreateChallengeAction.OnBackClicked -> {
                 viewModelScope.launch { _events.send(CreateChallengeEvent.NavigateBack) }
             }
@@ -213,9 +182,7 @@ class CreateChallengeViewModel @Inject constructor(
             repository.validateQuestions(nonEmptyQuestions)
                 .onSuccess {
                     val userProfile = userProfileRepo.readUserProfile()
-                    val challengeId = current.existingChallengeId ?: repository.generateChallengeId(
-                        current.visibility
-                    )
+                    val challengeId = current.existingChallengeId ?: repository.generateChallengeId(current.visibility)
                     val challenge = Challenge(
                         id = challengeId,
                         creatorId = userProfile.id,
@@ -244,13 +211,7 @@ class CreateChallengeViewModel @Inject constructor(
 
                     repository.createChallenge(challenge)
                         .onSuccess {
-                            _state.update {
-                                it.copy(
-                                    isSubmitting = false,
-                                    isSuccessDialogVisible = true,
-                                    invitationCode = challengeId
-                                )
-                            }
+                            _state.update { it.copy(isSubmitting = false, isSuccessDialogVisible = true, invitationCode = challengeId) }
                         }
                         .onError { _ ->
                             _state.update { it.copy(isSubmitting = false) }

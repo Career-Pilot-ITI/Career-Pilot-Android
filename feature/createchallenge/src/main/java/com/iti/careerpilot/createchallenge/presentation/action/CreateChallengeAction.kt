@@ -1,8 +1,8 @@
 package com.iti.careerpilot.createchallenge.presentation.action
 
-import com.iti.core.model.ChallengeType
-import com.iti.core.model.ChallengeVisibility
-import com.iti.core.model.SeniorityLevel
+import com.iti.careerpilot.challengefirestore.ChallengeType
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
+import com.iti.careerpilot.challengefirestore.SeniorityLevel
 import com.iti.core.model.Track
 
 

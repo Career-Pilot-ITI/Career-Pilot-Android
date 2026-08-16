@@ -1,8 +1,8 @@
 package com.iti.careerpilot.challenges.data.remote
 
+import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.Challenge
 
 interface ChallengesRemoteDataSource {
     suspend fun getPublicChallenges(): CareerPilotResult<List<Challenge>, FirebaseError>

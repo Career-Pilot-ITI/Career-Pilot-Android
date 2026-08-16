@@ -1,6 +1,6 @@
 package com.iti.careerpilot.challenges.presentation.state
 
-import com.iti.core.model.Challenge
+import com.iti.careerpilot.challengefirestore.Challenge
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 

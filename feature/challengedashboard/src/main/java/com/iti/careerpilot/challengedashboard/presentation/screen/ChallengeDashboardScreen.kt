@@ -49,13 +49,13 @@ import com.iti.careerpilot.challengedashboard.presentation.action.ChallengeDashb
 import com.iti.careerpilot.challengedashboard.presentation.event.ChallengeDashboardEvent
 import com.iti.careerpilot.challengedashboard.presentation.state.ChallengeDashboardState
 import com.iti.careerpilot.challengedashboard.presentation.viewmodel.ChallengeDashboardViewModel
+import com.iti.careerpilot.challengefirestore.Challenge
+import com.iti.careerpilot.challengefirestore.ChallengeSession
+import com.iti.careerpilot.challengefirestore.getTitleRes
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
-import com.iti.core.model.Challenge
-import com.iti.core.model.ChallengeSession
-import com.iti.core.model.getTitleRes
 import java.text.SimpleDateFormat
 import java.util.Date
 

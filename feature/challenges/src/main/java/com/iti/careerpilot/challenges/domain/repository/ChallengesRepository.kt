@@ -1,8 +1,8 @@
 package com.iti.careerpilot.challenges.domain.repository
 
+import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
-import com.iti.core.model.Challenge
 
 interface ChallengesRepository {
     suspend fun getPublicChallenges(): CareerPilotResult<List<Challenge>, FirebaseError>

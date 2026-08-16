@@ -10,7 +10,5 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))
-    
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.firestore)
+    implementation(project(":core:challengefirestore"))
 }

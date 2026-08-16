@@ -6,6 +6,7 @@ import com.iti.careerpilot.challengedashboard.domain.repository.ChallengeDashboa
 import com.iti.careerpilot.challengedashboard.presentation.action.ChallengeDashboardAction
 import com.iti.careerpilot.challengedashboard.presentation.event.ChallengeDashboardEvent
 import com.iti.careerpilot.challengedashboard.presentation.state.ChallengeDashboardState
+import com.iti.careerpilot.challengefirestore.ChallengeVisibility
 import com.iti.common.result.onError
 import com.iti.common.result.onSuccess
 import com.iti.common.snackbar.CareerPilotSnackbarController
@@ -109,7 +110,7 @@ class ChallengeDashboardViewModel @Inject constructor(
 
     private fun deleteChallenge(
         challengeId: String,
-        visibility: com.iti.core.model.ChallengeVisibility
+        visibility: ChallengeVisibility
     ) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }

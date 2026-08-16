@@ -46,13 +46,13 @@ import com.iti.careerpilot.challengedetails.presentation.action.ChallengeDetails
 import com.iti.careerpilot.challengedetails.presentation.event.ChallengeDetailsEvent
 import com.iti.careerpilot.challengedetails.presentation.state.ChallengeDetailsState
 import com.iti.careerpilot.challengedetails.presentation.viewmodel.ChallengeDetailsViewModel
+import com.iti.careerpilot.challengefirestore.ChallengeType
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.common.PermissionsDialog
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
-import com.iti.core.model.ChallengeType
 
 
 @Composable
@@ -101,7 +101,7 @@ fun ChallengeDetailsScreenRoot(
         }
     }
 
-    if (state.isPermissionDialogVisible) {
+    if (state.showMicPermissionDialog) {
         PermissionsDialog(
             title = stringResource(R.string.challenge_details_mic_permission_title),
             text = stringResource(R.string.challenge_details_mic_permission_text),
