@@ -2,6 +2,7 @@ package com.iti.careerpilot.challenges.data.remote
 
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.toObjects
 import com.iti.common.error.FirebaseError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.safeFirebaseCall
@@ -18,7 +19,7 @@ class ChallengesRemoteDataSourceImpl @Inject constructor() : ChallengesRemoteDat
         val snapshot = firestore.collection(FirestoreCollections.PUBLIC_CHALLENGES)
             .get()
             .await()
-        snapshot.toObjects(Challenge::class.java)
+        snapshot.toObjects<Challenge>()
     }
 
     override suspend fun checkChallengeExists(challengeId: String): CareerPilotResult<Boolean, FirebaseError> = safeFirebaseCall {

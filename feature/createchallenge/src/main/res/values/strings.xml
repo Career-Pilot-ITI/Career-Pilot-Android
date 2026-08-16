@@ -34,4 +34,8 @@
     <string name="enter_technical_question">Enter technical question</string>
     <string name="question">Question %1$d</string>
     <string name="remove_question">Remove question</string>
+    <string name="edit_challenge">Edit Challenge</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="loading_challenge">Loading Challenge…</string>
+    <string name="updating_challenge">Updating Challenge…</string>
 </resources>

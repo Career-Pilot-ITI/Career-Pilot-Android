@@ -34,4 +34,8 @@
     <string name="enter_technical_question">ادخل سؤال تقنى</string>
     <string name="question">السؤال %1$d</string>
     <string name="remove_question">ازالة السؤال</string>
+    <string name="edit_challenge">تعديل التحدي</string>
+    <string name="save_changes">حفظ التغييرات</string>
+    <string name="loading_challenge">جاري تحميل التحدي…</string>
+    <string name="updating_challenge">جاري تحديث التحدي…</string>
 </resources>
