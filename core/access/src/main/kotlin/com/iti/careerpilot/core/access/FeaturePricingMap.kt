@@ -10,9 +10,9 @@ import com.iti.core.model.FeatureKey
  * - Voice Practice Mode: 5 Coins
  * - Video Interview: 15 Coins
  * - Quizzes: 10 Coins
- * - ATS Features: 2 Coins
- * - CV AI Analysis: 5 Coins
- * - Cover Letter: 2 Coins
+ * - ATS Features: 5 Coins
+ * - CV AI Analysis: 15 Coins
+ * - Cover Letter: 5 Coins
  * - Job Parse: 1 Coin
  * - Export PDF Report: 0 Coins
  * - Advanced Reports: 0 Coins
@@ -24,9 +24,9 @@ object FeaturePricingMap {
         FeatureKey.VoicePracticeMode to 5,
         FeatureKey.VideoInterview to 15,
         FeatureKey.Quizzes to 10,
-        FeatureKey.AtsFeatures to 2,
-        FeatureKey.CvAiAnalysis to 5,
-        FeatureKey.CoverLetter to 2,
+        FeatureKey.AtsFeatures to 5,
+        FeatureKey.CvAiAnalysis to 15,
+        FeatureKey.CoverLetter to 5,
         FeatureKey.JobParse to 1,
         FeatureKey.ExportPdfReport to 0,
         FeatureKey.AdvancedReports to 0,
