@@ -296,7 +296,7 @@ private fun ChallengesEmptyState(hasQuery: Boolean, modifier: Modifier = Modifie
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = if (hasQuery) Icons.Default.SearchOff else Icons.Default.Dashboard,
+                imageVector = Icons.Default.SearchOff,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(48.dp)
