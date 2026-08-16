@@ -32,9 +32,11 @@ import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillStatus
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
+import com.iti.core.model.FeatureKey
 
 @Composable
 fun ScoringContent(
@@ -183,7 +185,10 @@ fun ScoringContent(
                         )
                     },
                 )
-                com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge(coinCost = 2, compact = true)
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.CoverLetter),
+                    compact = true,
+                )
             }
         }
         item {

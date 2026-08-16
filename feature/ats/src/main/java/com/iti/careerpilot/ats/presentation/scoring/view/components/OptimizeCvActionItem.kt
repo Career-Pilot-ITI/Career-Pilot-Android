@@ -22,9 +22,11 @@ import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
+import com.iti.core.model.FeatureKey
 
 @Composable
 fun OptimizeCvActionItem(
@@ -69,7 +71,10 @@ fun OptimizeCvActionItem(
                         )
                     },
                 )
-                FeaturePricingBadge(coinCost = 5, compact = true)
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.CvAiAnalysis),
+                    compact = true,
+                )
             }
         }
         optimizationError?.let { error ->

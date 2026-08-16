@@ -85,7 +85,7 @@ class CoverLetterViewModelTest {
 
             assertEquals(0, repository.generateCalls)
             assertTrue(viewModel.state.value.showCoinTopUpSheet)
-            assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+            assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
         }
 
     @Test
@@ -102,7 +102,7 @@ class CoverLetterViewModelTest {
             assertTrue(viewModel.state.value.showCoinTopUpSheet)
             assertTrue(viewModel.state.value.hasInsufficientCoins)
             assertFalse(viewModel.state.value.showGateSheet)
-            assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+            assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
         }
 
     @Test

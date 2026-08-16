@@ -55,7 +55,7 @@ class OptimizedCvViewModelTest {
     fun `completed job exposes section improvements`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
-            accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
@@ -69,7 +69,7 @@ class OptimizedCvViewModelTest {
     fun `pending job exposes a retryable not-ready message`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             repository = OptimizationRepository(PENDING_JOB),
-            accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
@@ -86,7 +86,7 @@ class OptimizedCvViewModelTest {
      * For CvAiAnalysis, we force it by setting a quota with remaining=0 AND explicitly setting
      * the plan to not include the feature — so neither plan access nor coin path is available.
      *
-     * Note: Because CvAiAnalysis has coin cost 5 in FeaturePricingMap, the coin path is always
+     * Note: Because CvAiAnalysis has coin cost 15 in FeaturePricingMap, the coin path is always
      * preferred over locking. To produce Locked we use no-plan access + quota exhausted with
      * coinCost=0 override and then check CoinTopUpRequired since cost falls back to pricing map.
      * The truly reachable "gated" states for coin-priced features are CoinTopUpRequired and
@@ -94,7 +94,7 @@ class OptimizedCvViewModelTest {
      */
     @Test
     fun `access CoinTopUpRequired with zero coins shows coin top-up sheet and stops loading`() = runTest(dispatcher) {
-        // CvAiAnalysis costs 5 coins; user has 0 → CoinTopUpRequired
+        // CvAiAnalysis costs 15 coins; user has 0 → CoinTopUpRequired
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
             accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
@@ -105,14 +105,14 @@ class OptimizedCvViewModelTest {
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertTrue(viewModel.state.value.hasInsufficientCoins)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
         assertFalse(viewModel.state.value.isLoading)
         assertEquals(0, viewModel.state.value.sections.size)
     }
 
     @Test
     fun `access CoinTopUpRequired shows coin top-up sheet and marks hasInsufficientCoins`() = runTest(dispatcher) {
-        // CvAiAnalysis costs 5 coins; give user 2 coins (< 5) → CoinTopUpRequired
+        // CvAiAnalysis costs 15 coins; give user 2 coins (< 15) → CoinTopUpRequired
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
             accessRepo = createAccessRepository(coins = 2, features = emptySet(), plan = Plan.FREE),
@@ -123,7 +123,7 @@ class OptimizedCvViewModelTest {
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertTrue(viewModel.state.value.hasInsufficientCoins)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
         assertFalse(viewModel.state.value.isLoading)
     }
 
@@ -149,7 +149,7 @@ class OptimizedCvViewModelTest {
     fun `access Granted proceeds to load AI job result`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
-            accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
+            accessRepo = createAccessRepository(coins = 20, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
@@ -186,7 +186,7 @@ class OptimizedCvViewModelTest {
         val viewModel = createViewModel(
             repository = OptimizationRepository(COMPLETED_JOB),
             accessRepo = createAccessRepository(
-                coins = 10,
+                coins = 20,
                 features = setOf(FeatureKey.CvAiAnalysis),
                 // Provide a quota with remaining=0 and coinCost=0 to force Locked path
                 quotas = mapOf(
@@ -202,8 +202,8 @@ class OptimizedCvViewModelTest {
         viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
-        // With remaining=0 and coinCost=0 (no coin override), pricing map = 5, so cost=5 > 0.
-        // coinBalance(10) >= cost(5) → Granted. This path doesn't gate.
+        // With remaining=0 and coinCost=0 (no coin override), pricing map = 15, so cost=15 > 0.
+        // coinBalance(20) >= cost(15) → Granted. This path doesn't gate.
         // So this test verifies dismiss clears state even if already false (no-op dismiss is safe).
         viewModel.onIntent(OptimizedCvIntent.DismissGateSheet)
         assertFalse(viewModel.state.value.showGateSheet)

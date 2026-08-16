@@ -45,7 +45,9 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.CoinTopUpBottomSheet
 import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.iti.careerpilot.core.access.FeaturePricingMap
 import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
+import com.iti.core.model.FeatureKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -267,7 +269,10 @@ private fun AtsFeaturesPricingCard(modifier: Modifier = Modifier) {
                     text = stringResource(R.string.ats_score_cv),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                FeaturePricingBadge(coinCost = 2, compact = true)
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.AtsFeatures),
+                    compact = true,
+                )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             Row(
@@ -279,7 +284,10 @@ private fun AtsFeaturesPricingCard(modifier: Modifier = Modifier) {
                     text = stringResource(R.string.ats_optimize_cv),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                FeaturePricingBadge(coinCost = 5, compact = true)
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.CvAiAnalysis),
+                    compact = true,
+                )
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             Row(
@@ -291,7 +299,10 @@ private fun AtsFeaturesPricingCard(modifier: Modifier = Modifier) {
                     text = stringResource(R.string.cover_letter),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                FeaturePricingBadge(coinCost = 2, compact = true)
+                FeaturePricingBadge(
+                    coinCost = FeaturePricingMap.coinCost(FeatureKey.CoverLetter),
+                    compact = true,
+                )
             }
         }
     }

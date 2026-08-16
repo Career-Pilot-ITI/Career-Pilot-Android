@@ -104,7 +104,7 @@ class ScoringViewModelTest {
 
         assertEquals(0, repository.scoreCalls)
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
@@ -140,7 +140,7 @@ class ScoringViewModelTest {
     fun `optimize with sufficient coins starts background job and emits tracking effect`() = runTest(dispatcher) {
         val repository = ScoringRepository()
         val accessRepo = createAccessRepository(
-            coins = 10,
+            coins = 20,
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
@@ -171,7 +171,7 @@ class ScoringViewModelTest {
 
         assertEquals(0, repository.optimizeCalls)
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
@@ -193,15 +193,15 @@ class ScoringViewModelTest {
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertTrue(viewModel.state.value.hasInsufficientCoins)
         assertFalse(viewModel.state.value.showGateSheet)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
     fun `optimize with sufficient coins via coin fallback is granted`() = runTest(dispatcher) {
         val repository = ScoringRepository()
         val accessRepo = createAccessRepository(
-            coins = 10,
-            features = setOf(FeatureKey.AtsFeatures), // Missing CvAiAnalysis, fallback to 5 coins
+            coins = 20,
+            features = setOf(FeatureKey.AtsFeatures), // Missing CvAiAnalysis, fallback to 15 coins
             plan = Plan.FREE,
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
@@ -237,7 +237,7 @@ class ScoringViewModelTest {
     private fun createViewModel(
         repository: ScoringRepository,
         state: SavedStateHandle,
-        accessRepository: FakeAccessRepository = createAccessRepository(10, setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis)),
+        accessRepository: FakeAccessRepository = createAccessRepository(20, setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis)),
     ) = ScoringViewModel(
         getWorkspace = GetWorkspaceUseCase(repository),
         scoreCv = ScoreCvUseCase(repository),

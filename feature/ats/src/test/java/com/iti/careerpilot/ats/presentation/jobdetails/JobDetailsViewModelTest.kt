@@ -86,7 +86,7 @@ class JobDetailsViewModelTest {
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
@@ -101,7 +101,7 @@ class JobDetailsViewModelTest {
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
         assertFalse(viewModel.state.value.showGateSheet)
-        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
