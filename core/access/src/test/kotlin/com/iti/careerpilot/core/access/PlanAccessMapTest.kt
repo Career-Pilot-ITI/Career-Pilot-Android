@@ -61,8 +61,8 @@ class PlanAccessMapTest {
     }
 
     @Test
-    fun `PLUS plan does NOT include Quizzes`() {
-        assertFalse(FeatureKey.Quizzes in PlanAccessMap.featuresFor(Plan.PLUS))
+    fun `PLUS plan includes Quizzes`() {
+        assertTrue(FeatureKey.Quizzes in PlanAccessMap.featuresFor(Plan.PLUS))
     }
 
     @Test
@@ -87,8 +87,8 @@ class PlanAccessMapTest {
     }
 
     @Test
-    fun `minimumPlanFor Quizzes is MAX`() {
-        assertEquals(Plan.MAX, PlanAccessMap.minimumPlanFor(FeatureKey.Quizzes))
+    fun `minimumPlanFor Quizzes is PLUS`() {
+        assertEquals(Plan.PLUS, PlanAccessMap.minimumPlanFor(FeatureKey.Quizzes))
     }
 
     @Test

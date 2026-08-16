@@ -14,6 +14,7 @@ object PlanAccessMap {
             FeatureKey.VoicePracticeMode,
             FeatureKey.AtsFeatures,
             FeatureKey.CvAiAnalysis,
+            FeatureKey.Quizzes,
             FeatureKey.ExportPdfReport,
         ),
         Plan.MAX to setOf(

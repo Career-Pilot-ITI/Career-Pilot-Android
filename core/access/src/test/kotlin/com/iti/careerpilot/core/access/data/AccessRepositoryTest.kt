@@ -167,7 +167,7 @@ class AccessRepositoryTest {
         assertTrue(FeatureKey.AtsFeatures in domain.features)
         assertTrue(FeatureKey.CvAiAnalysis in domain.features)
         assertFalse(FeatureKey.VideoInterview in domain.features)
-        assertFalse(FeatureKey.Quizzes in domain.features)
+        assertTrue(FeatureKey.Quizzes in domain.features)
     }
 
     @Test

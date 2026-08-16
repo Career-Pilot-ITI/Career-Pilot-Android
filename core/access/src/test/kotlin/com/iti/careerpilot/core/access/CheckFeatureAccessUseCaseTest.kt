@@ -140,7 +140,7 @@ class CheckFeatureAccessUseCaseTest {
             quotas = mapOf(FeatureKey.MockInterviews to quota),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 2 // MockInterviews costs 5 coins in FeaturePricingMap
+            coinBalance = 2 // MockInterviews costs 10 coins in FeaturePricingMap
         )
 
         val result = useCase(FeatureKey.MockInterviews).first()
@@ -148,7 +148,7 @@ class CheckFeatureAccessUseCaseTest {
         assertTrue(result is FeatureAccess.CoinTopUpRequired)
         val topUp = result as FeatureAccess.CoinTopUpRequired
         assertEquals(FeatureKey.MockInterviews, topUp.feature)
-        assertEquals(5, topUp.coinCost)
+        assertEquals(10, topUp.coinCost)
         assertEquals(2, topUp.currentCoins)
     }
 
@@ -166,7 +166,7 @@ class CheckFeatureAccessUseCaseTest {
             quotas = mapOf(FeatureKey.MockInterviews to quota),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 10 // MockInterviews costs 5 coins in FeaturePricingMap
+            coinBalance = 10 // MockInterviews costs 10 coins in FeaturePricingMap
         )
 
         val result = useCase(FeatureKey.MockInterviews).first()
@@ -209,14 +209,14 @@ class CheckFeatureAccessUseCaseTest {
             quotas = emptyMap(),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 4 // Quizzes costs 10 coins in FeaturePricingMap
+            coinBalance = 4 // VoicePracticeMode costs 10 coins in FeaturePricingMap
         )
 
-        val result = useCase(FeatureKey.Quizzes).first()
+        val result = useCase(FeatureKey.VoicePracticeMode).first()
 
         assertTrue(result is FeatureAccess.CoinTopUpRequired)
         val topUp = result as FeatureAccess.CoinTopUpRequired
-        assertEquals(FeatureKey.Quizzes, topUp.feature)
+        assertEquals(FeatureKey.VoicePracticeMode, topUp.feature)
         assertEquals(10, topUp.coinCost)
         assertEquals(4, topUp.currentCoins)
     }
@@ -229,10 +229,10 @@ class CheckFeatureAccessUseCaseTest {
             quotas = emptyMap(),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 15 // Quizzes costs 10 coins in FeaturePricingMap
+            coinBalance = 15 // VoicePracticeMode costs 10 coins in FeaturePricingMap
         )
 
-        val result = useCase(FeatureKey.Quizzes).first()
+        val result = useCase(FeatureKey.VoicePracticeMode).first()
 
         assertTrue(result is FeatureAccess.Granted)
     }
@@ -276,7 +276,7 @@ class CheckFeatureAccessUseCaseTest {
 
     @Test
     fun `feature not in plan with sufficient coins returns Granted via coin fallback`() = runTest {
-        // FREE plan does not include Quizzes, but user has 10 coins (Quizzes cost = 10)
+        // FREE plan does not include VoicePracticeMode, but user has 10 coins (VoicePracticeMode cost = 10)
         fakeRepo.mutableState.value = AccessState(
             plan = Plan.FREE,
             features = PlanAccessMap.featuresFor(Plan.FREE),
@@ -286,7 +286,7 @@ class CheckFeatureAccessUseCaseTest {
             coinBalance = 10
         )
 
-        val result = useCase(FeatureKey.Quizzes).first()
+        val result = useCase(FeatureKey.VoicePracticeMode).first()
 
         assertTrue(result is FeatureAccess.Granted)
         assertEquals(null, (result as FeatureAccess.Granted).quota)
@@ -294,7 +294,7 @@ class CheckFeatureAccessUseCaseTest {
 
     @Test
     fun `feature not in plan with insufficient coins returns CoinTopUpRequired`() = runTest {
-        // FREE plan does not include Quizzes, user has 5 coins (Quizzes cost = 10)
+        // FREE plan does not include VoicePracticeMode, user has 5 coins (VoicePracticeMode cost = 10)
         fakeRepo.mutableState.value = AccessState(
             plan = Plan.FREE,
             features = PlanAccessMap.featuresFor(Plan.FREE),
@@ -304,11 +304,11 @@ class CheckFeatureAccessUseCaseTest {
             coinBalance = 5
         )
 
-        val result = useCase(FeatureKey.Quizzes).first()
+        val result = useCase(FeatureKey.VoicePracticeMode).first()
 
         assertTrue(result is FeatureAccess.CoinTopUpRequired)
         val topUp = result as FeatureAccess.CoinTopUpRequired
-        assertEquals(FeatureKey.Quizzes, topUp.feature)
+        assertEquals(FeatureKey.VoicePracticeMode, topUp.feature)
         assertEquals(10, topUp.coinCost)
         assertEquals(5, topUp.currentCoins)
     }
@@ -333,7 +333,7 @@ class CheckFeatureAccessUseCaseTest {
 
     @Test
     fun `quota exhausted feature with exact coins returns Granted via coin fallback`() = runTest {
-        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 5, coinBalance = 5
+        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 10, coinBalance = 10
         val quota = FeatureQuota(
             feature = FeatureKey.MockInterviews,
             remaining = 0,
@@ -346,7 +346,7 @@ class CheckFeatureAccessUseCaseTest {
             quotas = mapOf(FeatureKey.MockInterviews to quota),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 5
+            coinBalance = 10
         )
 
         val result = useCase(FeatureKey.MockInterviews).first()
@@ -357,7 +357,7 @@ class CheckFeatureAccessUseCaseTest {
 
     @Test
     fun `quota exhausted feature with insufficient coins returns CoinTopUpRequired via coin fallback`() = runTest {
-        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 5, coinBalance = 2
+        // PLUS plan includes MockInterviews, quota remaining = 0, MockInterviews cost = 10, coinBalance = 2
         val quota = FeatureQuota(
             feature = FeatureKey.MockInterviews,
             remaining = 0,
@@ -378,7 +378,7 @@ class CheckFeatureAccessUseCaseTest {
         assertTrue(result is FeatureAccess.CoinTopUpRequired)
         val topUp = result as FeatureAccess.CoinTopUpRequired
         assertEquals(FeatureKey.MockInterviews, topUp.feature)
-        assertEquals(5, topUp.coinCost)
+        assertEquals(10, topUp.coinCost)
         assertEquals(2, topUp.currentCoins)
     }
 }
