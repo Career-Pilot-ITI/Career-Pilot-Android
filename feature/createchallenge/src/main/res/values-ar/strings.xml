@@ -38,4 +38,5 @@
     <string name="save_changes">حفظ التغييرات</string>
     <string name="loading_challenge">جاري تحميل التحدي…</string>
     <string name="updating_challenge">جاري تحديث التحدي…</string>
+    <string name="create_challenge_error_max_plan_required">إنشاء التحديات يتطلب خطة Max. يرجى الترقية للمتابعة.</string>
 </resources>
