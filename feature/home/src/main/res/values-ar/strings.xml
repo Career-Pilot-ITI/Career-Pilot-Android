@@ -48,6 +48,7 @@
     <!-- ATS job match card -->
     <string name="home_ats_job_match">مطابقة الوظائف</string>
     <string name="home_ats_new">جديد</string>
+    <string name="home_ats_plus">بلس</string>
     <string name="home_ats_subtitle">ألصق رابط وظيفة · اكتشف مدى توافق سيرتك الذاتية</string>
 
     <!-- Available interviews -->

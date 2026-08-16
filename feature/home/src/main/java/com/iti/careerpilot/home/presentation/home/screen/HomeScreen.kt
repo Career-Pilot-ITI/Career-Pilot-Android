@@ -208,6 +208,7 @@ fun HomeScreen(
 
                     item {
                         AtsJobMatchCard(
+                            isLocked = !state.isSubscribed,
                             onClick = { onIntent(HomeIntent.AtsJobMatchClicked) },
                             modifier = Modifier.padding(horizontal = 20.dp),
                         )

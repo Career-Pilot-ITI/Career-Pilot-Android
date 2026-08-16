@@ -260,6 +260,91 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun `AtsJobMatchClicked when tier is FREE emits NavigateToPlansPaywall with showMySubscription false`() = runTest {
+        val fakeAccessRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.FREE,
+                features = PlanAccessMap.featuresFor(Plan.FREE),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 0,
+            )
+        )
+        val viewModel = createViewModel(accessRepository = fakeAccessRepo)
+        testScheduler.advanceUntilIdle()
+
+        val events = mutableListOf<HomeEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.events.toList(events)
+        }
+
+        viewModel.onIntent(HomeIntent.AtsJobMatchClicked)
+        testScheduler.advanceUntilIdle()
+
+        val event = events.filterIsInstance<HomeEffect.NavigateToPlansPaywall>().firstOrNull()
+        assertTrue("Expected NavigateToPlansPaywall event", event != null)
+        assertFalse(event!!.showMySubscription)
+        job.cancel()
+    }
+
+    @Test
+    fun `AtsJobMatchClicked when tier is PLUS emits NavigateToAts`() = runTest {
+        val fakeAccessRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.PLUS,
+                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 100,
+            )
+        )
+        val viewModel = createViewModel(accessRepository = fakeAccessRepo)
+        testScheduler.advanceUntilIdle()
+
+        val events = mutableListOf<HomeEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.events.toList(events)
+        }
+
+        viewModel.onIntent(HomeIntent.AtsJobMatchClicked)
+        testScheduler.advanceUntilIdle()
+
+        val event = events.filterIsInstance<HomeEffect.NavigateToAts>().firstOrNull()
+        assertTrue("Expected NavigateToAts event", event != null)
+        job.cancel()
+    }
+
+    @Test
+    fun `AtsJobMatchClicked when tier is MAX emits NavigateToAts`() = runTest {
+        val fakeAccessRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 500,
+            )
+        )
+        val viewModel = createViewModel(accessRepository = fakeAccessRepo)
+        testScheduler.advanceUntilIdle()
+
+        val events = mutableListOf<HomeEffect>()
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.events.toList(events)
+        }
+
+        viewModel.onIntent(HomeIntent.AtsJobMatchClicked)
+        testScheduler.advanceUntilIdle()
+
+        val event = events.filterIsInstance<HomeEffect.NavigateToAts>().firstOrNull()
+        assertTrue("Expected NavigateToAts event", event != null)
+        job.cancel()
+    }
+
+    @Test
     fun `CoinsClicked emits NavigateToCoinsPaywall event`() = runTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()

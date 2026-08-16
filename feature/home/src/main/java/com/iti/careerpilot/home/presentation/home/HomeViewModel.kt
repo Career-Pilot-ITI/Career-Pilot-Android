@@ -91,7 +91,13 @@ class HomeViewModel @Inject constructor(
 
             HomeIntent.CoinsClicked -> sendEvent(HomeEffect.NavigateToCoinsPaywall)
             HomeIntent.ScoreCardClicked -> sendEvent(HomeEffect.NavigateToReports)
-            HomeIntent.AtsJobMatchClicked -> sendEvent(HomeEffect.NavigateToAts)
+            HomeIntent.AtsJobMatchClicked -> {
+                if (_state.value.isSubscribed) {
+                    sendEvent(HomeEffect.NavigateToAts)
+                } else {
+                    sendEvent(HomeEffect.NavigateToPlansPaywall(showMySubscription = false))
+                }
+            }
             HomeIntent.SeeAllSessionsClicked -> sendEvent(HomeEffect.NavigateToReports)
             HomeIntent.SeeAllInterviewsClicked -> sendEvent(HomeEffect.NavigateToInterviews)
 

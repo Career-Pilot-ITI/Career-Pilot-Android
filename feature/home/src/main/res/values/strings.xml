@@ -44,6 +44,7 @@
     <!-- ATS job match card -->
     <string name="home_ats_job_match">ATS Job Match</string>
     <string name="home_ats_new">NEW</string>
+    <string name="home_ats_plus">PLUS</string>
     <string name="home_ats_subtitle">Paste a job link · See how your CV scores</string>
 
     <!-- Available interviews -->
