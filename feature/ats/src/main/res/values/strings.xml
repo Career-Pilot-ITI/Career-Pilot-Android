@@ -13,10 +13,11 @@
     <string name="ats_supported_job_sites">Supports LinkedIn, Indeed, Wuzzuf, Glassdoor, and direct job-page URLs.</string>
     <string name="ats_cv_on_file">CV on File</string>
     <string name="ats_current_cv">Current CV</string>
+    <string name="ats_missing_cv_title">No CV on your profile</string>
+    <string name="ats_missing_cv_message">Add your CV from Edit Profile before comparing it with a job.</string>
+    <string name="ats_open_edit_profile">Open Edit Profile</string>
     <string name="ats_cv_size">%1$d KB · synchronized</string>
     <string name="ats_check_cv_icon">Check CV Icon</string>
-    <string name="ats_upload_your_cv">Upload your CV</string>
-    <string name="ats_pdf_limit">PDF · Max 10 MiB</string>
     <string name="ats_share_icon">Fast Share Icon</string>
     <string name="ats_share_tip"><b>Faster</b>: In LinkedIn or any job app, <b>tap Share → CareerPilot</b>. The link is captured automatically.</string>
     <string name="ats_compare_now">Compare Now</string>
@@ -24,7 +25,6 @@
     <string name="ats_importing_details">Reading job details…</string>
     <string name="ats_preparing_workspace">Preparing your workspace…</string>
     <string name="ats_invalid_shared_link">The shared content doesn’t contain a valid HTTPS job link.</string>
-    <string name="ats_cv_updated">Your CV is synchronized and ready to compare.</string>
     <string name="ats_back">Back</string>
     <string name="ats_cover_letter_edit_icon">Cover Letter Edit Icon</string>
     <string name="ats_cover_letter_copy_icon">Cover Letter Copy Icon</string>

@@ -1,11 +1,10 @@
 package com.iti.careerpilot.ats.presentation.entry.view
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -43,6 +42,7 @@ import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
+import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
 import com.iti.common.snackbar.CareerPilotSnackbarController
@@ -50,14 +50,12 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
-private const val PDF_MIME_TYPE = "application/pdf"
-
-
 @Composable
 fun AtsEntryRoot(
     initialSharedText: String?,
     onSharedTextConsumed: () -> Unit,
     onJobDetailsRequested: (Long) -> Unit,
+    onEditProfileRequested: () -> Unit,
     viewModel: AtsEntryViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -82,7 +80,7 @@ fun AtsEntryRoot(
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.effects.collect { effect ->
                 when (effect) {
-                    AtsEntryEffect.OpenPdfPicker -> launcher.launch(PDF_MIME_TYPE)
+                    AtsEntryEffect.NavigateToEditProfile -> onEditProfileRequested()
                     is AtsEntryEffect.NavigateToJobDetails -> onJobDetailsRequested(effect.workspaceId)
                     is AtsEntryEffect.ShowMessage -> CareerPilotSnackbarController.show(effect.message)
                 }
@@ -197,21 +195,44 @@ private fun CvUploadSection(
 ) {
     val fileName by rememberUiStateValue(stateProvider) { it.cvFileName }
     val fileSizeBytes by rememberUiStateValue(stateProvider) { it.cvSizeBytes }
-    val isUploadingCv by rememberUiStateValue(stateProvider) { it.isUploadingCv }
     val hasSynchronizedCv by rememberUiStateValue(stateProvider) { it.hasSynchronizedCv }
-    val uploadProgress by rememberUiStateValue(stateProvider) { it.uploadProgress }
 
-    CvUploadCard(
-        fileName = fileName.takeIf(String::isNotBlank),
-        fileSizeBytes = fileSizeBytes,
-        stage = when {
-            isUploadingCv -> CvUploadCardStage.UPLOADING
-            hasSynchronizedCv -> CvUploadCardStage.UPLOADED
-            else -> CvUploadCardStage.EMPTY
-        },
-        uploadProgress = uploadProgress,
-        onClick = { onIntent(AtsEntryIntent.SelectCvClicked) },
-    )
+    if (hasSynchronizedCv) {
+        CvUploadCard(
+            fileName = fileName.takeIf(String::isNotBlank)
+                ?: stringResource(R.string.ats_current_cv),
+            fileSizeBytes = fileSizeBytes,
+            stage = CvUploadCardStage.UPLOADED,
+            uploadProgress = 100,
+            onClick = {},
+            enabled = false,
+        )
+    } else {
+        CareerPilotCard(
+            useShadow = false,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.ats_missing_cv_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = stringResource(R.string.ats_missing_cv_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                CareerPilotButton(
+                    text = stringResource(R.string.ats_open_edit_profile),
+                    onClick = { onIntent(AtsEntryIntent.EditProfileClicked) },
+                )
+            }
+        }
+    }
 }
 
 @Composable

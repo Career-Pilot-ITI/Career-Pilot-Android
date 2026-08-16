@@ -12,10 +12,11 @@
     <string name="ats_supported_job_sites">يدعم LinkedIn وIndeed وWuzzuf وGlassdoor وروابط صفحات الوظائف المباشرة.</string>
     <string name="ats_cv_on_file">السيرة الذاتية الحالية</string>
     <string name="ats_current_cv">السيرة الذاتية الحالية</string>
+    <string name="ats_missing_cv_title">لا توجد سيرة ذاتية في ملفك الشخصي</string>
+    <string name="ats_missing_cv_message">أضف سيرتك الذاتية من تعديل الملف الشخصي قبل مقارنتها بالوظيفة.</string>
+    <string name="ats_open_edit_profile">فتح تعديل الملف الشخصي</string>
     <string name="ats_cv_size">%1$d كيلوبايت · متزامنة</string>
     <string name="ats_check_cv_icon">علامة صح للسيرة الذاتية</string>
-    <string name="ats_upload_your_cv">ارفع سيرتك الذاتية</string>
-    <string name="ats_pdf_limit">PDF · بحد أقصى 10 ميبيبايت</string>
     <string name="ats_share_icon">علامة مشاركة سريعة</string>
     <string name="ats_share_tip">أسرع: من LinkedIn أو أي تطبيق وظائف اضغط مشاركة ← CareerPilot وسيُلتقط الرابط تلقائيًا.</string>
     <string name="ats_compare_now">قارن الآن</string>
@@ -23,7 +24,6 @@
     <string name="ats_importing_details">جارٍ قراءة تفاصيل الوظيفة…</string>
     <string name="ats_preparing_workspace">جارٍ تجهيز مساحة العمل…</string>
     <string name="ats_invalid_shared_link">لا يحتوي المحتوى المشارك على رابط وظيفة HTTPS صالح.</string>
-    <string name="ats_cv_updated">تمت مزامنة سيرتك الذاتية وأصبحت جاهزة للمقارنة.</string>
     <string name="ats_back">رجوع</string>
     <string name="ats_cover_letter_edit_icon">علامة تعديل خطاب التقديم للوظيفة</string>
     <string name="ats_cover_letter_copy_icon">علامة نسخ خطاب التقديم للوظيفة</string>
