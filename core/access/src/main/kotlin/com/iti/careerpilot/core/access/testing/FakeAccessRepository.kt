@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * A test fake of [AccessRepository] backed by a [MutableStateFlow].
  *
  * Tests can manipulate [mutableState] directly to control what [accessState]
- * emits, and inspect [refreshCount] / [lastDeductedAmount] to verify
- * interactions.
+ * emits, and inspect [refreshCount] to verify interactions.
  */
 class FakeAccessRepository(
     initialState: AccessState = AccessState.Free
@@ -29,20 +28,9 @@ class FakeAccessRepository(
     /** Result returned by the next [refresh] call. Defaults to success. */
     var refreshResult: Result<Unit> = Result.success(Unit)
 
-    /** Last amount passed to [deductCoins], or `null` if never called. */
-    var lastDeductedAmount: Int? = null
-        private set
-
     override suspend fun refresh(): Result<Unit> {
         refreshCount++
         return refreshResult
-    }
-
-    override suspend fun deductCoins(amount: Int) {
-        lastDeductedAmount = amount
-        val current = mutableState.value
-        val updatedBalance = (current.coinBalance - amount).coerceAtLeast(0)
-        mutableState.value = current.copy(coinBalance = updatedBalance)
     }
 
     override fun hasAccess(feature: FeatureKey): Boolean =
@@ -51,6 +39,5 @@ class FakeAccessRepository(
     override suspend fun clear() {
         mutableState.value = AccessState.Free
         refreshCount = 0
-        lastDeductedAmount = null
     }
 }

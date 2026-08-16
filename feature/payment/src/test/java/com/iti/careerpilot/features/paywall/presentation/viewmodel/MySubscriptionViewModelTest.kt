@@ -121,7 +121,6 @@ class MySubscriptionViewModelTest {
             return refreshResult
         }
 
-        override suspend fun deductCoins(amount: Int) {}
         override fun hasAccess(feature: FeatureKey): Boolean = true
         override suspend fun clear() {}
     }

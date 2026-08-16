@@ -65,18 +65,6 @@ class AccessRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deductCoins(amount: Int) = withContext(ioDispatcher) {
-        val current = accessState.value
-        val updatedBalance = (current.coinBalance - amount).coerceAtLeast(0)
-        val updatedState = current.copy(coinBalance = updatedBalance)
-        local.save(updatedState)
-        userProfileRepo.updateUserProfile { profile ->
-            profile.copy(
-                account = profile.account.copy(coinBalance = updatedBalance)
-            )
-        }
-    }
-
     override fun hasAccess(feature: FeatureKey): Boolean =
         accessState.value.hasAccess(feature)
 

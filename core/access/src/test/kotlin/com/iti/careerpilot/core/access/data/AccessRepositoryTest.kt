@@ -54,47 +54,8 @@ class AccessRepositoryTest {
     }
 
     @Test
-    fun deductCoins_updatesStateAndSyncsToUserProfileRepo() = runTest(testDispatcher) {
+    fun refresh_savesRemoteStateAndSyncsToUserProfile() = runTest(testDispatcher) {
         val testFile = tmpFolder.newFile("test_access_1.preferences_pb")
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = backgroundScope,
-            produceFile = { testFile }
-        )
-        val localDataSource = AccessLocalDataSource(dataStore)
-        val initialProfile = UserProfile()
-        val userProfileRepo = FakeUserProfileRepo(initialProfile)
-
-        val initialState = AccessState(
-            plan = Plan.PLUS,
-            features = setOf(FeatureKey.VoicePracticeMode),
-            quotas = emptyMap(),
-            expiresAt = null,
-            lastSyncedAt = null,
-            coinBalance = 100
-        )
-        localDataSource.save(initialState)
-
-        val repository = AccessRepositoryImpl(
-            remote = TestAccessRemoteDataSource(),
-            local = localDataSource,
-            userProfileRepo = userProfileRepo,
-            ioDispatcher = testDispatcher,
-            scope = backgroundScope
-        )
-
-        assertEquals(100, repository.accessState.value.coinBalance)
-
-        repository.deductCoins(30)
-
-        assertEquals(70, repository.accessState.value.coinBalance)
-
-        val updatedProfile = userProfileRepo.readUserProfile()
-        assertEquals(70, updatedProfile.account.coinBalance)
-    }
-
-    @Test
-    fun deductCoins_coercesToZero_whenDeductingMoreThanBalance() = runTest(testDispatcher) {
-        val testFile = tmpFolder.newFile("test_access_2.preferences_pb")
         val dataStore = PreferenceDataStoreFactory.create(
             scope = backgroundScope,
             produceFile = { testFile }
@@ -102,28 +63,29 @@ class AccessRepositoryTest {
         val localDataSource = AccessLocalDataSource(dataStore)
         val userProfileRepo = FakeUserProfileRepo()
 
-        val initialState = AccessState(
-            plan = Plan.FREE,
-            features = emptySet(),
-            quotas = emptyMap(),
-            expiresAt = null,
-            lastSyncedAt = null,
-            coinBalance = 10
+        val remote = TestAccessRemoteDataSource(
+            statusDto = SubscriptionStatusDto(
+                tier = "PLUS",
+                isActive = true,
+                coinBalance = 150
+            ),
+            balance = 150
         )
-        localDataSource.save(initialState)
 
         val repository = AccessRepositoryImpl(
-            remote = TestAccessRemoteDataSource(),
+            remote = remote,
             local = localDataSource,
             userProfileRepo = userProfileRepo,
             ioDispatcher = testDispatcher,
             scope = backgroundScope
         )
 
-        repository.deductCoins(20)
-
-        assertEquals(0, repository.accessState.value.coinBalance)
-        assertEquals(0, userProfileRepo.readUserProfile().account.coinBalance)
+        val result = repository.refresh()
+        assertTrue(result.isSuccess)
+        assertEquals(Plan.PLUS, repository.accessState.value.plan)
+        assertEquals(150, repository.accessState.value.coinBalance)
+        assertEquals(150, userProfileRepo.readUserProfile().account.coinBalance)
+        assertEquals("PLUS", userProfileRepo.readUserProfile().account.subscriptionTier)
     }
 
     @Test
