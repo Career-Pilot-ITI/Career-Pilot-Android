@@ -167,6 +167,71 @@ class PaywallStateTest {
         )
         assertEquals(50, state.successfulCoinCount)
     }
+
+    @Test
+    fun `plus plan features include technical quizzes`() {
+        val state = PaywallState()
+        val plusPlan = state.subscriptionPlans.first { it.id == "plus" }
+
+        assertTrue(
+            "Plus plan should include technical quizzes",
+            plusPlan.features.contains(com.iti.careerpilot.payment.R.string.paywall_feature_technical_quizzes)
+        )
+        assertEquals(
+            listOf(
+                com.iti.careerpilot.payment.R.string.paywall_feature_everything_in_free,
+                com.iti.careerpilot.payment.R.string.paywall_feature_ats_scan,
+                com.iti.careerpilot.payment.R.string.paywall_feature_resume_optimizer,
+                com.iti.careerpilot.payment.R.string.paywall_feature_technical_quizzes,
+                com.iti.careerpilot.payment.R.string.paywall_feature_80_monthly_coins
+            ),
+            plusPlan.features
+        )
+    }
+
+    @Test
+    fun `unlockedFeatures include technical quizzes`() {
+        val state = PaywallState()
+
+        assertTrue(
+            "unlockedFeatures should include technical quizzes",
+            state.unlockedFeatures.contains(com.iti.careerpilot.payment.R.string.paywall_feature_technical_quizzes)
+        )
+        assertEquals(
+            listOf(
+                com.iti.careerpilot.payment.R.string.paywall_feature_everything_in_free,
+                com.iti.careerpilot.payment.R.string.paywall_feature_ats_scan,
+                com.iti.careerpilot.payment.R.string.paywall_feature_resume_optimizer,
+                com.iti.careerpilot.payment.R.string.paywall_feature_technical_quizzes,
+                com.iti.careerpilot.payment.R.string.paywall_feature_80_monthly_coins
+            ),
+            state.unlockedFeatures
+        )
+    }
+
+    @Test
+    fun `free and pro subscription plan features are configured correctly`() {
+        val state = PaywallState()
+        val freePlan = state.subscriptionPlans.first { it.id == "free" }
+        val proPlan = state.subscriptionPlans.first { it.id == "pro" }
+
+        assertEquals(
+            listOf(
+                com.iti.careerpilot.payment.R.string.paywall_feature_voice_mock_interview,
+                com.iti.careerpilot.payment.R.string.paywall_feature_performance_analytics,
+                com.iti.careerpilot.payment.R.string.paywall_feature_voice_scoring
+            ),
+            freePlan.features
+        )
+        assertEquals(
+            listOf(
+                com.iti.careerpilot.payment.R.string.paywall_feature_everything_in_plus,
+                com.iti.careerpilot.payment.R.string.paywall_feature_video_interview,
+                com.iti.careerpilot.payment.R.string.paywall_feature_160_monthly_coins
+            ),
+            proPlan.features
+        )
+    }
 }
 
 

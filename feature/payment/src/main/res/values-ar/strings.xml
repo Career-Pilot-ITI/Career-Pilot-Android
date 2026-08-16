@@ -37,7 +37,7 @@
     <string name="paywall_current_plan_button">الخطة الحالية</string>
     <string name="paywall_test_coins">عملات تجريبية</string>
     <string name="paywall_price_mo">%1$d ج.م/شهر</string>
-    <string name="paywall_feature_voice_mock_interview">مقابلات صوتية بالذكاء الاصطناعي (20 عملة / جلسة)</string>
+    <string name="paywall_feature_voice_mock_interview">مقابلات تجريبية صوتية بالذكاء الاصطناعي (10 عملات / جلسة)</string>
     <string name="paywall_feature_performance_analytics">تحليلات الأداء وتفصيل الدرجات</string>
     <string name="paywall_feature_voice_scoring">تقييم الصوت وملاحظات الذكاء الاصطناعي</string>
     <string name="paywall_feature_everything_in_free">كل مميزات الخطة المجانية</string>

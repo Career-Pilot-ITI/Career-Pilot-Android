@@ -37,7 +37,7 @@
     <string name="paywall_current_plan_button">Current Plan</string>
     <string name="paywall_test_coins">Test Coins</string>
     <string name="paywall_price_mo">EGP %1$d/mo</string>
-    <string name="paywall_feature_voice_mock_interview">AI Voice Mock Interviews (20 coins / session)</string>
+    <string name="paywall_feature_voice_mock_interview">AI Voice Mock Interviews (10 coins / session)</string>
     <string name="paywall_feature_performance_analytics">Performance Analytics &amp; Score Breakdown</string>
     <string name="paywall_feature_voice_scoring">Voice Scoring &amp; AI Feedback</string>
     <string name="paywall_feature_everything_in_free">Everything in Free plan</string>

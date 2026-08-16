@@ -58,6 +58,7 @@ data class PaywallState(
                 R.string.paywall_feature_everything_in_free,
                 R.string.paywall_feature_ats_scan,
                 R.string.paywall_feature_resume_optimizer,
+                R.string.paywall_feature_technical_quizzes,
                 R.string.paywall_feature_80_monthly_coins
             )
         ),
@@ -69,7 +70,6 @@ data class PaywallState(
             features = persistentListOf(
                 R.string.paywall_feature_everything_in_plus,
                 R.string.paywall_feature_video_interview,
-                R.string.paywall_feature_technical_quizzes,
                 R.string.paywall_feature_160_monthly_coins
             )
         )
@@ -79,6 +79,7 @@ data class PaywallState(
         R.string.paywall_feature_everything_in_free,
         R.string.paywall_feature_ats_scan,
         R.string.paywall_feature_resume_optimizer,
+        R.string.paywall_feature_technical_quizzes,
         R.string.paywall_feature_80_monthly_coins
     )
 ) {

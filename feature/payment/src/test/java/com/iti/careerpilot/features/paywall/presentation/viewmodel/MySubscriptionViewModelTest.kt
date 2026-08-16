@@ -196,6 +196,7 @@ class MySubscriptionViewModelTest {
 
         val expectedFeatures = PlanAccessMap.featuresFor(Plan.PLUS).map { it.displayName() }
         assertEquals(expectedFeatures, state.planFeatures)
+        assertTrue(state.planFeatures.contains(FeatureKey.Quizzes.displayName()))
     }
 
     @Test
