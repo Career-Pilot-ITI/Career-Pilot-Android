@@ -2,7 +2,6 @@ package com.iti.careerpilot.home.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSource
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.home.domain.model.InterviewSession
@@ -34,7 +33,6 @@ class HomeViewModel @Inject constructor(
     private val getScoreSummary: GetScoreSummaryUseCase,
     private val refreshAccessUseCase: RefreshAccessUseCase,
     private val accessRepository: AccessRepository,
-    private val challengeFirestoreDataSource: ChallengeFirestoreDataSource,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -56,10 +54,6 @@ class HomeViewModel @Inject constructor(
         if (hasInitialized) return
         hasInitialized = true
         load(isRefresh = false)
-//        only to add fake firestore challenges
-//        viewModelScope.launch {
-//            challengeFirestoreDataSource.addFakeData()
-//        }
     }
 
     fun onIntent(intent: HomeIntent) {
