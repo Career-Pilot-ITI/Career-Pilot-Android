@@ -355,8 +355,8 @@ fun PracticeSessionScreen(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     QuestionCard(
-                        questionOrder = state.currentSession?.currentQuestion?.questionOrder,
-                        questionText = state.currentSession?.currentQuestion?.questionText,
+                        questionOrder = state.displayQuestionOrder,
+                        questionText = state.displayQuestionText,
                         isReadingQuestion = state.isReadingQuestion,
                         onPlayClick = { onAction(PracticeSessionAction.ListenToAIReadingCurrentQuestion) },
                         onStopClick = { onAction(PracticeSessionAction.PauseListeningToCurrentQuestion) },

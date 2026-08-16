@@ -47,4 +47,10 @@ data class PracticeSessionState(
     val isBodyLanguageAnalyzing: Boolean = false,
     val enablePostureTracking: Boolean = false,
     val enableHandTracking: Boolean = false,
-)
+) {
+    val displayQuestionText: String?
+        get() = firestoreSession?.currentQuestion?.questionText ?: currentSession?.currentQuestion?.questionText
+
+    val displayQuestionOrder: Int?
+        get() = firestoreSession?.currentQuestion?.questionOrder ?: currentSession?.currentQuestion?.questionOrder
+}
