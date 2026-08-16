@@ -19,7 +19,6 @@ import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
 import com.iti.core.model.FeatureAccess
 import com.iti.core.model.FeatureKey
-import com.iti.core.model.Plan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

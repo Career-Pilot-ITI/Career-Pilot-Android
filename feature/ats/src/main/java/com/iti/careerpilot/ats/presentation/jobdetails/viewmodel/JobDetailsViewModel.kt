@@ -10,6 +10,7 @@ import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
 import com.iti.core.model.FeatureAccess
@@ -110,33 +111,34 @@ class JobDetailsViewModel @Inject constructor(
 
     private fun onStartScoring() {
         val id = workspaceId ?: return
-        when (val access = _state.value.atsScoreAccess) {
-            is FeatureAccess.Locked -> {
-                _state.update {
-                    it.copy(
-                        showGateSheet = true,
-                        gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                        gateRequiredPlan = access.requiredPlan,
-                        gateFeatureName = FeatureKey.AtsFeatures.displayName(),
-                    )
-                }
-            }
-            is FeatureAccess.CoinTopUpRequired -> {
-                _state.update {
-                    it.copy(
-                        showCoinTopUpSheet = true,
-                        coinTopUpRequiredCost = access.coinCost,
-                    )
-                }
-            }
-            is FeatureAccess.StaleCacheBlocked -> {
-                viewModelScope.launch { refreshAccess() }
-            }
-            else -> {
-                viewModelScope.launch {
+        val access = _state.value.atsScoreAccess
+        viewModelScope.launch {
+            access.handle(
+                onGranted = {
                     effectChannel.send(JobDetailsEffect.OpenScore(id))
-                }
-            }
+                },
+                onLocked = { locked ->
+                    _state.update {
+                        it.copy(
+                            showGateSheet = true,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
+                            gateFeatureName = FeatureKey.AtsFeatures.displayName(),
+                        )
+                    }
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    _state.update {
+                        it.copy(
+                            showCoinTopUpSheet = true,
+                            coinTopUpRequiredCost = coinReq.coinCost,
+                        )
+                    }
+                },
+                onStale = {
+                    refreshAccess()
+                },
+            )
         }
     }
 

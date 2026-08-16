@@ -15,6 +15,7 @@ import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.toUIText
@@ -121,40 +122,42 @@ class ScoringViewModel @Inject constructor(
         savedStateHandle[attemptKey(workspaceId)] = true
         activeOperation = viewModelScope.launch {
             val access = checkFeatureAccess(FeatureKey.AtsFeatures).first()
-            when (access) {
-                is FeatureAccess.Locked -> {
+            var handled = false
+            access.handle(
+                onGranted = { /* proceed — handled below */ },
+                onLocked = { locked ->
+                    handled = true
                     savedStateHandle[attemptKey(workspaceId)] = false
                     _state.update {
                         it.copy(
                             showGateSheet = true,
-                            gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                            gateRequiredPlan = access.requiredPlan,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
                             gateFeatureName = FeatureKey.AtsFeatures.displayName(),
                             isLoading = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.CoinTopUpRequired -> {
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    handled = true
                     savedStateHandle[attemptKey(workspaceId)] = false
                     _state.update {
                         it.copy(
                             showCoinTopUpSheet = true,
-                            coinTopUpRequiredCost = access.coinCost,
+                            coinTopUpRequiredCost = coinReq.coinCost,
                             hasInsufficientCoins = true,
                             isLoading = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.StaleCacheBlocked -> {
+                },
+                onStale = {
+                    handled = true
                     savedStateHandle[attemptKey(workspaceId)] = false
                     refreshAccess()
                     _state.update { it.copy(isLoading = false) }
-                    return@launch
-                }
-                else -> Unit
-            }
+                },
+            )
+            if (handled) return@launch
 
             _state.update {
                 it.copy(
@@ -249,37 +252,39 @@ class ScoringViewModel @Inject constructor(
 
         optimizationOperation = viewModelScope.launch {
             val access = checkFeatureAccess(FeatureKey.CvAiAnalysis).first()
-            when (access) {
-                is FeatureAccess.Locked -> {
+            var handled = false
+            access.handle(
+                onGranted = { /* proceed — handled below */ },
+                onLocked = { locked ->
+                    handled = true
                     _state.update {
                         it.copy(
                             showGateSheet = true,
-                            gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                            gateRequiredPlan = access.requiredPlan,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
                             gateFeatureName = FeatureKey.CvAiAnalysis.displayName(),
                             isStartingOptimization = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.CoinTopUpRequired -> {
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    handled = true
                     _state.update {
                         it.copy(
                             showCoinTopUpSheet = true,
-                            coinTopUpRequiredCost = access.coinCost,
+                            coinTopUpRequiredCost = coinReq.coinCost,
                             hasInsufficientCoins = true,
                             isStartingOptimization = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.StaleCacheBlocked -> {
+                },
+                onStale = {
+                    handled = true
                     refreshAccess()
                     _state.update { it.copy(isStartingOptimization = false) }
-                    return@launch
-                }
-                else -> Unit
-            }
+                },
+            )
+            if (handled) return@launch
 
             _state.update {
                 it.copy(

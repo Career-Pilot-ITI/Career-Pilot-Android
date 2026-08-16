@@ -15,6 +15,7 @@ import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
@@ -178,39 +179,41 @@ class CoverLetterViewModel @Inject constructor(
         savedStateHandle[attemptKey(id)] = true
         activeOperation = viewModelScope.launch {
             val access = checkFeatureAccess(FeatureKey.CoverLetter).first()
-            when (access) {
-                is FeatureAccess.Locked -> {
+            var handled = false
+            access.handle(
+                onGranted = { /* proceed — handled below */ },
+                onLocked = { locked ->
+                    handled = true
                     savedStateHandle[attemptKey(id)] = false
                     _state.update {
                         it.copy(
                             showGateSheet = true,
-                            gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                            gateRequiredPlan = access.requiredPlan,
+                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                            gateRequiredPlan = locked.requiredPlan,
                             isLoading = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.CoinTopUpRequired -> {
+                },
+                onCoinTopUpRequired = { coinReq ->
+                    handled = true
                     savedStateHandle[attemptKey(id)] = false
                     _state.update {
                         it.copy(
                             showCoinTopUpSheet = true,
-                            coinTopUpRequiredCost = access.coinCost,
+                            coinTopUpRequiredCost = coinReq.coinCost,
                             hasInsufficientCoins = true,
                             isLoading = false,
                         )
                     }
-                    return@launch
-                }
-                is FeatureAccess.StaleCacheBlocked -> {
+                },
+                onStale = {
+                    handled = true
                     savedStateHandle[attemptKey(id)] = false
                     refreshAccess()
                     _state.update { it.copy(isLoading = false) }
-                    return@launch
-                }
-                else -> Unit
-            }
+                },
+            )
+            if (handled) return@launch
 
             _state.update {
                 it.copy(
