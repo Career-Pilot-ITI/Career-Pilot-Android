@@ -43,9 +43,13 @@ class ChallengeDashboardViewModel @Inject constructor(
         loadData()
     }
 
-    private fun loadData() {
+    private fun loadData(isRefreshing: Boolean = false) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            if (isRefreshing) {
+                _state.update { it.copy(isRefreshing = true) }
+            } else {
+                _state.update { it.copy(isLoading = true) }
+            }
             val profile = userProfileRepo.readUserProfile()
             val userId = profile.id
 
@@ -60,19 +64,23 @@ class ChallengeDashboardViewModel @Inject constructor(
                 _state.update { it.copy(takenChallenges = sessions.toImmutableList()) }
             }
 
-            _state.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false, isRefreshing = false) }
         }
     }
 
     fun onAction(action: ChallengeDashboardAction) {
         when (action) {
             ChallengeDashboardAction.Initial -> initialize()
-            ChallengeDashboardAction.Refresh -> loadData()
+            ChallengeDashboardAction.Refresh -> loadData(isRefreshing = true)
             is ChallengeDashboardAction.OnTabSelected -> _state.update { it.copy(selectedTab = action.tab) }
-            is ChallengeDashboardAction.OnDeleteChallenge -> deleteChallenge(
-                action.challengeId,
-                action.visibility
-            )
+            is ChallengeDashboardAction.OnDeleteChallenge -> _state.update { it.copy(challengeToDelete = action.challenge) }
+            ChallengeDashboardAction.OnConfirmDelete -> {
+                _state.value.challengeToDelete?.let { challenge ->
+                    deleteChallenge(challenge.id, challenge.visibility)
+                }
+            }
+
+            ChallengeDashboardAction.OnDismissDeleteConfirmation -> _state.update { it.copy(challengeToDelete = null) }
 
             is ChallengeDashboardAction.OnEditChallenge -> {
                 viewModelScope.launch {
@@ -124,7 +132,7 @@ class ChallengeDashboardViewModel @Inject constructor(
         visibility: ChallengeVisibility
     ) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, challengeToDelete = null) }
             repository.deleteChallenge(challengeId, visibility)
                 .onSuccess {
                     loadData()

@@ -12,11 +12,13 @@
     <string name="questions_progress">%1$d/%2$d أسئلة</string>
     <string name="status_in_progress">قيد التنفيذ</string>
     <string name="status_completed">مكتمل</string>
-    <string name="dashboard_empty_created">No challenges created</string>
-    <string name="dashboard_empty_taken">No challenge history</string>
-    <string name="more_options">more</string>
-    <string name="edit">Edit</string>
-    <string name="delete">Delete</string>
-    <string name="invitation_code_label">Invitation code</string>
-    <string name="participants_count">%1$d participants</string>
+    <string name="dashboard_empty_created">لم يتم إنشاء أي تحديات بعد</string>
+    <string name="dashboard_empty_taken">لا يوجد سجل للتحديات المأخوذة</string>
+    <string name="more_options">خيارات إضافية</string>
+    <string name="edit">تعديل</string>
+    <string name="delete">حذف</string>
+    <string name="invitation_code_label">كود الدعوة</string>
+    <string name="participants_count">%1$d مشارك</string>
+    <string name="delete_challenge_confirmation">هل أنت متأكد من رغبتك في حذف هذا التحدي؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="cancel">إلغاء</string>
 </resources>

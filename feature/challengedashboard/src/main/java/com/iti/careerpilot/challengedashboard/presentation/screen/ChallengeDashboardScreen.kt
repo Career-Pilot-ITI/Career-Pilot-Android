@@ -1,5 +1,7 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 package com.iti.careerpilot.challengedashboard.presentation.screen
 
+import android.content.ClipData
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,28 +44,37 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iti.careerpilot.challengedashboard.R
@@ -75,10 +87,11 @@ import com.iti.careerpilot.challengefirestore.Challenge
 import com.iti.careerpilot.challengefirestore.ChallengeSession
 import com.iti.careerpilot.challengefirestore.ChallengeVisibility
 import com.iti.careerpilot.challengefirestore.getTitleRes
+import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
-import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -136,32 +149,23 @@ fun ChallengeDashboardScreenRoot(
             onViewSession = { viewModel.onAction(ChallengeDashboardAction.OnTakenChallengeClicked(it)) }
         )
     }
-    if (state.isLoading) {
+
+    state.challengeToDelete?.let {
+        ConfirmationDialog(
+            title = stringResource(R.string.delete),
+            text = stringResource(R.string.delete_challenge_confirmation),
+            icon = Icons.Default.Delete,
+            onDismiss = { viewModel.onAction(ChallengeDashboardAction.OnDismissDeleteConfirmation) },
+            onConfirm = { viewModel.onAction(ChallengeDashboardAction.OnConfirmDelete) },
+            cancel = stringResource(R.string.cancel),
+            confirm = stringResource(R.string.delete)
+        )
+    }
+
+    if (state.isLoading && !state.isRefreshing) {
         LoadingDialog()
     }
 }
-
-// -----------------------------------------------------------------------------------------------
-// Content
-//
-// What changed vs the original, and why:
-//  1. Edit/Delete are now a single overflow menu instead of two always-visible icon buttons —
-//     delete sitting right next to edit at full opacity invites mis-taps on a destructive action.
-//     A menu keeps the row calm and puts delete behind one extra, deliberate step.
-//  2. The "•"-separated metadata rows (seniority · questions · type, and date · progress · status)
-//     are replaced with icon-led chips — same info, but scannable instead of read-as-a-sentence,
-//     and they wrap gracefully on narrow screens instead of a single fragile Row.
-//  3. Status ("Completed" / "In progress") is now a small colored pill instead of plain colored
-//     text — it reads as a status the way a badge does, not as an accent color choice.
-//  4. Score is shown as a compact circular ring next to the chevron on TakenChallengeItem instead
-//     of a bare percentage — communicates "progress toward 100" at a glance, and gives sessions
-//     without a score yet a placeholder instead of just omitting the field.
-//  5. Both list tabs get an empty state (no created challenges / no completed challenges yet)
-//     instead of silently rendering nothing.
-//  6. Invitation code block gained a label + monospace-style emphasis and a copy affordance spot.
-//  7. ParticipantReportsDialog: participant rows now show an initials avatar, a real empty state
-//     (icon + text instead of a single gray line), and the header includes the participant count.
-// -----------------------------------------------------------------------------------------------
 
 @Composable
 fun ChallengeDashboardScreenContent(
@@ -169,79 +173,99 @@ fun ChallengeDashboardScreenContent(
     state: ChallengeDashboardState,
     onAction: (ChallengeDashboardAction) -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    val pullToRefreshState = rememberPullToRefreshState()
+    val clipboardManager = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+
+    PullToRefreshBox(
+        state = pullToRefreshState,
+        isRefreshing = state.isRefreshing,
+        onRefresh = { onAction(ChallengeDashboardAction.Refresh) },
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                color = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.surface,
+            )
+        },
+        modifier = modifier.fillMaxSize()
     ) {
-        Spacer(Modifier.height(4.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Spacer(Modifier.height(4.dp))
 
-        DashboardTabs(
-            selectedTab = state.selectedTab,
-            onTabSelected = { onAction(ChallengeDashboardAction.OnTabSelected(it)) }
-        )
+            DashboardTabs(
+                selectedTab = state.selectedTab,
+                onTabSelected = { onAction(ChallengeDashboardAction.OnTabSelected(it)) }
+            )
 
-        if (state.selectedTab == DashboardTab.MY_CHALLENGES) {
-            if (state.createdChallenges.isEmpty()) {
-                DashboardEmptyState(
-                    icon = Icons.Filled.Groups,
-                    text = stringResource(R.string.dashboard_empty_created),
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 32.dp)
-                ) {
-                    items(state.createdChallenges, key = { it.id }) { challenge ->
-                        CreatedChallengeItem(
-                            challenge = challenge,
-                            onEdit = { onAction(ChallengeDashboardAction.OnEditChallenge(challenge.id)) },
-                            onDelete = {
-                                onAction(
-                                    ChallengeDashboardAction.OnDeleteChallenge(
-                                        challenge.id,
-                                        challenge.visibility
+            if (state.selectedTab == DashboardTab.MY_CHALLENGES) {
+                if (state.createdChallenges.isEmpty()) {
+                    DashboardEmptyState(
+                        icon = Icons.Filled.Groups,
+                        text = stringResource(R.string.dashboard_empty_created),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 32.dp)
+                    ) {
+                        items(state.createdChallenges, key = { it.id }) { challenge ->
+                            CreatedChallengeItem(
+                                challenge = challenge,
+                                onEdit = { onAction(ChallengeDashboardAction.OnEditChallenge(challenge.id)) },
+                                onDelete = { onAction(ChallengeDashboardAction.OnDeleteChallenge(challenge)) },
+                                onViewReports = {
+                                    onAction(
+                                        ChallengeDashboardAction.OnViewParticipantReports(
+                                            challenge.id
+                                        )
                                     )
-                                )
-                            },
-                            onViewReports = {
-                                onAction(
-                                    ChallengeDashboardAction.OnViewParticipantReports(
-                                        challenge.id
-                                    )
-                                )
-                            }
-                        )
+                                },
+                                onCopyCode = { code ->
+                                    scope.launch {
+                                        val clipData = ClipData.newPlainText("code", code)
+                                        val clipEntry = ClipEntry(clipData)
+                                        clipboardManager.setClipEntry(clipEntry)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
-            }
-        } else {
-            if (state.takenChallenges.isEmpty()) {
-                DashboardEmptyState(
-                    icon = Icons.Filled.PersonOff,
-                    text = stringResource(R.string.dashboard_empty_taken),
-                    modifier = Modifier.weight(1f)
-                )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 32.dp)
-                ) {
-                    items(state.takenChallenges, key = { it.sessionId }) { session ->
-                        TakenChallengeItem(
-                            session = session,
-                            onClick = {
-                                onAction(
-                                    ChallengeDashboardAction.OnTakenChallengeClicked(
-                                        session.sessionId
+                if (state.takenChallenges.isEmpty()) {
+                    DashboardEmptyState(
+                        icon = Icons.Filled.PersonOff,
+                        text = stringResource(R.string.dashboard_empty_taken),
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 32.dp)
+                    ) {
+                        items(state.takenChallenges, key = { it.sessionId }) { session ->
+                            TakenChallengeItem(
+                                session = session,
+                                onClick = {
+                                    onAction(
+                                        ChallengeDashboardAction.OnTakenChallengeClicked(
+                                            session.sessionId
+                                        )
                                     )
-                                )
-                            }
-                        )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -251,7 +275,7 @@ fun ChallengeDashboardScreenContent(
 
 @Composable
 private fun DashboardEmptyState(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     text: String,
     modifier: Modifier = Modifier
 ) {
@@ -322,16 +346,13 @@ fun DashboardTabs(selectedTab: DashboardTab, onTabSelected: (DashboardTab) -> Un
     }
 }
 
-// -----------------------------------------------------------------------------------------------
-// Created challenge item
-// -----------------------------------------------------------------------------------------------
-
 @Composable
 fun CreatedChallengeItem(
     challenge: Challenge,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onViewReports: () -> Unit
+    onViewReports: () -> Unit,
+    onCopyCode: (String) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -409,6 +430,7 @@ fun CreatedChallengeItem(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .clickable { onCopyCode(challenge.invitationCode) }
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -476,7 +498,7 @@ private fun VisibilityPill(visibility: ChallengeVisibility) {
 }
 
 @Composable
-private fun InfoChip(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+private fun InfoChip(text: String, icon: ImageVector? = null) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         icon?.let {
             Icon(
@@ -494,10 +516,6 @@ private fun InfoChip(text: String, icon: androidx.compose.ui.graphics.vector.Ima
         )
     }
 }
-
-// -----------------------------------------------------------------------------------------------
-// Taken challenge item
-// -----------------------------------------------------------------------------------------------
 
 @Composable
 fun TakenChallengeItem(session: ChallengeSession, onClick: () -> Unit) {
@@ -607,10 +625,6 @@ private fun ScoreBadge(score: Int?) {
         }
     }
 }
-
-// -----------------------------------------------------------------------------------------------
-// Participant reports dialog
-// -----------------------------------------------------------------------------------------------
 
 @Composable
 fun ParticipantReportsDialog(
@@ -748,6 +762,84 @@ private fun ParticipantRow(session: ChallengeSession, onClick: () -> Unit) {
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary
             )
+        }
+    }
+}
+
+@Composable
+fun ConfirmationDialog(
+    title: String,
+    text: String,
+    icon: ImageVector,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    cancel: String,
+    confirm: String,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = false)
+    ) {
+        OutlinedCard(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(24.dp)
+            ) {
+                GradientIcon(
+                    icon = icon,
+                    modifier = Modifier
+                        .size(48.dp)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Text(
+                            text = cancel,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) {
+                        Text(
+                            text = confirm,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
     }
 }

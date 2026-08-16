@@ -8,11 +8,13 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class ChallengeDashboardState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val createdChallenges: ImmutableList<Challenge> = persistentListOf(),
     val takenChallenges: ImmutableList<ChallengeSession> = persistentListOf(),
     val selectedTab: DashboardTab = DashboardTab.MY_CHALLENGES,
     val participantSessions: ImmutableList<ChallengeSession>? = null, // Sessions for a specific created challenge
     val selectedChallengeId: String? = null,
+    val challengeToDelete: Challenge? = null,
 )
 
 enum class DashboardTab(val titleRes: Int) {
