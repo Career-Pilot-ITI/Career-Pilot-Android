@@ -288,13 +288,13 @@ fun SuccessDialog(
                             Icons.Default.ContentCopy,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.outline
+                            tint = MaterialTheme.colorScheme.outlineVariant
                         )
                     }
                     Text(
                         text = stringResource(R.string.create_challenge_copy_code),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 }
 
