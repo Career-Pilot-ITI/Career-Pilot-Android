@@ -25,7 +25,8 @@ import com.iti.careerpilot.ats.domain.model.AtsSectionScore
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
 import com.iti.careerpilot.ats.presentation.components.RecommendationsCard
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.FeedbackStatus
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.SkillStatus
@@ -38,7 +39,7 @@ import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 @Composable
 fun ScoringContent(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -50,7 +51,7 @@ fun ScoringContent(
         val error by rememberUiStateValue(stateProvider) { it.error }
         AtsWorkspaceErrorContent(
             error = error,
-            onRetry = { onAction(ScoringAction.Retry) },
+            onRetry = { onIntent(ScoringIntent.Retry) },
             modifier = modifier,
         )
         return
@@ -160,7 +161,7 @@ fun ScoringContent(
         item {
             OptimizeCvActionItem(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
         }
         item {
@@ -171,14 +172,14 @@ fun ScoringContent(
             ) {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_generate_cover_letter),
-                    onClick = { onAction(ScoringAction.GenerateCoverLetter) },
+                    onClick = { onIntent(ScoringIntent.GenerateCoverLetter) },
                     variant = ButtonVariant.OUTLINE,
                     modifier = Modifier.weight(1f),
                     leadingContent = {
                         Icon(
-                            imageVector = Icons.Outlined.Email,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
+                             imageVector = Icons.Outlined.Email,
+                             contentDescription = null,
+                             modifier = Modifier.size(20.dp),
                         )
                     },
                 )
@@ -188,7 +189,7 @@ fun ScoringContent(
         item {
             PracticeActionItem(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
         }
     }

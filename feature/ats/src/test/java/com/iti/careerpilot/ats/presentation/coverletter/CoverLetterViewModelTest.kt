@@ -10,7 +10,7 @@ import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GenerateCoverLetterUseCase
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -53,7 +53,7 @@ class CoverLetterViewModelTest {
             val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CoverLetter))
             val viewModel = createViewModel(repository, accessRepo)
 
-            viewModel.onAction(CoverLetterAction.Initial(1L))
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
             assertEquals(1, repository.generateCalls)
@@ -66,7 +66,7 @@ class CoverLetterViewModelTest {
         val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CoverLetter))
         val viewModel = createViewModel(repository, accessRepo)
 
-        viewModel.onAction(CoverLetterAction.Initial(1L))
+        viewModel.onIntent(CoverLetterIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(0, repository.generateCalls)
@@ -80,7 +80,7 @@ class CoverLetterViewModelTest {
             val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.CoverLetter))
             val viewModel = createViewModel(repository, accessRepo)
 
-            viewModel.onAction(CoverLetterAction.Initial(1L))
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
             assertEquals(0, repository.generateCalls)
@@ -95,7 +95,7 @@ class CoverLetterViewModelTest {
             val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
             val viewModel = createViewModel(repository, accessRepo)
 
-            viewModel.onAction(CoverLetterAction.Initial(1L))
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
             assertEquals(0, repository.generateCalls)
@@ -112,7 +112,7 @@ class CoverLetterViewModelTest {
             val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
             val viewModel = createViewModel(repository, accessRepo)
 
-            viewModel.onAction(CoverLetterAction.Initial(1L))
+            viewModel.onIntent(CoverLetterIntent.Initial(1L))
             advanceUntilIdle()
 
             assertEquals(1, repository.generateCalls)

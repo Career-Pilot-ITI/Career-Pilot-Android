@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.RecommendationsCard
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
@@ -24,7 +24,7 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 @Composable
 internal fun CoverLetterContent(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val error by rememberUiStateValue(stateProvider) { it.error }
@@ -60,7 +60,7 @@ internal fun CoverLetterContent(
                 item {
                     CareerPilotButton(
                         text = stringResource(R.string.ats_retry),
-                        onClick = { onAction(CoverLetterAction.Retry) },
+                        onClick = { onIntent(CoverLetterIntent.Retry) },
                     )
                 }
             }
@@ -68,7 +68,7 @@ internal fun CoverLetterContent(
             item {
                 GeneratedCoverLetterCard(
                     stateProvider = stateProvider,
-                    onAction = onAction,
+                    onIntent = onIntent,
                 )
             }
             if (approachTips.isNotEmpty()) {
@@ -86,7 +86,7 @@ internal fun CoverLetterContent(
             item {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_send_email),
-                    onClick = { onAction(CoverLetterAction.Email) },
+                    onClick = { onIntent(CoverLetterIntent.Email) },
                 )
             }
         }
@@ -94,7 +94,7 @@ internal fun CoverLetterContent(
             item {
                 CareerPilotButton(
                     text = stringResource(R.string.ats_get_coins),
-                    onClick = { onAction(CoverLetterAction.OpenCoins) },
+                    onClick = { onIntent(CoverLetterIntent.OpenCoins) },
                     variant = ButtonVariant.OUTLINE,
                 )
             }

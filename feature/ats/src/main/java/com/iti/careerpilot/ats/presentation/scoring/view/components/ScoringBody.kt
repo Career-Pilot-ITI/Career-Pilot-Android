@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceLoadingContent
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.uimodel.ScoringPhase
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
@@ -13,7 +13,7 @@ import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
 @Composable
 fun ScoringBody(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -29,12 +29,12 @@ fun ScoringBody(
         ScoringPhase.LOADING -> AtsWorkspaceLoadingContent(modifier = modifier)
         ScoringPhase.ERROR -> ScoringErrorContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = modifier,
         )
         ScoringPhase.CONTENT -> ScoringContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             onOpenJob = onOpenJob,
             modifier = modifier,
         )

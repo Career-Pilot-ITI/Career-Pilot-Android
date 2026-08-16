@@ -8,7 +8,7 @@ import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
@@ -203,22 +203,22 @@ class ScoringViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: ScoringAction) {
-        when (action) {
-            is ScoringAction.Initial -> {
+    fun onIntent(intent: ScoringIntent) {
+        when (intent) {
+            is ScoringIntent.Initial -> {
                 observeProfile()
-                loadScore(action.workspaceId)
+                loadScore(intent.workspaceId)
             }
-            ScoringAction.Retry -> workspaceId?.let {
+            ScoringIntent.Retry -> workspaceId?.let {
                 _state.update { state -> state.copy(score = null) }
                 loadScore(it)
             }
-            ScoringAction.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
-            ScoringAction.GenerateCoverLetter -> workspaceId?.let {
+            ScoringIntent.OpenCoins -> emit(ScoringEffect.OpenCoinsPaywall)
+            ScoringIntent.GenerateCoverLetter -> workspaceId?.let {
                 emit(ScoringEffect.OpenCoverLetter(it))
             }
-            ScoringAction.OptimizeCv -> startOptimization()
-            ScoringAction.StartPractice -> _state.value.trackId?.let { trackId ->
+            ScoringIntent.OptimizeCv -> startOptimization()
+            ScoringIntent.StartPractice -> _state.value.trackId?.let { trackId ->
                 workspaceId?.let { workspaceId ->
                     emit(
                         ScoringEffect.OpenPractice(
@@ -229,13 +229,13 @@ class ScoringViewModel @Inject constructor(
                     )
                 }
             }
-            ScoringAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            ScoringAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
-            ScoringAction.UpgradeFromGate -> {
+            ScoringIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            ScoringIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            ScoringIntent.UpgradeFromGate -> {
                 _state.update { it.copy(showGateSheet = false) }
                 emit(ScoringEffect.OpenCoinsPaywall)
             }
-            ScoringAction.BuyCoinsClicked -> {
+            ScoringIntent.BuyCoinsClicked -> {
                 _state.update { it.copy(showCoinTopUpSheet = false) }
                 emit(ScoringEffect.OpenCoinsPaywall)
             }

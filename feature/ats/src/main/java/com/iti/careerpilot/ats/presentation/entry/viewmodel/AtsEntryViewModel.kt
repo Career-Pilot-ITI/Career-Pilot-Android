@@ -7,8 +7,8 @@ import com.iti.careerpilot.ats.domain.usecase.ImportJobUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ReplaceCurrentCvUseCase
 import com.iti.careerpilot.ats.domain.util.JobUrlParser
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
@@ -63,16 +63,16 @@ class AtsEntryViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: AtsEntryAction) {
-        when (action) {
-            AtsEntryAction.Initial -> observeProfile()
-            is AtsEntryAction.JobUrlChanged -> updateUrl(action.value)
-            is AtsEntryAction.SharedTextReceived -> acceptSharedText(action.value)
-            AtsEntryAction.SelectCvClicked -> emitEffect(AtsEntryEffect.OpenPdfPicker)
-            is AtsEntryAction.PdfSelected -> uploadPdf(action.uri)
-            AtsEntryAction.CompareClicked -> importCurrentJob()
-            AtsEntryAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            AtsEntryAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+    fun onIntent(intent: AtsEntryIntent) {
+        when (intent) {
+            AtsEntryIntent.Initial -> observeProfile()
+            is AtsEntryIntent.JobUrlChanged -> updateUrl(intent.value)
+            is AtsEntryIntent.SharedTextReceived -> acceptSharedText(intent.value)
+            AtsEntryIntent.SelectCvClicked -> emitEffect(AtsEntryEffect.OpenPdfPicker)
+            is AtsEntryIntent.PdfSelected -> uploadPdf(intent.uri)
+            AtsEntryIntent.CompareClicked -> importCurrentJob()
+            AtsEntryIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            AtsEntryIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
         }
     }
 

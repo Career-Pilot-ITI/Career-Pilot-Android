@@ -14,18 +14,18 @@ import com.iti.careerpilot.ats.domain.model.CvOptimizationSection
 import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.CoverLetterScreen
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.view.AtsEntryScreen
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.jobdetails.view.JobDetailsScreen
-import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsIntent
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.ats.presentation.optimizedcv.view.OptimizedCvScreen
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.view.ScoringScreen
 import org.junit.Assert.assertEquals
@@ -40,7 +40,7 @@ class AtsScreenStateTest {
 
     @Test
     fun synchronizedCvAndValidUrlEnableCompare() {
-        var action: AtsEntryAction? = null
+        var intent: AtsEntryIntent? = null
         composeRule.setContent {
             MaterialTheme {
                 AtsEntryScreen(
@@ -51,14 +51,14 @@ class AtsScreenStateTest {
                         cvSizeBytes = 2_048,
                         hasSynchronizedCv = true,
                     ) },
-                    onAction = { action = it },
+                    onIntent = { intent = it },
                 )
             }
         }
 
         composeRule.onNodeWithText("resume.pdf").assertExists()
         composeRule.onNodeWithText("Compare Now").assertIsEnabled().performClick()
-        composeRule.runOnIdle { assertEquals(AtsEntryAction.CompareClicked, action) }
+        composeRule.runOnIdle { assertEquals(AtsEntryIntent.CompareClicked, intent) }
     }
 
     @Test
@@ -70,7 +70,7 @@ class AtsScreenStateTest {
                         jobUrl = "https://example.com/jobs/1",
                         isUrlValid = true,
                     ) },
-                    onAction = {},
+                    onIntent = {},
                 )
             }
         }
@@ -102,7 +102,7 @@ class AtsScreenStateTest {
                         ),
                         trackId = null,
                     ) },
-                    onAction = {},
+                    onIntent = {},
                     onBack = {},
                 )
             }
@@ -127,7 +127,7 @@ class AtsScreenStateTest {
 
     @Test
     fun importedWorkspaceRendersJobDetailsAndStartsScoring() {
-        var action: JobDetailsAction? = null
+        var intent: JobDetailsIntent? = null
         composeRule.setContent {
             MaterialTheme {
                 JobDetailsScreen(
@@ -135,7 +135,7 @@ class AtsScreenStateTest {
                         isLoading = false,
                         workspace = workspace(),
                     ) },
-                    onAction = { action = it },
+                    onIntent = { intent = it },
                     onBack = {},
                 )
             }
@@ -146,7 +146,7 @@ class AtsScreenStateTest {
         composeRule.onNodeWithText("Build accessible Android products.").assertExists()
         composeRule.onNodeWithText("Kotlin").assertExists()
         composeRule.onNodeWithText("Start Scoring").performClick()
-        composeRule.runOnIdle { assertEquals(JobDetailsAction.StartScoring, action) }
+        composeRule.runOnIdle { assertEquals(JobDetailsIntent.StartScoring, intent) }
     }
 
     @Test
@@ -162,7 +162,7 @@ class AtsScreenStateTest {
                         isLoading = false,
                         isEditing = true,
                     ) },
-                    onAction = { _: CoverLetterAction -> },
+                    onIntent = { _: CoverLetterIntent -> },
                     onBack = {},
                 )
             }
@@ -200,7 +200,7 @@ class AtsScreenStateTest {
                         recommendedTracks = persistentListOf(),
                         isLoading = false,
                     ) },
-                    onAction = {},
+                    onIntent = {},
                     onBack = {},
                 )
             }

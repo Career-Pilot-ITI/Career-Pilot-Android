@@ -3,8 +3,8 @@ package com.iti.careerpilot.ats.presentation.jobdetails.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsIntent
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
@@ -91,18 +91,18 @@ class JobDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: JobDetailsAction) {
-        when (action) {
-            is JobDetailsAction.Initial -> loadWorkspace(action.workspaceId)
-            JobDetailsAction.Retry -> workspaceId?.let(::loadWorkspace)
-            JobDetailsAction.StartScoring -> onStartScoring()
-            JobDetailsAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            JobDetailsAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
-            JobDetailsAction.UpgradeFromGate -> {
+    fun onIntent(intent: JobDetailsIntent) {
+        when (intent) {
+            is JobDetailsIntent.Initial -> loadWorkspace(intent.workspaceId)
+            JobDetailsIntent.Retry -> workspaceId?.let(::loadWorkspace)
+            JobDetailsIntent.StartScoring -> onStartScoring()
+            JobDetailsIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            JobDetailsIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            JobDetailsIntent.UpgradeFromGate -> {
                 _state.update { it.copy(showGateSheet = false) }
                 viewModelScope.launch { effectChannel.send(JobDetailsEffect.NavigateToPaywall(false)) }
             }
-            JobDetailsAction.BuyCoinsClicked -> {
+            JobDetailsIntent.BuyCoinsClicked -> {
                 _state.update { it.copy(showCoinTopUpSheet = false) }
                 viewModelScope.launch { effectChannel.send(JobDetailsEffect.NavigateToPaywall(true)) }
             }

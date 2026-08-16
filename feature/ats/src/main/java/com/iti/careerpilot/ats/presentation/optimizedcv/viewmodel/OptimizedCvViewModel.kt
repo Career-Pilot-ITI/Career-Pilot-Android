@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.domain.model.AiJobStatus
 import com.iti.careerpilot.ats.domain.usecase.GetAiJobUseCase
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvIntent
 import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
@@ -36,12 +36,12 @@ class OptimizedCvViewModel @Inject constructor(
 
     private var jobId: Long? = null
 
-    fun onAction(action: OptimizedCvAction) {
-        when (action) {
-            is OptimizedCvAction.Initial -> load(action.jobId)
-            OptimizedCvAction.Retry -> jobId?.let(::load)
-            OptimizedCvAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            OptimizedCvAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+    fun onIntent(intent: OptimizedCvIntent) {
+        when (intent) {
+            is OptimizedCvIntent.Initial -> load(intent.jobId)
+            OptimizedCvIntent.Retry -> jobId?.let(::load)
+            OptimizedCvIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            OptimizedCvIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
         }
     }
 

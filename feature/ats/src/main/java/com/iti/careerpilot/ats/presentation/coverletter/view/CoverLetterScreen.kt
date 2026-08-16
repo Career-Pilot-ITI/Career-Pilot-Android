@@ -22,8 +22,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.view.components.CoverLetterContent
 import com.iti.careerpilot.ats.presentation.coverletter.viewmodel.CoverLetterViewModel
@@ -53,7 +53,7 @@ fun CoverLetterRoot(
     val clipboardLabel = stringResource(R.string.cover_letter)
 
     LaunchedEffect(workspaceId) {
-        viewModel.onAction(CoverLetterAction.Initial(workspaceId))
+        viewModel.onIntent(CoverLetterIntent.Initial(workspaceId))
     }
 
     LaunchedEffect(lifecycleOwner) {
@@ -81,7 +81,7 @@ fun CoverLetterRoot(
 
     CoverLetterScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         onBack = onBack,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
@@ -98,8 +98,8 @@ fun CoverLetterRoot(
             featureName = stringResource(R.string.cover_letter),
             requiredPlan = gateRequiredPlan,
             planFeatures = gatePlanFeatures,
-            onUpgradeClick = { viewModel.onAction(CoverLetterAction.UpgradeFromGate) },
-            onDismiss = { viewModel.onAction(CoverLetterAction.DismissGateSheet) },
+            onUpgradeClick = { viewModel.onIntent(CoverLetterIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(CoverLetterIntent.DismissGateSheet) },
         )
     }
 
@@ -107,8 +107,8 @@ fun CoverLetterRoot(
         CoinTopUpBottomSheet(
             coinCost = coinTopUpRequiredCost,
             currentBalance = coinBalance,
-            onBuyCoins = { viewModel.onAction(CoverLetterAction.BuyCoinsClicked) },
-            onDismiss = { viewModel.onAction(CoverLetterAction.DismissCoinTopUpSheet) },
+            onBuyCoins = { viewModel.onIntent(CoverLetterIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(CoverLetterIntent.DismissCoinTopUpSheet) },
         )
     }
 }
@@ -117,7 +117,7 @@ fun CoverLetterRoot(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun CoverLetterScreen(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -128,7 +128,7 @@ fun CoverLetterScreen(
         )
         CoverLetterBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -138,7 +138,7 @@ fun CoverLetterScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun CoverLetterBody(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isLoading by rememberUiStateValue(stateProvider) { it.isLoading }
@@ -152,7 +152,7 @@ private fun CoverLetterBody(
     } else {
         CoverLetterContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = modifier,
         )
     }

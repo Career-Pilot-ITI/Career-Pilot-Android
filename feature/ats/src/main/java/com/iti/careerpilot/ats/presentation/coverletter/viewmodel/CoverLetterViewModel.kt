@@ -8,8 +8,8 @@ import com.iti.careerpilot.ats.domain.usecase.GenerateCoverLetterUseCase
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.presentation.util.coverLetterEmailDraft
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterEffect
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
@@ -131,23 +131,23 @@ class CoverLetterViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: CoverLetterAction) {
-        when (action) {
-            is CoverLetterAction.Initial -> {
+    fun onIntent(intent: CoverLetterIntent) {
+        when (intent) {
+            is CoverLetterIntent.Initial -> {
                 observeProfile()
-                loadWorkspace(action.workspaceId)
+                loadWorkspace(intent.workspaceId)
             }
-            CoverLetterAction.Retry -> if (_state.value.workspace == null) {
+            CoverLetterIntent.Retry -> if (_state.value.workspace == null) {
                 workspaceId?.let(::loadWorkspace)
             } else {
                 executeGeneration()
             }
-            CoverLetterAction.ToggleEditing -> _state.update { it.copy(isEditing = !it.isEditing) }
-            is CoverLetterAction.EditedValueChanged -> _state.update { it.copy(editedValue = action.value) }
-            CoverLetterAction.Copy -> _state.value.editedValue.takeIf(String::isNotBlank)?.let {
+            CoverLetterIntent.ToggleEditing -> _state.update { it.copy(isEditing = !it.isEditing) }
+            is CoverLetterIntent.EditedValueChanged -> _state.update { it.copy(editedValue = intent.value) }
+            CoverLetterIntent.Copy -> _state.value.editedValue.takeIf(String::isNotBlank)?.let {
                 emit(CoverLetterEffect.CopyText(it))
             }
-            CoverLetterAction.Email -> _state.value.editedValue.takeIf(String::isNotBlank)?.let { body ->
+            CoverLetterIntent.Email -> _state.value.editedValue.takeIf(String::isNotBlank)?.let { body ->
                 emit(
                     CoverLetterEffect.ComposeEmail(
                         coverLetterEmailDraft(
@@ -158,14 +158,14 @@ class CoverLetterViewModel @Inject constructor(
                     ),
                 )
             }
-            CoverLetterAction.OpenCoins -> emit(CoverLetterEffect.OpenCoinsPaywall)
-            CoverLetterAction.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
-            CoverLetterAction.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
-            CoverLetterAction.UpgradeFromGate -> {
+            CoverLetterIntent.OpenCoins -> emit(CoverLetterEffect.OpenCoinsPaywall)
+            CoverLetterIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
+            CoverLetterIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            CoverLetterIntent.UpgradeFromGate -> {
                 _state.update { it.copy(showGateSheet = false) }
                 emit(CoverLetterEffect.OpenCoinsPaywall)
             }
-            CoverLetterAction.BuyCoinsClicked -> {
+            CoverLetterIntent.BuyCoinsClicked -> {
                 _state.update { it.copy(showCoinTopUpSheet = false) }
                 emit(CoverLetterEffect.OpenCoinsPaywall)
             }

@@ -10,7 +10,7 @@ import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.ImportJobUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.ReplaceCurrentCvUseCase
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.viewmodel.AtsEntryViewModel
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -66,11 +66,11 @@ class AtsEntryViewModelTest {
     fun `compare requires valid URL and backend synchronized CV`() = runTest(dispatcher) {
         val repository = FakeAtsRepository()
         val viewModel = createViewModel(repository)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
 
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
         assertFalse(viewModel.state.value.canCompare)
 
@@ -87,8 +87,8 @@ class AtsEntryViewModelTest {
         val repository = FakeAtsRepository()
         val viewModel = createViewModel(repository)
 
-        viewModel.onAction(
-            AtsEntryAction.SharedTextReceived(
+        viewModel.onIntent(
+            AtsEntryIntent.SharedTextReceived(
                 "Apply: https://www.linkedin.com/jobs/view/123456789?source=share",
             ),
         )
@@ -108,14 +108,14 @@ class AtsEntryViewModelTest {
             holdImport = CompletableDeferred()
         }
         val viewModel = createViewModel(repository)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
 
-        viewModel.onAction(AtsEntryAction.CompareClicked)
-        viewModel.onAction(AtsEntryAction.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
         runCurrent()
 
         assertEquals(1, repository.importCount)
@@ -138,13 +138,13 @@ class AtsEntryViewModelTest {
         // JobParse costs 1 coin; user has 0 → CoinTopUpRequired
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(repository, accessRepo)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
 
-        viewModel.onAction(AtsEntryAction.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
         advanceUntilIdle()
 
         assertEquals(0, repository.importCount)
@@ -162,13 +162,13 @@ class AtsEntryViewModelTest {
         // lastSyncedAt = null → StaleCacheBlocked
         val accessRepo = FakeAccessRepository(initialState = AccessState.Free)
         val viewModel = createViewModel(repository, accessRepo)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
 
-        viewModel.onAction(AtsEntryAction.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
         advanceUntilIdle()
 
         assertEquals(1, accessRepo.refreshCount)
@@ -182,13 +182,13 @@ class AtsEntryViewModelTest {
         }
         val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.JobParse))
         val viewModel = createViewModel(repository, accessRepo)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
 
-        viewModel.onAction(AtsEntryAction.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
         advanceUntilIdle()
 
         assertEquals(1, repository.importCount)
@@ -203,16 +203,16 @@ class AtsEntryViewModelTest {
         }
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(repository, accessRepo)
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
         runCurrent()
-        viewModel.onAction(
-            AtsEntryAction.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
         )
-        viewModel.onAction(AtsEntryAction.CompareClicked)
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
         advanceUntilIdle()
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        viewModel.onAction(AtsEntryAction.DismissCoinTopUpSheet)
+        viewModel.onIntent(AtsEntryIntent.DismissCoinTopUpSheet)
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
     }
 
@@ -221,7 +221,7 @@ class AtsEntryViewModelTest {
         val viewModel = createViewModel(FakeAtsRepository())
 
         // DismissGateSheet is safe to call even when showGateSheet is already false
-        viewModel.onAction(AtsEntryAction.DismissGateSheet)
+        viewModel.onIntent(AtsEntryIntent.DismissGateSheet)
         assertFalse(viewModel.state.value.showGateSheet)
     }
 

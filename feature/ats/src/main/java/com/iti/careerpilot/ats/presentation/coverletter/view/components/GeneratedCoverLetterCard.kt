@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterAction
+import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterIntent
 import com.iti.careerpilot.ats.presentation.coverletter.state.CoverLetterUiState
 import com.iti.careerpilot.ats.presentation.coverletter.uimodels.CoverLetterContactInfo
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
@@ -43,7 +43,7 @@ val coverLetterPadding = 16.dp
 @Composable
 internal fun GeneratedCoverLetterCard(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     CareerPilotCard(
@@ -55,7 +55,7 @@ internal fun GeneratedCoverLetterCard(
         ) {
             CoverLetterCardHeader(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
 
             HorizontalDivider(
@@ -64,7 +64,7 @@ internal fun GeneratedCoverLetterCard(
 
             CoverLetterValue(
                 stateProvider = stateProvider,
-                onAction = onAction,
+                onIntent = onIntent,
             )
             CoverLetterContacts(stateProvider = stateProvider)
         }
@@ -74,7 +74,7 @@ internal fun GeneratedCoverLetterCard(
 @Composable
 private fun CoverLetterCardHeader(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
 ) {
     val isEditing by rememberUiStateValue(stateProvider) { it.isEditing }
     Row(
@@ -102,14 +102,14 @@ private fun CoverLetterCardHeader(
         CoverLetterActionButton(
             icon = Icons.Outlined.Edit,
             label = stringResource(if (isEditing) R.string.ats_done else R.string.ats_edit),
-            onClick = { onAction(CoverLetterAction.ToggleEditing) },
+            onClick = { onIntent(CoverLetterIntent.ToggleEditing) },
             contentDescription = stringResource(R.string.ats_cover_letter_edit_icon),
         )
         Spacer(modifier = Modifier.width(8.dp))
         CoverLetterActionButton(
             icon = Icons.Outlined.ContentCopy,
             label = stringResource(R.string.ats_copy),
-            onClick = { onAction(CoverLetterAction.Copy) },
+            onClick = { onIntent(CoverLetterIntent.Copy) },
             contentDescription = stringResource(R.string.ats_cover_letter_copy_icon),
         )
     }
@@ -118,7 +118,7 @@ private fun CoverLetterCardHeader(
 @Composable
 private fun CoverLetterValue(
     stateProvider: UiStateProvider<CoverLetterUiState>,
-    onAction: (CoverLetterAction) -> Unit,
+    onIntent: (CoverLetterIntent) -> Unit,
 ) {
     val editor by rememberUiStateValue(stateProvider) {
         CoverLetterEditorState(isEditing = it.isEditing, value = it.editedValue)
@@ -126,7 +126,7 @@ private fun CoverLetterValue(
     if (editor.isEditing) {
         OutlinedTextField(
             value = editor.value,
-            onValueChange = { onAction(CoverLetterAction.EditedValueChanged(it)) },
+            onValueChange = { onIntent(CoverLetterIntent.EditedValueChanged(it)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = coverLetterPadding),

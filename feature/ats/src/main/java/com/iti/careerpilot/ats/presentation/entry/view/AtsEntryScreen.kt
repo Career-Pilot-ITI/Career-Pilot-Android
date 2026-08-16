@@ -32,8 +32,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryAction
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryEffect
+import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryIntent
 import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.ats.presentation.entry.view.components.AtsScreenHeader
 import com.iti.careerpilot.ats.presentation.entry.view.components.FasterShareHintCard
@@ -63,16 +63,16 @@ fun AtsEntryRoot(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val stateProvider = rememberUiStateProvider(state)
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { viewModel.onAction(AtsEntryAction.PdfSelected(it.toString())) }
+        uri?.let { viewModel.onIntent(AtsEntryIntent.PdfSelected(it.toString())) }
     }
 
     LaunchedEffect(viewModel) {
-        viewModel.onAction(AtsEntryAction.Initial)
+        viewModel.onIntent(AtsEntryIntent.Initial)
     }
 
     LaunchedEffect(initialSharedText) {
         initialSharedText?.let {
-            viewModel.onAction(AtsEntryAction.SharedTextReceived(it))
+            viewModel.onIntent(AtsEntryIntent.SharedTextReceived(it))
             onSharedTextConsumed()
         }
     }
@@ -92,7 +92,7 @@ fun AtsEntryRoot(
 
     AtsEntryScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
     )
 }
@@ -100,7 +100,7 @@ fun AtsEntryRoot(
 @Composable
 fun AtsEntryScreen(
     stateProvider: UiStateProvider<AtsEntryUiState>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val jobUrlDescription = stringResource(R.string.ats_job_posting_link)
@@ -149,7 +149,7 @@ fun AtsEntryScreen(
 
                 JobUrlTextField(
                     stateProvider = stateProvider,
-                    onAction = onAction,
+                    onIntent = onIntent,
                     jobUrlDescription = jobUrlDescription,
                 )
 
@@ -173,7 +173,7 @@ fun AtsEntryScreen(
 
                 CvUploadSection(
                     stateProvider = stateProvider,
-                    onAction = onAction,
+                    onIntent = onIntent,
                 )
             }
 
@@ -185,7 +185,7 @@ fun AtsEntryScreen(
         CompareButton(
             stateProvider = stateProvider,
             importMessages = importMessages,
-            onAction = onAction,
+            onIntent = onIntent,
         )
     }
 }
@@ -193,7 +193,7 @@ fun AtsEntryScreen(
 @Composable
 private fun CvUploadSection(
     stateProvider: UiStateProvider<AtsEntryUiState>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
 ) {
     val fileName by rememberUiStateValue(stateProvider) { it.cvFileName }
     val fileSizeBytes by rememberUiStateValue(stateProvider) { it.cvSizeBytes }
@@ -210,7 +210,7 @@ private fun CvUploadSection(
             else -> CvUploadCardStage.EMPTY
         },
         uploadProgress = uploadProgress,
-        onClick = { onAction(AtsEntryAction.SelectCvClicked) },
+        onClick = { onIntent(AtsEntryIntent.SelectCvClicked) },
     )
 }
 
@@ -218,7 +218,7 @@ private fun CvUploadSection(
 private fun CompareButton(
     stateProvider: UiStateProvider<AtsEntryUiState>,
     importMessages: ImmutableList<String>,
-    onAction: (AtsEntryAction) -> Unit,
+    onIntent: (AtsEntryIntent) -> Unit,
 ) {
     val isImporting by rememberUiStateValue(stateProvider) { it.isImporting }
     val canCompare by rememberUiStateValue(stateProvider) { it.canCompare }
@@ -241,7 +241,7 @@ private fun CompareButton(
         } else {
             stringResource(R.string.ats_compare_now)
         },
-        onClick = { onAction(AtsEntryAction.CompareClicked) },
+        onClick = { onIntent(AtsEntryIntent.CompareClicked) },
         enabled = canCompare,
     )
 }

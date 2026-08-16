@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
@@ -29,7 +29,7 @@ import com.iti.careerpilot.core.designsystem.components.FeaturePricingBadge
 @Composable
 fun OptimizeCvActionItem(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
 ) {
     val hasInsufficientCoins by rememberUiStateValue(stateProvider) { it.hasInsufficientCoins }
     val isStartingOptimization by rememberUiStateValue(stateProvider) {
@@ -41,7 +41,7 @@ fun OptimizeCvActionItem(
         if (hasInsufficientCoins) {
             CareerPilotButton(
                 text = stringResource(R.string.ats_get_coins),
-                onClick = { onAction(ScoringAction.OpenCoins) },
+                onClick = { onIntent(ScoringIntent.OpenCoins) },
                 variant = ButtonVariant.OUTLINE,
             )
         } else {
@@ -58,7 +58,7 @@ fun OptimizeCvActionItem(
                             R.string.ats_optimize_cv
                         },
                     ),
-                    onClick = { onAction(ScoringAction.OptimizeCv) },
+                    onClick = { onIntent(ScoringIntent.OptimizeCv) },
                     enabled = !isStartingOptimization,
                     modifier = Modifier.weight(1f),
                     leadingContent = {

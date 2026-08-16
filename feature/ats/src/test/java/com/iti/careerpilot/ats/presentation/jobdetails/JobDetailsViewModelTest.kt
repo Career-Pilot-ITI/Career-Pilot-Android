@@ -7,8 +7,8 @@ import com.iti.careerpilot.ats.domain.model.JobListing
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
-import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsIntent
 import com.iti.careerpilot.ats.presentation.jobdetails.viewmodel.JobDetailsViewModel
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -53,7 +53,7 @@ class JobDetailsViewModelTest {
         val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
         val viewModel = createViewModel(repository, accessRepo)
 
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(WORKSPACE, viewModel.state.value.workspace)
@@ -65,11 +65,11 @@ class JobDetailsViewModelTest {
     fun `start scoring with sufficient coins emits score route with workspace id`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.AtsFeatures))
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(JobDetailsAction.StartScoring)
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
         runCurrent()
 
         assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
@@ -79,10 +79,10 @@ class JobDetailsViewModelTest {
     fun `start scoring with insufficient coins shows coin top up sheet and blocks navigation`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 0, features = setOf(FeatureKey.AtsFeatures))
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(JobDetailsAction.StartScoring)
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -93,10 +93,10 @@ class JobDetailsViewModelTest {
     fun `start scoring with insufficient coins shows coin top-up sheet`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(JobDetailsAction.StartScoring)
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -108,11 +108,11 @@ class JobDetailsViewModelTest {
     fun `start scoring with sufficient coins via coin fallback is granted`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
-        viewModel.onAction(JobDetailsAction.Initial(1L))
+        viewModel.onIntent(JobDetailsIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(JobDetailsAction.StartScoring)
+        viewModel.onIntent(JobDetailsIntent.StartScoring)
         runCurrent()
 
         assertFalse(viewModel.state.value.showGateSheet)

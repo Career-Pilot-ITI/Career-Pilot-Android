@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.util.UiStateProvider
 import com.iti.careerpilot.ats.presentation.util.rememberUiStateValue
@@ -19,7 +19,7 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 @Composable
 fun ScoringErrorContent(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val error by rememberUiStateValue(stateProvider) { it.error }
@@ -27,13 +27,13 @@ fun ScoringErrorContent(
     Column(modifier = modifier) {
         AtsWorkspaceErrorContent(
             error = error,
-            onRetry = { onAction(ScoringAction.Retry) },
+            onRetry = { onIntent(ScoringIntent.Retry) },
             modifier = Modifier.weight(1f),
         )
         if (hasInsufficientCoins) {
             CareerPilotButton(
                 text = stringResource(R.string.ats_get_coins),
-                onClick = { onAction(ScoringAction.OpenCoins) },
+                onClick = { onIntent(ScoringIntent.OpenCoins) },
                 variant = ButtonVariant.OUTLINE,
                 modifier = Modifier.padding(20.dp),
             )

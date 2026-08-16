@@ -11,7 +11,7 @@ import com.iti.careerpilot.ats.domain.model.CvSectionImprovement
 import com.iti.careerpilot.ats.domain.model.JobWorkspace
 import com.iti.careerpilot.ats.domain.repository.AtsRepository
 import com.iti.careerpilot.ats.domain.usecase.GetAiJobUseCase
-import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvAction
+import com.iti.careerpilot.ats.presentation.optimizedcv.state.OptimizedCvIntent
 import com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel.OptimizedCvViewModel
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -58,7 +58,7 @@ class OptimizedCvViewModelTest {
             accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertEquals("Experience", viewModel.state.value.sections.single().name)
@@ -72,7 +72,7 @@ class OptimizedCvViewModelTest {
             accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertNotNull(viewModel.state.value.error)
@@ -100,7 +100,7 @@ class OptimizedCvViewModelTest {
             accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -118,7 +118,7 @@ class OptimizedCvViewModelTest {
             accessRepo = createAccessRepository(coins = 2, features = emptySet(), plan = Plan.FREE),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
@@ -136,7 +136,7 @@ class OptimizedCvViewModelTest {
             accessRepo = accessRepo,
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertEquals(1, accessRepo.refreshCount)
@@ -152,7 +152,7 @@ class OptimizedCvViewModelTest {
             accessRepo = createAccessRepository(coins = 10, features = setOf(FeatureKey.CvAiAnalysis)),
         )
 
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showGateSheet)
@@ -166,11 +166,11 @@ class OptimizedCvViewModelTest {
             repository = OptimizationRepository(COMPLETED_JOB),
             accessRepo = createAccessRepository(coins = 2, features = emptySet(), plan = Plan.FREE),
         )
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
 
-        viewModel.onAction(OptimizedCvAction.DismissCoinTopUpSheet)
+        viewModel.onIntent(OptimizedCvIntent.DismissCoinTopUpSheet)
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.showCoinTopUpSheet)
@@ -199,13 +199,13 @@ class OptimizedCvViewModelTest {
                 ),
             ),
         )
-        viewModel.onAction(OptimizedCvAction.Initial(42L))
+        viewModel.onIntent(OptimizedCvIntent.Initial(42L))
         advanceUntilIdle()
 
         // With remaining=0 and coinCost=0 (no coin override), pricing map = 5, so cost=5 > 0.
         // coinBalance(10) >= cost(5) → Granted. This path doesn't gate.
         // So this test verifies dismiss clears state even if already false (no-op dismiss is safe).
-        viewModel.onAction(OptimizedCvAction.DismissGateSheet)
+        viewModel.onIntent(OptimizedCvIntent.DismissGateSheet)
         assertFalse(viewModel.state.value.showGateSheet)
     }
 

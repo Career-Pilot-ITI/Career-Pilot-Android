@@ -14,8 +14,8 @@ import com.iti.careerpilot.ats.domain.usecase.GetWorkspaceUseCase
 import com.iti.careerpilot.ats.domain.usecase.ObserveCurrentProfileUseCase
 import com.iti.careerpilot.ats.domain.usecase.OptimizeCvUseCase
 import com.iti.careerpilot.ats.domain.usecase.ScoreCvUseCase
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
@@ -65,7 +65,7 @@ class ScoringViewModelTest {
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
 
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(1, repository.workspaceCalls)
@@ -81,8 +81,8 @@ class ScoringViewModelTest {
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         runCurrent()
 
         assertEquals(1, repository.scoreCalls)
@@ -99,7 +99,7 @@ class ScoringViewModelTest {
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
 
         assertEquals(0, repository.scoreCalls)
@@ -119,11 +119,11 @@ class ScoringViewModelTest {
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(ScoringAction.StartPractice)
+        viewModel.onIntent(ScoringIntent.StartPractice)
         runCurrent()
 
         assertEquals(
@@ -144,11 +144,11 @@ class ScoringViewModelTest {
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
         runCurrent()
 
         assertEquals(1, repository.optimizeCalls)
@@ -163,10 +163,10 @@ class ScoringViewModelTest {
             features = setOf(FeatureKey.AtsFeatures, FeatureKey.CvAiAnalysis),
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
         advanceUntilIdle()
 
         assertEquals(0, repository.optimizeCalls)
@@ -183,10 +183,10 @@ class ScoringViewModelTest {
             plan = Plan.FREE,
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
 
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
         advanceUntilIdle()
 
         assertEquals(0, repository.optimizeCalls)
@@ -205,11 +205,11 @@ class ScoringViewModelTest {
             plan = Plan.FREE,
         )
         val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
-        viewModel.onAction(ScoringAction.Initial(1L))
+        viewModel.onIntent(ScoringIntent.Initial(1L))
         advanceUntilIdle()
         val effect = async { viewModel.effects.first() }
 
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
         runCurrent()
 
         assertEquals(1, repository.optimizeCalls)

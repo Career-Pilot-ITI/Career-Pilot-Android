@@ -25,8 +25,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.iti.careerpilot.ats.R
 import com.iti.careerpilot.ats.background.CvOptimizationService
 import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
-import com.iti.careerpilot.ats.presentation.scoring.state.ScoringAction
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringEffect
+import com.iti.careerpilot.ats.presentation.scoring.state.ScoringIntent
 import com.iti.careerpilot.ats.presentation.scoring.state.ScoringUiState
 import com.iti.careerpilot.ats.presentation.scoring.view.components.ScoringBody
 import com.iti.careerpilot.ats.presentation.scoring.viewmodel.ScoringViewModel
@@ -56,11 +56,11 @@ fun ScoringRoot(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) {
-        viewModel.onAction(ScoringAction.OptimizeCv)
+        viewModel.onIntent(ScoringIntent.OptimizeCv)
     }
 
     LaunchedEffect(workspaceId) {
-        viewModel.onAction(ScoringAction.Initial(workspaceId))
+        viewModel.onIntent(ScoringIntent.Initial(workspaceId))
     }
 
     LaunchedEffect(lifecycleOwner, viewModel) {
@@ -87,9 +87,9 @@ fun ScoringRoot(
 
     ScoringScreen(
         stateProvider = stateProvider,
-        onAction = { action ->
+        onIntent = { intent ->
             if (
-                action == ScoringAction.OptimizeCv &&
+                intent == ScoringIntent.OptimizeCv &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(
                     context,
@@ -98,7 +98,7 @@ fun ScoringRoot(
             ) {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
-                viewModel.onAction(action)
+                viewModel.onIntent(intent)
             }
         },
         onBack = onBack,
@@ -119,8 +119,8 @@ fun ScoringRoot(
             featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
             requiredPlan = gateRequiredPlan,
             planFeatures = gatePlanFeatures,
-            onUpgradeClick = { viewModel.onAction(ScoringAction.UpgradeFromGate) },
-            onDismiss = { viewModel.onAction(ScoringAction.DismissGateSheet) },
+            onUpgradeClick = { viewModel.onIntent(ScoringIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(ScoringIntent.DismissGateSheet) },
         )
     }
 
@@ -128,8 +128,8 @@ fun ScoringRoot(
         CoinTopUpBottomSheet(
             coinCost = coinTopUpRequiredCost,
             currentBalance = coinBalance,
-            onBuyCoins = { viewModel.onAction(ScoringAction.BuyCoinsClicked) },
-            onDismiss = { viewModel.onAction(ScoringAction.DismissCoinTopUpSheet) },
+            onBuyCoins = { viewModel.onIntent(ScoringIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(ScoringIntent.DismissCoinTopUpSheet) },
         )
     }
 }
@@ -137,7 +137,7 @@ fun ScoringRoot(
 @Composable
 fun ScoringScreen(
     stateProvider: UiStateProvider<ScoringUiState>,
-    onAction: (ScoringAction) -> Unit,
+    onIntent: (ScoringIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenJob: (String) -> Unit = {},
@@ -150,7 +150,7 @@ fun ScoringScreen(
 
         ScoringBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             onOpenJob = onOpenJob,
             modifier = Modifier.fillMaxSize(),
         )

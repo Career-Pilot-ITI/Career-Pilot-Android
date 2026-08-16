@@ -30,8 +30,8 @@ import com.iti.careerpilot.ats.presentation.components.AtsCenteredTopBar
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceErrorContent
 import com.iti.careerpilot.ats.presentation.components.AtsWorkspaceLoadingContent
 import com.iti.careerpilot.ats.presentation.components.JobHeaderCard
-import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsAction
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsEffect
+import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsIntent
 import com.iti.careerpilot.ats.presentation.jobdetails.state.JobDetailsUiState
 import com.iti.careerpilot.ats.presentation.jobdetails.view.components.DescriptionCard
 import com.iti.careerpilot.ats.presentation.jobdetails.view.components.JobOverviewCard
@@ -61,7 +61,7 @@ fun JobDetailsRoot(
     val stateProvider = rememberUiStateProvider(state)
 
     LaunchedEffect(workspaceId) {
-        viewModel.onAction(JobDetailsAction.Initial(workspaceId))
+        viewModel.onIntent(JobDetailsIntent.Initial(workspaceId))
     }
 
     LaunchedEffect(viewModel) {
@@ -75,7 +75,7 @@ fun JobDetailsRoot(
 
     JobDetailsScreen(
         stateProvider = stateProvider,
-        onAction = viewModel::onAction,
+        onIntent = viewModel::onIntent,
         onBack = onBack,
         onOpenJob = openJob,
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
@@ -94,8 +94,8 @@ fun JobDetailsRoot(
             featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
             requiredPlan = gateRequiredPlan,
             planFeatures = gatePlanFeatures,
-            onUpgradeClick = { viewModel.onAction(JobDetailsAction.UpgradeFromGate) },
-            onDismiss = { viewModel.onAction(JobDetailsAction.DismissGateSheet) },
+            onUpgradeClick = { viewModel.onIntent(JobDetailsIntent.UpgradeFromGate) },
+            onDismiss = { viewModel.onIntent(JobDetailsIntent.DismissGateSheet) },
         )
     }
 
@@ -103,8 +103,8 @@ fun JobDetailsRoot(
         CoinTopUpBottomSheet(
             coinCost = coinTopUpRequiredCost,
             currentBalance = coinBalance,
-            onBuyCoins = { viewModel.onAction(JobDetailsAction.BuyCoinsClicked) },
-            onDismiss = { viewModel.onAction(JobDetailsAction.DismissCoinTopUpSheet) },
+            onBuyCoins = { viewModel.onIntent(JobDetailsIntent.BuyCoinsClicked) },
+            onDismiss = { viewModel.onIntent(JobDetailsIntent.DismissCoinTopUpSheet) },
         )
     }
 }
@@ -112,7 +112,7 @@ fun JobDetailsRoot(
 @Composable
 fun JobDetailsScreen(
     stateProvider: UiStateProvider<JobDetailsUiState>,
-    onAction: (JobDetailsAction) -> Unit,
+    onIntent: (JobDetailsIntent) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenJob: (String) -> Unit = {},
@@ -125,7 +125,7 @@ fun JobDetailsScreen(
 
         JobDetailsBody(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             onOpenJob = onOpenJob,
             modifier = Modifier.fillMaxSize(),
         )
@@ -135,7 +135,7 @@ fun JobDetailsScreen(
 @Composable
 private fun JobDetailsBody(
     stateProvider: UiStateProvider<JobDetailsUiState>,
-    onAction: (JobDetailsAction) -> Unit,
+    onIntent: (JobDetailsIntent) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -151,12 +151,12 @@ private fun JobDetailsBody(
         JobDetailsPhase.LOADING -> AtsWorkspaceLoadingContent(modifier = modifier)
         JobDetailsPhase.ERROR -> JobDetailsErrorContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             modifier = modifier,
         )
         JobDetailsPhase.CONTENT -> JobDetailsContent(
             stateProvider = stateProvider,
-            onAction = onAction,
+            onIntent = onIntent,
             onOpenJob = onOpenJob,
             modifier = modifier,
         )
@@ -166,13 +166,13 @@ private fun JobDetailsBody(
 @Composable
 private fun JobDetailsErrorContent(
     stateProvider: UiStateProvider<JobDetailsUiState>,
-    onAction: (JobDetailsAction) -> Unit,
+    onIntent: (JobDetailsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val error by rememberUiStateValue(stateProvider) { it.error }
     AtsWorkspaceErrorContent(
         error = error,
-        onRetry = { onAction(JobDetailsAction.Retry) },
+        onRetry = { onIntent(JobDetailsIntent.Retry) },
         modifier = modifier,
     )
 }
@@ -180,7 +180,7 @@ private fun JobDetailsErrorContent(
 @Composable
 private fun JobDetailsContent(
     stateProvider: UiStateProvider<JobDetailsUiState>,
-    onAction: (JobDetailsAction) -> Unit,
+    onIntent: (JobDetailsIntent) -> Unit,
     onOpenJob: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -190,7 +190,7 @@ private fun JobDetailsContent(
         val error by rememberUiStateValue(stateProvider) { it.error }
         AtsWorkspaceErrorContent(
             error = error,
-            onRetry = { onAction(JobDetailsAction.Retry) },
+            onRetry = { onIntent(JobDetailsIntent.Retry) },
             modifier = modifier,
         )
         return
@@ -236,12 +236,12 @@ private fun JobDetailsContent(
             access = atsScoreAccess,
             coinBalance = coinBalance,
             planDisplayName = planDisplayName,
-            onUpgradeClick = { onAction(JobDetailsAction.UpgradeFromGate) },
+            onUpgradeClick = { onIntent(JobDetailsIntent.UpgradeFromGate) },
         )
 
         CareerPilotButton(
             text = stringResource(R.string.ats_start_scoring),
-            onClick = { onAction(JobDetailsAction.StartScoring) },
+            onClick = { onIntent(JobDetailsIntent.StartScoring) },
         )
     }
 }
