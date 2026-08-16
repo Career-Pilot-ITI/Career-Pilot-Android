@@ -3,6 +3,7 @@ package com.iti.careerpilot.challengedetails.presentation.screen
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -319,7 +320,11 @@ fun DetailRow(
 @Composable
 fun PermissionRow(label: String, isGranted: Boolean, onClick: () -> Unit) {
     Surface(
-        onClick = onClick,
+        modifier = Modifier
+            .clickable(
+                onClick = onClick,
+                enabled = !isGranted
+            ),
         shape = MaterialTheme.shapes.medium,
         color = if (isGranted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         else MaterialTheme.colorScheme.surfaceVariant.copy(
@@ -353,9 +358,7 @@ fun PermissionRow(label: String, isGranted: Boolean, onClick: () -> Unit) {
 
 @Composable
 fun TipsCard() {
-    CareerPilotCard(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-    ) {
+    CareerPilotCard {
         Column(
             modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
