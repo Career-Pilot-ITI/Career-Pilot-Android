@@ -93,6 +93,11 @@ class ChallengeDashboardViewModel @Inject constructor(
             }
 
             is ChallengeDashboardAction.OnViewParticipantReports -> loadParticipantSessions(action.challengeId)
+            is ChallengeDashboardAction.OnViewSessionResult -> {
+                viewModelScope.launch {
+                    _events.send(ChallengeDashboardEvent.NavigateToSessionResult(action.sessionId))
+                }
+            }
             is ChallengeDashboardAction.OnTakenChallengeClicked -> {
                 val session = _state.value.takenChallenges.find { it.sessionId == action.sessionId }
                     ?: _state.value.participantSessions?.find { it.sessionId == action.sessionId }

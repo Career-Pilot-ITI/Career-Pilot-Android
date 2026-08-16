@@ -196,6 +196,8 @@ class ResultViewModel @Inject constructor(
         return SessionResult(
             id = 0, // Placeholder for Long ID
             sessionId = 0, // Placeholder
+            participantName = session.participantName,
+            participantEmail = session.participantEmail,
             overallScore = session.overallScore ?: 0,
             clarityScore = session.clarityScore ?: 0,
             confidenceScore = session.confidenceScore ?: 0,

@@ -3,6 +3,8 @@ package com.iti.careerpilot.practicesession.domain.models
 data class SessionResult(
     val id: Long,
     val sessionId: Long,
+    val participantName: String? = null,
+    val participantEmail: String? = null,
     val overallScore: Int,
     val clarityScore: Int,
     val confidenceScore: Int,

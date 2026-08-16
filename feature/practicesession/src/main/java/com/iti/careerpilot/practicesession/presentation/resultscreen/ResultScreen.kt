@@ -123,10 +123,19 @@ fun ResultScreen(
                     BackIconButton(onBack = onBack)
                 },
                 title = {
-                    Text(
-                        text = stringResource(R.string.session_results),
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.session_results),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        state.sessionResult?.participantName?.let { name ->
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
@@ -160,7 +169,10 @@ fun ResultScreen(
                 ) {
                     item {
                         Spacer(modifier = Modifier.height(Dimens.SpaceS))
-                        OverallScoreSection(result.overallScore)
+                        OverallScoreSection(
+                            score = result.overallScore,
+                            participantName = result.participantName
+                        )
                     }
 
                     item {
@@ -190,7 +202,10 @@ fun ResultScreen(
                     }
 
                     items(result.questions) { question ->
-                        QuestionDetailItem(question)
+                        QuestionDetailItem(
+                            question = question,
+                            participantName = result.participantName
+                        )
                     }
 
                     item {
@@ -255,7 +270,10 @@ fun ResultErrorState(
 }
 
 @Composable
-fun OverallScoreSection(score: Int) {
+fun OverallScoreSection(
+    score: Int,
+    participantName: String? = null
+) {
     val isGoodResult = score >= 70
     val isExcellentResult = score >= 85
 
@@ -335,12 +353,15 @@ fun OverallScoreSection(score: Int) {
 
         Spacer(modifier = Modifier.height(Dimens.SpaceL))
 
+        val statusText = when {
+            score >= 85 -> stringResource(R.string.excellent_performance)
+            score >= 70 -> stringResource(R.string.good_performance)
+            participantName != null -> stringResource(R.string.needs_improvement)
+            else -> stringResource(R.string.keep_practicing)
+        }
+
         Text(
-            text = when {
-                score >= 85 -> stringResource(R.string.excellent_performance)
-                score >= 70 -> stringResource(R.string.good_performance)
-                else -> stringResource(R.string.keep_practicing)
-            },
+            text = statusText,
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center
         )
@@ -479,7 +500,10 @@ fun CoachingTipsSection(tips: List<String>) {
 }
 
 @Composable
-fun QuestionDetailItem(question: SessionQuestionResult) {
+fun QuestionDetailItem(
+    question: SessionQuestionResult,
+    participantName: String? = null
+) {
     var expanded by remember { mutableStateOf(false) }
 
     CareerPilotCard(
@@ -525,8 +549,14 @@ fun QuestionDetailItem(question: SessionQuestionResult) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                     Spacer(modifier = Modifier.height(Dimens.SpaceL))
                     
+                    val transcriptLabel = if (participantName != null) {
+                        stringResource(R.string.transcript)
+                    } else {
+                        stringResource(R.string.your_transcript)
+                    }
+
                     Text(
-                        text = stringResource(R.string.your_transcript),
+                        text = transcriptLabel,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

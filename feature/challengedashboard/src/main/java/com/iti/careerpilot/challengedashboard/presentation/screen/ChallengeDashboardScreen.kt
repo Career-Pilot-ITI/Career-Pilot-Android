@@ -146,7 +146,10 @@ fun ChallengeDashboardScreenRoot(
         ParticipantReportsDialog(
             sessions = sessions,
             onDismiss = { viewModel.onAction(ChallengeDashboardAction.OnDismissParticipantReports) },
-            onViewSession = { viewModel.onAction(ChallengeDashboardAction.OnTakenChallengeClicked(it)) }
+            onViewSession = {
+                viewModel.onAction(ChallengeDashboardAction.OnViewSessionResult(it))
+                viewModel.onAction(ChallengeDashboardAction.OnDismissParticipantReports)
+            }
         )
     }
 

@@ -13,6 +13,7 @@ sealed interface ChallengeDashboardAction {
     data class OnEditChallenge(val challengeId: String) : ChallengeDashboardAction
     data class OnViewParticipantReports(val challengeId: String) : ChallengeDashboardAction
     data class OnTakenChallengeClicked(val sessionId: String) : ChallengeDashboardAction
+    data class OnViewSessionResult(val sessionId: String) : ChallengeDashboardAction
     data object OnDismissParticipantReports : ChallengeDashboardAction
     data object OnBackClicked : ChallengeDashboardAction
 }
