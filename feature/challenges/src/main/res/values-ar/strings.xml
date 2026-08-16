@@ -2,12 +2,12 @@
 <resources>
     <string name="challenges_title">التحديات</string>
     <string name="challenges_search_placeholder">البحث حسب المسار أو المنشئ</string>
-    <string name="challenges_enter_code">أدخل كود خاص</string>
+    <string name="challenges_enter_code">أدخل كود</string>
     <string name="challenges_create">إنشاء تحدي</string>
     <string name="challenges_dashboard">لوحة التحكم</string>
     <string name="challenges_empty_list">لم يتم العثور على تحديات</string>
-    <string name="challenges_private_dialog_title">تحدي خاص</string>
-    <string name="challenges_private_dialog_text">أدخل كود الدعوة للوصول إلى تحدي خاص.</string>
+    <string name="challenges_private_dialog_title">تحدي</string>
+    <string name="challenges_private_dialog_text">أدخل كود الدعوة للوصول إلى تحدي.</string>
     <string name="challenges_private_dialog_hint">كود الدعوة</string>
     <string name="challenges_private_dialog_submit">دخول</string>
     <string name="challenges_private_dialog_cancel">إلغاء</string>
@@ -15,4 +15,7 @@
     <string name="dashboard">لوحة التحكم</string>
     <string name="questions">%1$d اسئلة</string>
     <string name="created_by">انشأه: %1$s</string>
+    <string name="challenges_public_section">Public Challenges</string>
+    <string name="challenges_empty_search">No search results.</string>
+    <string name="loading">Loading</string>
 </resources>
