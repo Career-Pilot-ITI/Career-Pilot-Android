@@ -60,9 +60,6 @@ fun AtsEntryRoot(
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
     val stateProvider = rememberUiStateProvider(state)
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { viewModel.onIntent(AtsEntryIntent.PdfSelected(it.toString())) }
-    }
 
     LaunchedEffect(viewModel) {
         viewModel.onIntent(AtsEntryIntent.Initial)

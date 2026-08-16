@@ -20,7 +20,6 @@ import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
 import com.iti.core.model.AccessState
 import com.iti.core.model.FeatureKey
-import com.iti.core.model.PdfFile
 import com.iti.core.model.Plan
 import kotlin.time.Clock
 import kotlinx.collections.immutable.persistentListOf
@@ -157,8 +156,6 @@ private class CoverLetterRepository(
     override val userProfile = MutableStateFlow(UserProfile())
     var generateCalls = 0
 
-    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
-        CareerPilotResult.Success(Unit)
     override suspend fun importJob(url: String) = CareerPilotResult.Success(workspace())
     override suspend fun getWorkspace(workspaceId: Long) = CareerPilotResult.Success(workspace())
     override suspend fun scoreCv(workspaceId: Long): CareerPilotResult<AtsScore, NetworkError> =

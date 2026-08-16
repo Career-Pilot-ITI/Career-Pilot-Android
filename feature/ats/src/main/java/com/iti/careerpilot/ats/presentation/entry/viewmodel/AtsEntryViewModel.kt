@@ -12,7 +12,6 @@ import com.iti.careerpilot.ats.presentation.entry.state.AtsEntryUiState
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
-import com.iti.common.media.pdfpicker.PdfOperations
 import com.iti.common.result.CareerPilotResult
 import com.iti.common.util.UIText
 import com.iti.common.util.toUIText
@@ -33,7 +32,6 @@ import javax.inject.Inject
 class AtsEntryViewModel @Inject constructor(
     private val observeCurrentProfile: ObserveCurrentProfileUseCase,
     private val importJob: ImportJobUseCase,
-    private val pdfOperations: PdfOperations,
     private val checkFeatureAccess: CheckFeatureAccessUseCase,
     private val refreshAccess: RefreshAccessUseCase,
 ) : ViewModel() {
@@ -66,8 +64,7 @@ class AtsEntryViewModel @Inject constructor(
             AtsEntryIntent.Initial -> observeProfile()
             is AtsEntryIntent.JobUrlChanged -> updateUrl(intent.value)
             is AtsEntryIntent.SharedTextReceived -> acceptSharedText(intent.value)
-            AtsEntryIntent.SelectCvClicked -> emitEffect(AtsEntryEffect.OpenPdfPicker)
-            is AtsEntryIntent.PdfSelected -> uploadPdf(intent.uri)
+            AtsEntryIntent.EditProfileClicked -> emitEffect(AtsEntryEffect.NavigateToEditProfile)
             AtsEntryIntent.CompareClicked -> importCurrentJob()
             AtsEntryIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
             AtsEntryIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
