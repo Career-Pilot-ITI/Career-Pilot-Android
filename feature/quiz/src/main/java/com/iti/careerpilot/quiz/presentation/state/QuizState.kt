@@ -34,7 +34,7 @@ data class QuizState(
     val planDisplayName: String = "Free",
     val showGateSheet: Boolean = false,
     val gatePlanFeatures: List<String> = emptyList(),
-    val gateRequiredPlan: Plan = Plan.MAX,
+    val gateRequiredPlan: Plan = Plan.PLUS,
     val showCoinTopUpSheet: Boolean = false,
     val coinTopUpRequiredCost: Int = 0,
 )

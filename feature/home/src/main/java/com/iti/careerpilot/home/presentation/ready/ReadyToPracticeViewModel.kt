@@ -74,7 +74,7 @@ class ReadyToPracticeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            checkFeatureAccess(FeatureKey.MockInterviews).collect { access ->
+            checkFeatureAccess(FeatureKey.VoicePracticeMode).collect { access ->
                 _state.update { it.copy(audioInterviewAccess = access) }
                 if (access is FeatureAccess.StaleCacheBlocked) {
                     refreshAccess()

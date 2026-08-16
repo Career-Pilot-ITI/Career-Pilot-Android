@@ -167,7 +167,7 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `SelectVideoMode when user has insufficient coins opens coin top up sheet`() = runTest {
+    fun `SelectVideoMode on FREE plan shows video gate sheet for Plan MAX`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
@@ -181,38 +181,41 @@ class ReadyToPracticeViewModelTest {
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.CoinTopUpRequired)
+        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Locked)
+        assertEquals(Plan.MAX, (viewModel.state.value.videoInterviewAccess as FeatureAccess.Locked).requiredPlan)
 
         viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
+        assertTrue(viewModel.state.value.showVideoGateSheet)
+        assertEquals(Plan.MAX, viewModel.state.value.videoGateRequiredPlan)
         assertFalse(viewModel.state.value.isVideoMode)
     }
 
     @Test
-    fun `SelectVideoMode on FREE plan with sufficient coins is granted via coin fallback`() = runTest {
+    fun `SelectVideoMode on PLUS plan shows video gate sheet for Plan MAX`() = runTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
+                plan = Plan.PLUS,
+                features = PlanAccessMap.featuresFor(Plan.PLUS),
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
-                coinBalance = 20,
+                coinBalance = 100,
             )
         )
         val viewModel = createViewModel(accessRepository = fakeRepo)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Granted)
+        assertTrue(viewModel.state.value.videoInterviewAccess is FeatureAccess.Locked)
+        assertEquals(Plan.MAX, (viewModel.state.value.videoInterviewAccess as FeatureAccess.Locked).requiredPlan)
 
         viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.isVideoMode)
-        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertTrue(viewModel.state.value.showVideoGateSheet)
+        assertEquals(Plan.MAX, viewModel.state.value.videoGateRequiredPlan)
+        assertFalse(viewModel.state.value.isVideoMode)
     }
 
     @Test
@@ -556,7 +559,7 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
         assertTrue(events.isEmpty())
         job.cancel()
     }
@@ -564,7 +567,7 @@ class ReadyToPracticeViewModelTest {
     @Test
     fun `BeginInterviewClicked when CoinTopUpRequired opens coin top up sheet`() = runTest {
         val quota = FeatureQuota(
-            feature = FeatureKey.MockInterviews,
+            feature = FeatureKey.VoicePracticeMode,
             remaining = 0,
             max = 3,
             coinCost = 25,
@@ -573,7 +576,7 @@ class ReadyToPracticeViewModelTest {
             AccessState(
                 plan = Plan.FREE,
                 features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = mapOf(FeatureKey.MockInterviews to quota),
+                quotas = mapOf(FeatureKey.VoicePracticeMode to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
                 coinBalance = 5,
@@ -603,16 +606,16 @@ class ReadyToPracticeViewModelTest {
     @Test
     fun `BeginInterviewClicked in video mode when Locked shows video gate sheet`() = runTest {
         val quota = FeatureQuota(
-            feature = FeatureKey.MockInterviews,
+            feature = FeatureKey.VoicePracticeMode,
             remaining = 3,
             max = 3,
-            coinCost = 5,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
-                plan = Plan.FREE,
-                features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = mapOf(FeatureKey.MockInterviews to quota),
+                plan = Plan.PLUS,
+                features = PlanAccessMap.featuresFor(Plan.PLUS),
+                quotas = mapOf(FeatureKey.VoicePracticeMode to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
                 coinBalance = 0,
@@ -625,11 +628,12 @@ class ReadyToPracticeViewModelTest {
         viewModel.initialise(trackId = 105L, trackName = "Kotlin")
         viewModel.onIntent(ReadyToPracticeIntent.MicrophonePermissionChanged(isGranted = true))
         viewModel.onIntent(ReadyToPracticeIntent.CameraPermissionChanged(isGranted = true))
-        // Manually trigger video mode in state if possible or select video mode
-        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode) // sets showVideoGateSheet
+        // SelectVideoMode shows gate sheet since video requires MAX
+        viewModel.onIntent(ReadyToPracticeIntent.SelectVideoMode)
+        assertTrue(viewModel.state.value.showVideoGateSheet)
         viewModel.onIntent(ReadyToPracticeIntent.DismissVideoGateSheet)
 
-        // Now test beginInterview when audio is granted but video is locked
+        // Now test beginInterview when audio is granted via quota
         val events = mutableListOf<ReadyToPracticeEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.events.toList(events)
@@ -638,7 +642,7 @@ class ReadyToPracticeViewModelTest {
         viewModel.onIntent(ReadyToPracticeIntent.BeginInterviewClicked)
         testScheduler.advanceUntilIdle()
 
-        // Audio mode is active since SelectVideoMode was locked, so beginInterview in audio mode (MockInterviews is in FREE) proceeds
+        // Audio mode is active since SelectVideoMode was locked, so beginInterview in audio mode proceeds
         val practiceEvent = events.filterIsInstance<ReadyToPracticeEffect.NavigateToPractice>().firstOrNull()
         assertTrue("Expected NavigateToPractice event", practiceEvent != null)
         assertFalse(practiceEvent!!.isVideo)
@@ -690,12 +694,12 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `initial state contains exact pricing from FeaturePricingMap for voice 5 coins and video 15 coins`() = runTest {
+    fun `initial state contains exact pricing from FeaturePricingMap for voice 10 coins and video 0 coins`() = runTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        assertEquals(5, viewModel.state.value.voiceCoinCost)
-        assertEquals(15, viewModel.state.value.videoCoinCost)
+        assertEquals(10, viewModel.state.value.voiceCoinCost)
+        assertEquals(0, viewModel.state.value.videoCoinCost)
         assertEquals(FeaturePricingMap.coinCost(FeatureKey.VoicePracticeMode), viewModel.state.value.voiceCoinCost)
         assertEquals(FeaturePricingMap.coinCost(FeatureKey.VideoInterview), viewModel.state.value.videoCoinCost)
     }
@@ -703,16 +707,16 @@ class ReadyToPracticeViewModelTest {
     @Test
     fun `StartPracticeClicked with insufficient coins in audio mode blocks and opens coin top up sheet`() = runTest {
         val quota = FeatureQuota(
-            feature = FeatureKey.MockInterviews,
+            feature = FeatureKey.VoicePracticeMode,
             remaining = 0,
             max = 3,
-            coinCost = 5,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
                 features = PlanAccessMap.featuresFor(Plan.FREE),
-                quotas = mapOf(FeatureKey.MockInterviews to quota),
+                quotas = mapOf(FeatureKey.VoicePracticeMode to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
                 coinBalance = 2,
@@ -734,7 +738,7 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
         assertTrue(events.isEmpty())
         job.cancel()
     }
