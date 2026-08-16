@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class ChallengesState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val publicChallenges: ImmutableList<Challenge> = persistentListOf(),
     val searchQuery: String = "",
     val isPrivateCodeDialogOpen: Boolean = false,

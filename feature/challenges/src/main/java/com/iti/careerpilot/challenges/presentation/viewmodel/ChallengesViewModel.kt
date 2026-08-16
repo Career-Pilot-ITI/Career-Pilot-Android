@@ -40,15 +40,23 @@ class ChallengesViewModel @Inject constructor(
         fetchPublicChallenges()
     }
 
-    private fun fetchPublicChallenges() {
+    private fun fetchPublicChallenges(isRefreshing: Boolean = false) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            if (isRefreshing) {
+                _state.update { it.copy(isRefreshing = true) }
+            } else {
+                _state.update { it.copy(isLoading = true) }
+            }
             repository.getPublicChallenges()
                 .onSuccess { challenges ->
-                    _state.update { it.copy(publicChallenges = challenges.toImmutableList(), isLoading = false) }
+                    _state.update { it.copy(
+                        publicChallenges = challenges.toImmutableList(),
+                        isLoading = false,
+                        isRefreshing = false
+                    ) }
                 }
                 .onError { error ->
-                    _state.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isLoading = false, isRefreshing = false) }
                     CareerPilotSnackbarController.show(error.toUIText())
                 }
         }
@@ -57,7 +65,7 @@ class ChallengesViewModel @Inject constructor(
     fun onAction(action: ChallengesAction) {
         when (action) {
             ChallengesAction.Initial -> initialize()
-            ChallengesAction.Refresh -> fetchPublicChallenges()
+            ChallengesAction.Refresh -> fetchPublicChallenges(isRefreshing = true)
             is ChallengesAction.OnSearchQueryChange -> _state.update { it.copy(searchQuery = action.query) }
             ChallengesAction.TogglePrivateCodeDialog -> _state.update { it.copy(isPrivateCodeDialogOpen = !it.isPrivateCodeDialogOpen, privateCode = "") }
             is ChallengesAction.OnPrivateCodeChange -> _state.update { it.copy(privateCode = action.code) }
