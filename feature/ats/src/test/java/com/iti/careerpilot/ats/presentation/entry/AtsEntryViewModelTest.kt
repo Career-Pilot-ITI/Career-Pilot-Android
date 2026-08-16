@@ -265,6 +265,34 @@ class AtsEntryViewModelTest {
         assertFalse(viewModel.state.value.showGateSheet)
     }
 
+    @Test
+    fun `UpgradeFromGate clears gate sheet flag and emits NavigateToPaywall effect`() = runTest(dispatcher) {
+        val repository = FakeAtsRepository().apply {
+            userProfile.value = UserProfile(cv = CvInfo(cvUrl = "https://cdn.example.com/cv.pdf"))
+        }
+        val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(repository, accessRepo)
+        var receivedEffect: AtsEntryEffect? = null
+        val job = launch(dispatcher) {
+            viewModel.effects.collect { receivedEffect = it }
+        }
+        viewModel.onIntent(AtsEntryIntent.Initial)
+        runCurrent()
+        viewModel.onIntent(
+            AtsEntryIntent.JobUrlChanged("https://www.linkedin.com/jobs/view/123456789"),
+        )
+        viewModel.onIntent(AtsEntryIntent.CompareClicked)
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value.showGateSheet)
+
+        viewModel.onIntent(AtsEntryIntent.UpgradeFromGate)
+        runCurrent()
+
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertEquals(AtsEntryEffect.NavigateToPaywall, receivedEffect)
+        job.cancel()
+    }
+
     // ----- helpers -----
 
     private fun createAccessRepository(

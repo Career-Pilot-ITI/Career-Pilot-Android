@@ -331,6 +331,9 @@ fun RootNavDisplay(
                                 Route.EditProfile(section = ProfileEditSection.CAREER),
                             )
                         },
+                        onPaywallRequested = {
+                            rootBackStack.navigateSingleTop(Route.Paywall())
+                        },
                     )
                 }
                 entry<Route.AtsJobDetails> { route ->

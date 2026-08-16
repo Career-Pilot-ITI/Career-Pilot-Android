@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,17 +46,21 @@ import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCard
 import com.iti.careerpilot.core.designsystem.components.CvUploadCardStage
+import com.iti.careerpilot.core.designsystem.components.FeatureGateBottomSheet
 import com.iti.common.snackbar.CareerPilotSnackbarController
+import com.iti.core.model.Plan
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AtsEntryRoot(
     initialSharedText: String?,
     onSharedTextConsumed: () -> Unit,
     onJobDetailsRequested: (Long) -> Unit,
     onEditProfileRequested: () -> Unit,
+    onPaywallRequested: () -> Unit = {},
     viewModel: AtsEntryViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -80,6 +85,7 @@ fun AtsEntryRoot(
                     AtsEntryEffect.NavigateToEditProfile -> onEditProfileRequested()
                     is AtsEntryEffect.NavigateToJobDetails -> onJobDetailsRequested(effect.workspaceId)
                     is AtsEntryEffect.ShowMessage -> CareerPilotSnackbarController.show(effect.message)
+                    AtsEntryEffect.NavigateToPaywall -> onPaywallRequested()
                 }
             }
         }
@@ -92,6 +98,7 @@ fun AtsEntryRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AtsEntryScreen(
     stateProvider: UiStateProvider<AtsEntryUiState>,
@@ -181,6 +188,21 @@ fun AtsEntryScreen(
             stateProvider = stateProvider,
             importMessages = importMessages,
             onIntent = onIntent,
+        )
+    }
+
+    val showGateSheet by rememberUiStateValue(stateProvider) { it.showGateSheet }
+    val gateRequiredPlan by rememberUiStateValue(stateProvider) { it.gateRequiredPlan }
+    val gatePlanFeatures by rememberUiStateValue(stateProvider) { it.gatePlanFeatures }
+    val gateFeatureName by rememberUiStateValue(stateProvider) { it.gateFeatureName }
+
+    if (showGateSheet) {
+        FeatureGateBottomSheet(
+            featureName = gateFeatureName.ifEmpty { stringResource(R.string.ats_job_match_title) },
+            requiredPlan = gateRequiredPlan ?: Plan.PLUS,
+            planFeatures = gatePlanFeatures,
+            onUpgradeClick = { onIntent(AtsEntryIntent.UpgradeFromGate) },
+            onDismiss = { onIntent(AtsEntryIntent.DismissGateSheet) },
         )
     }
 }

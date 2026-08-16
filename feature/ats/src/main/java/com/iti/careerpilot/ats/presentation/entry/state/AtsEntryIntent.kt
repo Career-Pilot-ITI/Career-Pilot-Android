@@ -8,4 +8,5 @@ sealed interface AtsEntryIntent {
     data object CompareClicked : AtsEntryIntent
     data object DismissGateSheet : AtsEntryIntent
     data object DismissCoinTopUpSheet : AtsEntryIntent
+    data object UpgradeFromGate : AtsEntryIntent
 }

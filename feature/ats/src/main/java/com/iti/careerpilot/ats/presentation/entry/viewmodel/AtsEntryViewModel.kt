@@ -68,6 +68,10 @@ class AtsEntryViewModel @Inject constructor(
             AtsEntryIntent.CompareClicked -> importCurrentJob()
             AtsEntryIntent.DismissGateSheet -> _state.update { it.copy(showGateSheet = false) }
             AtsEntryIntent.DismissCoinTopUpSheet -> _state.update { it.copy(showCoinTopUpSheet = false) }
+            AtsEntryIntent.UpgradeFromGate -> {
+                _state.update { it.copy(showGateSheet = false) }
+                emitEffect(AtsEntryEffect.NavigateToPaywall)
+            }
         }
     }
 
