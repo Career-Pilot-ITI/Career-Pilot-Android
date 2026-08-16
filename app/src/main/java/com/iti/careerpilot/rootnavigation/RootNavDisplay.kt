@@ -316,6 +316,11 @@ fun RootNavDisplay(
                                 Route.Paywall(showGetCoins = showGetCoins)
                             )
                         },
+                        openChallengeDetails = { challengeId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.ChallengeDetails(challengeId)
+                            )
+                        },
                         openCreateChallenge = {
                             rootBackStack.navigateSingleTop(
                                 Route.CreateChallenge,
