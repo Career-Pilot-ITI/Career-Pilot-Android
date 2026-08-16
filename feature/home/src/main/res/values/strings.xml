@@ -11,7 +11,7 @@
     <string name="home_free_trial">FREE TRIAL</string>
     <string name="home_upgrade">Upgrade</string>
     <string name="home_plan_label">%1$s plan</string>
-    <string name="home_plan_upgrade_subtitle">Upgrade for unlimited interviews</string>
+    <string name="home_plan_upgrade_subtitle">Upgrade to unlock ATS &amp; Quizzes</string>
     <string name="home_plan_active_subtitle">You\'re all set</string>
     <string name="home_plan_upgrade_to_max">Upgrade to Max</string>
     <string name="home_plan_plus_subtitle">Upgrade to Max for video AI &amp; quizzes</string>
