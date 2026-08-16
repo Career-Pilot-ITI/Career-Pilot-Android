@@ -11,6 +11,7 @@ import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.onUpload
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
@@ -18,12 +19,19 @@ import io.ktor.client.request.patch
 import io.ktor.client.request.setBody
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.client.statement.readBytes
 import java.io.File
 import javax.inject.Inject
 
 class EditProfileRemoteDataSourceImpl @Inject constructor(
     private val httpClient: HttpClient
 ): EditProfileRemoteDataSource {
+
+    override suspend fun getProfile(): CareerPilotResult<UserProfileDto, NetworkError> {
+        return safeApiCall<UserProfileDto> {
+            httpClient.get(Endpoints.PROFILE)
+        }
+    }
 
     override suspend fun updateProfile(
         request: UpdateProfileRequestDto
@@ -92,9 +100,41 @@ class EditProfileRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun analyzeCV(
+        file: File,
+    ): CareerPilotResult<UserProfileDto, NetworkError> {
+        return safeApiCall<UserProfileDto> {
+            httpClient.submitFormWithBinaryData(
+                url = Endpoints.ANALYZE_CV,
+                formData = formData {
+                    append(
+                        key = "file",
+                        value = file.readBytes(),
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, "application/pdf")
+                            append(HttpHeaders.ContentDisposition, "filename=\"${file.name}\"")
+                        }
+                    )
+                }
+            ) {
+                timeout {
+                    requestTimeoutMillis = CV_ANALYSIS_TIMEOUT_MILLIS
+                    socketTimeoutMillis = CV_ANALYSIS_TIMEOUT_MILLIS
+                }
+            }
+        }
+    }
+
+    override suspend fun downloadBytes(url: String): ByteArray? =
+        runCatching { httpClient.get(url).readBytes() }.getOrNull()
+
     override suspend fun getTracks(): CareerPilotResult<List<TrackDto>, NetworkError> {
         return safeApiCall<List<TrackDto>> {
             httpClient.get(Endpoints.GET_TRACKS)
         }
+    }
+
+    private companion object {
+        const val CV_ANALYSIS_TIMEOUT_MILLIS = 120_000L
     }
 }

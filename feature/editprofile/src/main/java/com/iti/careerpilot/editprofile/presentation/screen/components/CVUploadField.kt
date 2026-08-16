@@ -49,6 +49,7 @@ import com.iti.careerpilot.editprofile.R
 fun CVUploadField(
     fileName: String,
     isUploading: Boolean,
+    isParsing: Boolean,
     uploadProgress: Int,
     onCVSelected: (Uri?) -> Unit,
     onCVRemove: () -> Unit,
@@ -69,7 +70,7 @@ fun CVUploadField(
         )
 
         when {
-            isUploading -> CVUploadingState(uploadProgress)
+            isUploading -> CVUploadingState(uploadProgress, isParsing)
             fileName.isNotBlank() -> CVUploadedState(
                 fileName = fileName,
                 onChange = { launcher.launch("application/pdf") },
@@ -190,7 +191,7 @@ private fun CVUploadedState(
 }
 
 @Composable
-private fun CVUploadingState(uploadProgress: Int) {
+private fun CVUploadingState(uploadProgress: Int, isParsing: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,12 +210,16 @@ private fun CVUploadingState(uploadProgress: Int) {
         )
         Column {
             Text(
-                text = stringResource(R.string.uploading),
+                text = stringResource(if (isParsing) R.string.parsing_cv else R.string.uploading),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = stringResource(R.string.uploading_cv, uploadProgress),
+                text = if (isParsing) {
+                    stringResource(R.string.parsing_cv_subtitle)
+                } else {
+                    stringResource(R.string.uploading_cv, uploadProgress)
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

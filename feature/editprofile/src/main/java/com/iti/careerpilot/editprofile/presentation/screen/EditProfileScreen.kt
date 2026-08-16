@@ -108,9 +108,11 @@ fun EditProfileRoot(
     }
 
     if (state.isUploadingCV) {
+        val isParsing = state.isAnalyzingCV || state.cvUploadProgress >= 100
         UploadProgressDialog(
             progress = state.cvUploadProgress,
-            title = stringResource(R.string.uploading)
+            isParsing = isParsing,
+            title = stringResource(if (isParsing) R.string.parsing_cv else R.string.uploading)
         )
     }
 }
@@ -329,6 +331,7 @@ fun EditProfileScreen(
                             CVUploadField(
                                 fileName = state.cvFileName,
                                 isUploading = state.isUploadingCV,
+                                isParsing = state.isAnalyzingCV,
                                 uploadProgress = state.cvUploadProgress,
                                 onCVSelected = { uri -> onAction(EditProfileAction.OnCVUpload(uri)) },
                                 onCVRemove = { onAction(EditProfileAction.OnCVRemove) }
