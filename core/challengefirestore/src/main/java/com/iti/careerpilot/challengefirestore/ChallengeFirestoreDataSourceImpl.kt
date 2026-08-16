@@ -21,7 +21,6 @@ import javax.inject.Inject
 class ChallengeFirestoreDataSourceImpl @Inject constructor(
     private val json: Json
 ) : ChallengeFirestoreDataSource {
-
     private val firestore = Firebase.firestore
     private val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
         modelName = MODEL_NAME,
@@ -314,6 +313,164 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
                 .set(session)
                 .await()
         }
+
+    override suspend fun addFakeData(): CareerPilotResult<Unit, FirebaseError> = safeFirebaseCall {
+        val userId = 1L // Dummy user ID
+        val now = Instant.now().toString()
+
+        val fakeChallenges = listOf(
+            Challenge(
+                id = "CHL_ANDROID",
+                creatorId = userId,
+                creatorUsername = "iti_admin",
+                creatorName = "ITI Expert",
+                trackId = 1,
+                invitationCode = "CHL_ANDROID",
+                trackName = "Android Development",
+                visibility = ChallengeVisibility.PUBLIC,
+                seniorityLevel = SeniorityLevel.MID_LEVEL,
+                creationDate = System.currentTimeMillis(),
+                questions = listOf(
+                    ChallengeQuestion("Q1", "Explain the Activity lifecycle."),
+                    ChallengeQuestion("Q2", "What is Dependency Injection?"),
+                    ChallengeQuestion("Q3", "How does Coroutines work?")
+                ),
+                type = ChallengeType.VIDEO_AND_AUDIO
+            ),
+            Challenge(
+                id = "CHL_JAVA",
+                invitationCode = "CHL_JAVA",
+                creatorId = userId,
+                creatorUsername = "java_pro",
+                creatorName = "James Gosling",
+                trackId = 2,
+                trackName = "Java Core",
+                visibility = ChallengeVisibility.PUBLIC,
+                seniorityLevel = SeniorityLevel.SENIOR,
+                creationDate = System.currentTimeMillis(),
+                questions = listOf(
+                    ChallengeQuestion("Q4", "Difference between Abstract Class and Interface."),
+                    ChallengeQuestion("Q5", "What is the Java Memory Model?")
+                ),
+                type = ChallengeType.AUDIO_ONLY
+            ),
+            Challenge(
+                id = "CHL_SYSTEM_DESIGN",
+                invitationCode = "CHL_SYSTEM_DESIGN",
+                creatorId = userId,
+                creatorUsername = "arch_master",
+                creatorName = "Martin Fowler",
+                trackId = 3,
+                trackName = "System Design",
+                visibility = ChallengeVisibility.PUBLIC,
+                seniorityLevel = SeniorityLevel.LEAD,
+                creationDate = System.currentTimeMillis(),
+                questions = listOf(
+                    ChallengeQuestion("Q6", "How would you design a rate limiter?"),
+                    ChallengeQuestion("Q7", "Explain CAP Theorem.")
+                ),
+                type = ChallengeType.VIDEO_AND_AUDIO
+            ),
+            Challenge(
+                id = "CHL_FLUTTER",
+                invitationCode = "CHL_FLUTTER",
+                creatorId = userId,
+                creatorUsername = "google_dev",
+                creatorName = "Google Dev",
+                trackId = 4,
+                trackName = "Flutter Development",
+                visibility = ChallengeVisibility.PRIVATE,
+                seniorityLevel = SeniorityLevel.JUNIOR,
+                creationDate = System.currentTimeMillis(),
+                questions = listOf(
+                    ChallengeQuestion("Q8", "State Management in Flutter.")
+                ),
+                type = ChallengeType.AUDIO_ONLY
+            ),
+            Challenge(
+                id = "CHL_KOTLIN",
+                invitationCode = "CHL_KOTLIN",
+                creatorId = userId,
+                creatorUsername = "jb_dev",
+                creatorName = "JetBrains Dev",
+                trackId = 5,
+                trackName = "Kotlin Multiplatform",
+                visibility = ChallengeVisibility.PUBLIC,
+                seniorityLevel = SeniorityLevel.MID_LEVEL,
+                creationDate = System.currentTimeMillis(),
+                questions = listOf(
+                    ChallengeQuestion("Q9", "What are inline functions?"),
+                    ChallengeQuestion("Q10", "Sealed classes vs Enums.")
+                ),
+                type = ChallengeType.VIDEO_AND_AUDIO
+            )
+        )
+
+        fakeChallenges.forEach { saveChallenge(it) }
+
+        // Add some sessions
+        val fakeSessions = listOf(
+            ChallengeSession(
+                sessionId = "SESS_1",
+                challengeId = "CHL_ANDROID",
+                challengeTitle = "Android Development",
+                participantId = userId,
+                participantEmail = "user@example.com",
+                participantName = "John Doe",
+                trackName = "Android Development",
+                status = "COMPLETED",
+                overallScore = 85,
+                clarityScore = 90,
+                confidenceScore = 80,
+                pacingScore = 85,
+                fillerWordsScore = 95,
+                contentRelevanceScore = 80,
+                coachingTips = listOf("Good job!", "Try to be more concise."),
+                timestamp = System.currentTimeMillis() - 86400000,
+                startedAt = now,
+                updatedAt = now,
+                results = listOf(
+                    ChallengeQuestionResult(
+                        questionId = "Q1",
+                        questionText = "Explain the Activity lifecycle.",
+                        userTranscript = "The activity lifecycle has methods like onCreate, onStart, and onResume.",
+                        score = ChallengeScore(85, 80, 85, 90, 80, 85, "Great answer", now)
+                    )
+                )
+            ),
+            ChallengeSession(
+                sessionId = "SESS_2",
+                challengeId = "CHL_JAVA",
+                challengeTitle = "Java Core",
+                participantId = userId,
+                participantEmail = "user@example.com",
+                participantName = "John Doe",
+                trackName = "Java Core",
+                status = "IN_PROGRESS",
+                maxQuestions = 2,
+                answeredCount = 1,
+                timestamp = System.currentTimeMillis(),
+                startedAt = now,
+                updatedAt = now,
+                currentQuestion = ChallengeCurrentQuestion("Q5", "What is the Java Memory Model?", 2, now),
+                results = listOf(
+                    ChallengeQuestionResult(
+                        questionId = "Q4",
+                        questionText = "Difference between Abstract Class and Interface.",
+                        userTranscript = "Interfaces are for multiple inheritance...",
+                        score = ChallengeScore(70, 75, 70, 65, 80, 72, "Explain default methods too.", now)
+                    )
+                )
+            )
+        )
+
+        fakeSessions.forEach { session ->
+            firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS)
+                .document(session.sessionId)
+                .set(session)
+                .await()
+        }
+    }
 
     private fun getCollectionName(visibility: ChallengeVisibility): String {
         return if (visibility == ChallengeVisibility.PUBLIC) {

@@ -31,4 +31,5 @@ interface ChallengeFirestoreDataSource {
 
     suspend fun getSession(sessionId: String): CareerPilotResult<ChallengeSession, FirebaseError>
     suspend fun updateSession(session: ChallengeSession): CareerPilotResult<Unit, FirebaseError>
+    suspend fun addFakeData(): CareerPilotResult<Unit, FirebaseError>
 }
