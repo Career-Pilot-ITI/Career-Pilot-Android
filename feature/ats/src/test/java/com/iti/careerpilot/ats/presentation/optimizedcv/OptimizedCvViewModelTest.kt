@@ -16,7 +16,6 @@ import com.iti.careerpilot.ats.presentation.optimizedcv.viewmodel.OptimizedCvVie
 import com.iti.common.error.NetworkError
 import com.iti.common.result.CareerPilotResult
 import com.iti.core.datastore.models.UserProfile
-import com.iti.core.model.PdfFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,8 +69,6 @@ private class OptimizationRepository(
 ) : AtsRepository {
     override val userProfile = MutableStateFlow(UserProfile())
 
-    override suspend fun replaceCurrentCv(file: PdfFile, onProgress: (Int) -> Unit) =
-        CareerPilotResult.Success(Unit)
     override suspend fun importJob(url: String): CareerPilotResult<JobWorkspace, NetworkError> =
         CareerPilotResult.Error(NetworkError.UNKNOWN)
     override suspend fun getWorkspace(workspaceId: Long): CareerPilotResult<JobWorkspace, NetworkError> =

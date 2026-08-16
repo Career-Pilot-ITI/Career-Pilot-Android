@@ -64,6 +64,8 @@
     <string name="remove_cv">إزالة السيرة الذاتية</string>
     <string name="uploading">جارٍ الرفع…</string>
     <string name="uploading_cv">جارٍ رفع السيرة الذاتية… %1$d%%</string>
+    <string name="parsing_cv">جارٍ معالجة السيرة الذاتية…</string>
+    <string name="parsing_cv_subtitle">جارٍ تحليل سيرتك الذاتية. قد يستغرق ذلك لحظة…</string>
     <string name="camera_permission_title">إذن الكاميرا</string>
     <string name="camera_permission_text">يرجى السماح بإذن الكاميرا للمتابعة</string>
     <string name="remove_x">إزالة</string>
