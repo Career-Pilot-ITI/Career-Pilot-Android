@@ -100,7 +100,7 @@ import java.util.Date
 fun ChallengeDashboardScreenRoot(
     onBack: () -> Unit,
     onEditChallenge: (String) -> Unit,
-    onViewChallenge: (String) -> Unit,
+    onViewResult: (String) -> Unit,
     onContinueSession: (String) -> Unit,
     viewModel: ChallengeDashboardViewModel = hiltViewModel()
 ) {
@@ -114,7 +114,7 @@ fun ChallengeDashboardScreenRoot(
         when (event) {
             ChallengeDashboardEvent.NavigateBack -> onBack()
             is ChallengeDashboardEvent.NavigateToEditChallenge -> onEditChallenge(event.challengeId)
-            is ChallengeDashboardEvent.NavigateToSessionDetails -> onViewChallenge(event.sessionId)
+            is ChallengeDashboardEvent.NavigateToSessionResult -> onViewResult(event.sessionId)
             is ChallengeDashboardEvent.ContinueSession -> onContinueSession(event.sessionId)
         }
     }

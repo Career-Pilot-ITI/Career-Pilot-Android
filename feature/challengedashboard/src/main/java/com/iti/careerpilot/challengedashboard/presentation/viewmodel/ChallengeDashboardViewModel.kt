@@ -100,7 +100,7 @@ class ChallengeDashboardViewModel @Inject constructor(
                 viewModelScope.launch {
                     if (session?.status == "COMPLETED") {
                         _events.send(
-                            ChallengeDashboardEvent.NavigateToSessionDetails(
+                            ChallengeDashboardEvent.NavigateToSessionResult(
                                 action.sessionId
                             )
                         )

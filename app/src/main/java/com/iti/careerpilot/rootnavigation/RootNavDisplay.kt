@@ -540,9 +540,9 @@ fun RootNavDisplay(
                         onEditChallenge = { challengeId ->
                             rootBackStack.navigateSingleTop(Route.CreateChallenge(challengeId))
                         },
-                        onViewChallenge = { challengeId ->
+                        onViewResult = { sessionId ->
                             rootBackStack.navigateSingleTop(
-                                Route.ChallengeDetails(challengeId)
+                                Route.PracticeResult(firestoreSessionId = sessionId)
                             )
                         },
                         onContinueSession = { sessionId ->
