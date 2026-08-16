@@ -44,6 +44,24 @@ class AccessRepositoryImpl @Inject constructor(
                     )
                 )
             }
+        }.onFailure {
+            val cachedProfile = userProfileRepo.userProfile.value
+            if (cachedProfile.account.subscriptionTier.isNotEmpty() || cachedProfile.account.coinBalance > 0) {
+                val cachedPlan = when (cachedProfile.account.subscriptionTier.uppercase().trim()) {
+                    "PLUS" -> com.iti.core.model.Plan.PLUS
+                    "PRO", "MAX" -> com.iti.core.model.Plan.MAX
+                    else -> com.iti.core.model.Plan.FREE
+                }
+                val fallbackState = AccessState(
+                    plan = cachedPlan,
+                    features = com.iti.careerpilot.core.access.PlanAccessMap.featuresFor(cachedPlan),
+                    quotas = emptyMap(),
+                    expiresAt = null,
+                    lastSyncedAt = kotlin.time.Clock.System.now(),
+                    coinBalance = cachedProfile.account.coinBalance
+                )
+                local.save(fallbackState)
+            }
         }
     }
 

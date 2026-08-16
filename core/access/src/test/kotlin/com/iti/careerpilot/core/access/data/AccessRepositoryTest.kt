@@ -45,6 +45,14 @@ class AccessRepositoryTest {
         override suspend fun setBodyLanguageConsent(given: Boolean) {}
     }
 
+    private class TestAccessRemoteDataSource(
+        var statusDto: SubscriptionStatusDto = SubscriptionStatusDto(),
+        var balance: Int = 0
+    ) : AccessRemoteDataSource {
+        override suspend fun getSubscriptionStatus(): SubscriptionStatusDto = statusDto
+        override suspend fun getWalletBalance(): Int = balance
+    }
+
     @Test
     fun deductCoins_updatesStateAndSyncsToUserProfileRepo() = runTest(testDispatcher) {
         val testFile = tmpFolder.newFile("test_access_1.preferences_pb")
@@ -67,7 +75,7 @@ class AccessRepositoryTest {
         localDataSource.save(initialState)
 
         val repository = AccessRepositoryImpl(
-            remote = AccessRemoteDataSource(HttpClient()),
+            remote = TestAccessRemoteDataSource(),
             local = localDataSource,
             userProfileRepo = userProfileRepo,
             ioDispatcher = testDispatcher,
@@ -105,7 +113,7 @@ class AccessRepositoryTest {
         localDataSource.save(initialState)
 
         val repository = AccessRepositoryImpl(
-            remote = AccessRemoteDataSource(HttpClient()),
+            remote = TestAccessRemoteDataSource(),
             local = localDataSource,
             userProfileRepo = userProfileRepo,
             ioDispatcher = testDispatcher,
@@ -139,7 +147,7 @@ class AccessRepositoryTest {
         localDataSource.save(state)
 
         val repository = AccessRepositoryImpl(
-            remote = AccessRemoteDataSource(HttpClient()),
+            remote = TestAccessRemoteDataSource(),
             local = localDataSource,
             userProfileRepo = userProfileRepo,
             ioDispatcher = testDispatcher,
@@ -171,7 +179,7 @@ class AccessRepositoryTest {
         localDataSource.save(state)
 
         val repository = AccessRepositoryImpl(
-            remote = AccessRemoteDataSource(HttpClient()),
+            remote = TestAccessRemoteDataSource(),
             local = localDataSource,
             userProfileRepo = userProfileRepo,
             ioDispatcher = testDispatcher,
