@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.careerpilot.feature.presentation)
+    alias(libs.plugins.careerpilot.testing)
 }
 
 android {

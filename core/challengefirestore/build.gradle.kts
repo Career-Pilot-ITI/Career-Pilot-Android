@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.careerpilot.android.library)
     alias(libs.plugins.careerpilot.android.hilt)
     alias(libs.plugins.careerpilot.kotlin.serialization)
+    alias(libs.plugins.careerpilot.testing)
 }
 
 android {
