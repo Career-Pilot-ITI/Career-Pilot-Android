@@ -151,7 +151,8 @@ class CreateChallengeViewModel @Inject constructor(
                     val challengeId = repository.generateChallengeId(current.visibility)
                     val challenge = Challenge(
                         id = challengeId,
-                        creatorId = userProfile.account.email,
+                        creatorId = userProfile.id,
+                        creatorUsername = userProfile.account.username,
                         creatorName = userProfile.personal.displayName,
                         trackId = current.selectedTrack?.id ?: 0L,
                         trackName = current.selectedTrack?.name ?: "",

@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Challenge(
     val id: String = "",
-    val creatorId: String = "",
+    val creatorId: Long = 0,
+    val creatorUsername: String = "",
     val creatorName: String = "",
     val trackId: Long = 0,
     val trackName: String = "",
