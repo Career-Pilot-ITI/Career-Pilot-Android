@@ -5,6 +5,7 @@ import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.ai.domain.EvaluateBodyLanguageUseCase
 import com.iti.careerpilot.ai.evaluator.BodyLanguageAiEvaluator
 import com.iti.careerpilot.ai.fallback.LocalBodyLanguageFallbackEngine
+import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSourceImpl
 import com.iti.careerpilot.practicesession.domain.models.AnswerRequest
 import com.iti.careerpilot.practicesession.domain.models.AnswerResponse
 import com.iti.careerpilot.practicesession.domain.models.AudioAttachment
@@ -25,6 +26,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -95,6 +97,7 @@ class ResultViewModelTest {
             evaluateBodyLanguageUseCase = evaluateBodyLanguageUseCase,
             sessionCache = sessionCache,
             ioDispatcher = testDispatcher,
+            firestoreDataSource = ChallengeFirestoreDataSourceImpl(Json),
         )
     }
 

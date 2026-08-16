@@ -1,9 +1,13 @@
 package com.iti.careerpilot.practicesession.presentation.practicescreen.viewmodel
 
 import android.content.Context
+import android.content.ContextWrapper
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.SavedStateHandle
+import com.iti.careerpilot.ai.cache.InMemorySessionCache
 import com.iti.careerpilot.bodylanguage.BodyLanguageAnalyzer
+import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSource
+import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSourceImpl
 import com.iti.careerpilot.practicesession.data.audio.AmplitudeNormalizer
 import com.iti.careerpilot.practicesession.data.tts.TextToSpeechManager
 import com.iti.careerpilot.practicesession.domain.audio.AudioPlayer
@@ -40,6 +44,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -49,6 +54,7 @@ import org.junit.Before
 import org.junit.Test
 import java.io.File
 import java.lang.reflect.Proxy
+import kotlin.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PracticeSessionViewModelTest {
@@ -271,7 +277,7 @@ class PracticeSessionViewModelTest {
     }
 
     private fun createDummyContext(): Context {
-        return object : android.content.ContextWrapper(null) {
+        return object : ContextWrapper(null) {
             override fun getApplicationContext(): Context = this
             override fun getPackageName(): String = "com.iti.careerpilot"
         }
@@ -310,7 +316,7 @@ class PracticeSessionViewModelTest {
         whisperEngine: WhisperEngine = FakeWhisperEngine(),
         bodyLanguageAnalyzer: BodyLanguageAnalyzer = FakeBodyLanguageAnalyzer(),
         userProfileRepo: UserProfileRepo = FakeUserProfileRepo(),
-        sessionCache: com.iti.careerpilot.ai.cache.InMemorySessionCache = com.iti.careerpilot.ai.cache.InMemorySessionCache(),
+        sessionCache: InMemorySessionCache = InMemorySessionCache(),
     ): PracticeSessionViewModel {
         val ttsManager = TextToSpeechManager(createDummyContext())
         val amplitudeNormalizer = AmplitudeNormalizer()
@@ -325,7 +331,8 @@ class PracticeSessionViewModelTest {
             bodyLanguageAnalyzer = bodyLanguageAnalyzer,
             userProfileRepo = userProfileRepo,
             sessionCache = sessionCache,
-            defaultDispatcher = testDispatcher
+            defaultDispatcher = testDispatcher,
+            firestoreDataSource = ChallengeFirestoreDataSourceImpl(Json),
         ).also { createdViewModels.add(it) }
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             vm.state.collect {}
@@ -482,7 +489,7 @@ class PracticeSessionViewModelTest {
             RecordingDetails(
                 filePath = tempAudioFile.absolutePath,
                 isRecording = false,
-                duration = kotlin.time.Duration.parse("10s"),
+                duration = Duration.parse("10s"),
                 amplitudes = listOf(0.5f, 0.7f, 0.8f)
             )
         )
