@@ -536,7 +536,7 @@ class ReadyToPracticeViewModelTest {
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
-                features = emptySet(), // No features granted
+                features = PlanAccessMap.featuresFor(Plan.FREE),
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
