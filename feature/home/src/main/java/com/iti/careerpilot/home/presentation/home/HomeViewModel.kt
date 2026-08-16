@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
 import com.iti.careerpilot.home.R
 import com.iti.careerpilot.challengefirestore.ChallengeFirestoreDataSource
-import com.iti.careerpilot.home.domain.model.InterviewSession
 import com.iti.careerpilot.home.domain.model.InterviewTrack
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
