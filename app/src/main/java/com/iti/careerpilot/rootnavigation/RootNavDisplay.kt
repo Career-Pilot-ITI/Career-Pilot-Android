@@ -400,6 +400,7 @@ fun RootNavDisplay(
                     PracticeSessionRoot(
                         trackId = route.trackId,
                         sessionId = route.sessionId,
+                        firestoreSessionId = route.firestoreSessionId,
                         workspaceId = route.workspaceId,
                         challengeId = route.challengeId,
                         isVideoSession = route.isVideoSession,
@@ -542,6 +543,13 @@ fun RootNavDisplay(
                         onViewChallenge = { challengeId ->
                             rootBackStack.navigateSingleTop(
                                 Route.ChallengeDetails(challengeId)
+                            )
+                        },
+                        onContinueSession = { sessionId ->
+                            rootBackStack.navigateSingleTop(
+                                Route.PracticeSession(
+                                    firestoreSessionId = sessionId
+                                )
                             )
                         }
                     )

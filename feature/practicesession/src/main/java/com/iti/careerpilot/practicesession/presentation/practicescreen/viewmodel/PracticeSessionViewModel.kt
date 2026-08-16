@@ -427,7 +427,7 @@ class PracticeSessionViewModel @Inject constructor(
 
         if (firestoreSessionId != null) {
             loadFirestoreSession {
-                firestoreDataSource.getSession(firestoreSessionId)
+                firestoreDataSource.restartSession(firestoreSessionId)
             }
             return
         }

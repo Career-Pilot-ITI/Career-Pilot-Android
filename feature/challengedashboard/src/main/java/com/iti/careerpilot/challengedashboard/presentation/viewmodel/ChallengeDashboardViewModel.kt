@@ -86,12 +86,23 @@ class ChallengeDashboardViewModel @Inject constructor(
 
             is ChallengeDashboardAction.OnViewParticipantReports -> loadParticipantSessions(action.challengeId)
             is ChallengeDashboardAction.OnTakenChallengeClicked -> {
+                val session = _state.value.takenChallenges.find { it.sessionId == action.sessionId }
+                    ?: _state.value.participantSessions?.find { it.sessionId == action.sessionId }
+
                 viewModelScope.launch {
-                    _events.send(
-                        ChallengeDashboardEvent.NavigateToSessionDetails(
-                            action.sessionId
+                    if (session?.status == "COMPLETED") {
+                        _events.send(
+                            ChallengeDashboardEvent.NavigateToSessionDetails(
+                                action.sessionId
+                            )
                         )
-                    )
+                    } else {
+                        _events.send(
+                            ChallengeDashboardEvent.ContinueSession(
+                                action.sessionId
+                            )
+                        )
+                    }
                 }
             }
 

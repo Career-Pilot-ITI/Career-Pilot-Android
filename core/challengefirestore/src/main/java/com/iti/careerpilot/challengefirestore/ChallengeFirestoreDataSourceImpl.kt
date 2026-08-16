@@ -314,6 +314,45 @@ class ChallengeFirestoreDataSourceImpl @Inject constructor(
                 .await()
         }
 
+    override suspend fun restartSession(sessionId: String): CareerPilotResult<ChallengeSession, FirebaseError> =
+        safeFirebaseCall {
+            val docRef = firestore.collection(FirestoreCollections.CHALLENGE_SESSIONS).document(sessionId)
+            val session = docRef.get().await().toObject<ChallengeSession>()
+                ?: throw Exception("Session not found")
+
+            val challenge = when (val challengeResult = getChallenge(session.challengeId)) {
+                is CareerPilotResult.Success -> challengeResult.data
+                is CareerPilotResult.Error -> throw Exception("Challenge not found")
+            }
+
+            val now = Instant.now().toString()
+            val restartedSession = session.copy(
+                status = "IN_PROGRESS",
+                answeredCount = 0,
+                results = emptyList(),
+                updatedAt = now,
+                startedAt = now,
+                currentQuestion = challenge.questions.firstOrNull()?.let {
+                    ChallengeCurrentQuestion(
+                        id = it.id,
+                        questionText = it.text,
+                        questionOrder = 1,
+                        createdAt = now
+                    )
+                },
+                overallScore = null,
+                clarityScore = null,
+                confidenceScore = null,
+                pacingScore = null,
+                fillerWordsScore = null,
+                contentRelevanceScore = null,
+                coachingTips = emptyList()
+            )
+
+            docRef.set(restartedSession).await()
+            restartedSession
+        }
+
     override suspend fun addFakeData(): CareerPilotResult<Unit, FirebaseError> = safeFirebaseCall {
         val userId = 1L // Dummy user ID
         val now = Instant.now().toString()

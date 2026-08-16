@@ -67,6 +67,7 @@ fun ChallengeDashboardScreenRoot(
     onBack: () -> Unit,
     onEditChallenge: (String) -> Unit,
     onViewChallenge: (String) -> Unit,
+    onContinueSession: (String) -> Unit,
     viewModel: ChallengeDashboardViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -80,6 +81,7 @@ fun ChallengeDashboardScreenRoot(
             ChallengeDashboardEvent.NavigateBack -> onBack()
             is ChallengeDashboardEvent.NavigateToEditChallenge -> onEditChallenge(event.challengeId)
             is ChallengeDashboardEvent.NavigateToSessionDetails -> onViewChallenge(event.sessionId)
+            is ChallengeDashboardEvent.ContinueSession -> onContinueSession(event.sessionId)
         }
     }
 

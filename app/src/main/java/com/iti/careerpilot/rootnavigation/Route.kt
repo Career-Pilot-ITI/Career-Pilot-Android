@@ -55,8 +55,9 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class PracticeSession(
-        val trackId: Long,
+        val trackId: Long = 0,
         val sessionId: Long? = null,
+        val firestoreSessionId: String? = null,
         val workspaceId: Long? = null,
         val challengeId: String? = null,
         val isVideoSession: Boolean = false,
