@@ -7,6 +7,7 @@ import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.careerpilot.home.domain.usecase.GetUserProfileUseCase
 import com.iti.core.model.FeatureAccess
 import com.iti.core.model.FeatureKey
@@ -139,36 +140,36 @@ class ReadyToPracticeViewModel @Inject constructor(
             }
 
             ReadyToPracticeAction.SelectVideoMode -> {
-                when (val access = _state.value.videoInterviewAccess) {
-                    is FeatureAccess.Granted -> {
+                _state.value.videoInterviewAccess.handle(
+                    onGranted = {
                         _state.update {
                             it.copy(
                                 isVideoMode = true,
                                 showCameraPermissionDialog = !it.isCameraGranted
                             )
                         }
-                    }
-                    is FeatureAccess.Locked -> {
+                    },
+                    onLocked = { locked ->
                         _state.update {
                             it.copy(
                                 showVideoGateSheet = true,
-                                videoGatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                                videoGateRequiredPlan = access.requiredPlan
+                                videoGatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                                videoGateRequiredPlan = locked.requiredPlan
                             )
                         }
-                    }
-                    is FeatureAccess.CoinTopUpRequired -> {
+                    },
+                    onCoinTopUpRequired = { coinReq ->
                         _state.update {
                             it.copy(
                                 showCoinTopUpSheet = true,
-                                coinTopUpRequiredCost = access.coinCost
+                                coinTopUpRequiredCost = coinReq.coinCost
                             )
                         }
-                    }
-                    is FeatureAccess.StaleCacheBlocked -> {
+                    },
+                    onStale = {
                         viewModelScope.launch { refreshAccess() }
-                    }
-                    is FeatureAccess.Unknown -> {
+                    },
+                    onUnknown = {
                         val cost = _state.value.videoCoinCost
                         if (_state.value.coinBalance < cost) {
                             _state.update {
@@ -185,8 +186,8 @@ class ReadyToPracticeViewModel @Inject constructor(
                                 )
                             }
                         }
-                    }
-                }
+                    },
+                )
             }
 
             ReadyToPracticeAction.MicrophoneRowClicked -> _state.update {
@@ -232,42 +233,44 @@ class ReadyToPracticeViewModel @Inject constructor(
         val s = _state.value
 
         val currentAccess = if (s.isVideoMode) s.videoInterviewAccess else s.audioInterviewAccess
-        when (currentAccess) {
-            is FeatureAccess.Locked -> {
+        var handled = false
+        currentAccess.handle(
+            onGranted = { /* proceed below */ },
+            onLocked = {
+                handled = true
                 if (s.isVideoMode) {
                     _state.update { it.copy(showVideoGateSheet = true) }
                 } else {
                     sendEvent(ReadyToPracticeEvent.NavigateToPaywall)
                 }
-                return
-            }
-            is FeatureAccess.CoinTopUpRequired -> {
+            },
+            onCoinTopUpRequired = { coinReq ->
+                handled = true
                 _state.update {
                     it.copy(
                         showCoinTopUpSheet = true,
-                        coinTopUpRequiredCost = currentAccess.coinCost
+                        coinTopUpRequiredCost = coinReq.coinCost
                     )
                 }
-                return
-            }
-            is FeatureAccess.StaleCacheBlocked -> {
+            },
+            onStale = {
+                handled = true
                 viewModelScope.launch { refreshAccess() }
-                return
-            }
-            is FeatureAccess.Unknown -> {
+            },
+            onUnknown = {
                 val cost = if (s.isVideoMode) s.videoCoinCost else s.voiceCoinCost
                 if (s.coinBalance < cost) {
+                    handled = true
                     _state.update {
                         it.copy(
                             showCoinTopUpSheet = true,
                             coinTopUpRequiredCost = cost
                         )
                     }
-                    return
                 }
-            }
-            is FeatureAccess.Granted -> Unit
-        }
+            },
+        )
+        if (handled) return
 
         sendEvent(
             ReadyToPracticeEvent.NavigateToPractice(

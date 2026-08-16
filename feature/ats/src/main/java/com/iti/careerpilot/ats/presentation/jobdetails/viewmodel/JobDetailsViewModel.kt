@@ -111,35 +111,36 @@ class JobDetailsViewModel @Inject constructor(
 
     private fun onStartScoring() {
         val id = workspaceId ?: return
-        val access = _state.value.atsScoreAccess
-        viewModelScope.launch {
-            access.handle(
-                onGranted = {
+        _state.value.atsScoreAccess.handle(
+            onGranted = {
+                viewModelScope.launch {
                     effectChannel.send(JobDetailsEffect.OpenScore(id))
-                },
-                onLocked = { locked ->
-                    _state.update {
-                        it.copy(
-                            showGateSheet = true,
-                            gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
-                            gateRequiredPlan = locked.requiredPlan,
-                            gateFeatureName = FeatureKey.AtsFeatures.displayName(),
-                        )
-                    }
-                },
-                onCoinTopUpRequired = { coinReq ->
-                    _state.update {
-                        it.copy(
-                            showCoinTopUpSheet = true,
-                            coinTopUpRequiredCost = coinReq.coinCost,
-                        )
-                    }
-                },
-                onStale = {
+                }
+            },
+            onLocked = { locked ->
+                _state.update {
+                    it.copy(
+                        showGateSheet = true,
+                        gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                        gateRequiredPlan = locked.requiredPlan,
+                        gateFeatureName = FeatureKey.AtsFeatures.displayName(),
+                    )
+                }
+            },
+            onCoinTopUpRequired = { coinReq ->
+                _state.update {
+                    it.copy(
+                        showCoinTopUpSheet = true,
+                        coinTopUpRequiredCost = coinReq.coinCost,
+                    )
+                }
+            },
+            onStale = {
+                viewModelScope.launch {
                     refreshAccess()
-                },
-            )
-        }
+                }
+            },
+        )
     }
 
     private fun loadWorkspace(workspaceId: Long) {

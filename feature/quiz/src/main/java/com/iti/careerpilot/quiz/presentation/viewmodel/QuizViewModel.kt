@@ -6,6 +6,7 @@ import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.AccessRepository
 import com.iti.careerpilot.core.access.domain.usecase.CheckFeatureAccessUseCase
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
+import com.iti.careerpilot.core.access.domain.usecase.handle
 import com.iti.careerpilot.quiz.domain.repository.QuizRepository
 import com.iti.careerpilot.quiz.presentation.action.QuizAction
 import com.iti.careerpilot.quiz.presentation.event.QuizEvent
@@ -79,28 +80,32 @@ class QuizViewModel @Inject constructor(
             }
 
             is QuizAction.SenioritySelected -> {
-                when (val access = _state.value.quizAccess) {
-                    is FeatureAccess.Locked -> {
+                _state.value.quizAccess.handle(
+                    onGranted = {
+                        _state.update { it.copy(seniority = action.level) }
+                        generateTopics()
+                    },
+                    onLocked = { locked ->
                         _state.update {
                             it.copy(
                                 showGateSheet = true,
-                                gatePlanFeatures = PlanAccessMap.featuresFor(access.requiredPlan).map { f -> f.displayName() },
-                                gateRequiredPlan = access.requiredPlan,
+                                gatePlanFeatures = PlanAccessMap.featuresFor(locked.requiredPlan).map { f -> f.displayName() },
+                                gateRequiredPlan = locked.requiredPlan,
                             )
                         }
-                    }
-                    is FeatureAccess.CoinTopUpRequired -> {
+                    },
+                    onCoinTopUpRequired = { coinReq ->
                         _state.update {
                             it.copy(
                                 showCoinTopUpSheet = true,
-                                coinTopUpRequiredCost = access.coinCost,
+                                coinTopUpRequiredCost = coinReq.coinCost,
                             )
                         }
-                    }
-                    is FeatureAccess.StaleCacheBlocked -> {
+                    },
+                    onStale = {
                         viewModelScope.launch { refreshAccess() }
-                    }
-                    is FeatureAccess.Unknown -> {
+                    },
+                    onUnknown = {
                         val cost = _state.value.quizCoinCost
                         if (_state.value.coinBalance < cost) {
                             _state.update {
@@ -113,12 +118,8 @@ class QuizViewModel @Inject constructor(
                             _state.update { it.copy(seniority = action.level) }
                             generateTopics()
                         }
-                    }
-                    is FeatureAccess.Granted -> {
-                        _state.update { it.copy(seniority = action.level) }
-                        generateTopics()
-                    }
-                }
+                    },
+                )
             }
 
             is QuizAction.TopicSelected -> {

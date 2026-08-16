@@ -94,7 +94,7 @@ class FeatureAccessHandlerTest {
     }
 
     @Test
-    fun `Unknown - no handler called`() = runTest {
+    fun `Unknown - no handler called when onUnknown omitted`() = runTest {
         var grantedCalled = false
         var lockedCalled = false
         var coinCalled = false
@@ -112,5 +112,20 @@ class FeatureAccessHandlerTest {
         assertFalse("onLocked should NOT be called for Unknown", lockedCalled)
         assertFalse("onCoinTopUpRequired should NOT be called for Unknown", coinCalled)
         assertFalse("onStale should NOT be called for Unknown", staleCalled)
+    }
+
+    @Test
+    fun `Unknown - onUnknown called when provided`() = runTest {
+        var unknownCalled = false
+        var grantedCalled = false
+
+        val access: FeatureAccess = FeatureAccess.Unknown
+        access.handle(
+            onGranted = { grantedCalled = true },
+            onUnknown = { unknownCalled = true },
+        )
+
+        assertFalse("onGranted should NOT be called for Unknown", grantedCalled)
+        assertTrue("onUnknown should be called for Unknown", unknownCalled)
     }
 }
