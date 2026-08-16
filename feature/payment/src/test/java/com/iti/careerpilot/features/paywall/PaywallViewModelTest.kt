@@ -80,9 +80,9 @@ class PaywallViewModelTest {
         override suspend fun cancelSubscription() =
             CareerPilotResult.Success(Unit)
         override suspend fun getSubscriptionTiers() =
-            CareerPilotResult.Success(mapOf("PLUS" to 199.0, "PRO" to 499.0))
+            CareerPilotResult.Success(mapOf("PLUS" to 349.0, "PRO" to 599.0))
         override suspend fun getCoinPacks() =
-            CareerPilotResult.Success(mapOf(100 to 50.0, 500 to 200.0, 1000 to 350.0))
+            CareerPilotResult.Success(mapOf(50 to 149.0, 120 to 299.0, 300 to 599.0))
         override suspend fun confirmPayment(merchantOrderId: String) =
             CareerPilotResult.Success(Unit)
     }
@@ -138,8 +138,8 @@ class PaywallViewModelTest {
         override suspend fun downgradeSubscription(request: DowngradeSubscriptionRequestDto) {}
         override suspend fun cancelSubscription() {}
         override suspend fun getPaymentHistory() = PaymentHistoryPageDto()
-        override suspend fun getSubscriptionTiers() = mapOf("PLUS" to 199.0, "PRO" to 499.0)
-        override suspend fun getCoinPacks() = mapOf(100 to 50.0, 500 to 200.0, 1000 to 350.0)
+        override suspend fun getSubscriptionTiers() = mapOf("PLUS" to 349.0, "PRO" to 599.0)
+        override suspend fun getCoinPacks() = mapOf(50 to 149.0, 120 to 299.0, 300 to 599.0)
         override suspend fun confirmPayment(merchantOrderId: String) {}
     }
 
@@ -226,8 +226,8 @@ class PaywallViewModelTest {
     @Test
     fun `SelectCoinPack updates selectedCoinPackId in state`() = runTest {
         val viewModel = makeViewModel()
-        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_1000"))
-        assertEquals("coins_1000", viewModel.state.value.selectedCoinPackId)
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_300"))
+        assertEquals("coins_300", viewModel.state.value.selectedCoinPackId)
     }
 
     @Test
@@ -235,7 +235,7 @@ class PaywallViewModelTest {
         val viewModel = makeViewModel()
         viewModel.onIntent(PaywallIntent.LoadCoinPacks)
         testScheduler.advanceUntilIdle()
-        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_100"))
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_50"))
 
         val effects = mutableListOf<PaywallEffect>()
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -255,11 +255,11 @@ class PaywallViewModelTest {
     @Test
     fun `BuyCoinsRequested on error emits ShowSnackbar`() = runTest {
         val customRepo = object : PaymentRepository by errorRepo() {
-            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(100 to 50.0))
+            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(50 to 149.0))
         }
         val viewModel = makeViewModel(repo = customRepo, api = errorApi())
         viewModel.onIntent(PaywallIntent.LoadCoinPacks)
-        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_100"))
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_50"))
         testScheduler.advanceUntilIdle()
 
         val effects = mutableListOf<PaywallEffect>()
@@ -436,8 +436,8 @@ class PaywallViewModelTest {
     @Test
     fun `LoadSubscriptionPlans and LoadCoinPacks load prices from backend`() = runTest {
         val customRepo = object : PaymentRepository by successRepo() {
-            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 250.0, "PRO" to 600.0))
-            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(100 to 60.0, 500 to 220.0, 1000 to 400.0))
+            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 349.0, "PRO" to 599.0))
+            override suspend fun getCoinPacks() = CareerPilotResult.Success(mapOf(50 to 149.0, 120 to 299.0, 300 to 599.0))
         }
         val viewModel = makeViewModel(repo = customRepo)
         viewModel.onIntent(PaywallIntent.LoadSubscriptionPlans)
@@ -446,17 +446,17 @@ class PaywallViewModelTest {
 
         val plusPlan = viewModel.state.value.subscriptionPlans.find { it.id == "plus" }
         val proPlan = viewModel.state.value.subscriptionPlans.find { it.id == "pro" }
-        val pack100 = viewModel.state.value.coinPacks.find { it.coins == 100 }
+        val pack50 = viewModel.state.value.coinPacks.find { it.coins == 50 }
 
-        assertEquals(250, plusPlan?.priceEgp)
-        assertEquals(600, proPlan?.priceEgp)
-        assertEquals(60, pack100?.priceEgp)
+        assertEquals(349, plusPlan?.priceEgp)
+        assertEquals(599, proPlan?.priceEgp)
+        assertEquals(149, pack50?.priceEgp)
     }
 
     @Test
     fun `LoadSubscriptionPlans intent updates subscription plan prices and sets isLoadingTierPrices to false`() = runTest {
         val customRepo = object : PaymentRepository by successRepo() {
-            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 299.0))
+            override suspend fun getSubscriptionTiers() = CareerPilotResult.Success(mapOf("PLUS" to 349.0))
         }
         val viewModel = makeViewModel(repo = customRepo)
 
@@ -464,7 +464,7 @@ class PaywallViewModelTest {
         testScheduler.advanceUntilIdle()
 
         val plusPlan = viewModel.state.value.subscriptionPlans.find { it.id == "plus" }
-        assertEquals(299, plusPlan?.priceEgp)
+        assertEquals(349, plusPlan?.priceEgp)
         assertEquals(false, viewModel.state.value.isLoadingTierPrices)
     }
 
@@ -486,7 +486,7 @@ class PaywallViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(3, viewModel.state.value.coinPacks.size)
-        assertEquals("coins_500", viewModel.state.value.selectedCoinPackId)
+        assertEquals("coins_120", viewModel.state.value.selectedCoinPackId)
         assertEquals(false, viewModel.state.value.isLoadingCoinPacks)
     }
 
@@ -505,14 +505,14 @@ class PaywallViewModelTest {
         val viewModel = makeViewModel()
         viewModel.onIntent(PaywallIntent.LoadCoinPacks)
         testScheduler.advanceUntilIdle()
-        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_500"))
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_120"))
 
         viewModel.onIntent(PaywallIntent.BuyCoinsRequested)
         testScheduler.advanceUntilIdle()
 
         assertEquals(CheckoutItemType.COIN_PACK, viewModel.state.value.checkoutItemType)
-        assertEquals(500, viewModel.state.value.purchasedCoinCount)
-        assertEquals(500, viewModel.state.value.successfulCoinCount)
+        assertEquals(120, viewModel.state.value.purchasedCoinCount)
+        assertEquals(120, viewModel.state.value.successfulCoinCount)
     }
 
     @Test
@@ -521,7 +521,7 @@ class PaywallViewModelTest {
         userRepo.updateUserProfile { current -> current.copy(account = current.account.copy(coinBalance = 100)) }
 
         val customApi = object : PaymentRemoteDataSource by successApi() {
-            override suspend fun getWalletBalance() = CoinBalanceResponseDto(balance = 600)
+            override suspend fun getWalletBalance() = CoinBalanceResponseDto(balance = 220)
             override suspend fun getPaymentHistory() = PaymentHistoryPageDto()
         }
 
@@ -529,7 +529,7 @@ class PaywallViewModelTest {
         testScheduler.advanceUntilIdle()
         viewModel.onIntent(PaywallIntent.LoadCoinPacks)
         testScheduler.advanceUntilIdle()
-        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_500"))
+        viewModel.onIntent(PaywallIntent.SelectCoinPack("coins_120"))
         viewModel.onIntent(PaywallIntent.BuyCoinsRequested)
         testScheduler.advanceUntilIdle()
 
@@ -541,8 +541,8 @@ class PaywallViewModelTest {
         viewModel.onIntent(PaywallIntent.PollPaymentStatus)
         testScheduler.advanceUntilIdle()
 
-        assertEquals(600, viewModel.state.value.coinBalance)
-        assertEquals(500, viewModel.state.value.successfulCoinCount)
+        assertEquals(220, viewModel.state.value.coinBalance)
+        assertEquals(120, viewModel.state.value.successfulCoinCount)
         assertTrue(effects.any { it is PaywallEffect.NavigateToPaymentSuccessful })
         job.cancel()
     }

@@ -111,5 +111,5 @@ data class PaywallState(
         get() = selectedPlan?.nameRes ?: R.string.paywall_plan_plus
 
     val successfulCoinCount: Int
-        get() = purchasedCoinCount ?: selectedCoinPack?.coins ?: 100
+        get() = purchasedCoinCount ?: selectedCoinPack?.coins ?: 50
 }

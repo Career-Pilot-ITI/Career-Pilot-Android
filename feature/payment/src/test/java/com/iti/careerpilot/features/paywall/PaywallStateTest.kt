@@ -119,7 +119,7 @@ class PaywallStateTest {
 
     @Test
     fun `selectedCoinPack returns matching coin pack when present`() {
-        val pack = CoinPack(id = "coin_pack_1", coins = 100, priceEgp = 50)
+        val pack = CoinPack(id = "coin_pack_1", coins = 50, priceEgp = 149)
         val state = PaywallState(
             coinPacks = persistentListOf(pack),
             selectedCoinPackId = "coin_pack_1"
@@ -141,31 +141,31 @@ class PaywallStateTest {
     @Test
     fun `successfulCoinCount returns purchasedCoinCount when set`() {
         val state = PaywallState(
-            purchasedCoinCount = 1000,
-            selectedCoinPackId = "coins_100",
-            coinPacks = persistentListOf(CoinPack(id = "coins_100", coins = 100, priceEgp = 50))
+            purchasedCoinCount = 300,
+            selectedCoinPackId = "coins_50",
+            coinPacks = persistentListOf(CoinPack(id = "coins_50", coins = 50, priceEgp = 149))
         )
-        assertEquals(1000, state.successfulCoinCount)
+        assertEquals(300, state.successfulCoinCount)
     }
 
     @Test
     fun `successfulCoinCount falls back to selected pack coins when purchasedCoinCount is null`() {
         val state = PaywallState(
             purchasedCoinCount = null,
-            selectedCoinPackId = "coins_500",
-            coinPacks = persistentListOf(CoinPack(id = "coins_500", coins = 500, priceEgp = 200))
+            selectedCoinPackId = "coins_120",
+            coinPacks = persistentListOf(CoinPack(id = "coins_120", coins = 120, priceEgp = 299))
         )
-        assertEquals(500, state.successfulCoinCount)
+        assertEquals(120, state.successfulCoinCount)
     }
 
     @Test
-    fun `successfulCoinCount falls back to 100 when both purchasedCoinCount and selected pack are null`() {
+    fun `successfulCoinCount falls back to 50 when both purchasedCoinCount and selected pack are null`() {
         val state = PaywallState(
             purchasedCoinCount = null,
             selectedCoinPackId = null,
             coinPacks = persistentListOf()
         )
-        assertEquals(100, state.successfulCoinCount)
+        assertEquals(50, state.successfulCoinCount)
     }
 }
 

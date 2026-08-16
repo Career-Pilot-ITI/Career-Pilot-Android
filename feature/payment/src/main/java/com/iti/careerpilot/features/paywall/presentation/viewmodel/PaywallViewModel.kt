@@ -145,9 +145,9 @@ class PaywallViewModel @Inject constructor(
                 is CareerPilotResult.Success -> {
                     val prices = result.data
                     val defaultPacks = listOf(
-                        CoinPack(id = "coins_100", coins = 100, priceEgp = 50),
-                        CoinPack(id = "coins_500", coins = 500, priceEgp = 200, badge = CoinPackBadge.MOST_POPULAR),
-                        CoinPack(id = "coins_1000", coins = 1000, priceEgp = 350, badge = CoinPackBadge.BEST_VALUE)
+                        CoinPack(id = "coins_50", coins = 50, priceEgp = 149),
+                        CoinPack(id = "coins_120", coins = 120, priceEgp = 299, badge = CoinPackBadge.MOST_POPULAR),
+                        CoinPack(id = "coins_300", coins = 300, priceEgp = 599, badge = CoinPackBadge.BEST_VALUE)
                     )
                     val packsList = if (prices.isNotEmpty()) {
                         prices.map { (coins, price) ->
@@ -156,8 +156,8 @@ class PaywallViewModel @Inject constructor(
                                 coins = coins,
                                 priceEgp = price.toInt(),
                                 badge = when (coins) {
-                                    500 -> CoinPackBadge.MOST_POPULAR
-                                    1000 -> CoinPackBadge.BEST_VALUE
+                                    120 -> CoinPackBadge.MOST_POPULAR
+                                    300 -> CoinPackBadge.BEST_VALUE
                                     else -> null
                                 }
                             )
@@ -167,7 +167,7 @@ class PaywallViewModel @Inject constructor(
                     }
                     val immutablePacks = packsList.toImmutableList()
                     mutableState.update { currentState ->
-                        val selectedId = currentState.selectedCoinPackId ?: "coins_500"
+                        val selectedId = currentState.selectedCoinPackId ?: "coins_120"
                         currentState.copy(
                             isLoadingCoinPacks = false,
                             coinPacks = immutablePacks,
