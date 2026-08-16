@@ -82,6 +82,7 @@ fun SelectSeniorityContent(
                 access = state.quizAccess,
                 coinBalance = state.coinBalance,
                 planDisplayName = state.planDisplayName,
+                coinCost = state.quizCoinCost,
                 onUpgradeClick = { onIntent(QuizIntent.UpgradeFromGate) },
             )
         }

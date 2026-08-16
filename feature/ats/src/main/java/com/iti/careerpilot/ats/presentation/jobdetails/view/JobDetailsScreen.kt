@@ -238,6 +238,7 @@ private fun JobDetailsContent(
             access = atsScoreAccess,
             coinBalance = coinBalance,
             planDisplayName = planDisplayName,
+            coinCost = com.iti.careerpilot.core.access.FeaturePricingMap.coinCost(com.iti.core.model.FeatureKey.AtsFeatures),
             onUpgradeClick = { onIntent(JobDetailsIntent.UpgradeFromGate) },
         )
 

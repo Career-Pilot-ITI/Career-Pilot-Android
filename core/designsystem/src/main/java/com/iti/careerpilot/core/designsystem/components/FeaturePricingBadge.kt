@@ -48,6 +48,7 @@ fun FeaturePricingBadge(
     coinBalance: Int,
     planDisplayName: String,
     modifier: Modifier = Modifier,
+    coinCost: Int? = null,
     onUpgradeClick: () -> Unit = {},
 ) {
     AnimatedContent(targetState = access, label = "pricing_badge") { currentAccess ->
@@ -162,6 +163,7 @@ fun FeaturePricingBadge(
                     quota = currentAccess.quota,
                     coinBalance = coinBalance,
                     planDisplayName = planDisplayName,
+                    coinCost = coinCost,
                     modifier = modifier,
                 )
             }
@@ -256,27 +258,23 @@ private fun GrantedPricingBadge(
     coinBalance: Int,
     planDisplayName: String,
     modifier: Modifier = Modifier,
+    coinCost: Int? = null,
 ) {
-    val coinCost = quota?.coinCost
+    val quotaCoinCost = quota?.coinCost
     val remaining = quota?.remaining
     val max = quota?.max
+    val effectiveCoinCost = (quotaCoinCost?.takeIf { it > 0 }) ?: (coinCost?.takeIf { it > 0 })
 
     val (icon, title, subtitle) = when {
-        coinCost != null && coinCost > 0 -> Triple(
-            Icons.Rounded.MonetizationOn,
-            stringResource(R.string.pricing_badge_coins_per_use, coinCost),
-            stringResource(R.string.pricing_badge_balance, coinBalance),
-        )
-
         remaining != null && max != null -> Triple(
             Icons.Rounded.CheckCircle,
             stringResource(R.string.pricing_badge_quota_remaining, remaining, max),
             stringResource(R.string.pricing_badge_included_in_plan, planDisplayName),
         )
 
-        planDisplayName.equals("Free", ignoreCase = true) -> Triple(
+        effectiveCoinCost != null -> Triple(
             Icons.Rounded.MonetizationOn,
-            stringResource(R.string.pricing_badge_coins_per_use, 20),
+            stringResource(R.string.pricing_badge_coins_per_use, effectiveCoinCost),
             stringResource(R.string.pricing_badge_balance, coinBalance),
         )
 

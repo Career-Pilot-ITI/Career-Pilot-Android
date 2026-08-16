@@ -361,6 +361,7 @@ fun ReadyToPracticeScreen(
                 access = if (state.isVideoMode) state.videoInterviewAccess else state.audioInterviewAccess,
                 coinBalance = state.coinBalance,
                 planDisplayName = state.planDisplayName,
+                coinCost = if (state.isVideoMode) state.videoCoinCost else state.voiceCoinCost,
                 onUpgradeClick = { onIntent(ReadyToPracticeIntent.UpgradeFromVideoGate) },
             )
 
