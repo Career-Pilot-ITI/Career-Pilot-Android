@@ -3,9 +3,11 @@ package com.iti.careerpilot.home.presentation.home
 import com.iti.careerpilot.core.access.PlanAccessMap
 import com.iti.careerpilot.core.access.domain.usecase.RefreshAccessUseCase
 import com.iti.careerpilot.core.access.testing.FakeAccessRepository
-import com.iti.careerpilot.home.domain.model.InterviewSession
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSession
+import com.iti.careerpilot.core.interviews.domain.model.InterviewSessionPage
+import com.iti.careerpilot.core.interviews.domain.model.SessionStatus
+import com.iti.careerpilot.core.interviews.domain.repository.InterviewSessionRepository
 import com.iti.careerpilot.home.domain.model.InterviewTrack
-import com.iti.careerpilot.home.domain.model.SessionStatus
 import com.iti.careerpilot.home.domain.repository.InterviewRepository
 import com.iti.careerpilot.home.domain.usecase.GetInterviewSessionsUseCase
 import com.iti.careerpilot.home.domain.usecase.GetScoreSummaryUseCase
@@ -68,11 +70,32 @@ class HomeViewModelTest {
     }
 
     private class FakeInterviewRepository(
-        var sessionsResult: CareerPilotResult<List<InterviewSession>, NetworkError> = CareerPilotResult.Success(emptyList()),
         var tracksResult: CareerPilotResult<List<InterviewTrack>, NetworkError> = CareerPilotResult.Success(emptyList()),
     ) : InterviewRepository {
-        override suspend fun getInterviewSessions(): CareerPilotResult<List<InterviewSession>, NetworkError> = sessionsResult
         override suspend fun getTracks(): CareerPilotResult<List<InterviewTrack>, NetworkError> = tracksResult
+    }
+
+    private class FakeInterviewSessionRepository(
+        var sessionsResult: CareerPilotResult<InterviewSessionPage, NetworkError> = CareerPilotResult.Success(
+            InterviewSessionPage(
+                sessions = emptyList(),
+                pageNumber = 0,
+                totalPages = 0,
+                totalElements = 0L,
+                isFirst = true,
+                isLast = true,
+            )
+        ),
+        var sessionResult: CareerPilotResult<InterviewSession, NetworkError> = CareerPilotResult.Error(NetworkError.NOT_FOUND),
+    ) : InterviewSessionRepository {
+        override suspend fun getSessions(
+            page: Int,
+            size: Int,
+        ): CareerPilotResult<InterviewSessionPage, NetworkError> = sessionsResult
+
+        override suspend fun getSession(
+            sessionId: Long,
+        ): CareerPilotResult<InterviewSession, NetworkError> = sessionResult
     }
 
     @Before
@@ -88,6 +111,7 @@ class HomeViewModelTest {
     private fun createViewModel(
         userProfileRepo: UserProfileRepo = FakeUserProfileRepo(),
         interviewRepository: FakeInterviewRepository = FakeInterviewRepository(),
+        interviewSessionRepository: FakeInterviewSessionRepository = FakeInterviewSessionRepository(),
         accessRepository: FakeAccessRepository = FakeAccessRepository(
             AccessState(
                 plan = Plan.FREE,
@@ -101,7 +125,7 @@ class HomeViewModelTest {
     ): HomeViewModel {
         return HomeViewModel(
             getUserProfile = GetUserProfileUseCase(userProfileRepo),
-            getInterviewSessions = GetInterviewSessionsUseCase(interviewRepository),
+            getInterviewSessions = GetInterviewSessionsUseCase(interviewSessionRepository),
             getInterviewTracks = GetTracksUseCase(interviewRepository),
             getScoreSummary = GetScoreSummaryUseCase(),
             refreshAccessUseCase = RefreshAccessUseCase(accessRepository),
@@ -492,15 +516,24 @@ class HomeViewModelTest {
             id = 42L,
             trackId = 99L,
             trackName = "Android Developer",
-            overallScore = 85,
+            score = 85,
             durationMinutes = 15,
             occurredAt = null,
             status = SessionStatus.IN_PROGRESS,
+            questionCount = 5,
         )
-        val repo = FakeInterviewRepository(
-            sessionsResult = CareerPilotResult.Success(listOf(session))
+        val sessionPage = InterviewSessionPage(
+            sessions = listOf(session),
+            pageNumber = 0,
+            totalPages = 1,
+            totalElements = 1L,
+            isFirst = true,
+            isLast = true,
         )
-        val viewModel = createViewModel(interviewRepository = repo)
+        val repo = FakeInterviewSessionRepository(
+            sessionsResult = CareerPilotResult.Success(sessionPage)
+        )
+        val viewModel = createViewModel(interviewSessionRepository = repo)
         testScheduler.advanceUntilIdle()
 
         val events = mutableListOf<HomeEffect>()
