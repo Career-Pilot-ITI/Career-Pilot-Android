@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -88,7 +89,7 @@ class CoverLetterViewModelTest {
         }
 
     @Test
-    fun `opening cover letter when locked displays gate sheet and blocks generation`() =
+    fun `opening cover letter with insufficient coins shows coin top up sheet`() =
         runTest(dispatcher) {
             val repository = CoverLetterRepository(coverLetterText = null)
             val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
@@ -98,7 +99,26 @@ class CoverLetterViewModelTest {
             advanceUntilIdle()
 
             assertEquals(0, repository.generateCalls)
-            assertTrue(viewModel.state.value.showGateSheet)
+            assertTrue(viewModel.state.value.showCoinTopUpSheet)
+            assertTrue(viewModel.state.value.hasInsufficientCoins)
+            assertFalse(viewModel.state.value.showGateSheet)
+            assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+        }
+
+    @Test
+    fun `opening cover letter with sufficient coins via coin fallback is granted`() =
+        runTest(dispatcher) {
+            val repository = CoverLetterRepository(coverLetterText = null)
+            val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
+            val viewModel = createViewModel(repository, accessRepo)
+
+            viewModel.onAction(CoverLetterAction.Initial(1L))
+            advanceUntilIdle()
+
+            assertEquals(1, repository.generateCalls)
+            assertFalse(viewModel.state.value.showGateSheet)
+            assertFalse(viewModel.state.value.showCoinTopUpSheet)
+            assertEquals("Generated letter", viewModel.state.value.editedValue)
         }
 
     private fun createAccessRepository(

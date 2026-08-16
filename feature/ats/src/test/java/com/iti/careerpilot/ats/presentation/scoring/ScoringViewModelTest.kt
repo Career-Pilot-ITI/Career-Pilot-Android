@@ -175,10 +175,10 @@ class ScoringViewModelTest {
     }
 
     @Test
-    fun `optimize when locked displays gate sheet and blocks optimize request`() = runTest(dispatcher) {
+    fun `optimize with insufficient coins shows coin top up sheet`() = runTest(dispatcher) {
         val repository = ScoringRepository()
         val accessRepo = createAccessRepository(
-            coins = 10,
+            coins = 0,
             features = setOf(FeatureKey.AtsFeatures), // Missing CvAiAnalysis
             plan = Plan.FREE,
         )
@@ -190,7 +190,32 @@ class ScoringViewModelTest {
         advanceUntilIdle()
 
         assertEquals(0, repository.optimizeCalls)
-        assertTrue(viewModel.state.value.showGateSheet)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertTrue(viewModel.state.value.hasInsufficientCoins)
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertEquals(5, viewModel.state.value.coinTopUpRequiredCost)
+    }
+
+    @Test
+    fun `optimize with sufficient coins via coin fallback is granted`() = runTest(dispatcher) {
+        val repository = ScoringRepository()
+        val accessRepo = createAccessRepository(
+            coins = 10,
+            features = setOf(FeatureKey.AtsFeatures), // Missing CvAiAnalysis, fallback to 5 coins
+            plan = Plan.FREE,
+        )
+        val viewModel = createViewModel(repository, SavedStateHandle(), accessRepo)
+        viewModel.onAction(ScoringAction.Initial(1L))
+        advanceUntilIdle()
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(ScoringAction.OptimizeCv)
+        runCurrent()
+
+        assertEquals(1, repository.optimizeCalls)
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(ScoringEffect.StartOptimizationTracking(OPTIMIZATION_JOB), effect.await())
     }
 
     private fun createAccessRepository(

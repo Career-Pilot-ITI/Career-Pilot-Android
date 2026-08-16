@@ -90,7 +90,7 @@ class JobDetailsViewModelTest {
     }
 
     @Test
-    fun `start scoring when locked shows gate sheet and blocks navigation`() = runTest(dispatcher) {
+    fun `start scoring with insufficient coins shows coin top-up sheet`() = runTest(dispatcher) {
         val accessRepo = createAccessRepository(coins = 0, features = emptySet(), plan = Plan.FREE)
         val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
         viewModel.onAction(JobDetailsAction.Initial(1L))
@@ -99,8 +99,25 @@ class JobDetailsViewModelTest {
         viewModel.onAction(JobDetailsAction.StartScoring)
         advanceUntilIdle()
 
-        assertTrue(viewModel.state.value.showGateSheet)
-        assertEquals(Plan.PLUS, viewModel.state.value.gateRequiredPlan)
+        assertTrue(viewModel.state.value.showCoinTopUpSheet)
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertEquals(2, viewModel.state.value.coinTopUpRequiredCost)
+    }
+
+    @Test
+    fun `start scoring with sufficient coins via coin fallback is granted`() = runTest(dispatcher) {
+        val accessRepo = createAccessRepository(coins = 10, features = emptySet(), plan = Plan.FREE)
+        val viewModel = createViewModel(JobDetailsRepository(), accessRepo)
+        viewModel.onAction(JobDetailsAction.Initial(1L))
+        advanceUntilIdle()
+        val effect = async { viewModel.effects.first() }
+
+        viewModel.onAction(JobDetailsAction.StartScoring)
+        runCurrent()
+
+        assertFalse(viewModel.state.value.showGateSheet)
+        assertFalse(viewModel.state.value.showCoinTopUpSheet)
+        assertEquals(JobDetailsEffect.OpenScore(1L), effect.await())
     }
 
     private fun createAccessRepository(
