@@ -79,15 +79,18 @@ import com.iti.careerpilot.challengefirestore.getTitleRes
 import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
+import com.iti.careerpilot.core.designsystem.components.ButtonVariant
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
+import com.iti.careerpilot.core.designsystem.components.ShareChallengeDialog
 import com.iti.careerpilot.createchallenge.R
 import com.iti.careerpilot.createchallenge.presentation.action.CreateChallengeAction
 import com.iti.careerpilot.createchallenge.presentation.event.CreateChallengeEvent
 import com.iti.careerpilot.createchallenge.presentation.state.CreateChallengeState
 import com.iti.careerpilot.createchallenge.presentation.viewmodel.CreateChallengeViewModel
+import com.iti.common.util.ChallengeShareHelper
 import kotlinx.coroutines.launch
 
 
@@ -143,7 +146,33 @@ fun CreateChallengeScreenRoot(
     if (state.isSuccessDialogVisible && state.invitationCode != null) {
         SuccessDialog(
             code = state.invitationCode!!,
+            onShare = { viewModel.onAction(CreateChallengeAction.OnShareSuccessChallenge) },
             onDismiss = { viewModel.onAction(CreateChallengeAction.OnDismissSuccess) }
+        )
+    }
+
+    if (state.isShareDialogVisible && state.invitationCode != null) {
+        val code = state.invitationCode!!
+        val shareUrl = ChallengeShareHelper.buildShareUrl(
+            challengeId = code,
+            invitationCode = code
+        )
+        val shareMessage = ChallengeShareHelper.buildShareMessage(
+            creatorName = state.creatorName ?: "",
+            trackName = state.selectedTrack?.name ?: "",
+            seniorityLevel = state.seniorityLevel.name,
+            challengeType = state.challengeType.name.replace("_", " "),
+            questionsCount = state.questions.size,
+            challengeId = code,
+            invitationCode = code
+        )
+
+        ShareChallengeDialog(
+            title = stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_title),
+            subtitle = "${state.selectedTrack?.name ?: ""} (${state.seniorityLevel.name})",
+            shareUrl = shareUrl,
+            shareMessage = shareMessage,
+            onDismiss = { viewModel.onAction(CreateChallengeAction.OnDismissShareDialog) }
         )
     }
 
@@ -159,6 +188,7 @@ fun CreateChallengeScreenRoot(
         )
     }
 }
+
 
 @Composable
 fun ConfirmationDialog(
@@ -227,6 +257,7 @@ fun ConfirmationDialog(
 @Composable
 fun SuccessDialog(
     code: String,
+    onShare: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val clipboardManager = LocalClipboard.current
@@ -299,6 +330,13 @@ fun SuccessDialog(
                 }
 
                 CareerPilotButton(
+                    text = stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_button),
+                    onClick = onShare,
+                    variant = ButtonVariant.SECONDARY,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                CareerPilotButton(
                     text = stringResource(R.string.create_challenge_done),
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
@@ -307,6 +345,7 @@ fun SuccessDialog(
         }
     }
 }
+
 
 @Composable
 fun CreateChallengeScreenContent(

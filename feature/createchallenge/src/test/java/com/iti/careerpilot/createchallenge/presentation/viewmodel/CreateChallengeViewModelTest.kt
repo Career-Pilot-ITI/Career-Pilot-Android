@@ -405,4 +405,26 @@ class CreateChallengeViewModelTest {
         assertTrue(events.first() is CreateChallengeEvent.NavigateBack)
         job.cancel()
     }
+
+    @Test
+    fun `OnShareSuccessChallenge sets isShareDialogVisible to true`() = runTest {
+        val viewModel = createViewModel()
+        assertFalse(viewModel.state.value.isShareDialogVisible)
+
+        viewModel.onAction(CreateChallengeAction.OnShareSuccessChallenge)
+
+        assertTrue(viewModel.state.value.isShareDialogVisible)
+    }
+
+    @Test
+    fun `OnDismissShareDialog sets isShareDialogVisible to false`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onAction(CreateChallengeAction.OnShareSuccessChallenge)
+        assertTrue(viewModel.state.value.isShareDialogVisible)
+
+        viewModel.onAction(CreateChallengeAction.OnDismissShareDialog)
+
+        assertFalse(viewModel.state.value.isShareDialogVisible)
+    }
 }
+
