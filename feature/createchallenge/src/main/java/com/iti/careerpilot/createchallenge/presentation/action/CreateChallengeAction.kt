@@ -22,5 +22,8 @@ sealed interface CreateChallengeAction {
     data object OnSubmit : CreateChallengeAction
     data object OnDismissError : CreateChallengeAction
     data object OnDismissSuccess : CreateChallengeAction
+    data object OnShareSuccessChallenge : CreateChallengeAction
+    data object OnDismissShareDialog : CreateChallengeAction
     data object OnBackClicked : CreateChallengeAction
 }
+

@@ -52,8 +52,16 @@ class CreateChallengeViewModel @Inject constructor(
         if (hasInitialized) return
         hasInitialized = true
         fetchTracks()
+        fetchUserProfile()
         challengeId?.let { id ->
             fetchExistingChallenge(id)
+        }
+    }
+
+    private fun fetchUserProfile() {
+        viewModelScope.launch {
+            val profile = userProfileRepo.readUserProfile()
+            _state.update { it.copy(creatorName = profile.personal.displayName) }
         }
     }
 
@@ -93,7 +101,8 @@ class CreateChallengeViewModel @Inject constructor(
                             challengeType = challenge.type,
                             analyzePosture = challenge.videoAnalysisConfig?.analyzePosture ?: false,
                             analyzeHands = challenge.videoAnalysisConfig?.analyzeHands ?: false,
-                            questions = challenge.questions.map { q -> q.text }.toImmutableList()
+                            questions = challenge.questions.map { q -> q.text }.toImmutableList(),
+                            creatorName = challenge.creatorName
                         )
                     }
                 }
@@ -148,11 +157,14 @@ class CreateChallengeViewModel @Inject constructor(
                 _state.update { it.copy(isSuccessDialogVisible = false, invitationCode = null) }
                 viewModelScope.launch { _events.send(CreateChallengeEvent.NavigateToDashboard) }
             }
+            CreateChallengeAction.OnShareSuccessChallenge -> _state.update { it.copy(isShareDialogVisible = true) }
+            CreateChallengeAction.OnDismissShareDialog -> _state.update { it.copy(isShareDialogVisible = false) }
             CreateChallengeAction.OnBackClicked -> {
                 viewModelScope.launch { _events.send(CreateChallengeEvent.NavigateBack) }
             }
         }
     }
+
 
     private fun removeQuestion(index: Int) {
         if (_state.value.questions.size > 10) {
@@ -224,7 +236,14 @@ class CreateChallengeViewModel @Inject constructor(
 
                     repository.createChallenge(challenge)
                         .onSuccess {
-                            _state.update { it.copy(isSubmitting = false, isSuccessDialogVisible = true, invitationCode = challengeId) }
+                            _state.update {
+                                it.copy(
+                                    isSubmitting = false,
+                                    isSuccessDialogVisible = true,
+                                    invitationCode = challengeId,
+                                    creatorName = userProfile.personal.displayName
+                                )
+                            }
                         }
                         .onError { _ ->
                             _state.update { it.copy(isSubmitting = false) }

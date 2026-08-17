@@ -3,6 +3,7 @@ package com.iti.careerpilot
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.optimization.PendingCvOptimization
+import com.iti.careerpilot.share.PendingChallengeDeepLink
 import com.iti.careerpilot.share.PendingSharedText
 import com.iti.core.datastore.UserTokensRepo
 import com.iti.core.datastore.settings.domain.UserSettingsRepo
@@ -28,6 +29,8 @@ class MainViewModel @Inject constructor(
     val pendingSharedText = _pendingSharedText.asStateFlow()
     private val _pendingCvOptimization = MutableStateFlow<PendingCvOptimization?>(null)
     val pendingCvOptimization = _pendingCvOptimization.asStateFlow()
+    private val _pendingChallengeDeepLink = MutableStateFlow<PendingChallengeDeepLink?>(null)
+    val pendingChallengeDeepLink = _pendingChallengeDeepLink.asStateFlow()
 
     val isLoggedIn: StateFlow<Boolean?> = userTokensRepo.tokenUpdates
         .map { it.accessToken?.isNotBlank() }
@@ -56,6 +59,15 @@ class MainViewModel @Inject constructor(
 
     fun consumeCvOptimization() {
         _pendingCvOptimization.value = null
+    }
+
+    fun acceptChallengeDeepLink(payload: PendingChallengeDeepLink?) {
+        payload ?: return
+        _pendingChallengeDeepLink.value = payload
+    }
+
+    fun consumeChallengeDeepLink() {
+        _pendingChallengeDeepLink.value = null
     }
 
     fun saveLanguageSettings(languageSetting: LanguageSetting) {

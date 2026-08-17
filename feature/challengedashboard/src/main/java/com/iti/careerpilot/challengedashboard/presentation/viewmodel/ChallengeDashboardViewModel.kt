@@ -81,7 +81,22 @@ class ChallengeDashboardViewModel @Inject constructor(
             }
 
             ChallengeDashboardAction.OnDismissDeleteConfirmation -> _state.update { it.copy(challengeToDelete = null) }
-
+            is ChallengeDashboardAction.OnShareChallengeClicked -> {
+                _state.update {
+                    it.copy(
+                        isShareDialogVisible = true,
+                        challengeToShare = action.challenge ?: it.challengeToShare ?: it.createdChallenges.firstOrNull()
+                    )
+                }
+            }
+            ChallengeDashboardAction.OnDismissShareDialog -> {
+                _state.update {
+                    it.copy(
+                        isShareDialogVisible = false,
+                        challengeToShare = null
+                    )
+                }
+            }
             is ChallengeDashboardAction.OnEditChallenge -> {
                 viewModelScope.launch {
                     _events.send(

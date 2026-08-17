@@ -23,7 +23,10 @@ data class CreateChallengeState(
     val error: String? = null,
     val invitationCode: String? = null,
     val isSuccessDialogVisible: Boolean = false,
+    val isShareDialogVisible: Boolean = false,
+    val creatorName: String? = null,
     val questionToDeleteIndex: Int? = null,
     val isEditMode: Boolean = false,
     val existingChallengeId: String? = null
 )
+

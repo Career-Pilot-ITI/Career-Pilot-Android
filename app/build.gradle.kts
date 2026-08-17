@@ -74,4 +74,5 @@ dependencies {
     implementation(project(":feature:createchallenge"))
     implementation(project(":feature:challengedashboard"))
     implementation(project(":feature:challengedetails"))
+    testImplementation(libs.robolectric)
 }

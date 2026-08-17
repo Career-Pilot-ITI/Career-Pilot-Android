@@ -15,9 +15,14 @@ data class ChallengeDashboardState(
     val participantSessions: ImmutableList<ChallengeSession>? = null, // Sessions for a specific created challenge
     val selectedChallengeId: String? = null,
     val challengeToDelete: Challenge? = null,
-)
+    val challengeToShare: Challenge? = null,
+    val isShareDialogVisible: Boolean = false,
+) {
+    val challenge: Challenge? get() = challengeToShare
+}
 
 enum class DashboardTab(val titleRes: Int) {
     MY_CHALLENGES(R.string.dashboard_tab_my_challenges),
     HISTORY(R.string.dashboard_tab_history)
 }
+

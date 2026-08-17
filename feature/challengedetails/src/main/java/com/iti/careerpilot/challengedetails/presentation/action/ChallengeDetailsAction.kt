@@ -10,4 +10,6 @@ sealed interface ChallengeDetailsAction {
     data class CameraPermissionChanged(val isGranted: Boolean) : ChallengeDetailsAction
     data object BeginChallengeClicked : ChallengeDetailsAction
     data object OnBackClicked : ChallengeDetailsAction
+    data object ShareClicked : ChallengeDetailsAction
+    data object DismissShareDialog : ChallengeDetailsAction
 }

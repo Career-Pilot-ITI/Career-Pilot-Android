@@ -19,9 +19,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -54,6 +56,8 @@ import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotButton
 import com.iti.careerpilot.core.designsystem.components.CareerPilotCard
 import com.iti.careerpilot.core.designsystem.components.LoadingWave
+import com.iti.careerpilot.core.designsystem.components.ShareChallengeDialog
+import com.iti.common.util.ChallengeShareHelper
 
 
 @Composable
@@ -136,12 +140,48 @@ fun ChallengeDetailsScreenRoot(
         )
     }
 
+    if (state.isShareDialogVisible && state.challenge != null) {
+        val challenge = state.challenge!!
+        val shareUrl = ChallengeShareHelper.buildShareUrl(
+            challengeId = challenge.id,
+            invitationCode = challenge.invitationCode
+        )
+        val shareMessage = ChallengeShareHelper.buildShareMessage(
+            creatorName = challenge.creatorName,
+            trackName = challenge.trackName,
+            seniorityLevel = challenge.seniorityLevel.name,
+            challengeType = challenge.type.name.replace("_", " "),
+            questionsCount = challenge.questions.size,
+            challengeId = challenge.id,
+            invitationCode = challenge.invitationCode
+        )
+
+        ShareChallengeDialog(
+            title = stringResource(R.string.share_challenge_title),
+            subtitle = "${challenge.trackName} (${challenge.seniorityLevel.name})",
+            shareUrl = shareUrl,
+            shareMessage = shareMessage,
+            onDismiss = { viewModel.onAction(ChallengeDetailsAction.DismissShareDialog) }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.challenge_details_title)) },
                 navigationIcon = {
                     BackIconButton(onBack = { viewModel.onAction(ChallengeDetailsAction.OnBackClicked) })
+                },
+                actions = {
+                    if (state.challenge != null) {
+                        IconButton(onClick = { viewModel.onAction(ChallengeDetailsAction.ShareClicked) }) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = stringResource(R.string.share_challenge_button),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
