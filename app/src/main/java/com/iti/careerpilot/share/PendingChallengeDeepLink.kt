@@ -55,7 +55,7 @@ data class PendingChallengeDeepLink(
 }
 
 fun Intent.toPendingChallengeDeepLink(): PendingChallengeDeepLink? {
-    if (action != Intent.ACTION_VIEW) return null
-    return PendingChallengeDeepLink.from(dataString)
+    val rawUri = dataString ?: data?.toString() ?: return null
+    return PendingChallengeDeepLink.from(rawUri)
 }
 
