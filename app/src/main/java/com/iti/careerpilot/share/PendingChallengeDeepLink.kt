@@ -1,7 +1,7 @@
 package com.iti.careerpilot.share
 
 import android.content.Intent
-import java.net.URI
+import android.net.Uri
 
 data class PendingChallengeDeepLink(
     val challengeId: String,
@@ -15,12 +15,11 @@ data class PendingChallengeDeepLink(
 
         fun from(rawUri: String?): PendingChallengeDeepLink? {
             if (rawUri.isNullOrBlank()) return null
-            val uri = runCatching { URI(rawUri.trim()) }.getOrNull() ?: return null
+            val uri = runCatching { Uri.parse(rawUri.trim()) }.getOrNull() ?: return null
 
             val scheme = uri.scheme?.lowercase() ?: return null
             val host = uri.host?.lowercase() ?: ""
-            val path = uri.path.orEmpty()
-            val segments = path.split('/').filter { it.isNotBlank() }
+            val segments = uri.pathSegments.orEmpty()
 
             val isUniversalLink = (scheme == "https" || scheme == "http") &&
                 host == WEB_HOST &&
@@ -31,19 +30,8 @@ data class PendingChallengeDeepLink(
 
             if (!isUniversalLink && !isCustomSchemeLink) return null
 
-            val queryParams = uri.rawQuery
-                ?.split('&')
-                ?.mapNotNull { param ->
-                    val parts = param.split('=', limit = 2)
-                    if (parts.isNotEmpty() && parts[0].isNotBlank()) {
-                        parts[0].trim() to parts.getOrNull(1)?.trim()
-                    } else null
-                }
-                ?.toMap()
-                .orEmpty()
-
             // 1. Check query parameter `id`
-            var challengeId = queryParams["id"]?.takeIf { it.isNotBlank() }
+            var challengeId = runCatching { uri.getQueryParameter("id") }.getOrNull()?.takeIf { it.isNotBlank() }
 
             // 2. Fallback to path segment: /challenge/{id} or custom scheme /chl_abc
             if (challengeId.isNullOrBlank()) {
@@ -56,7 +44,7 @@ data class PendingChallengeDeepLink(
             }
 
             if (challengeId.isNullOrBlank()) return null
-            val code = queryParams["code"]?.takeIf { it.isNotBlank() }
+            val code = runCatching { uri.getQueryParameter("code") }.getOrNull()?.takeIf { it.isNotBlank() }
 
             return PendingChallengeDeepLink(
                 challengeId = challengeId,
@@ -70,3 +58,4 @@ fun Intent.toPendingChallengeDeepLink(): PendingChallengeDeepLink? {
     if (action != Intent.ACTION_VIEW) return null
     return PendingChallengeDeepLink.from(dataString)
 }
+

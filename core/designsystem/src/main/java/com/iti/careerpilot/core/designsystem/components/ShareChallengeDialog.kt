@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,9 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.core.designsystem.R
 import com.iti.common.util.ChallengeShareHelper
 import com.iti.common.util.QrCodeGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ShareChallengeDialog(
@@ -59,6 +63,7 @@ fun ShareChallengeDialog(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
+    val scope = rememberCoroutineScope()
     var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var copied by remember { mutableStateOf(false) }
 
@@ -66,12 +71,14 @@ fun ShareChallengeDialog(
     val bgColor = MaterialTheme.colorScheme.surface.toArgb()
 
     LaunchedEffect(shareUrl, primaryColor, bgColor) {
-        qrBitmap = QrCodeGenerator.generateQrBitmap(
-            content = shareUrl,
-            sizePx = 512,
-            foregroundColor = primaryColor,
-            backgroundColor = bgColor
-        )
+        qrBitmap = withContext(Dispatchers.Default) {
+            QrCodeGenerator.generateQrBitmap(
+                content = shareUrl,
+                sizePx = 512,
+                foregroundColor = primaryColor,
+                backgroundColor = bgColor
+            )
+        }
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -173,15 +180,19 @@ fun ShareChallengeDialog(
                 qrBitmap?.let { bitmap ->
                     OutlinedButton(
                         onClick = {
-                            val file = ChallengeShareHelper.saveQrBitmapToCache(context, bitmap)
-                            if (file != null) {
-                                val sendIntent = ChallengeShareHelper.createShareImageIntent(
-                                    context = context,
-                                    imageFile = file,
-                                    caption = shareMessage
-                                )
-                                val chooser = Intent.createChooser(sendIntent, title)
-                                context.startActivity(chooser)
+                            scope.launch(Dispatchers.IO) {
+                                val file = ChallengeShareHelper.saveQrBitmapToCache(context, bitmap)
+                                if (file != null) {
+                                    val sendIntent = ChallengeShareHelper.createShareImageIntent(
+                                        context = context,
+                                        imageFile = file,
+                                        caption = shareMessage
+                                    )
+                                    val chooser = Intent.createChooser(sendIntent, title)
+                                    withContext(Dispatchers.Main) {
+                                        context.startActivity(chooser)
+                                    }
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
