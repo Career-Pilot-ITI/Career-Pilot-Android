@@ -40,6 +40,7 @@ import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.careerpilot.optimization.PendingCvOptimization
+import com.iti.careerpilot.share.PendingChallengeDeepLink
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
@@ -62,6 +63,8 @@ fun RootNavDisplay(
     onSharedTextConsumed: () -> Unit,
     pendingCvOptimization: PendingCvOptimization?,
     onCvOptimizationConsumed: () -> Unit,
+    pendingChallengeDeepLink: PendingChallengeDeepLink? = null,
+    onChallengeDeepLinkConsumed: () -> Unit = {},
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -126,6 +129,27 @@ fun RootNavDisplay(
                 }
             }
             onCvOptimizationConsumed()
+        }
+    }
+
+    LaunchedEffect(pendingChallengeDeepLink, isLoggedIn, currentRootRoute) {
+        val authOrSetupRoute = currentRootRoute == Route.Splash ||
+            currentRootRoute == Route.Login ||
+            currentRootRoute is Route.OTP ||
+            currentRootRoute == Route.Onboarding
+        if (
+            pendingChallengeDeepLink != null &&
+            isLoggedIn == true &&
+            !authOrSetupRoute
+        ) {
+            val isCurrentDetails = currentRootRoute is Route.ChallengeDetails &&
+                currentRootRoute.challengeId == pendingChallengeDeepLink.challengeId
+            if (!isCurrentDetails) {
+                rootBackStack.navigateSingleTop(
+                    Route.ChallengeDetails(pendingChallengeDeepLink.challengeId)
+                )
+            }
+            onChallengeDeepLinkConsumed()
         }
     }
 

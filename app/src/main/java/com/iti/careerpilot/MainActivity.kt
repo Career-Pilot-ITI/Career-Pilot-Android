@@ -24,6 +24,7 @@ import com.iti.careerpilot.core.designsystem.CareerPilotTheme
 import com.iti.careerpilot.optimization.toPendingCvOptimization
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
+import com.iti.careerpilot.share.toPendingChallengeDeepLink
 import com.iti.careerpilot.share.toPendingSharedText
 import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.common.network.NetworkMonitor
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewModel.acceptSharedText(intent.toPendingSharedText())
         viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
+        viewModel.acceptChallengeDeepLink(intent.toPendingChallengeDeepLink())
         enableEdgeToEdge()
         splashScreen.setKeepOnScreenCondition {
             mainUiState == MainUiState.Loading
@@ -75,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             val isOnline by networkMonitor.isOnline.collectAsStateWithLifecycle()
             val pendingSharedText by viewModel.pendingSharedText.collectAsStateWithLifecycle()
             val pendingCvOptimization by viewModel.pendingCvOptimization.collectAsStateWithLifecycle()
+            val pendingChallengeDeepLink by viewModel.pendingChallengeDeepLink.collectAsStateWithLifecycle()
             val isDarkTheme = shouldShowDarkTheme(mainUiState)
             LaunchedEffect(isDarkTheme) {
                 enableEdgeToEdge(
@@ -98,6 +101,8 @@ class MainActivity : AppCompatActivity() {
                         onSharedTextConsumed = viewModel::consumeSharedText,
                         pendingCvOptimization = pendingCvOptimization,
                         onCvOptimizationConsumed = viewModel::consumeCvOptimization,
+                        pendingChallengeDeepLink = pendingChallengeDeepLink,
+                        onChallengeDeepLinkConsumed = viewModel::consumeChallengeDeepLink,
                     )
                 }
             }
@@ -109,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         viewModel.acceptSharedText(intent.toPendingSharedText())
         viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
+        viewModel.acceptChallengeDeepLink(intent.toPendingChallengeDeepLink())
     }
 }
 

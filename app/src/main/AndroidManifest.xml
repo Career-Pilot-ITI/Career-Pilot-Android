@@ -56,6 +56,26 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
+            <!-- Challenge Universal App Link -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="career-pilot-indol.vercel.app"
+                    android:pathPrefix="/challenge" />
+            </intent-filter>
+
+            <!-- Challenge Custom Scheme Fallback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="careerpilot"
+                    android:host="challenge" />
+            </intent-filter>
         </activity>
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
