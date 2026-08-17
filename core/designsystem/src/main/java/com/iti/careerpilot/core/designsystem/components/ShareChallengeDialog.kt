@@ -228,13 +228,21 @@ fun ShareChallengeDialog(
                     }
                 }
 
-                // Action Buttons
+                // Primary Action Button (Shares QR Code Image + Message by default)
                 CareerPilotButton(
                     text = stringResource(R.string.share_challenge_button),
                     onClick = {
-                        val sendIntent = ChallengeShareHelper.createShareTextIntent(shareMessage)
-                        val chooser = Intent.createChooser(sendIntent, title)
-                        context.startActivity(chooser)
+                        scope.launch(Dispatchers.IO) {
+                            val sendIntent = ChallengeShareHelper.createShareChallengeIntent(
+                                context = context,
+                                message = shareMessage,
+                                qrBitmap = qrBitmap
+                            )
+                            val chooser = Intent.createChooser(sendIntent, title)
+                            withContext(Dispatchers.Main) {
+                                context.startActivity(chooser)
+                            }
+                        }
                     },
                     variant = ButtonVariant.PRIMARY,
                     leadingContent = {
@@ -247,38 +255,6 @@ fun ShareChallengeDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                qrBitmap?.let { bitmap ->
-                    CareerPilotButton(
-                        text = stringResource(R.string.share_challenge_share_qr_image),
-                        onClick = {
-                            scope.launch(Dispatchers.IO) {
-                                val file = ChallengeShareHelper.saveQrBitmapToCache(context, bitmap)
-                                if (file != null) {
-                                    val sendIntent = ChallengeShareHelper.createShareImageIntent(
-                                        context = context,
-                                        imageFile = file,
-                                        caption = shareMessage
-                                    )
-                                    val chooser = Intent.createChooser(sendIntent, title)
-                                    withContext(Dispatchers.Main) {
-                                        context.startActivity(chooser)
-                                    }
-                                }
-                            }
-                        },
-                        variant = ButtonVariant.OUTLINE,
-                        leadingContent = {
-                            Icon(
-                                imageVector = Icons.Default.QrCode,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
                 CareerPilotButton(
                     text = stringResource(R.string.share_challenge_close),

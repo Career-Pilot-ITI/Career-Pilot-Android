@@ -77,4 +77,22 @@ $link$codeLine
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     }
+
+    fun createShareChallengeIntent(
+        context: Context,
+        message: String,
+        qrBitmap: Bitmap? = null
+    ): Intent {
+        val imageFile = if (qrBitmap != null) {
+            saveQrBitmapToCache(context, qrBitmap)
+        } else {
+            null
+        }
+
+        return if (imageFile != null) {
+            createShareImageIntent(context, imageFile, message)
+        } else {
+            createShareTextIntent(message)
+        }
+    }
 }

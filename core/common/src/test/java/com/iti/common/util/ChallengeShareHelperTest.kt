@@ -1,10 +1,17 @@
 package com.iti.common.util
 
+import android.content.Intent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class ChallengeShareHelperTest {
 
     @Test
@@ -44,11 +51,27 @@ class ChallengeShareHelperTest {
         assertTrue(message.contains("Audio & Video"))
         assertTrue(message.contains("5 questions"))
         assertTrue(message.contains("https://career-pilot-indol.vercel.app/challenge?id=ch_123&code=CODE456"))
-        assertTrue(message.contains("https://career-pilot-indol.vercel.app/"))
         assertTrue(message.contains("CODE456"))
 
         // Verify no emojis are present
         val hasEmoji = message.any { Character.isSurrogate(it) }
         assertFalse("Message must not contain emojis", hasEmoji)
+    }
+
+    @Test
+    fun `createShareTextIntent creates valid send intent`() {
+        val intent = ChallengeShareHelper.createShareTextIntent("Hello Challenge")
+        assertEquals(Intent.ACTION_SEND, intent.action)
+        assertEquals("text/plain", intent.type)
+        assertEquals("Hello Challenge", intent.getStringExtra(Intent.EXTRA_TEXT))
+    }
+
+    @Test
+    fun `createShareChallengeIntent with null bitmap falls back to text intent`() {
+        val context = RuntimeEnvironment.getApplication()
+        val intent = ChallengeShareHelper.createShareChallengeIntent(context, "Hello Challenge", null)
+        assertEquals(Intent.ACTION_SEND, intent.action)
+        assertEquals("text/plain", intent.type)
+        assertEquals("Hello Challenge", intent.getStringExtra(Intent.EXTRA_TEXT))
     }
 }
