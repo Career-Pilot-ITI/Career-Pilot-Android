@@ -116,7 +116,7 @@ class ChallengesViewModelTest {
                 quotas = emptyMap(),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
-                coinBalance = 0,
+                coinBalance = 50,
             )
         )
         val viewModel = createViewModel(accessRepository = accessRepo)
@@ -198,7 +198,7 @@ class ChallengesViewModelTest {
             feature = FeatureKey.CreateChallenge,
             remaining = 0,
             max = 5,
-            coinCost = 20,
+            coinCost = 10,
         )
         val accessRepo = FakeAccessRepository(
             AccessState(
@@ -207,7 +207,7 @@ class ChallengesViewModelTest {
                 quotas = mapOf(FeatureKey.CreateChallenge to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
-                coinBalance = 5, // less than cost 20
+                coinBalance = 5, // less than cost 10
             )
         )
         val viewModel = createViewModel(accessRepository = accessRepo)

@@ -203,12 +203,18 @@ class QuizViewModelTest {
     }
 
     @Test
-    fun `PLUS user selecting seniority is granted with 0 coins and generates topics immediately`() = runTest {
+    fun `PLUS user selecting seniority is granted with active quota and generates topics immediately`() = runTest {
+        val quota = FeatureQuota(
+            feature = FeatureKey.Quizzes,
+            remaining = 3,
+            max = 3,
+            coinCost = 10,
+        )
         val fakeRepo = FakeAccessRepository(
             AccessState(
                 plan = Plan.PLUS,
                 features = PlanAccessMap.featuresFor(Plan.PLUS),
-                quotas = emptyMap(),
+                quotas = mapOf(FeatureKey.Quizzes to quota),
                 expiresAt = null,
                 lastSyncedAt = Clock.System.now(),
                 coinBalance = 0,
@@ -238,7 +244,7 @@ class QuizViewModelTest {
             feature = FeatureKey.Quizzes,
             remaining = 0,
             max = 5,
-            coinCost = 20,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -260,7 +266,7 @@ class QuizViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(20, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
         assertEquals(0, fakeQuizRepo.generateTopicsCallCount)
     }
 
@@ -377,7 +383,7 @@ class QuizViewModelTest {
             feature = FeatureKey.Quizzes,
             remaining = 0,
             max = 5,
-            coinCost = 20,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -426,7 +432,7 @@ class QuizViewModelTest {
             feature = FeatureKey.Quizzes,
             remaining = 0,
             max = 5,
-            coinCost = 20,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -569,11 +575,11 @@ class QuizViewModelTest {
     }
 
     @Test
-    fun `initial state contains exact pricing from FeaturePricingMap for quizzes 0 coins`() = runTest {
+    fun `initial state contains exact pricing from FeaturePricingMap for quizzes 10 coins`() = runTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
-        assertEquals(0, viewModel.state.value.quizCoinCost)
+        assertEquals(10, viewModel.state.value.quizCoinCost)
         assertEquals(FeaturePricingMap.coinCost(FeatureKey.Quizzes), viewModel.state.value.quizCoinCost)
     }
 
