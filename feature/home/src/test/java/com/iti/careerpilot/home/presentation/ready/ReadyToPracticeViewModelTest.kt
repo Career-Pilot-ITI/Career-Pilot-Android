@@ -224,7 +224,7 @@ class ReadyToPracticeViewModelTest {
             feature = FeatureKey.VideoInterview,
             remaining = 0,
             max = 5,
-            coinCost = 40,
+            coinCost = 15,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -245,7 +245,7 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(40, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(15, viewModel.state.value.coinTopUpRequiredCost)
     }
 
     @Test
@@ -287,7 +287,7 @@ class ReadyToPracticeViewModelTest {
             feature = FeatureKey.VideoInterview,
             remaining = 0,
             max = 5,
-            coinCost = 40,
+            coinCost = 15,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -335,7 +335,7 @@ class ReadyToPracticeViewModelTest {
             feature = FeatureKey.VideoInterview,
             remaining = 0,
             max = 5,
-            coinCost = 40,
+            coinCost = 15,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -570,7 +570,7 @@ class ReadyToPracticeViewModelTest {
             feature = FeatureKey.VoicePracticeMode,
             remaining = 0,
             max = 3,
-            coinCost = 25,
+            coinCost = 10,
         )
         val fakeRepo = FakeAccessRepository(
             AccessState(
@@ -598,7 +598,7 @@ class ReadyToPracticeViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertTrue(viewModel.state.value.showCoinTopUpSheet)
-        assertEquals(25, viewModel.state.value.coinTopUpRequiredCost)
+        assertEquals(10, viewModel.state.value.coinTopUpRequiredCost)
         assertTrue(events.isEmpty())
         job.cancel()
     }
@@ -694,12 +694,12 @@ class ReadyToPracticeViewModelTest {
     }
 
     @Test
-    fun `initial state contains exact pricing from FeaturePricingMap for voice 10 coins and video 0 coins`() = runTest {
+    fun `initial state contains exact pricing from FeaturePricingMap for voice 10 coins and video 15 coins`() = runTest {
         val viewModel = createViewModel()
         testScheduler.advanceUntilIdle()
 
         assertEquals(10, viewModel.state.value.voiceCoinCost)
-        assertEquals(0, viewModel.state.value.videoCoinCost)
+        assertEquals(15, viewModel.state.value.videoCoinCost)
         assertEquals(FeaturePricingMap.coinCost(FeatureKey.VoicePracticeMode), viewModel.state.value.voiceCoinCost)
         assertEquals(FeaturePricingMap.coinCost(FeatureKey.VideoInterview), viewModel.state.value.videoCoinCost)
     }

@@ -417,14 +417,34 @@ class CheckFeatureAccessUseCaseTest {
     }
 
     @Test
-    fun `MAX plan user accessing CreateChallenge returns Granted`() = runTest {
+    fun `MAX plan user with insufficient coins accessing CreateChallenge returns CoinTopUpRequired`() = runTest {
         fakeRepo.mutableState.value = AccessState(
             plan = Plan.MAX,
             features = PlanAccessMap.featuresFor(Plan.MAX),
             quotas = emptyMap(),
             expiresAt = null,
             lastSyncedAt = Clock.System.now(),
-            coinBalance = 0
+            coinBalance = 0 // CreateChallenge costs 10 coins in FeaturePricingMap
+        )
+
+        val result = useCase(FeatureKey.CreateChallenge).first()
+
+        assertTrue(result is FeatureAccess.CoinTopUpRequired)
+        val topUp = result as FeatureAccess.CoinTopUpRequired
+        assertEquals(FeatureKey.CreateChallenge, topUp.feature)
+        assertEquals(10, topUp.coinCost)
+        assertEquals(0, topUp.currentCoins)
+    }
+
+    @Test
+    fun `MAX plan user with sufficient coins accessing CreateChallenge returns Granted`() = runTest {
+        fakeRepo.mutableState.value = AccessState(
+            plan = Plan.MAX,
+            features = PlanAccessMap.featuresFor(Plan.MAX),
+            quotas = emptyMap(),
+            expiresAt = null,
+            lastSyncedAt = Clock.System.now(),
+            coinBalance = 10
         )
 
         val result = useCase(FeatureKey.CreateChallenge).first()

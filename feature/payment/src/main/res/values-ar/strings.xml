@@ -46,9 +46,9 @@
     <string name="paywall_feature_resume_optimizer">تحسين أقسام السيرة الذاتية وخطاب التقديم</string>
     <string name="paywall_feature_80_monthly_coins">80 عملة شهرية متضمنة</string>
     <string name="paywall_feature_everything_in_plus">كل مميزات خطة بلس</string>
-    <string name="paywall_feature_video_interview">تحليل لغة الجسد والوضعية في الفيديو</string>
-    <string name="paywall_feature_create_challenges">إنشاء واستضافة تحديات المقابلات المخصصة</string>
-    <string name="paywall_feature_technical_quizzes">اختبارات المهارات التقنية ومسارات التعلم</string>
+    <string name="paywall_feature_video_interview">تحليل لغة الجسد والوضعية في الفيديو (15 عملة / جلسة)</string>
+    <string name="paywall_feature_create_challenges">إنشاء واستضافة تحديات المقابلات المخصصة (10 عملات)</string>
+    <string name="paywall_feature_technical_quizzes">اختبارات المهارات التقنية (10 عملات / اختبار)</string>
     <string name="paywall_feature_160_monthly_coins">160 عملة شهرية متضمنة</string>
     <string name="paywall_checkout_title">إتمام الشراء</string>
     <string name="paywall_checkout_subtitle">راجع خطتك الجديدة قبل المتابعة.</string>
