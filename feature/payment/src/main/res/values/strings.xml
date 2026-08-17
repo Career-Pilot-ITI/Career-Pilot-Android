@@ -46,9 +46,9 @@
     <string name="paywall_feature_resume_optimizer">AI Resume Section Optimizer &amp; Cover Letter</string>
     <string name="paywall_feature_80_monthly_coins">80 Monthly Coins Included</string>
     <string name="paywall_feature_everything_in_plus">Everything in Plus plan</string>
-    <string name="paywall_feature_video_interview">Video Body Language &amp; Posture AI</string>
-    <string name="paywall_feature_create_challenges">Create &amp; Host Custom Challenges</string>
-    <string name="paywall_feature_technical_quizzes">AI Technical Skill Quizzes &amp; Tests</string>
+    <string name="paywall_feature_video_interview">Video Body Language &amp; Posture AI (15 coins / session)</string>
+    <string name="paywall_feature_create_challenges">Create &amp; Host Custom Challenges (10 coins)</string>
+    <string name="paywall_feature_technical_quizzes">AI Technical Skill Quizzes (10 coins / quiz)</string>
     <string name="paywall_feature_160_monthly_coins">160 Monthly Coins Included</string>
     <string name="paywall_checkout_title">Checkout</string>
     <string name="paywall_checkout_subtitle">Review your new plan before proceeding.</string>

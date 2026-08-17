@@ -304,6 +304,34 @@ class CreateChallengeViewModelTest {
     }
 
     @Test
+    fun `Submit challenge when user has insufficient coins for CreateChallenge is blocked by feature access guard`() = runTest {
+        val accessRepo = FakeAccessRepository(
+            AccessState(
+                plan = Plan.MAX,
+                features = PlanAccessMap.featuresFor(Plan.MAX),
+                quotas = emptyMap(),
+                expiresAt = null,
+                lastSyncedAt = Clock.System.now(),
+                coinBalance = 5, // less than required 10 coins
+            )
+        )
+        val fakeRepo = FakeCreateChallengeRepository()
+        val viewModel = createViewModel(repository = fakeRepo, accessRepository = accessRepo)
+
+        viewModel.onAction(CreateChallengeAction.Initial(null))
+        testScheduler.advanceUntilIdle()
+
+        setValidQuestions(viewModel)
+
+        viewModel.onAction(CreateChallengeAction.OnSubmit)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(0, fakeRepo.validateQuestionsCallCount)
+        assertEquals(0, fakeRepo.createChallengeCallCount)
+        assertFalse(viewModel.state.value.isSuccessDialogVisible)
+    }
+
+    @Test
     fun `Submit challenge with fewer than 10 non-blank questions blocks submission`() = runTest {
         val fakeRepo = FakeCreateChallengeRepository()
         val viewModel = createViewModel(repository = fakeRepo)
