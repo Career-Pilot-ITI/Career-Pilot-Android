@@ -30,4 +30,6 @@
     <string name="challenge_details_tip_internet">Check your internet connection.</string>
     <string name="challenge_details_tip_focus">Stay focused and answer clearly.</string>
     <string name="challenge_details_tip_lighting">For video sessions, ensure good lighting.</string>
+    <string name="share_challenge_title">Share Challenge</string>
+    <string name="share_challenge_button">Share Challenge</string>
 </resources>

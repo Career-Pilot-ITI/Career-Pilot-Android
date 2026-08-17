@@ -46,6 +46,8 @@ class ChallengeDetailsViewModel @Inject constructor(
             ChallengeDetailsAction.CameraPermissionDialogDismissed -> _state.update { it.copy(showCameraPermissionDialog = false) }
             ChallengeDetailsAction.MicrophoneRowClicked -> _state.update { it.copy(showMicPermissionDialog = true, showCameraPermissionDialog = false) }
             ChallengeDetailsAction.CameraRowClicked -> _state.update { it.copy(showMicPermissionDialog = true, showCameraPermissionDialog = true) }
+            ChallengeDetailsAction.ShareClicked -> _state.update { it.copy(isShareDialogVisible = true) }
+            ChallengeDetailsAction.DismissShareDialog -> _state.update { it.copy(isShareDialogVisible = false) }
         }
     }
 

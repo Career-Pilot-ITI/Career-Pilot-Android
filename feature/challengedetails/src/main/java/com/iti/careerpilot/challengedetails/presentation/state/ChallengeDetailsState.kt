@@ -10,7 +10,8 @@ data class ChallengeDetailsState(
     val isMicrophoneGranted: Boolean = false,
     val isCameraGranted: Boolean = false,
     val showMicPermissionDialog: Boolean = false,
-    val showCameraPermissionDialog: Boolean = false
+    val showCameraPermissionDialog: Boolean = false,
+    val isShareDialogVisible: Boolean = false
 ) {
     val canBegin: Boolean
         get() = challenge != null && 
