@@ -18,4 +18,5 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.lottie.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.zxing.core)
 }

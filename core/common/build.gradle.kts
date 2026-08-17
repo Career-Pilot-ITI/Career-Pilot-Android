@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
+    implementation(libs.zxing.core)
 }
