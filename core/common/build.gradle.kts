@@ -16,4 +16,5 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.ai)
     implementation(libs.zxing.core)
+    testImplementation(libs.robolectric)
 }

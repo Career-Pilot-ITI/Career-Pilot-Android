@@ -42,10 +42,12 @@ googleServices = "4.5.0"
 mediapipe = "1.0.0"
 camerax = "1.6.1"
 zxing = "3.5.3"
+robolectric = "4.14.1"
 
 
 [libraries]
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 animated-navigation-bar = { module = "com.exyte:animated-navigation-bar", version.ref = "animatedNavigationBar" }
