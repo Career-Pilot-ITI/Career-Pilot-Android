@@ -9,6 +9,7 @@ android {
 }
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:common"))
     implementation(libs.androidx.compose.googlefonts)
     api(libs.androidx.compose.material3)
     api(libs.androidx.material3.android)

@@ -59,4 +59,12 @@
     <string name="cv_upload_progress">%1$d%% uploaded</string>
     <string name="cv_upload_file_details">%1$s • %2$s</string>
     <string name="cv_upload_parsing">Parsing CV…</string>
+
+    <string name="share_challenge_title">Share Challenge</string>
+    <string name="share_challenge_scan_qr">Scan QR Code with camera to join</string>
+    <string name="share_challenge_copy_link">Copy Link</string>
+    <string name="share_challenge_copied">Link copied to clipboard</string>
+    <string name="share_challenge_button">Share Challenge</string>
+    <string name="share_challenge_share_qr_image">Share QR Code Image</string>
+    <string name="share_challenge_close">Close</string>
 </resources>
