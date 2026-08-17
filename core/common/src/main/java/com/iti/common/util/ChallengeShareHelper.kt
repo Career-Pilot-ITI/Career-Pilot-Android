@@ -41,11 +41,7 @@ Career Pilot Challenge Invitation
 You have been invited by $creator to take on a $seniorityLevel $trackName mock interview challenge on Career Pilot ($challengeType, $questionsCount questions).
 
 Open the challenge:
-$link
-
-If you don't have Career Pilot installed on your device, download it here:
-$BASE_URL/
-$codeLine
+$link$codeLine
         """.trimIndent()
     }
 
