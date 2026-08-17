@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.Button
@@ -91,6 +92,8 @@ import com.iti.careerpilot.core.designsystem.common.GradientIcon
 import com.iti.careerpilot.core.designsystem.common.ObserveEvent
 import com.iti.careerpilot.core.designsystem.components.BackIconButton
 import com.iti.careerpilot.core.designsystem.components.LoadingDialog
+import com.iti.careerpilot.core.designsystem.components.ShareChallengeDialog
+import com.iti.common.util.ChallengeShareHelper
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -165,6 +168,31 @@ fun ChallengeDashboardScreenRoot(
         )
     }
 
+    if (state.isShareDialogVisible && state.challenge != null) {
+        val challenge = state.challenge!!
+        val shareUrl = ChallengeShareHelper.buildShareUrl(
+            challengeId = challenge.id,
+            invitationCode = challenge.invitationCode
+        )
+        val shareMessage = ChallengeShareHelper.buildShareMessage(
+            creatorName = challenge.creatorName,
+            trackName = challenge.trackName,
+            seniorityLevel = challenge.seniorityLevel.name,
+            challengeType = challenge.type.name.replace("_", " "),
+            questionsCount = challenge.questions.size,
+            challengeId = challenge.id,
+            invitationCode = challenge.invitationCode
+        )
+
+        ShareChallengeDialog(
+            title = stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_title),
+            subtitle = "${challenge.trackName} (${challenge.seniorityLevel.name})",
+            shareUrl = shareUrl,
+            shareMessage = shareMessage,
+            onDismiss = { viewModel.onAction(ChallengeDashboardAction.OnDismissShareDialog) }
+        )
+    }
+
     if (state.isLoading && !state.isRefreshing) {
         LoadingDialog()
     }
@@ -226,6 +254,7 @@ fun ChallengeDashboardScreenContent(
                                 challenge = challenge,
                                 onEdit = { onAction(ChallengeDashboardAction.OnEditChallenge(challenge.id)) },
                                 onDelete = { onAction(ChallengeDashboardAction.OnDeleteChallenge(challenge)) },
+                                onShare = { onAction(ChallengeDashboardAction.OnShareChallengeClicked(challenge)) },
                                 onViewReports = {
                                     onAction(
                                         ChallengeDashboardAction.OnViewParticipantReports(
@@ -354,6 +383,7 @@ fun CreatedChallengeItem(
     challenge: Challenge,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onShare: () -> Unit,
     onViewReports: () -> Unit,
     onCopyCode: (String) -> Unit
 ) {
@@ -383,37 +413,60 @@ fun CreatedChallengeItem(
                     VisibilityPill(challenge.visibility)
                 }
 
-                Box {
-                    IconButton(onClick = { menuExpanded = true }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onShare) {
                         Icon(
-                            Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.more_options)
+                            imageVector = Icons.Default.Share,
+                            contentDescription = stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_button),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.edit)) },
-                            leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-                            onClick = { menuExpanded = false; onEdit() }
-                        )
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    stringResource(R.string.delete),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            },
-                            onClick = { menuExpanded = false; onDelete() }
-                        )
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = stringResource(R.string.more_options)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_button)) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Share,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                onClick = {
+                                    menuExpanded = false
+                                    onShare()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.edit)) },
+                                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                                onClick = { menuExpanded = false; onEdit() }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        stringResource(R.string.delete),
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                },
+                                onClick = { menuExpanded = false; onDelete() }
+                            )
+                        }
                     }
                 }
             }
@@ -433,12 +486,16 @@ fun CreatedChallengeItem(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .clickable { onCopyCode(challenge.invitationCode) }
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onCopyCode(challenge.invitationCode) }
+                            .padding(vertical = 4.dp)
+                    ) {
                         Text(
                             text = stringResource(R.string.invitation_code_label),
                             style = MaterialTheme.typography.labelSmall,
@@ -450,6 +507,14 @@ fun CreatedChallengeItem(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp,
                             color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onShare) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = stringResource(com.iti.careerpilot.core.designsystem.R.string.share_challenge_button),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

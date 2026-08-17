@@ -10,6 +10,8 @@ sealed interface ChallengeDashboardAction {
     data class OnDeleteChallenge(val challenge: Challenge) : ChallengeDashboardAction
     data object OnConfirmDelete : ChallengeDashboardAction
     data object OnDismissDeleteConfirmation : ChallengeDashboardAction
+    data class OnShareChallengeClicked(val challenge: Challenge? = null) : ChallengeDashboardAction
+    data object OnDismissShareDialog : ChallengeDashboardAction
     data class OnEditChallenge(val challengeId: String) : ChallengeDashboardAction
     data class OnViewParticipantReports(val challengeId: String) : ChallengeDashboardAction
     data class OnTakenChallengeClicked(val sessionId: String) : ChallengeDashboardAction
