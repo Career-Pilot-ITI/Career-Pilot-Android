@@ -76,6 +76,35 @@
                     android:scheme="careerpilot"
                     android:host="challenge" />
             </intent-filter>
+
+            <!-- Company Interview Universal Link -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="career-pilot-indol.vercel.app"
+                    android:pathPrefix="/interview" />
+            </intent-filter>
+
+            <!-- Company Interview Custom Scheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="careerpilot"
+                    android:host="company-interview" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="careerpilot"
+                    android:host="interview" />
+            </intent-filter>
         </activity>
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

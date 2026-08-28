@@ -49,6 +49,15 @@ object Endpoints {
 
     fun interviewSessionQuestions(sessionId: Long): String =
         "${interviewSession(sessionId)}/questions"
+
+    // Company / Applicant Interview Assessment
+    const val APPLICANT_INTERVIEW = "$BASE_URL/api/v1/applicant/interview"
+    fun applicantInterviewMetadata(token: String) = "$APPLICANT_INTERVIEW/$token"
+    fun applicantVerifyEmail(token: String) = "$APPLICANT_INTERVIEW/$token/verify-email"
+    fun applicantStartSession(token: String) = "$APPLICANT_INTERVIEW/$token/start"
+    fun applicantSubmitAnswer(token: String) = "$APPLICANT_INTERVIEW/$token/answer"
+    fun applicantCompleteSession(token: String) = "$APPLICANT_INTERVIEW/$token/complete"
+    fun applicantSessionState(token: String) = "$APPLICANT_INTERVIEW/$token/state"
 }
 
 

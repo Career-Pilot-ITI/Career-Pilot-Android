@@ -110,4 +110,9 @@ sealed interface Route : NavKey {
         val trackName: String,
         val workspaceId: Long? = null,
     ) : Route
+
+    @Serializable
+    data class CompanyInterview(
+        val token: String
+    ) : Route
 }

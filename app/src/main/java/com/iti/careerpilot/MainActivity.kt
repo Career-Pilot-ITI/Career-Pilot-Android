@@ -25,6 +25,7 @@ import com.iti.careerpilot.optimization.toPendingCvOptimization
 import com.iti.careerpilot.rootnavigation.RootNavDisplay
 import com.iti.careerpilot.rootnavigation.Route
 import com.iti.careerpilot.share.toPendingChallengeDeepLink
+import com.iti.careerpilot.share.toPendingCompanyInterviewDeepLink
 import com.iti.careerpilot.share.toPendingSharedText
 import com.iti.careerpilot.settings.presentation.viewmodel.LocalSettingsUser
 import com.iti.common.network.NetworkMonitor
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.acceptSharedText(intent.toPendingSharedText())
         viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
         viewModel.acceptChallengeDeepLink(intent.toPendingChallengeDeepLink())
+        viewModel.acceptCompanyInterviewDeepLink(intent.toPendingCompanyInterviewDeepLink())
         enableEdgeToEdge()
         splashScreen.setKeepOnScreenCondition {
             mainUiState == MainUiState.Loading
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
             val pendingSharedText by viewModel.pendingSharedText.collectAsStateWithLifecycle()
             val pendingCvOptimization by viewModel.pendingCvOptimization.collectAsStateWithLifecycle()
             val pendingChallengeDeepLink by viewModel.pendingChallengeDeepLink.collectAsStateWithLifecycle()
+            val pendingCompanyInterviewDeepLink by viewModel.pendingCompanyInterviewDeepLink.collectAsStateWithLifecycle()
             val isDarkTheme = shouldShowDarkTheme(mainUiState)
             LaunchedEffect(isDarkTheme) {
                 enableEdgeToEdge(
@@ -103,6 +106,8 @@ class MainActivity : AppCompatActivity() {
                         onCvOptimizationConsumed = viewModel::consumeCvOptimization,
                         pendingChallengeDeepLink = pendingChallengeDeepLink,
                         onChallengeDeepLinkConsumed = viewModel::consumeChallengeDeepLink,
+                        pendingCompanyInterviewDeepLink = pendingCompanyInterviewDeepLink,
+                        onCompanyInterviewDeepLinkConsumed = viewModel::consumeCompanyInterviewDeepLink,
                     )
                 }
             }
@@ -115,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.acceptSharedText(intent.toPendingSharedText())
         viewModel.acceptCvOptimization(intent.toPendingCvOptimization())
         viewModel.acceptChallengeDeepLink(intent.toPendingChallengeDeepLink())
+        viewModel.acceptCompanyInterviewDeepLink(intent.toPendingCompanyInterviewDeepLink())
     }
 }
 

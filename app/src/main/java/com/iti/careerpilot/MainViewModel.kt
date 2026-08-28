@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.careerpilot.share.PendingChallengeDeepLink
+import com.iti.careerpilot.share.PendingCompanyInterviewDeepLink
 import com.iti.careerpilot.share.PendingSharedText
 import com.iti.core.datastore.UserTokensRepo
 import com.iti.core.datastore.settings.domain.UserSettingsRepo
@@ -31,6 +32,8 @@ class MainViewModel @Inject constructor(
     val pendingCvOptimization = _pendingCvOptimization.asStateFlow()
     private val _pendingChallengeDeepLink = MutableStateFlow<PendingChallengeDeepLink?>(null)
     val pendingChallengeDeepLink = _pendingChallengeDeepLink.asStateFlow()
+    private val _pendingCompanyInterviewDeepLink = MutableStateFlow<PendingCompanyInterviewDeepLink?>(null)
+    val pendingCompanyInterviewDeepLink = _pendingCompanyInterviewDeepLink.asStateFlow()
 
     val isLoggedIn: StateFlow<Boolean?> = userTokensRepo.tokenUpdates
         .map { it.accessToken?.isNotBlank() }
@@ -68,6 +71,15 @@ class MainViewModel @Inject constructor(
 
     fun consumeChallengeDeepLink() {
         _pendingChallengeDeepLink.value = null
+    }
+
+    fun acceptCompanyInterviewDeepLink(payload: PendingCompanyInterviewDeepLink?) {
+        payload ?: return
+        _pendingCompanyInterviewDeepLink.value = payload
+    }
+
+    fun consumeCompanyInterviewDeepLink() {
+        _pendingCompanyInterviewDeepLink.value = null
     }
 
     fun saveLanguageSettings(languageSetting: LanguageSetting) {

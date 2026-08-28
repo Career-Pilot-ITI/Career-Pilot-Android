@@ -36,11 +36,13 @@ import com.iti.careerpilot.features.paywall.navigation.PaymentRoute
 import com.iti.careerpilot.features.splash.SplashRoot
 import com.iti.careerpilot.home.presentation.interviews.screen.InterviewsRoot
 import com.iti.careerpilot.home.presentation.ready.screen.ReadyToPracticeRoot
+import com.iti.careerpilot.companyinterview.presentation.screen.CompanyInterviewScreen
 import com.iti.careerpilot.login.presentation.login.screen.LoginRoot
 import com.iti.careerpilot.login.presentation.otp.screen.OTPRoot
 import com.iti.careerpilot.nestednavigation.NestedNavDisplay
 import com.iti.careerpilot.optimization.PendingCvOptimization
 import com.iti.careerpilot.share.PendingChallengeDeepLink
+import com.iti.careerpilot.share.PendingCompanyInterviewDeepLink
 import com.iti.careerpilot.practicesession.presentation.practicescreen.screen.PracticeSessionRoot
 import com.iti.careerpilot.practicesession.presentation.resultscreen.ResultRoot
 import com.iti.careerpilot.quiz.presentation.screen.QuizRoot
@@ -65,6 +67,8 @@ fun RootNavDisplay(
     onCvOptimizationConsumed: () -> Unit,
     pendingChallengeDeepLink: PendingChallengeDeepLink? = null,
     onChallengeDeepLinkConsumed: () -> Unit = {},
+    pendingCompanyInterviewDeepLink: PendingCompanyInterviewDeepLink? = null,
+    onCompanyInterviewDeepLinkConsumed: () -> Unit = {},
 ) {
 
     val rootBackStack = rememberNavBackStack(startRoute)
@@ -150,6 +154,19 @@ fun RootNavDisplay(
                 )
             }
             onChallengeDeepLinkConsumed()
+        }
+    }
+
+    LaunchedEffect(pendingCompanyInterviewDeepLink, currentRootRoute) {
+        if (pendingCompanyInterviewDeepLink != null) {
+            val isCurrentInterview = currentRootRoute is Route.CompanyInterview &&
+                currentRootRoute.token == pendingCompanyInterviewDeepLink.token
+            if (!isCurrentInterview) {
+                rootBackStack.navigateSingleTop(
+                    Route.CompanyInterview(pendingCompanyInterviewDeepLink.token)
+                )
+            }
+            onCompanyInterviewDeepLinkConsumed()
         }
     }
 
@@ -657,6 +674,15 @@ fun RootNavDisplay(
                                 )
                             }
                         },
+                    )
+                }
+
+                entry<Route.CompanyInterview> { route ->
+                    CompanyInterviewScreen(
+                        token = route.token,
+                        onNavigateBack = {
+                            rootBackStack.popIfCurrentIs<Route.CompanyInterview>()
+                        }
                     )
                 }
             },
