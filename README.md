@@ -8,7 +8,7 @@
 [![Navigation 3](https://img.shields.io/badge/Navigation-Navigation%203-00599C?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/guide/navigation)
 [![Dagger Hilt](https://img.shields.io/badge/DI-Dagger%20Hilt%202.60.1-brightgreen?style=for-the-badge&logo=dagger&logoColor=white)](https://dagger.dev/hilt/)
 [![Ktor Client](https://img.shields.io/badge/Network-Ktor%203.5.1-F88900?style=for-the-badge&logo=ktor&logoColor=white)](https://ktor.io/)
-[![Google MediaPipe](https://img.shields.io/badge/Vision%20AI-MediaPipe%20Tasks-00C853?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com/mediapipe)
+[![Vision AI](https://img.shields.io/badge/Vision%20AI-On--Device%20Vision-00C853?style=for-the-badge&logo=google&logoColor=white)](https://developers.google.com)
 [![Firebase AI](https://img.shields.io/badge/Multimodal%20AI-Gemini%20Flash-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Min SDK](https://img.shields.io/badge/Min%20SDK-26%20(Android%208.0)-blue?style=for-the-badge)](https://developer.android.com/)
 [![Target SDK](https://img.shields.io/badge/Target%20SDK-37%20(Android%2015)-blueviolet?style=for-the-badge)](https://developer.android.com/)
@@ -57,7 +57,7 @@
 
 **CareerPilot** is an enterprise-grade, modern Android application engineered to bridge the gap between job seekers and hiring standards. Built on **Jetpack Compose (Material 3 Expressive)**, **Navigation 3**, and a strictly decoupled **Multi-Module Clean MVI Architecture**, CareerPilot provides a full-suite interview preparation ecosystem.
 
-Unlike conventional prep apps that only transcribe spoken answers, CareerPilot incorporates a **privacy-first, on-device Computer Vision pipeline (Google MediaPipe)** to evaluate non-verbal communication (eye contact, posture, fidgets, facial expressiveness) alongside speech analysis (Whisper/Sherpa-ONNX) and cloud multimodal evaluation (Google Gemini Flash).
+Unlike conventional prep apps that only transcribe spoken answers, CareerPilot incorporates a **privacy-first, on-device Computer Vision pipeline** to evaluate non-verbal communication (eye contact, posture, fidgets, facial expressiveness) alongside on-device speech analysis and cloud multimodal evaluation (Google Gemini Flash).
 
 ---
 
@@ -66,7 +66,7 @@ Unlike conventional prep apps that only transcribe spoken answers, CareerPilot i
 ### 1. 🎯 AI Video Body Language Coach
 *Comprehensive non-verbal communication intelligence during mock video interviews.*
 
-- **100% On-Device Vision Engine**: Powered by Google MediaPipe (`FaceLandmarker` & `PoseLandmarker`) via CameraX. Video frames are analyzed in-memory and discarded immediately ($0 cloud streaming costs, zero video uploads, complete privacy).
+- **100% On-Device Vision Engine**: Powered by on-device Face & Pose landmark pipelines via CameraX. Video frames are analyzed in-memory and discarded immediately ($0 cloud streaming costs, zero video uploads, complete privacy).
 - **The 4 Behavioral Dimensions**:
   1. 👁️ **Gaze Stability & Eye Contact**: Measures pupil-to-iris deviation relative to head pose angles.
   2. 🧘 **Torso Posture & Alignment**: Tracks shoulder tilt, spinal slouching, and forward head lean.
@@ -81,7 +81,7 @@ Unlike conventional prep apps that only transcribe spoken answers, CareerPilot i
 
 ### 2. 🎙️ Multimodal AI Mock Interview Practice
 - **Real-Time Voice & Text Delivery**: Practice technical and behavioral questions across selected career tracks (Android, Frontend, Backend, AI/ML, DevOps, UI/UX, etc.).
-- **On-Device Speech Recognition**: Low-latency transcription powered by **Sherpa-ONNX / Whisper**.
+- **On-Device Speech Recognition**: Low-latency transcription powered by on-device speech recognition engine.
 - **Context-Aware Follow-ups**: Adaptive AI interviewer dynamically adjusts follow-up questions based on the candidate's answer depth.
 
 ### 3. 📄 ATS Resume Optimizer & Workspace Studio
@@ -228,9 +228,9 @@ Build configuration is centralized in `build-logic/convention` using custom Grad
 | **`:core:database`** | Core Data | Room Database 2.8.4 local caching, DAOs, entities, offline synchronization. |
 | **`:core:datastore`** | Core Data | AndroidX DataStore Preferences for user tokens, session caching, and app configurations. |
 | **`:core:access`** | Core Domain/Data | Subscription entitlement logic, plan access maps (`FREE`, `PLUS`, `MAX`), coin deductions. |
-| **`:core:bodylanguage`** | Core Vision | MediaPipe Face & Pose signal extractors, metric calculators, offline deterministic engine. |
+| **`:core:bodylanguage`** | Core Vision | On-device Face & Pose signal extractors, metric calculators, offline deterministic engine. |
 | **`:core:ai`** | Core ML | Firebase AI (Gemini Flash) integrations, evaluation prompts, multimodal response parsers. |
-| **`:core:whisper`** | Core Audio | On-device Sherpa-ONNX / Whisper speech-to-text inference engine. |
+| **`:core:whisper`** | Core Audio | On-device speech-to-text inference engine. |
 | **`:core:challengefirestore`** | Core Realtime | Firebase Firestore repository for multiplayer challenges, matchmaking, and leaderboards. |
 | **`:core:interviews`** | Core Domain | Interview question models, session state management, feedback contracts. |
 | **`:core:model`** | Core Domain | Shared pure Kotlin domain models free of framework dependencies. |
@@ -265,9 +265,9 @@ Build configuration is centralized in `build-logic/convention` using custom Grad
 | **Networking** | [Ktor Client](https://ktor.io/) | `3.5.1` | Multiplatform HTTP client with OkHttp engine & JSON serialization. |
 | **Local Database** | [Room](https://developer.android.com/training/data-storage/room) | `2.8.4` | Local SQLite abstraction with coroutine Flow support. |
 | **Preferences** | [DataStore Preferences](https://developer.android.com/topic/libraries/architecture/datastore) | `1.2.1` | Asynchronous key-value storage. |
-| **Computer Vision** | [Google MediaPipe](https://developers.google.com/mediapipe) | `1.0.0` | On-device Face Mesh & Pose landmark detection. |
+| **Computer Vision** | On-Device Vision Engine | `1.0.0` | On-device Face Mesh & Pose landmark detection. |
 | **Camera** | [CameraX](https://developer.android.com/training/camerax) | `1.6.1` | Camera lifecycle management and frame analysis pipeline. |
-| **Speech Recognition**| [Sherpa-ONNX / Whisper](https://github.com/k2-fsa/sherpa-onnx) | `v1.13.4` | On-device, offline speech-to-text inference. |
+| **Speech Recognition**| On-Device Speech-to-Text | `v1.13.4` | On-device, offline speech-to-text inference. |
 | **Multimodal Cloud AI**| [Firebase AI (Gemini Flash)](https://firebase.google.com/) | `BOM 34.17.0` | Cloud AI evaluation, question generation & executive coaching. |
 | **Realtime Database** | [Firebase Firestore](https://firebase.google.com/docs/firestore) | `BOM 34.17.0` | Real-time matchmaking and peer coding challenges. |
 | **App Security** | [Firebase App Check](https://firebase.google.com/docs/app-check) | `BOM 34.17.0` | Play Integrity API attestation preventing abuse. |
@@ -285,7 +285,7 @@ Build configuration is centralized in `build-logic/convention` using custom Grad
 - **Android Studio**: Android Studio Ladybug (2024.2.1+) or Meerkat (2024.3.1+)
 - **JDK**: Java Development Kit 17 or 21 (configured in Android Studio Gradle settings)
 - **Android SDK**: Compile SDK `37`, Target SDK `37`, Min SDK `26` (Android 8.0 Oreo+)
-- **Physical Device or Emulator**: Physical device recommended for camera/MediaPipe and microphone features.
+- **Physical Device or Emulator**: Physical device recommended for camera and microphone features.
 
 ### Clone & Project Configuration
 
@@ -353,7 +353,7 @@ CareerPilot Android connects to the **CareerPilot Spring Boot Backend**. For ful
 
 CareerPilot is built with a **Privacy-by-Design** foundation:
 
-- **Zero Video Uploads**: Camera frames captured during mock interviews are processed frame-by-frame in volatile RAM by Google MediaPipe and recycled immediately. No video files or streams are stored or transmitted.
+- **Zero Video Uploads**: Camera frames captured during mock interviews are processed frame-by-frame in volatile RAM by on-device computer vision and recycled immediately. No video files or streams are stored or transmitted.
 - **On-Device Fallback Engine**: Telemetry statistics are aggregated locally. When offline or when cloud AI is unreachable, the deterministic rule engine computes all scores and benchmarks locally without network access.
 - **Secure Token Storage**: User JWT access/refresh tokens are stored securely via encrypted preferences in `:core:datastore`.
 - **Firebase App Check**: Protects backend APIs and Firebase resources from unauthorized clients and API scraping using Google Play Integrity.
